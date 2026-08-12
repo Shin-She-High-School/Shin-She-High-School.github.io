@@ -20,9 +20,7 @@
 			text-rendering: optimizeLegibility;
 		}
 		@media (min-width: 768px) { html, body { font-size: 16px; } }
-		input, select, button, textarea {
-			font-family: inherit;
-		}
+		input, select, button, textarea { font-family: inherit; }
 		.app-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
 		.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
 		.custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
@@ -116,7 +114,7 @@
 		@media (min-width: 640px) { .admin-backend { padding: 24px; } }
 		.admin-header { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; color: #0f172a; border-left: 6px solid #4f46e5; padding-left: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 		.admin-toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1.5px solid #cbd5e1; box-sizing: border-box; }
-		.admin-toolbar > * { flex: 1; min-width: 140px; }
+		.admin-toolbar > * { flex: 1; min-width: 130px; }
 		@media (max-width: 640px) { .admin-toolbar > * { flex: 1 1 calc(50% - 6px) !important; } #adminSearchInput { flex: 1 1 100% !important; } }
 		.admin-table-container { display: none; }
 		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 800px; }
@@ -259,18 +257,18 @@
 					<div id="adminTableContainer" class="admin-table-container overflow-x-auto w-full custom-scrollbar" style="-webkit-overflow-scrolling: touch;">
 						<table class="admin-table">
 							<colgroup>
-								<col style="width: 12%; min-width: 80px;">
-								<col style="width: 12%; min-width: 80px;">
-								<col style="width: 12%; min-width: 80px;">
-								<col style="width: 24%; min-width: 120px;">
-								<col style="width: 40%; min-width: 330px;">
+								<col style="width: 14%; min-width: 80px;">
+								<col style="width: 14%; min-width: 80px;">
+								<col style="width: 12%; min-width: 70px;">
+								<col style="width: 28%; min-width: 140px;">
+								<col style="width: 32%; min-width: 310px;">
 							</colgroup>
 							<thead>
 								<tr>
 									<th>姓名</th>
 									<th>帳號</th>
 									<th>身份</th>
-									<th>入學年/科別-班級</th>
+									<th>入學年 / 科別</th>
 									<th>操作</th>
 								</tr>
 							</thead>
@@ -549,7 +547,18 @@
 			SB_KEY = "sb_publishable_ojrdIB0TeCnl8eZXbzWsdQ_2W3JB3xT",
 			EMAIL_DOMAIN = "@sshs.tc.edu.tw",
 			YEAR_OPTIONS = ["113"],
-			DEPT_OPTIONS = ["普通科(文史法商群)-1", "普通科(文史法商群)-2", "普通科(理工生醫群)-3", "普通科(理工生醫群)-4", "體育班-5", "體育班-6", "農經科-7", "園藝科-8", "商經科-9", "資處科-10"],
+			DEPT_OPTIONS = [
+				"普通科(文史法商群)-1",
+				"普通科(文史法商群)-2",
+				"普通科(理工生醫群)-3",
+				"普通科(理工生醫群)-4",
+				"體育班-5",
+				"體育班-6",
+				"農經科-7",
+				"園藝科-8",
+				"商經科-9",
+				"資處科-10"
+			],
 			mapping = {
 				cat: {
 					"dept": { text: "部定必修", class: "bg-dept-main" },
@@ -1042,7 +1051,7 @@
 			currentYear = "113", currentDept = "普通科(文史法商群)-1", lastUserId = null, currentLayoutMode = "subject",
 			currentUncheckedCredits = [];
 
-		function initDropdowns(isAdmin = false) {
+		window.initDropdowns = function(isAdmin = false) {
 			const yearSelects = ['authEntryYear', 'dashSelectYear', 'profEntryYear', 'editUserEntryYear', 'newUserEntryYear'];
 			const deptSelects = ['authEntryDept', 'dashSelectDept', 'profEntryDept', 'editUserEntryDept', 'newUserEntryDept'];
 
@@ -1053,15 +1062,10 @@
 				let html = '';
 				if (id === 'authEntryYear') html += '<option value="">請選擇入學年</option>';
 				if (id === 'editUserEntryYear' || id === 'newUserEntryYear') html += '<option value="未設定">未設定</option>';
-				YEAR_OPTIONS.forEach(y => {
-					html += `<option value="${y}">${y} 學年度</option>`;
-				});
+				YEAR_OPTIONS.forEach(y => { html += `<option value="${y}">${y} 學年度</option>`; });
 				el.innerHTML = html;
-				if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) {
-					el.value = currentVal;
-				} else if (id === 'dashSelectYear') {
-					el.value = currentYear;
-				}
+				if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) el.value = currentVal;
+				else if (id === 'dashSelectYear') el.value = currentYear;
 			});
 
 			deptSelects.forEach(id => {
@@ -1071,15 +1075,10 @@
 				let html = '';
 				if (id === 'authEntryDept') html += '<option value="">請選擇科別</option>';
 				if (id === 'editUserEntryDept' || id === 'newUserEntryDept') html += '<option value="未設定">未設定</option>';
-				DEPT_OPTIONS.forEach(d => {
-					html += `<option value="${d}">${d}</option>`;
-				});
+				DEPT_OPTIONS.forEach(d => { html += `<option value="${d}">${d}</option>`; });
 				el.innerHTML = html;
-				if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) {
-					el.value = currentVal;
-				} else if (id === 'dashSelectDept') {
-					el.value = currentDept;
-				}
+				if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) el.value = currentVal;
+				else if (id === 'dashSelectDept') el.value = currentDept;
 			});
 
 			const fYear = document.getElementById('adminFilterYear');
@@ -1094,34 +1093,34 @@
 				DEPT_OPTIONS.forEach(d => h += `<option value="${d}">${d}</option>`);
 				fDept.innerHTML = h;
 			}
-		}
+		};
 
-		function getTrackType(deptName) {
+		window.getTrackType = function(deptName) {
 			if (!deptName) return 'vocational';
 			if (deptName.includes('普通科')) return 'academic';
 			if (deptName.includes('體育班')) return 'sports';
 			return 'vocational';
-		}
+		};
 
-		function getChkId(name, sIdx) {
+		window.getChkId = function(name, sIdx) {
 			return `chk_${name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}_${sIdx}`;
-		}
+		};
 
-		function translateError(msg) {
+		window.translateError = function(msg) {
 			if (!msg) return "發生未知錯誤";
 			if (msg.includes("Invalid login credentials")) return "帳號或密碼錯誤，請重新確認！";
 			if (msg.includes("User already registered")) return "該帳號已經註冊過，請直接登入！";
 			if (msg.includes("Password should be at least")) return "密碼長度太短！";
 			return msg;
-		}
+		};
 
-		function toggleUIModal(show, modalId) {
+		window.toggleUIModal = function(show, modalId) {
 			const modal = document.getElementById(modalId);
 			if (modal) modal.style.display = show ? 'flex' : 'none';
 			if (show && modalId === 'helpModal') updateHelpModalDetails();
-		}
+		};
 
-		function updateHelpModalDetails() {
+		window.updateHelpModalDetails = function() {
 			const track = getTrackType(currentDept);
 			const acad = document.getElementById('helpDetailsAcademic');
 			const voc = document.getElementById('helpDetailsVocational');
@@ -1129,9 +1128,9 @@
 			if (acad) acad.open = (track === 'academic');
 			if (voc) voc.open = (track === 'vocational');
 			if (sports) sports.open = (track === 'sports');
-		}
+		};
 
-		async function findTutorByYearDept(yr, dept) {
+		window.findTutorByYearDept = async function(yr, dept) {
 			if (!dbClient || yr === '未設定' || dept === '未設定') return '未設定';
 			try {
 				const { data } = await dbClient.from('grad_checks').select('full_name').eq('role', 'teacher').eq('entry_year', yr).eq('entry_dept', dept).maybeSingle();
@@ -1139,9 +1138,9 @@
 			} catch (e) {
 				return '未設定';
 			}
-		}
+		};
 
-		function determineCurriculumVersion(record) {
+		window.determineCurriculumVersion = function(record) {
 			if (!record) return { year: currentYear, dept: currentDept, locked: false };
 			const role = record.role || 'student';
 			if (role === 'student' && record.entry_year && record.entry_year !== '未設定' && record.entry_dept && record.entry_dept !== '未設定') {
@@ -1152,18 +1151,18 @@
 				dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(文史法商群)-1',
 				locked: false
 			};
-		}
+		};
 
-		function selectCurriculum(yr, dept) {
+		window.selectCurriculum = function(yr, dept) {
 			currentYear = yr;
 			currentDept = dept;
 			const key = `${yr}_${dept}`;
 			curriculum = curriculums[key] || [];
 			initThresholds();
 			updateCurriculumSelectorVisibility();
-		}
+		};
 
-		function updateCurriculumSelectorVisibility() {
+		window.updateCurriculumSelectorVisibility = function() {
 			const selectorArea = document.getElementById('curriculumSelectorArea');
 			if (!selectorArea) return;
 			const rec = editingStudentId ? activeStudentDBRecord : userDBRecord;
@@ -1174,16 +1173,16 @@
 			const dtSel = document.getElementById('dashSelectDept');
 			if (yrSel) yrSel.value = currentYear;
 			if (dtSel) dtSel.value = currentDept;
-		}
+		};
 
-		function initThresholds() {
+		window.initThresholds = function() {
 			let maxDept = 0;
 			curriculum.forEach(i => { if (i.cat === 'dept') maxDept += i.credits.reduce((a, b) => a + b, 0); });
 			DEPT_THRESHOLD = Math.ceil(maxDept * 0.85);
 			const el = document.getElementById('dept-limit-text'); if (el) el.innerText = `(${DEPT_THRESHOLD})`;
-		}
+		};
 
-		function calculateStats() {
+		window.calculateStats = function() {
 			let total = 0, dept = 0, prof = 0, prac = 0;
 			let reqEarned = 0, optEarned = 0;
 			let deptGenEarned = 0, deptGenMax = 0;
@@ -1227,9 +1226,9 @@
 				const pass = (total >= 160 && dept >= DEPT_THRESHOLD && prof >= 60 && prac >= 45);
 				return { total, pass, dept, prof, prac, trackType };
 			}
-		}
+		};
 
-		function calculate() {
+		window.calculate = function() {
 			const isNullState = curriculum.length === 0;
 			const stats = isNullState ? { total: null, pass: false } : calculateStats();
 			const trackType = getTrackType(currentDept);
@@ -1243,17 +1242,17 @@
 				if (cT) { 
 					cT.style.display = 'flex'; 
 					cT.style.gridColumn = '1 / -1'; 
-					cT.innerHTML = buildCardContent("總學分", stats.total, isNullState ? null : 150, true); 
+					cT.innerHTML = buildCardContent("畢業最低總學分", stats.total, isNullState ? null : 150, true); 
 				}
 				if (cD) { 
 					cD.style.display = 'flex'; 
 					cD.style.gridColumn = 'auto'; 
-					cD.innerHTML = buildCardContent("必修學分", isNullState ? null : stats.reqEarned, isNullState ? null : 102); 
+					cD.innerHTML = buildCardContent("必修學分 (部定+校定)", isNullState ? null : stats.reqEarned, isNullState ? null : 102); 
 				}
 				if (cF) { 
 					cF.style.display = 'flex'; 
 					cF.style.gridColumn = 'auto'; 
-					cF.innerHTML = buildCardContent("選修學分", isNullState ? null : stats.optEarned, isNullState ? null : 40); 
+					cF.innerHTML = buildCardContent("選修學分 (加深+多元)", isNullState ? null : stats.optEarned, isNullState ? null : 40); 
 				}
 				if (cP) { 
 					cP.style.display = 'none'; 
@@ -1267,9 +1266,9 @@
 				if (cP) { cP.style.display = 'flex'; }
 
 				if (cT) cT.innerHTML = buildCardContent("總學分", stats.total, isNullState ? null : 150, true);
-				if (cD) cD.innerHTML = buildCardContent("部定一般必修", isNullState ? null : stats.deptGenEarned, isNullState ? null : stats.targetGen);
-				if (cF) cF.innerHTML = buildCardContent("體育專業必修", isNullState ? null : stats.deptSportsEarned, isNullState ? null : stats.targetSports);
-				if (cP) cP.innerHTML = buildCardContent("選修科目", isNullState ? null : stats.sportsOptEarned, isNullState ? null : stats.targetOpt);
+				if (cD) cD.innerHTML = buildCardContent("部定一般必修 (≥80%)", isNullState ? null : stats.deptGenEarned, isNullState ? null : stats.targetGen);
+				if (cF) cF.innerHTML = buildCardContent("體育專業必修 (≥85%)", isNullState ? null : stats.deptSportsEarned, isNullState ? null : stats.targetSports);
+				if (cP) cP.innerHTML = buildCardContent("選修科目 (≥70%)", isNullState ? null : stats.sportsOptEarned, isNullState ? null : stats.targetOpt);
 			} else {
 				if (cT) cT.style.gridColumn = 'auto';
 				if (cD) cD.style.gridColumn = 'auto';
@@ -1312,55 +1311,70 @@
 					st.className = "status-bar status-fail text-white";
 				}
 			}
-		}
+		};
 
-		function initHelpModalScrollGuard() {
+		window.confirmSetAllStatus = function(p) {
+			if (curriculum.length === 0) { showMsg("目前版本的課表尚未建置！", "error"); return; }
+			const msg = p ? "您確定要將所有課程學分一次設為「及格」嗎？此操作將會覆蓋當前勾選狀態，並同步存檔。" : "您確定要將所有及格學分「全部歸零」嗎？此操作將會清空所有勾選狀態，並同步存檔。";
+			showConfirmModal(msg, p ? "確認全部及格" : "確認學分歸零", () => { setAllStatus(p); toggleUIModal(false, 'confirmModal'); }, p ? "確認全部及格" : "確認學分歸零", p ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" : "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
+		};
+
+		window.setAllStatus = function(p) {
+			document.querySelectorAll(".toggle-checkbox").forEach(chk => {
+				chk.checked = p;
+			});
+			calculate();
+			saveToCloud(true);
+			renderTable();
+		};
+
+		window.initHelpModalScrollGuard = function() {
 			const container = document.getElementById('helpScrollContainer');
 			if (!container) return;
 			container.addEventListener('scroll', () => {
 				if (container.scrollHeight - container.scrollTop <= container.clientHeight + 12) unlockConfirmButton();
 			});
-		}
+		};
 
-		function unlockConfirmButton() {
+		window.unlockConfirmButton = function() {
 			const btn = document.getElementById('btnConfirmHelp');
 			if (!btn) return;
 			btn.disabled = false;
 			btn.className = "action-btn btn-pass-all w-full py-3.5 text-base font-extrabold rounded-xl shadow-md transition duration-150 cursor-pointer opacity-100";
 			btn.style.pointerEvents = "auto";
-		}
+		};
 
-		function confirmReadHelp() { sessionStorage.setItem('helpModalShown', 'true'); toggleUIModal(false, 'helpModal'); }
+		window.confirmReadHelp = function() { sessionStorage.setItem('helpModalShown', 'true'); toggleUIModal(false, 'helpModal'); };
 
-		function handleOutsideClick(event) {
+		window.handleOutsideClick = function(event) {
 			if (event.target.classList.contains('modal-overlay')) {
 				if (!currentUser && event.target.id === 'authWorkspace') return;
 				event.target.style.display = 'none';
 			}
-		}
+		};
 
-		function showMsg(txt, type = 'info') {
+		window.showMsg = function(txt, type = 'info') {
 			const b = document.getElementById('msgBox'); b.innerText = txt; b.style.background = type === 'error' ? '#ef4444' : '#10b981'; b.style.display = 'block';
 			setTimeout(() => b.style.display = 'none', 2500);
-		}
+		};
 
-		function updateSyncStatusIndicator(status) {
+		window.updateSyncStatusIndicator = function(status) {
 			const badge = document.getElementById('syncStatusIndicator'); if (!badge) return;
 			badge.className = "sync-badge " + (status === 'offline' ? 'sync-offline' : (status === 'saving' ? 'sync-saving' : 'sync-success'));
 			badge.innerHTML = `<span>${status === 'offline' ? '同步失敗，請聯繫管理員！' : (status === 'saving' ? '正在儲存...' : '同步成功')}</span>`;
-		}
+		};
 
-		function showConfirmModal(msg, title, action, confirmBtnText, confirmBtnBg) {
+		window.showConfirmModal = function(msg, title, action, confirmBtnText, confirmBtnBg) {
 			const btn = document.querySelector('#confirmModal .btn-pass-all');
 			btn.style.background = confirmBtnBg || (title.includes("重設") ? "linear-gradient(135deg, #6366f1, #4f46e5)" : "#dc3545");
 			btn.innerText = confirmBtnText || (title.includes("重設") ? "確認重設" : (title.includes("刪除") ? "確認刪除" : "確認操作"));
 			document.getElementById('confirmMsg').innerText = msg; document.getElementById('confirmModal').querySelector('.modal-header span').innerText = title;
 			confirmAction = action; toggleUIModal(true, 'confirmModal');
-		}
+		};
 
-		function triggerConfirmAction() { if (confirmAction) confirmAction(); }
+		window.triggerConfirmAction = function() { if (confirmAction) confirmAction(); };
 
-		async function directResetPasswordToSid() {
+		window.directResetPasswordToSid = async function() {
 			const id = document.getElementById('editUserId').value, sid = document.getElementById('editUserSid').value.trim(), name = document.getElementById('editUserName').value.trim();
 			if (!sid) { showMsg("無法重設：此帳號目前沒有設定帳號！", "error"); return; }
 			showConfirmModal(`您確定要將「${name}」的登入密碼立即重設為其帳號「${sid}」嗎？`, "確認重設密碼", async () => {
@@ -1373,9 +1387,9 @@
 					toggleUIModal(false, 'confirmModal'); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
 				} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
 			});
-		}
+		};
 
-		async function handleAuth() {
+		window.handleAuth = async function() {
 			if (!dbClient) { showMsg("無法進行登入 or 註冊！請聯絡管理員。", "error"); return; }
 			const sid = document.getElementById('authID').value.trim(), pwd = document.getElementById('authPassword').value;
 			if (!sid || !pwd) { showMsg("請輸入帳號密碼！", "error"); return; }
@@ -1401,9 +1415,9 @@
 					hasLoadedInitialData = false; updateUI();
 				}
 			} catch (e) { updateSyncStatusIndicator('offline'); showMsg(translateError(e.message), 'error'); }
-		}
+		};
 
-		function switchAuthMode() {
+		window.switchAuthMode = function() {
 			const isReg = document.getElementById('regFields').style.display === 'none';
 			document.getElementById('regFields').style.display = isReg ? 'block' : 'none';
 			document.getElementById('authTitle').innerText = isReg ? '註冊新帳號' : '帳號登入';
@@ -1411,9 +1425,9 @@
 			if (authBtn) authBtn.innerText = isReg ? "確認註冊帳號" : "確認登入";
 			document.getElementById('authSwitchLink').innerText = isReg ? '已有帳號？請點此前往登入' : '尚未註冊帳號？請點此註冊';
 			initDropdowns(false);
-		}
+		};
 
-		async function handleLogout() { try { if (dbClient) await dbClient.auth.signOut(); window.location.reload(); } catch (e) { showMsg("登出失敗", 'error'); } }
+		window.handleLogout = async function() { try { if (dbClient) await dbClient.auth.signOut(); window.location.reload(); } catch (e) { showMsg("登出失敗", 'error'); } };
 
 		if (dbClient) {
 			dbClient.auth.onAuthStateChange((event, session) => {
@@ -1435,21 +1449,21 @@
 			}, 100);
 		}
 
-		function changeDashCurriculum() {
+		window.changeDashCurriculum = function() {
 			const yr = document.getElementById('dashSelectYear').value, dept = document.getElementById('dashSelectDept').value;
 			sessionStorage.setItem('tempSelectedYear', yr); sessionStorage.setItem('tempSelectedDept', dept);
 			selectCurriculum(yr, dept); renderTable(); calculate(); saveToCloud(true);
-		}
+		};
 
-		function setLayoutMode(mode) {
+		window.setLayoutMode = function(mode) {
 			currentLayoutMode = mode;
 			const btnSubject = document.getElementById('btnLayoutSubject'), btnSemester = document.getElementById('btnLayoutSemester');
 			btnSubject.className = mode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600 hover:text-slate-800";
 			btnSemester.className = mode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600 hover:text-slate-800";
 			renderTable(); calculate();
-		}
+		};
 
-		function updateUI() {
+		window.updateUI = function() {
 			const mobileContainer = document.getElementById('mobileCardsContainer'), adminBackend = document.getElementById('adminBackend'),
 				dashboard = document.getElementById('dashboardSection'), userStatusDisplay = document.getElementById('userStatusDisplay'),
 				saveBtn = document.getElementById('saveBtn'), backToTrialBtn = document.getElementById('backToTopBtn'),
@@ -1465,7 +1479,9 @@
 					sessionStorage.removeItem('just_logged_in');
 				}
 				if (!hasLoadedInitialData && !editingStudentId) isViewingClassList = false;
-				const myYear = userDBRecord?.entry_year || m?.entry_year || '未設定', myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
+				const myYear = userDBRecord?.entry_year || m?.entry_year || '未設定',
+					myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
+				
 				if (role === 'teacher' && (myYear === '未設定' || myDept === '未設定')) { saveBtn.style.display = 'none'; }
 				else {
 					saveBtn.innerText = role === 'admin' ? '管理後台' : (role === 'teacher' ? '班級資料' : '雲端存檔');
@@ -1510,9 +1526,9 @@
 					else updateCurriculumSelectorVisibility();
 				}
 			}
-		}
+		};
 
-		function handleMainAction() {
+		window.handleMainAction = function() {
 			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 			if (role === 'student') saveToCloud();
 			else {
@@ -1525,19 +1541,19 @@
 				}
 				isViewingClassList = true; editingStudentId = null; updateUI();
 			}
-		}
+		};
 
-		function handleReturnToTrial() {
+		window.handleReturnToTrial = function() {
 			isViewingClassList = false;
 			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 			let myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定', myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 			if (role === 'admin' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
-				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '商經科';
+				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '普通科(文史法商群)-1';
 			}
 			selectCurriculum(myYear, myDept); updateUI(); loadFromCloud();
-		}
+		};
 
-		function openProfile() {
+		window.openProfile = function() {
 			if (!currentUser) return;
 			const curData = userDBRecord || currentUser.user_metadata, role = curData.role || 'student';
 			initDropdowns(role === 'admin' || role === 'teacher');
@@ -1546,7 +1562,8 @@
 				accountLabel = document.getElementById('profAccountLabel'), tutorArea = document.getElementById('profStudentTutorArea'),
 				nameInput = document.getElementById('profName');
 			accountInput.value = curData.student_id || ''; nameInput.value = curData.full_name || '';
-			yrSel.value = curData.entry_year || '未設定'; dtSel.value = curData.entry_dept || '未設定';
+			yrSel.value = curData.entry_year || '未設定';
+			dtSel.value = curData.entry_dept || '未設定';
 			const isAdmin = (role === 'admin'), isStudent = (role === 'student');
 			accountInput.disabled = !isAdmin; yrSel.disabled = !isAdmin; dtSel.disabled = !isAdmin;
 			nameInput.disabled = true; accountLabel.innerText = "帳號";
@@ -1568,16 +1585,17 @@
 			tutorArea.style.display = isStudent ? 'block' : 'none';
 			if (isStudent) document.getElementById('profTutor').value = curData.tutor || '未設定';
 			document.getElementById('profPassword').value = ''; toggleUIModal(true, 'profileModal');
-		}
+		};
 
-		async function updateProfile() {
+		window.updateProfile = async function() {
 			const n = document.getElementById('profName').value, p = document.getElementById('profPassword').value, d = { data: { full_name: n } };
 			if (p) d.password = p;
 			try {
 				const curData = userDBRecord || currentUser.user_metadata, role = curData.role || 'student';
 				updateSyncStatusIndicator('saving');
 				if (role === 'admin') {
-					const sid = document.getElementById('profAccount').value.split('@')[0].toLowerCase().trim(), ey = document.getElementById('profEntryYear').value, ed = document.getElementById('profEntryDept').value;
+					const sid = document.getElementById('profAccount').value.split('@')[0].toLowerCase().trim(), ey = document.getElementById('profEntryYear').value,
+						ed = document.getElementById('profEntryDept').value;
 					d.data.student_id = sid; d.data.entry_year = ey; d.data.entry_dept = ed; d.email = `${sid}${EMAIL_DOMAIN}`;
 					await dbClient.auth.updateUser(d);
 					await dbClient.rpc('admin_update_user_sid', { target_user_id: currentUser.id, new_sid: sid, new_name: n, new_year: ey, new_dept: ed, new_role: role, new_tutor: curData.tutor || '管理員免設定' });
@@ -1589,9 +1607,9 @@
 				updateSyncStatusIndicator('success'); showMsg("個人資料已更新！");
 				hasLoadedInitialData = false; await loadFromCloud(); toggleUIModal(false, 'profileModal');
 			} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error'); }
-		}
+		};
 
-		async function saveToCloud(isAuto = false) {
+		window.saveToCloud = async function(isAuto = false) {
 			if (!currentUser || !dbClient || curriculum.length === 0) { updateSyncStatusIndicator('offline'); return; }
 			const targetId = editingStudentId || currentUser.id, curRecord = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata),
 				targetRole = curRecord?.role || 'student', entryYear = curRecord?.entry_year || '未設定', entryDept = curRecord?.entry_dept || '未設定',
@@ -1628,11 +1646,11 @@
 				if (rec) { rec.credits_json = checks; rec.total_credits = res.total; }
 				updateSyncStatusIndicator('success'); if (!isAuto) showMsg("同步成功！");
 			}
-		}
+		};
 
-		function deleteStudentData(id, name) { deleteTargetId = id; showConfirmModal(`確定要刪除「${name}」資料與其登入帳號嗎？`, "確認刪除資料", execDelete); }
+		window.deleteStudentData = function(id, name) { deleteTargetId = id; showConfirmModal(`確定要刪除「${name}」資料與其登入帳號嗎？`, "確認刪除資料", execDelete); };
 
-		async function execDelete() {
+		window.execDelete = async function() {
 			if (!deleteTargetId || !dbClient) return;
 			try {
 				updateSyncStatusIndicator('saving');
@@ -1641,21 +1659,21 @@
 				updateSyncStatusIndicator('success'); showMsg("已成功刪除該帳號資料！");
 				toggleUIModal(false, 'confirmModal'); fetchAdminList();
 			} catch (e) { updateSyncStatusIndicator('offline'); showMsg("刪除失敗：" + translateError(e.message), "error"); toggleUIModal(false, 'confirmModal'); }
-		}
+		};
 
-		async function enterAdminEditMode(id, name) { editingStudentId = id; updateUI(); }
+		window.enterAdminEditMode = async function(id, name) { editingStudentId = id; updateUI(); };
 
-		function exitAdminEditMode() {
+		window.exitAdminEditMode = function() {
 			editingStudentId = null; lastLoadedStudentId = null; activeStudentDBRecord = null;
 			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 			let myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定', myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 			if (role === 'admin' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
-				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '商經科';
+				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '普通科(文史法商群)-1';
 			}
 			selectCurriculum(myYear, myDept); updateUI();
-		}
+		};
 
-		function toggleAdminTutorField(role, currentVal = "未設定") {
+		window.toggleAdminTutorField = function(role, currentVal = "未設定") {
 			const section = document.getElementById('editTutorSection'), wrapper = document.getElementById('editTutorWrapper');
 			if (role === 'student') {
 				section.style.display = 'block';
@@ -1663,18 +1681,18 @@
 				teacherNames.forEach(tn => { html += `<option value="${tn}" ${tn === currentVal ? 'selected' : ''}>${tn}</option>`; });
 				wrapper.innerHTML = html + `</select>`;
 			} else section.style.display = 'none';
-		}
+		};
 
-		async function openAdminUserEdit(index) {
+		window.openAdminUserEdit = async function(index) {
 			const s = applyFilters()[index]; if (!s) return;
 			initDropdowns(true);
 			document.getElementById('editUserId').value = s.id; document.getElementById('editUserSid').value = s.student_id || '';
 			document.getElementById('editUserName').value = s.full_name || ''; document.getElementById('editUserEntryYear').value = s.entry_year || '未設定';
 			document.getElementById('editUserEntryDept').value = s.entry_dept || '未設定'; document.getElementById('editUserRole').value = s.role || 'student';
 			toggleAdminTutorField(s.role || 'student', s.tutor || '未設定'); toggleUIModal(true, 'adminUserModal');
-		}
+		};
 
-		async function saveAdminUserEdit() {
+		window.saveAdminUserEdit = async function() {
 			if (!dbClient) return;
 			const id = document.getElementById('editUserId').value, sid = document.getElementById('editUserSid').value.split('@')[0].toLowerCase().trim(),
 				n = document.getElementById('editUserName').value.trim(), y = document.getElementById('editUserEntryYear').value,
@@ -1686,16 +1704,17 @@
 				if (error) throw error;
 				updateSyncStatusIndicator('success'); showMsg("資料更新成功！"); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
 			} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error'); }
-		}
+		};
 
-		function openCreateUserModal() {
+		window.openCreateUserModal = function() {
 			initDropdowns(true);
 			document.getElementById('newUserSid').value = ''; document.getElementById('newUserName').value = '';
-			document.getElementById('newUserEntryYear').value = '未設定'; document.getElementById('newUserEntryDept').value = '未設定';
+			document.getElementById('newUserEntryYear').value = '未設定';
+			document.getElementById('newUserEntryDept').value = '未設定';
 			document.getElementById('newUserRole').value = 'student'; toggleNewUserTutorField('student'); toggleUIModal(true, 'createUserModal');
-		}
+		};
 
-		function toggleNewUserTutorField(role, currentVal = "未設定") {
+		window.toggleNewUserTutorField = function(role, currentVal = "未設定") {
 			const section = document.getElementById('newTutorSection'), wrapper = document.getElementById('newTutorWrapper');
 			if (role === 'student') {
 				section.style.display = 'block';
@@ -1703,9 +1722,9 @@
 				teacherNames.forEach(tn => { html += `<option value="${tn}" ${tn === currentVal ? 'selected' : ''}>${tn}</option>`; });
 				wrapper.innerHTML = html + `</select>`;
 			} else section.style.display = 'none';
-		}
+		};
 
-		async function saveNewUser() {
+		window.saveNewUser = async function() {
 			if (!dbClient) return;
 			const sid = document.getElementById('newUserSid').value.split('@')[0].toLowerCase().trim(), name = document.getElementById('newUserName').value.trim(),
 				year = document.getElementById('newUserEntryYear').value, dept = document.getElementById('newUserEntryDept').value,
@@ -1717,9 +1736,9 @@
 				if (error) throw error;
 				updateSyncStatusIndicator('success'); showMsg(`系統帳號「${name}」已成功直接建立！`); toggleUIModal(false, 'createUserModal'); fetchAdminList();
 			} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); }
-		}
+		};
 
-		async function loadFromCloud(tid = null) {
+		window.loadFromCloud = async function(tid = null) {
 			const uid = tid || currentUser?.id; if (!uid || !dbClient) return;
 			try {
 				let { data, error } = await dbClient.from('grad_checks').select('*').eq('id', uid).maybeSingle();
@@ -1778,20 +1797,22 @@
 					} else hasLoadedInitialData = true;
 				}
 			} catch (e) { hasLoadedInitialData = true; updateSyncStatusIndicator('offline'); showMsg("雲端加載錯誤：" + translateError(e.message), "error"); }
-		}
+		};
 
-		async function fetchAdminList(onlyRefreshUI = false) {
+		window.fetchAdminList = async function(onlyRefreshUI = false) {
 			if (!dbClient) return;
 			if (!onlyRefreshUI) {
 				const { data } = await dbClient.from('grad_checks').select('*');
 				if (data) { adminListData = data; teacherNames = data.filter(u => u.role === 'teacher').map(u => u.full_name); }
 			}
 			renderAdminTable();
-		}
+		};
 
-		function applyFilters() {
-			const searchText = document.getElementById('adminSearchInput').value.toLowerCase(), filterYear = document.getElementById('adminFilterYear').value,
-				filterDept = document.getElementById('adminFilterDept').value, sortType = document.getElementById('adminSort').value,
+		window.applyFilters = function() {
+			const searchText = document.getElementById('adminSearchInput').value.toLowerCase(),
+				filterYear = document.getElementById('adminFilterYear').value,
+				filterDept = document.getElementById('adminFilterDept').value,
+				sortType = document.getElementById('adminSort').value,
 				role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student', myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year,
 				myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept;
 			let filtered = [...adminListData];
@@ -1808,9 +1829,9 @@
 			else if (sortType === 'sid') filtered.sort((a, b) => (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true }));
 			else if (sortType === 'name') filtered.sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''));
 			return filtered;
-		}
+		};
 
-		function renderAdminTable() {
+		window.renderAdminTable = function() {
 			const tableBody = document.getElementById('adminListBody'), cardsContainer = document.getElementById('adminCardsContainer');
 			tableBody.innerHTML = ""; cardsContainer.innerHTML = "";
 			const filtered = applyFilters(), role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
@@ -1850,14 +1871,14 @@
 						<div class="min-w-0"><div class="text-sm font-bold text-slate-800 truncate">${s.full_name}</div><div class="text-xs text-slate-500 mt-0.5">帳號: ${s.student_id || '-'}</div></div>
 						<span class="role-badge ${roleClass} text-xs py-1 px-2.5 rounded-full font-bold text-white shrink-0">${mapping.role[s.role] || '使用者'}</span>
 					</div>
-					<div class="text-xs text-slate-600 flex justify-between"><span>入學年/科別-班級:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
+					<div class="text-xs text-slate-600 flex justify-between"><span>入學年 / 科別:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
 					<div class="flex gap-1.5 flex-nowrap mt-1 w-full">${btnsMobile}</div>
 				`;
 				cardsContainer.appendChild(card);
 			});
-		}
+		};
 
-		function renderMobileCards(checkedStates = {}) {
+		window.renderMobileCards = function(checkedStates = {}) {
 			const container = document.getElementById("mobileCardsContainer");
 			container.innerHTML = ""; container.className = "grid grid-cols-1 gap-4 mt-4 w-full";
 			curriculum.forEach((item) => {
@@ -1897,9 +1918,9 @@
 				`;
 				container.appendChild(card);
 			});
-		}
+		};
 
-		function renderSemesterCards(checkedStates = {}) {
+		window.renderSemesterCards = function(checkedStates = {}) {
 			const container = document.getElementById("mobileCardsContainer");
 			container.innerHTML = ""; container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4 w-full";
 			const semesterFullLabels = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
@@ -1961,9 +1982,9 @@
 					</div>`;
 				const cardWrapper = document.createElement('div'); cardWrapper.innerHTML = cardHtml; container.appendChild(cardWrapper.firstElementChild);
 			}
-		}
+		};
 
-		function updateSemesterProgress(inputEl, semIdx) {
+		window.updateSemesterProgress = function(inputEl, semIdx) {
 			const card = inputEl.closest('.semester-card');
 			if (!card) return;
 			let earned = 0;
@@ -1979,9 +2000,9 @@
 				const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
 				barEl.style.width = pct + '%';
 			}
-		}
+		};
 
-		function renderTable() {
+		window.renderTable = function() {
 			const mobileContainer = document.getElementById("mobileCardsContainer"), constructionBox = document.getElementById("underConstructionBox"), constYearDeptSpan = document.getElementById("constYearDept");
 			const checkedStates = {};
 			document.querySelectorAll(".toggle-checkbox").forEach(chk => checkedStates[chk.id] = chk.checked);
@@ -1992,9 +2013,9 @@
 			constructionBox.classList.add("hidden"); mobileContainer.style.display = "grid";
 			if (currentLayoutMode === 'subject') renderMobileCards(checkedStates);
 			else renderSemesterCards(checkedStates);
-		}
+		};
 
-		function buildCardContent(title, value, target, isTotalCard = false) {
+		window.buildCardContent = function(title, value, target, isTotalCard = false) {
 			const percentage = (value === null || target === null) ? 0 : Math.min(100, Math.round((value / target) * 100));
 			let barColor = '#d97706';
 			if (value !== null && target !== null) {
@@ -2010,59 +2031,9 @@
 				<div class="card-title">${title}</div>
 				<div class="flex items-baseline justify-center gap-1 text-lg xs:text-xl md:text-2xl font-black text-slate-900"><span>${value === null ? "-" : value}</span><span style="font-size: 0.85rem; color: #475569; font-weight: 700;">/ ${target === null ? "-" : target}</span></div>
 				<div class="card-progress-bg"><div class="card-progress-fill" style="width: ${percentage}%; background-color: ${barColor};"></div></div>`;
-		}
-		function renderMobileCards(checkedStates = {}) {
-			const container = document.getElementById("mobileCardsContainer");
-			container.innerHTML = ""; container.className = "grid grid-cols-1 gap-4 mt-4 w-full";
-			curriculum.forEach((item) => {
-				const card = document.createElement("div");
-				card.className = "mobile-card flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 bg-white border border-slate-300 rounded-xl shadow-sm";
-				let titleHtml = `<span class="mobile-card-title text-[0.88rem] md:text-[1rem] font-extrabold text-slate-900 break-words leading-tight">${item.name}</span>`;
-				
-				let noteHtml = "";
-				if (item.name.includes("彈性")) {
-					noteHtml = `<div class="mt-1.5 text-xs text-amber-900 font-extrabold bg-amber-100/80 border border-amber-300 rounded-lg px-2.5 py-1 inline-flex items-center gap-1.5 w-fit">
-						<span class="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span>
-						備註：自主學習無學分
-					</div>`;
-				}
+		};
 
-				let semHtml = "";
-				const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
-				item.credits.forEach((c, sIdx) => {
-					const id = getChkId(item.name, sIdx);
-					const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (item.defaultUnchecked ? false : true);
-					semHtml += `<div class="mobile-sem-item"><span class="mobile-sem-label">${semNames[sIdx]}</span>
-						${c > 0 ? `<div class="mobile-score-box"><input type="checkbox" class="toggle-checkbox" id="${id}" data-val="${c}" data-cat="${item.cat}" data-type="${item.type}" data-name="${item.name}" data-sem="${sIdx}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" onchange="calculate(); saveToCloud(true);" ${isChecked ? 'checked' : ''}><label class="score-label" for="${id}">${c}</label></div>` : '<div class="mobile-score-box zero-score score-label" style="cursor: default;">-</div>'}
-					</div>`;
-				});
-				card.innerHTML = `
-					<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 md:w-[38%] min-w-0">
-						<div class="flex flex-col gap-1 w-full">
-							${titleHtml}
-							<div class="mobile-card-badges flex flex-wrap gap-1.5 shrink-0 mt-0.5">
-								<span class="mobile-badge ${mapping.cat[item.cat].class} text-[0.72rem] px-2 py-0.5 font-extrabold">${mapping.cat[item.cat].text}</span>
-								<span class="mobile-badge bg-slate-200 text-slate-800 border border-slate-300 text-[0.72rem] px-2 py-0.5 font-extrabold">${mapping.type[item.type]}</span>
-							</div>
-							${noteHtml}
-						</div>
-					</div>
-					<div class="mobile-semesters-grid md:w-[62%] min-w-0">${semHtml}</div>
-				`;
-				container.appendChild(card);
-			});
-		}
-
-		function setAllStatus(p) {
-			document.querySelectorAll(".toggle-checkbox").forEach(chk => {
-				chk.checked = p;
-			});
-			calculate();
-			saveToCloud(true);
-			renderTable();
-		}
-
-		function initBackToTop() {
+		window.initBackToTop = function() {
 			const sc = document.getElementById('scrollContainer');
 			if (sc) {
 				sc.addEventListener('scroll', () => {
@@ -2077,14 +2048,14 @@
 					}
 				});
 			}
-		}
+		};
 
-		function scrollToTop() {
+		window.scrollToTop = function() {
 			const sc = document.getElementById('scrollContainer');
 			if (sc) sc.scrollTo({ top: 0, behavior: 'smooth' });
-		}
+		};
 
-		function showMissingCreditsModal() {
+		window.showMissingCreditsModal = function() {
 			if (curriculum.length === 0) { showMsg("目前版本的課表尚未建置！", "error"); return; }
 			const semFullNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
 			currentUncheckedCredits = [];
@@ -2103,9 +2074,9 @@
 			}
 			renderMissingCreditsFiltered();
 			toggleUIModal(true, 'missingCreditsModal');
-		}
+		};
 
-		function renderMissingCreditsFiltered() {
+		window.renderMissingCreditsFiltered = function() {
 			const filterVal = document.getElementById("missingCreditsFilter").value;
 			const listContainer = document.getElementById("missingCreditsList");
 			const semFullNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
@@ -2145,7 +2116,7 @@
 				});
 				listContainer.innerHTML = html;
 			}
-		}
+		};
 
 		initDropdowns(false);
 		selectCurriculum(currentYear, currentDept);
