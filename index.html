@@ -270,7 +270,7 @@
 									<th>姓名</th>
 									<th>帳號</th>
 									<th>身份</th>
-									<th>入學年/科別</th>
+									<th>入學年/科別-班級</th>
 									<th>操作</th>
 								</tr>
 							</thead>
@@ -1039,7 +1039,7 @@
 		let currentUser = null, DEPT_THRESHOLD = 0, userDBRecord = null, activeStudentDBRecord = null,
 			hasLoadedInitialData = false, lastLoadedStudentId = null, adminListData = [], teacherNames = [],
 			isViewingClassList = false, deleteTargetId = null, editingStudentId = null, confirmAction = null,
-			currentYear = "113", currentDept = "商經科", lastUserId = null, currentLayoutMode = "subject",
+			currentYear = "113", currentDept = "普通科(文史法商群)-1", lastUserId = null, currentLayoutMode = "subject",
 			currentUncheckedCredits = [];
 
 		function initDropdowns(isAdmin = false) {
@@ -1149,7 +1149,7 @@
 			}
 			return {
 				year: record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113',
-				dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '商經科',
+				dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(文史法商群)-1',
 				locked: false
 			};
 		}
@@ -1850,7 +1850,7 @@
 						<div class="min-w-0"><div class="text-sm font-bold text-slate-800 truncate">${s.full_name}</div><div class="text-xs text-slate-500 mt-0.5">帳號: ${s.student_id || '-'}</div></div>
 						<span class="role-badge ${roleClass} text-xs py-1 px-2.5 rounded-full font-bold text-white shrink-0">${mapping.role[s.role] || '使用者'}</span>
 					</div>
-					<div class="text-xs text-slate-600 flex justify-between"><span>入學年/科別:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
+					<div class="text-xs text-slate-600 flex justify-between"><span>入學年/科別-班級:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
 					<div class="flex gap-1.5 flex-nowrap mt-1 w-full">${btnsMobile}</div>
 				`;
 				cardsContainer.appendChild(card);
