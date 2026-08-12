@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+	<title>新社高中畢業自我檢核系統</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap');
+		html, body {
+			margin: 0;
+			padding: 0;
+			font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+			font-size: 14px;
+			background-color: #f4f6f9;
+			color: #0f172a;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+			text-rendering: optimizeLegibility;
+		}
+		@media (min-width: 768px) { html, body { font-size: 16px; } }
+		input, select, button, textarea {
+			font-family: inherit;
+		}
+		.app-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
+		.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+		.custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
+		.custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+		.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+		#authWorkspace { position: fixed; inset: 0; background: linear-gradient(135deg, #052e16 0%, #022c22 40%, #091a14 100%); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 9999; overflow: hidden; }
+		.auth-glow-1 { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0) 70%); top: -150px; right: -150px; pointer-events: none; }
+		.auth-glow-2 { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 70%); bottom: -200px; left: -200px; pointer-events: none; }
+		.auth-card { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); width: 100%; max-width: 400px; border-radius: 24px; padding: 30px 25px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.05); border: 1px solid rgba(255, 255, 255, 0.5); box-sizing: border-box; position: relative; z-index: 2; animation: cardSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+		@keyframes cardSlideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+		.auth-title { font-size: 1.45rem; font-weight: 800; color: #0f291e; margin: 0; letter-spacing: 0.5px; text-align: center; }
+		.auth-subtitle { font-size: 0.85rem; color: #334155; margin-top: 6px; margin-bottom: 25px; text-align: center; font-weight: 600; }
+		.auth-form-group { margin-bottom: 16px; text-align: left; }
+		.auth-form-group label { display: block; font-size: 0.85rem; font-weight: 800; color: #1e293b; margin-bottom: 6px; letter-spacing: 0.5px; }
+		.auth-form-group input, .auth-form-group select { width: 100%; padding: 11px 14px; border: 1.5px solid #94a3b8; border-radius: 10px; box-sizing: border-box; font-size: 0.95rem; color: #0f172a; background-color: #fff; outline: none; transition: all 0.2s ease; font-weight: 600; }
+		.auth-form-group input:focus, .auth-form-group select:focus { border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+		.auth-btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 100%; color: white; border: none; padding: 12.5px; border-radius: 12px; font-size: 0.98rem; font-weight: 800; cursor: pointer; box-shadow: 0 6px 15px rgba(5, 150, 105, 0.2); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 10px; letter-spacing: 1px; }
+		.auth-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3); filter: brightness(1.05); }
+		.auth-switch-link { text-align: center; margin-top: 20px; font-size: 0.88rem; color: #334155; cursor: pointer; font-weight: 700; transition: color 0.2s; }
+		.auth-switch-link:hover { color: #059669; text-decoration: underline; }
+		#statusHeader { background: linear-gradient(135deg, #0f172a, #020617); color: #f8fafc; padding-top: calc(12px + env(safe-area-inset-top, 0px)); padding-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+		#userStatusDisplay { font-size: 0.92rem; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; width: 100%; }
+		.user-info-actions { display: flex; align-items: center; gap: 12px; }
+		#userStatusDisplay a { color: #38bdf8; text-decoration: none; font-weight: 800; transition: color 0.2s; }
+		#userStatusDisplay a:hover { color: #7dd3fc; text-decoration: underline; }
+		.sync-badge { font-size: 0.78rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; background-color: rgba(255, 255, 255, 0.15); color: #cbd5e1; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s; }
+		.sync-offline { color: #fca5a5; background-color: rgba(239, 68, 68, 0.25); }
+		.sync-saving { color: #93c5fd; background-color: rgba(59, 130, 246, 0.25); }
+		.sync-success { color: #6ee7b7; background-color: rgba(16, 185, 129, 0.25); }
+		.status-bar { text-align: center; font-size: 1rem; font-weight: 900; padding: 12px; margin-bottom: 15px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); letter-spacing: 1px; transition: all 0.3s; }
+		@media (min-width: 768px) { .status-bar { font-size: 1.25rem; } }
+		.status-pass { background: linear-gradient(135deg, #059669, #047857); }
+		.status-fail { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+		.result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 10px 0 20px 0; width: 100%; box-sizing: border-box; }
+		.result-card { background-color: #fff; padding: 14px 8px; border: 1.5px solid #cbd5e1; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; min-height: 95px; box-sizing: border-box; min-width: 0; }
+		.result-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08); border-color: #94a3b8; }
+		.card-title { font-size: 0.78rem; font-weight: 800; color: #334155; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.card-progress-bg { width: 100%; background-color: #cbd5e1; height: 7px; border-radius: 4px; margin-top: 8px; overflow: hidden; }
+		.card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+		.btn-group { display: flex; gap: 8px; margin-top: 15px; width: 100%; box-sizing: border-box; flex-wrap: wrap; }
+		.action-btn { flex: 1 1 calc(50% - 4px); min-width: 110px; padding: 12px 6px; border: none; border-radius: 10px; font-size: 0.88rem; font-weight: 800; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; text-align: center; text-overflow: ellipsis; overflow: hidden; box-sizing: border-box; }
+		@media (min-width: 768px) { .btn-group { gap: 12px; } .action-btn { flex: 1; padding: 12px 16px; font-size: 0.95rem; } }
+		.btn-pass-all { background: linear-gradient(135deg, #059669, #047857); }
+		.btn-fail-all { background: linear-gradient(135deg, #64748b, #475569); }
+		.btn-help { background: linear-gradient(135deg, #0891b2, #0e7490); }
+		.btn-cloud { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+		.btn-admin { background: linear-gradient(135deg, #4f46e5, #4338ca); }
+		.mobile-cards-grid { display: grid !important; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 30px; }
+		.mobile-card { background-color: white; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; min-width: 0; }
+		.mobile-semesters-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+		@media (min-width: 480px) { .mobile-semesters-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; } }
+		.mobile-sem-item { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; }
+		.mobile-sem-label { font-size: 0.78rem; color: #334155; font-weight: 700; }
+		.mobile-score-box { width: 100%; height: 42px; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-sizing: border-box; background-color: transparent; position: relative; }
+		.toggle-checkbox { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+		.score-label { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: pointer; font-weight: 900; font-size: 1.15rem; position: relative; border-radius: 8px; transition: all 0.15s ease; box-sizing: border-box; border: 2px solid transparent; }
+		.toggle-checkbox:checked + .score-label { background-color: #dcfce7; color: #14532d; border: 2px solid #059669; }
+		.toggle-checkbox:checked + .score-label::after { content: '✔'; font-size: 0.75em; color: #059669; font-weight: 900; position: absolute; right: 4px; top: 4px; line-height: 1; }
+		.toggle-checkbox:not(:checked) + .score-label { background-color: #fef2f2; color: #991b1b; border: 2px solid #fca5a5; }
+		.zero-score { color: #94a3b8; font-size: 1.1em; background: #f1f5f9; border: 1px dashed #94a3b8; font-weight: 800; }
+		
+		.sem-checkbox:checked + .sem-label .checkbox-indicator {
+			background-color: #059669 !important;
+			border-color: #059669 !important;
+			box-shadow: 0 2px 5px rgba(5, 150, 105, 0.3) !important;
+		}
+		.sem-checkbox:checked + .sem-label .check-mark {
+			display: inline-block !important;
+		}
+		.sem-checkbox:checked + .sem-label .sub-name {
+			color: #065f46 !important;
+			font-weight: 800 !important;
+		}
+		.sem-checkbox:checked + .sem-label .credit-badge {
+			background-color: #dcfce7 !important;
+			color: #14532d !important;
+			border-color: #86efac !important;
+		}
+
+		.mobile-badge { font-size: 0.78rem; font-weight: 800; padding: 4px 9px; border-radius: 6px; display: inline-flex; align-items: center; }
+		.bg-dept-main { background-color: #fee2e2 !important; color: #7f1d1d !important; border: 1px solid #fca5a5 !important; }
+		.bg-sch-req-main { background-color: #dcfce7 !important; color: #14532d !important; border: 1px solid #86efac !important; }
+		.bg-sch-opt-main { background-color: #dbeafe !important; color: #1e3a8a !important; border: 1px solid #93c5fd !important; }
+		.modal-overlay { display: none; position: fixed !important; z-index: 99999 !important; left: 0; top: 0; width: 100vw; height: 100vh; height: 100dvh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; box-sizing: border-box; padding: 16px; }
+		.modal-content { background-color: #fff; width: 100%; max-width: 500px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); position: relative; max-height: 80dvh; overflow-y: auto; animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); box-sizing: border-box; margin: auto; }
+		.modal-header { font-size: 1.3rem; font-weight: 800; margin-bottom: 18px; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 14px; display: flex; justify-content: space-between; align-items: center; color: #0f172a; }
+		.close-modal-btn { font-size: 2rem; color: #64748b; cursor: pointer; line-height: 1; padding: 0 5px; transition: color 0.2s; font-weight: 800; }
+		.close-modal-btn:hover { color: #0f172a; }
+		.modal-body { font-size: 1rem; line-height: 1.7; color: #334155; font-weight: 500; }
+		.admin-backend { display: none; padding: 16px; background: white; margin: 15px 0; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); border: 1.5px solid #cbd5e1; box-sizing: border-box; }
+		@media (min-width: 640px) { .admin-backend { padding: 24px; } }
+		.admin-header { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; color: #0f172a; border-left: 6px solid #4f46e5; padding-left: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+		.admin-toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1.5px solid #cbd5e1; box-sizing: border-box; }
+		.admin-toolbar > * { flex: 1; min-width: 140px; }
+		@media (max-width: 640px) { .admin-toolbar > * { flex: 1 1 calc(50% - 6px) !important; } #adminSearchInput { flex: 1 1 100% !important; } }
+		.admin-table-container { display: none; }
+		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 800px; }
+		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 14px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; color: #1e293b; font-weight: 600; }
+		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 330px !important; min-width: 330px !important; }
+		.admin-table th { background: #e2e8f0; color: #0f172a; font-weight: 800; }
+		.admin-table tr:hover { background-color: #f1f5f9; }
+		.admin-cards-grid { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 15px; }
+		@media (min-width: 640px) and (max-width: 1024px) { .admin-cards-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+		@media (min-width: 1025px) { .admin-table-container { display: block !important; } }
+		@media (max-width: 1024px) { .admin-cards-grid { display: grid !important; } }
+		.btn-mini { display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; height: 32px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.82rem; color: white; font-weight: 800; transition: opacity 0.2s; box-sizing: border-box; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.btn-mini:hover { opacity: 0.9; }
+		.input-group { margin-bottom: 16px; text-align: left; }
+		.input-group label { display: block; margin-bottom: 6px; font-weight: 800; font-size: 0.92rem; color: #1e293b; }
+		.input-group input, .input-group select { width: 100%; padding: 10px 12px; border: 1.5px solid #94a3b8; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; color: #0f172a; background-color: #fff; outline: none; transition: border-color 0.2s; font-weight: 600; }
+		.input-group input:focus, .input-group select:focus { border-color: #4f46e5; }
+		.input-group select:disabled { background-color: #e2e8f0; cursor: not-allowed; color: #475569; font-weight: 700; }
+		.sort-select, .admin-filter-input { padding: 10px; border-radius: 8px; border: 1.5px solid #94a3b8; font-size: 0.92rem; outline: none; color: #0f172a; background-color: #fff; font-weight: 600; }
+		.sort-select:focus, .admin-filter-input:focus { border-color: #4f46e5; }
+		.role-badge { padding: 4px 9px; border-radius: 6px; font-size: 0.78rem; color: white; font-weight: 800; }
+		.badge-student { background-color: #2563eb; }
+		.badge-teacher { background-color: #059669; }
+		.badge-admin { background-color: #4f46e5; }
+		#msgBox { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 14px 28px; border-radius: 50px; color: white; font-weight: 800; display: none; z-index: 100000 !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); font-size: 0.98rem; }
+		@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+		@keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+	</style>
+</head>
+<body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col">
+	<div id="msgBox"></div>
+
+	<div id="authWorkspace">
+		<div class="auth-glow-1"></div>
+		<div class="auth-glow-2"></div>
+		<div class="auth-card">
+			<div class="flex justify-center mb-3">
+				<img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="新社高中校徽" class="h-16 w-auto object-contain">
+			</div>
+			<h2 id="authTitle" class="auth-title">帳號登入</h2>
+			<p class="auth-subtitle">新社高中畢業自我檢核系統</p>
+			<div class="auth-form-group">
+				<label>帳號</label>
+				<input type="text" id="authID" placeholder="請輸入帳號(學號/教職員編號)">
+			</div>
+			<div id="regFields" style="display:none">
+				<div class="auth-form-group">
+					<label>姓名</label>
+					<input type="text" id="authName" placeholder="請輸入真實姓名">
+				</div>
+				<div class="auth-form-group">
+					<label>入學年</label>
+					<select id="authEntryYear" class="bg-white"></select>
+				</div>
+				<div class="auth-form-group">
+					<label>科別</label>
+					<select id="authEntryDept" class="bg-white"></select>
+				</div>
+			</div>
+			<div class="auth-form-group">
+				<label>密碼</label>
+				<input type="password" id="authPassword" placeholder="請輸入密碼">
+			</div>
+			<button class="auth-btn-primary" onclick="handleAuth()">確認登入</button>
+			<div id="authSwitchLink" class="auth-switch-link" onclick="switchAuthMode()">尚未有帳號？點此註冊</div>
+		</div>
+	</div>
+
+	<div id="appWorkspace" style="display: none;" class="flex-grow flex flex-col h-full overflow-hidden">
+		<div id="statusHeader" class="shrink-0" style="display: none;">
+			<div class="app-container">
+				<div id="userStatusDisplay"></div>
+			</div>
+		</div>
+
+		<div id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar pb-[calc(96px+env(safe-area-inset-bottom,24px))]">
+			<div id="dashboardSection" class="app-container mt-4" style="display: none;">
+				<div class="bg-white border border-slate-200 rounded-2xl py-6 px-5 shadow-sm">
+					<div id="curriculumSelectorArea" class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center mb-6 pb-4 border-b border-slate-100">
+						<span class="text-xs sm:text-sm font-extrabold text-slate-700 shrink-0">學分表檢視版本：</span>
+						<div class="flex gap-2 w-full sm:w-auto items-center">
+							<select id="dashSelectYear" class="sort-select text-xs sm:text-sm py-1.5 px-2.5 shrink-0 bg-white" onchange="changeDashCurriculum()"></select>
+							<select id="dashSelectDept" class="sort-select text-xs sm:text-sm py-1.5 px-2.5 flex-grow sm:flex-initial max-w-full truncate bg-white" onchange="changeDashCurriculum()"></select>
+						</div>
+					</div>
+					<div id="adminEditBanner" class="admin-edit-banner" style="display:none; background:#6366f1; color:white; padding:10px; text-align:center; font-weight:bold; border-radius:8px; margin-bottom:12px;">
+						正在編輯 <span id="targetStudentName">學生</span> 的資料 | <a href="javascript:void(0)" onclick="exitAdminEditMode()" style="color:white; text-decoration:underline;">取消返回列表</a>
+					</div>
+					<div id="finalStatus" class="status-bar status-fail">計算中...</div>
+					<div class="result-grid">
+						<div class="result-card" id="cell-total"></div>
+						<div class="result-card" id="cell-dept"></div>
+						<div class="result-card" id="cell-prof-prac"></div>
+						<div class="result-card" id="cell-prac"></div>
+					</div>
+					<div class="btn-group">
+						<button class="action-btn btn-help" onclick="toggleUIModal(true,'helpModal')">使用說明</button>
+						<button class="action-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="showMissingCreditsModal()">未得學分清單</button>
+						<button id="saveBtn" class="action-btn btn-cloud" onclick="handleMainAction()">班級資料</button>
+						<button class="action-btn btn-pass-all" onclick="confirmSetAllStatus(true)">全部及格</button>
+						<button class="action-btn btn-fail-all" onclick="confirmSetAllStatus(false)">學分歸零</button>
+					</div>
+				</div>
+			</div>
+
+			<div id="layoutSwitcherArea" class="app-container mt-3 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+				<span class="text-sm font-extrabold text-slate-700 shrink-0 text-center md:text-left">檢視版面切換：</span>
+				<div class="inline-flex rounded-xl p-1 bg-slate-200 border border-slate-300">
+					<button id="btnLayoutSubject" onclick="setLayoutMode('subject')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md">
+						按科目檢視
+					</button>
+					<button id="btnLayoutSemester" onclick="setLayoutMode('semester')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900">
+						按學期檢視
+					</button>
+				</div>
+			</div>
+
+			<div class="app-container mt-2">
+				<div id="adminBackend" class="admin-backend">
+					<div class="admin-header">
+						<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+							<span id="backendTitle">資料管理</span>
+							<button id="backToTrialBtn" class="btn-mini" style="background:#6c757d; display:none;" onclick="handleReturnToTrial()">返回檢核表試算</button>
+							<button id="createUserBtn" class="btn-mini" style="background:#10b981; display:none;" onclick="openCreateUserModal()">新增帳號</button>
+						</div>
+					</div>
+					<div class="admin-toolbar">
+						<input type="text" id="adminSearchInput" class="admin-filter-input" placeholder="搜尋姓名或帳號" oninput="fetchAdminList(true)">
+						<select id="adminFilterYear" class="sort-select" onchange="fetchAdminList(true)">
+							<option value="all">所有年度</option>
+						</select>
+						<select id="adminFilterDept" class="sort-select" onchange="fetchAdminList(true)">
+							<option value="all">所有科別</option>
+						</select>
+						<select id="adminSort" class="sort-select" onchange="fetchAdminList(true)">
+							<option value="sid">帳號排序</option>
+							<option value="name">姓名排序</option>
+						</select>
+					</div>
+					<div id="adminTableContainer" class="admin-table-container overflow-x-auto w-full custom-scrollbar" style="-webkit-overflow-scrolling: touch;">
+						<table class="admin-table">
+							<colgroup>
+								<col style="width: 12%; min-width: 80px;">
+								<col style="width: 12%; min-width: 80px;">
+								<col style="width: 12%; min-width: 80px;">
+								<col style="width: 24%; min-width: 120px;">
+								<col style="width: 40%; min-width: 330px;">
+							</colgroup>
+							<thead>
+								<tr>
+									<th>姓名</th>
+									<th>帳號</th>
+									<th>身份</th>
+									<th>入學年/科別</th>
+									<th>操作</th>
+								</tr>
+							</thead>
+							<tbody id="adminListBody"></tbody>
+						</table>
+					</div>
+					<div id="adminCardsContainer" class="admin-cards-grid"></div>
+				</div>
+				<div id="underConstructionBox" class="hidden bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm my-6">
+					<h3 class="text-xl font-bold text-slate-800 mb-2">資料建置中</h3>
+					<p class="text-slate-500 text-sm">目前選擇的年度與科別（<span id="constYearDept" class="font-bold text-[#059669]"></span>）課程學分資料正在建置中，敬請期待！</p>
+				</div>
+				<div id="mobileCardsContainer" class="mobile-cards-grid"></div>
+			</div>
+		</div>
+
+		<button id="backToTopBtn" class="fixed bottom-[calc(88px+env(safe-area-inset-bottom,16px))] md:bottom-[calc(24px+env(safe-area-inset-bottom,16px))] right-6 z-40 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none flex items-center justify-center border border-emerald-400" onclick="scrollToTop()">
+			<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path>
+			</svg>
+		</button>
+	</div>
+
+	<div id="profileModal" class="modal-overlay" onclick="handleOutsideClick(event)">
+		<div class="modal-content" style="max-width:400px;">
+			<div class="modal-header"><span>個人資料管理</span><span class="close-modal-btn" onclick="toggleUIModal(false,'profileModal')">&times;</span></div>
+			<div class="input-group">
+				<label id="profAccountLabel">帳號</label>
+				<input type="text" id="profAccount" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;">
+			</div>
+			<div class="input-group">
+				<label>姓名</label>
+				<input type="text" id="profName" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;">
+			</div>
+			<div class="input-group"><label id="profYearLabel">入學年</label><select id="profEntryYear" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;"></select></div>
+			<div class="input-group"><label id="profDeptLabel">科別</label><select id="profEntryDept" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;"></select></div>
+			<div id="profStudentTutorArea" class="input-group">
+				<label id="profTutorLabel">導師 (系統自動對應)</label>
+				<input type="text" id="profTutor" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;">
+			</div>
+			<p id="profTipMessage" style="font-size:0.85rem; color:#d946ef; margin-bottom:15px; font-weight:bold;">※ 帳號資料有誤請洽管理員更正，僅能修改密碼。</p>
+			<div class="input-group"><label>更改密碼 (不更改保持空白)</label><input type="password" id="profPassword"></div>
+			<div class="flex gap-2">
+				<button class="action-btn btn-admin" style="width:100%;" onclick="updateProfile()">儲存修改</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="adminUserModal" class="modal-overlay" onclick="handleOutsideClick(event)">
+		<div class="modal-content" style="max-width:400px;">
+			<div class="modal-header"><span>更改帳號資料</span><span class="close-modal-btn" onclick="toggleUIModal(false,'adminUserModal')">&times;</span></div>
+			<input type="hidden" id="editUserId">
+			<div class="input-group"><label>帳號</label><input type="text" id="editUserSid"></div>
+			<div class="input-group"><label>姓名</label><input type="text" id="editUserName"></div>
+			<div class="input-group">
+				<label>入學年</label>
+				<select id="editUserEntryYear"><option value="未設定">未設定</option></select>
+			</div>
+			<div class="input-group">
+				<label>科別</label>
+				<select id="editUserEntryDept"><option value="未設定">未設定</option></select>
+			</div>
+			<div class="input-group">
+				<label>身份</label>
+				<select id="editUserRole" onchange="toggleAdminTutorField(this.value)"><option value="student">學生</option><option value="teacher">教師</option><option value="admin">管理員</option></select>
+			</div>
+			<div id="editTutorSection" class="input-group">
+				<label id="editTutorLabel">導師</label>
+				<div id="editTutorWrapper"></div>
+			</div>
+			<div class="input-group" style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 15px;">
+				<label style="color: #6366f1; font-weight: bold; font-size: 0.9rem; margin-bottom: 6px; display: block;">密碼重設</label>
+				<button type="button" class="action-btn" style="border-radius: 8px; background: linear-gradient(135deg, #6366f1, #4f46e5); width: 100%; font-size: 0.9rem; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0;" onclick="directResetPasswordToSid()">
+					一鍵重設密碼為「帳號」
+				</button>
+				<p style="font-size: 0.8rem; color: #64748b; margin-top: 8px; line-height: 1.4;">※ 點擊後，系統會立即將該使用者的登入密碼覆寫為他的「帳號」。</p>
+			</div>
+			<button class="action-btn btn-admin" style="width:100%; margin-top: 15px;" onclick="saveAdminUserEdit()">儲存帳號修改</button>
+		</div>
+	</div>
+
+	<div id="createUserModal" class="modal-overlay" onclick="handleOutsideClick(event)">
+		<div class="modal-content" style="max-width:400px;">
+			<div class="modal-header"><span>新增帳號</span><span class="close-modal-btn" onclick="toggleUIModal(false,'createUserModal')">&times;</span></div>
+			<div class="input-group"><label>帳號</label><input type="text" id="newUserSid" placeholder="請輸入帳號"></div>
+			<div class="input-group"><label>姓名</label><input type="text" id="newUserName" placeholder="請輸入姓名"></div>
+			<div class="input-group">
+				<label>入學年</label>
+				<select id="newUserEntryYear"><option value="未設定">未設定</option></select>
+			</div>
+			<div class="input-group">
+				<label>科別</label>
+				<select id="newUserEntryDept"><option value="未設定">未設定</option></select>
+			</div>
+			<div class="input-group">
+				<label>身份</label>
+				<select id="newUserRole" onchange="toggleNewUserTutorField(this.value)"><option value="student" selected>學生</option><option value="teacher">教師</option><option value="admin">管理員</option></select>
+			</div>
+			<div id="newTutorSection" class="input-group">
+				<label>導師</label>
+				<div id="newTutorWrapper"></div>
+			</div>
+			<p style="font-size:0.8rem; color:#888; margin-bottom:15px; line-height:1.4;">管理員在此建立基本資料後，系統將在雲端產生該使用者的登入帳號，即可憑帳號作為預設密碼直接登入！</p>
+			<button class="action-btn btn-pass-all" style="width:100%;" onclick="saveNewUser()">確認建立新帳號</button>
+		</div>
+	</div>
+
+	<div id="missingCreditsModal" class="modal-overlay" onclick="handleOutsideClick(event)">
+		<div class="modal-content !max-w-md !w-full">
+			<div class="modal-header">
+				<span class="font-black text-slate-800 text-xl flex items-center gap-2">
+					<span class="w-2.5 h-5 rounded-full bg-amber-500"></span>
+					未獲得學分明細
+				</span>
+				<span class="close-modal-btn" onclick="toggleUIModal(false,'missingCreditsModal')">&times;</span>
+			</div>
+			<div class="mb-4 px-1">
+				<label class="block text-xs font-bold text-slate-500 mb-1.5">選擇欲檢視的學期學分：</label>
+				<select id="missingCreditsFilter" class="sort-select text-sm py-1.5 px-3 w-full bg-white border border-slate-200 rounded-xl outline-none" onchange="renderMissingCreditsFiltered()"></select>
+			</div>
+			<div class="modal-body">
+				<div id="missingCreditsList" class="max-h-[45dvh] overflow-y-auto custom-scrollbar space-y-3 pr-1"></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="confirmModal" class="modal-overlay">
+		<div class="modal-content" style="max-width:320px; text-align:center;">
+			<div class="modal-header"><span>確認操作</span></div>
+			<div class="modal-body" id="confirmMsg">確定要執行此操作嗎？</div>
+			<div style="display:flex; gap:10px; margin-top:20px;">
+				<button class="action-btn btn-fail-all" style="background:#6c757d;" onclick="toggleUIModal(false,'confirmModal')"><b>取消</b></button>
+				<button class="action-btn btn-pass-all" style="background:#dc3545;" onclick="triggerConfirmAction()"><b>確認</b></button>
+			</div>
+		</div>
+	</div>
+
+	<div id="helpModal" class="modal-overlay">
+		<div class="modal-content !max-w-xl !w-full !p-6 md:!p-8" onclick="event.stopPropagation()">
+			<div class="modal-header" style="border-bottom: none; margin-bottom: 8px; padding-bottom: 0;">
+				<span class="font-black text-slate-800 text-2xl">畢業自我檢核系統說明</span>
+			</div>
+			<div class="modal-body !text-base">
+				<div id="helpScrollContainer" class="max-h-[48dvh] overflow-y-auto p-2 custom-scrollbar mb-4">
+					<p class="text-base text-slate-500 font-extrabold mb-4 pb-2 border-b border-dashed border-slate-200">請完整閱讀以下所有資訊：</p>
+					<div class="mb-6">
+						<span class="text-lg font-black text-slate-800 flex items-center gap-1.5 mb-3">
+							<span class="w-2 h-4 rounded-full bg-emerald-500"></span>
+							1. 儀表板狀態說明
+						</span>
+						<div class="space-y-4 max-w-lg mb-4">
+							<div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+								<h5 class="text-sm font-black text-slate-700 mb-2.5 flex items-center gap-1.5">
+									<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+									(一) 學分勾選
+								</h5>
+								<div class="flex flex-col gap-3">
+									<div class="flex items-center gap-3">
+										<div class="w-12 h-10 rounded-lg bg-green-50 border-2 border-green-500 flex items-center justify-center font-black text-sm text-green-700 relative shrink-0">
+											3<span class="absolute right-1 top-0.5 text-[9px] text-green-500 font-black">✔</span>
+										</div>
+										<div class="text-sm text-slate-600 font-semibold leading-relaxed">
+											<span class="text-emerald-600 font-black">已勾選 (及格)</span>：代表您已取得該學分，學分數會即時計算並計入總學分與各類門檻累計。
+										</div>
+									</div>
+									<div class="flex items-center gap-3">
+										<div class="w-12 h-10 rounded-lg bg-red-50 border-2 border-red-200 flex items-center justify-center font-black text-sm text-red-500 shrink-0">
+											3
+										</div>
+										<div class="text-sm text-slate-600 font-semibold leading-relaxed">
+											<span class="text-red-500 font-black">未勾選 (不及格)</span>：代表您未獲得該學分，不計入任何統計數據中。
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+								<h5 class="text-sm font-black text-slate-700 mb-2.5 flex items-center gap-1.5">
+									<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+									(二) 總學分狀態卡片（畢業、修業、成績證明）
+								</h5>
+								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<div class="border border-emerald-200 bg-emerald-50/40 p-3 rounded-xl text-center shadow-sm">
+										<div class="text-[11px] font-black text-emerald-800">畢業證書資格</div>
+										<div class="text-lg font-black text-emerald-700 mt-1">160</div>
+										<div class="w-full bg-emerald-100 h-1 rounded-full overflow-hidden mt-2">
+											<div class="h-full bg-emerald-500" style="width: 100%"></div>
+										</div>
+										<div class="text-[10px] font-extrabold text-emerald-600 mt-1.5 leading-snug">符合畢業門檻，<br>核發畢業證書。</div>
+									</div>
+									<div class="border border-amber-200 bg-amber-50/40 p-3 rounded-xl text-center shadow-sm">
+										<div class="text-[11px] font-black text-amber-800">修業證明資格</div>
+										<div class="text-lg font-black text-amber-700 mt-1">120</div>
+										<div class="w-full bg-amber-100 h-1 rounded-full overflow-hidden mt-2">
+											<div class="h-full bg-amber-500" style="width: 75%"></div>
+										</div>
+										<div class="text-[10px] font-extrabold text-amber-600 mt-1.5 leading-snug">未符合畢業門檻，<br>核發修業證明。</div>
+									</div>
+									<div class="border border-rose-200 bg-rose-50/40 p-3 rounded-xl text-center shadow-sm">
+										<div class="text-[11px] font-black text-rose-800">僅發成績證明</div>
+										<div class="text-lg font-black text-rose-700 mt-1">90</div>
+										<div class="w-full bg-rose-100 h-1 rounded-full overflow-hidden mt-2">
+											<div class="h-full bg-rose-500" style="width: 56%"></div>
+										</div>
+										<div class="text-[10px] font-extrabold text-rose-500 mt-1.5 leading-snug">未符合畢業門檻，<br>核發成績證明。</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<span class="text-lg font-black text-slate-800 flex items-center gap-1.5 mb-3 mt-6">
+							<span class="w-2 h-4 rounded-full bg-emerald-500"></span>
+							2. 畢業條件規定
+						</span>
+						<p class="text-xs text-slate-500 mb-3 font-medium">（已自動為您展開目前科系之對應條件，亦可點擊切換）</p>
+						<div class="space-y-3 max-w-lg mb-6">
+							<details id="helpDetailsAcademic" class="group bg-slate-50 rounded-xl border border-slate-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+								<summary class="flex justify-between items-center p-3.5 font-bold text-slate-800 cursor-pointer hover:bg-slate-100 transition-colors duration-150">
+									<span class="flex items-center gap-2 text-sm md:text-base">
+										<span class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black">普</span>
+										(一) 普通型高中畢業條件
+									</span>
+									<span class="text-xs text-slate-400 group-open:rotate-180 transition-transform duration-200">▼</span>
+								</summary>
+								<div class="p-4 border-t border-slate-200/60 text-sm text-slate-600 space-y-2 leading-relaxed bg-white">
+									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">1.</span><p><b>應修習總學分</b>：182 學分。</p></div>
+									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">2.</span><p><b>畢業之最低學分數</b>：150 學分成績及格。</p></div>
+									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">3.</span><p><b>必修及選修學分</b>：部定必修及校訂必修至少需 <b>102 學分</b>且成績及格；同時選修學分至少需修習 <b>40 學分</b>且成績及格。</p></div>
+									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">4.</span><p><b>德行操守表現</b>：修業期間德行評量之獎懲紀錄相抵後，<b>未滿三大過</b>。</p></div>
+								</div>
+							</details>
+							<details id="helpDetailsVocational" class="group bg-slate-50 rounded-xl border border-slate-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+								<summary class="flex justify-between items-center p-3.5 font-bold text-slate-800 cursor-pointer hover:bg-slate-100 transition-colors duration-150">
+									<span class="flex items-center gap-2 text-sm md:text-base">
+										<span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-black">技</span>
+										(二) 技術型高中畢業條件
+									</span>
+									<span class="text-xs text-slate-400 group-open:rotate-180 transition-transform duration-200">▼</span>
+								</summary>
+								<div class="p-4 border-t border-slate-200/60 text-sm text-slate-600 space-y-2 leading-relaxed bg-white">
+									<div class="flex gap-1.5"><span class="text-emerald-500 font-bold shrink-0">1.</span><p><b>應修習總學分</b>：180-192 學分，畢業及格學分數至少為 <b>160 學分</b>。</p></div>
+									<div class="flex gap-1.5"><span class="text-emerald-500 font-bold shrink-0">2.</span><p><b>部定必修要求</b>：表列部定必修科目 111-136 學分均須修習，並至少 <b>85% 及格</b>，始得畢業。</p></div>
+									<div class="flex gap-1.5"><span class="text-emerald-500 font-bold shrink-0">3.</span><p><b>專業與實習學分</b>：專業科目及實習科目至少須修習 80 學分以上，其中至少 <b>60 學分及格</b>，含實習(實驗、實務)科目至少 <b>45 學分以上及格</b>。</p></div>
+									<div class="flex gap-1.5"><span class="text-emerald-500 font-bold shrink-0">4.</span><p><b>德行操守表現</b>：修業期間德行評量之獎懲紀錄相抵後，<b>未滿三大過</b>。</p></div>
+								</div>
+							</details>
+							<details id="helpDetailsSports" class="group bg-slate-50 rounded-xl border border-slate-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+								<summary class="flex justify-between items-center p-3.5 font-bold text-slate-800 cursor-pointer hover:bg-slate-100 transition-colors duration-150">
+									<span class="flex items-center gap-2 text-sm md:text-base">
+										<span class="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-black">體</span>
+										(三) 體育班畢業條件
+									</span>
+									<span class="text-xs text-slate-400 group-open:rotate-180 transition-transform duration-200">▼</span>
+								</summary>
+								<div class="p-4 border-t border-slate-200/60 text-sm text-slate-600 space-y-2 leading-relaxed bg-white">
+									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">1.</span><p><b>應修習總學分</b>：182 學分。</p></div>
+									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">2.</span><p><b>畢業之最低學分數</b>：150 學分成績及格。</p></div>
+									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">3.</span><p><b>部定必修一般科目要求</b>：至少須 <b>80% 及格</b>。</p></div>
+									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">4.</span><p><b>部定必修體育專業科目要求</b>：至少須 <b>85% 及格</b>。</p></div>
+									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">5.</span><p><b>選修科目學分要求</b>：至少須 <b>70% 及格</b>。</p></div>
+									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">6.</span><p><b>德行操守表現</b>：修業期間德行評量之獎懲紀錄相抵後，<b>未滿三大過</b>。</p></div>
+								</div>
+							</details>
+						</div>
+					</div>
+					<div class="mt-3">
+						<button id="btnConfirmHelp" disabled class="w-full py-3.5 text-base font-extrabold rounded-xl shadow-md transition duration-150 bg-slate-300 text-slate-500 cursor-not-allowed opacity-60 pointer-events-none" onclick="confirmReadHelp()">
+							我已詳閱上述說明
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
+			SB_KEY = "sb_publishable_ojrdIB0TeCnl8eZXbzWsdQ_2W3JB3xT",
+			EMAIL_DOMAIN = "@sshs.tc.edu.tw",
+			YEAR_OPTIONS = ["113"],
+			DEPT_OPTIONS = ["普通科(文史法商群)", "普通科(理工生醫群)", "體育班", "農經科", "園藝科", "商經科", "資處科"],
+			mapping = {
+				cat: {
+					"dept": { text: "部定必修", class: "bg-dept-main" },
+					"dept_sports": { text: "體育專業必修", class: "bg-amber-100 text-amber-800 border border-amber-200" },
+					"sch_req": { text: "校定必修", class: "bg-sch-req-main" },
+					"sch_opt": { text: "校定選修", class: "bg-sch-opt-main" }
+				},
+				type: { 1: "一般科目", 2: "專業科目", 3: "實習科目" },
+				role: { student: "學生", teacher: "教師", admin: "管理員" }
+			};
+
+		const curriculums = {
+			"113_商經科": [
+				{ cat: "dept", type: 1, name: "國語文", credits: [3,3,3,3,2,2] },
+				{ cat: "dept", type: 1, name: "英語文", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "本土語文", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "數學", credits: [3,3,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "歷史", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "地理", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "公民與社會", credits: [0,0,0,0,2,0] },
+				{ cat: "dept", type: 1, name: "物理", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "化學", credits: [1,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "生物", credits: [1,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "音樂", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "美術", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0,0,0,0,1,1] },
+				{ cat: "dept", type: 1, name: "資訊科技", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "健康與護理", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "體育", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "商業概論", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "數位科技概論", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "會計學", credits: [3,3,2,2,0,0] },
+				{ cat: "dept", type: 2, name: "經濟學", credits: [0,0,4,4,0,0] },
+				{ cat: "dept", type: 3, name: "數位科技應用", credits: [0,0,2,2,0,0] },
+				{ cat: "dept", type: 3, name: "商業溝通", credits: [0,0,0,0,0,2] },
+				{ cat: "dept", type: 3, name: "門市經營實務", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 3, name: "行銷實務", credits: [0,0,2,2,0,0] },
+				{ cat: "dept", type: 3, name: "會計軟體應用", credits: [0,0,2,2,0,0] },
+				{ cat: "dept", type: 3, name: "金融與證券投資實務", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1,1,0,0,0,0] },
+				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0,0,1,1,0,0] },
+				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_req", type: 1, name: "數學", credits: [0,0,3,3,0,0] },
+				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0,0,0,2,2,0] },
+				{ cat: "sch_req", type: 3, name: "進階門市實務", credits: [0,0,2,2,0,0] },
+				{ cat: "sch_req", type: 3, name: "會計實務", credits: [0,0,2,2,4,4] },
+				{ cat: "sch_req", type: 3, name: "經濟應用實務", credits: [0,0,0,0,4,4] },
+				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0,0,0,0,3,3] },
+				{ cat: "sch_opt", type: 2, name: "計算機探究", credits: [0,0,0,0,4,4] },
+				{ cat: "sch_opt", type: 2, name: "商業專論", credits: [0,0,0,0,2,2] },
+				{ cat: "sch_opt", type: 3, name: "文書處理", credits: [0,2,0,0,0,0] },
+				{ cat: "sch_opt", type: 3, name: "記帳實務", credits: [1,1,0,0,0,0] },
+				{ cat: "sch_opt", type: 3, name: "商業簡報實務", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 3, name: "同科單班(市場調查實務/電腦記帳實務)", credits: [0,0,0,0,2,0] },
+				{ cat: "sch_opt", type: 3, name: "同科單班(財務報表分析/電子商務實務)", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0,0,2,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0,0,1,1,0,0], defaultUnchecked: true, isElective5: true }
+			],
+			"113_資處科": [
+				{ cat: "dept", type: 1, name: "國語文", credits: [3,3,3,3,2,2] },
+				{ cat: "dept", type: 1, name: "英語文", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "本土語文", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "數學", credits: [3,3,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "歷史", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "地理", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "公民與社會", credits: [0,0,0,0,0,2] },
+				{ cat: "dept", type: 1, name: "物理", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "化學", credits: [0,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "生物", credits: [0,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "音樂", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "美術", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0,0,0,0,1,1] },
+				{ cat: "dept", type: 1, name: "資訊科技", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "健康與護理", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "體育", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "商業概論", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "數位科技概論", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "會計學", credits: [3,3,2,2,0,0] },
+				{ cat: "dept", type: 2, name: "經濟學", credits: [0,0,4,4,0,0] },
+				{ cat: "dept", type: 3, name: "數位科技應用", credits: [0,0,2,2,0,0] },
+				{ cat: "dept", type: 3, name: "商業溝通", credits: [0,0,0,0,0,2] },
+				{ cat: "dept", type: 3, name: "程式語言與設計", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 3, name: "多媒體製作與應用", credits: [0,0,3,3,0,0] },
+				{ cat: "dept", type: 3, name: "資料庫應用", credits: [0,0,0,0,2,2] },
+				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1,1,0,0,0,0] },
+				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0,0,1,1,0,0] },
+				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_req", type: 1, name: "數學", credits: [0,0,3,3,0,0] },
+				{ cat: "sch_req", type: 1, name: "計算機探究", credits: [0,0,0,0,4,4] },
+				{ cat: "sch_req", type: 1, name: "商業專論", credits: [0,0,0,0,2,2] },
+				{ cat: "sch_req", type: 3, name: "記帳實務", credits: [1,1,0,0,0,0] },
+				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0,0,0,2,2,0] },
+				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0,0,0,0,3,3] },
+				{ cat: "sch_opt", type: 3, name: "文書處理", credits: [2,0,0,0,0,0] },
+				{ cat: "sch_opt", type: 3, name: "專題前導", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 3, name: "軟體應用", credits: [0,0,3,0,0,0] },
+				{ cat: "sch_opt", type: 3, name: "會計實務", credits: [0,0,2,2,4,4] },
+				{ cat: "sch_opt", type: 3, name: "經濟應用實務", credits: [0,0,0,0,4,4] },
+				{ cat: "sch_opt", type: 3, name: "同科單班(進階軟體應用/網站規劃實務)", credits: [0,0,0,3,0,0] },
+				{ cat: "sch_opt", type: 3, name: "同科單班(進階程式設計/電腦繪圖實務)", credits: [0,0,0,0,2,0] },
+				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0,0,2,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0,0,1,1,0,0], defaultUnchecked: true, isElective5: true }
+			],
+			"113_農經科": [
+				{ cat: "dept", type: 1, name: "國語文", credits: [3,3,3,3,2,2] },
+				{ cat: "dept", type: 1, name: "英語文", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "本土語文", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "數學", credits: [3,3,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "歷史", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "地理", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "公民與社會", credits: [0,0,1,1,0,0] },
+				{ cat: "dept", type: 1, name: "化學", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "生物", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "音樂", credits: [0,0,0,0,1,1] },
+				{ cat: "dept", type: 1, name: "美術", credits: [0,0,0,0,2,0] },
+				{ cat: "dept", type: 1, name: "生涯規劃", credits: [1,0,0,0,0,1] },
+				{ cat: "dept", type: 1, name: "資訊科技", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "健康與護理", credits: [0,0,1,1,0,0] },
+				{ cat: "dept", type: 1, name: "體育", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "農業概論", credits: [3,3,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "生物技術概論", credits: [0,0,0,0,2,2] },
+				{ cat: "dept", type: 2, name: "農業安全衛生", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "生命科學概論", credits: [0,0,2,2,0,0] },
+				{ cat: "dept", type: 3, name: "農業資訊管理實習", credits: [0,0,0,0,2,2] },
+				{ cat: "dept", type: 3, name: "農園場管理實習", credits: [0,0,3,3,0,0] },
+				{ cat: "dept", type: 3, name: "植物栽培實習", credits: [3,3,0,0,0,0] },
+				{ cat: "dept", type: 3, name: "農業資源應用實習", credits: [0,0,3,3,0,0] },
+				{ cat: "dept", type: 3, name: "植物識別實習", credits: [0,0,3,3,0,0] },
+				{ cat: "dept", type: 3, name: "植物保護實習", credits: [2,2,0,0,0,0] },
+				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1,1,0,0,0,0] },
+				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0,0,1,1,0,0] },
+				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_req", type: 1, name: "數學", credits: [0,0,3,3,0,0] },
+				{ cat: "sch_req", type: 2, name: "作物生產", credits: [2,3,0,0,0,0] },
+				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0,0,0,2,2,0] },
+				{ cat: "sch_req", type: 3, name: "農業機械實習", credits: [0,0,3,3,0,0] },
+				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0,0,0,0,3,3] },
+				{ cat: "sch_opt", type: 2, name: "進階生物", credits: [0,0,0,0,2,2] },
+				{ cat: "sch_opt", type: 2, name: "農業產業評析", credits: [0,0,0,0,2,2] },
+				{ cat: "sch_opt", type: 3, name: "在地特用作物加工", credits: [0,0,0,0,0,3] },
+				{ cat: "sch_opt", type: 3, name: "在地特用作物栽培", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 3, name: "智慧農業實習", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 3, name: "植物組織培養實習", credits: [0,0,0,0,0,3] },
+				{ cat: "sch_opt", type: 3, name: "農業加工實習", credits: [0,0,0,0,3,0] },
+				{ cat: "sch_opt", type: 3, name: "農產行銷實習", credits: [0,0,0,0,2,0] },
+				{ cat: "sch_opt", type: 3, name: "種苗生產實習", credits: [0,2,0,0,0,0] },
+				{ cat: "sch_opt", type: 3, name: "同科單班(休閒農業實務/有機農業實務)", credits: [0,0,0,0,0,3] },
+				{ cat: "sch_opt", type: 3, name: "同科單班(安全農業實習/精緻農業實務)", credits: [0,0,0,0,3,0] },
+				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0,0,2,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0,0,1,1,0,0], defaultUnchecked: true, isElective5: true }
+			],
+			"113_園藝科": [
+				{ cat: "dept", type: 1, name: "國語文", credits: [3,3,3,3,2,2] },
+				{ cat: "dept", type: 1, name: "英語文", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "本土語文", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "數學", credits: [3,3,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "歷史", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "地理", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "公民與社會", credits: [0,0,1,1,0,0] },
+				{ cat: "dept", type: 1, name: "化學", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "生物", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "音樂", credits: [0,0,0,0,1,1] },
+				{ cat: "dept", type: 1, name: "美術", credits: [0,0,0,0,0,2] },
+				{ cat: "dept", type: 1, name: "生涯規劃", credits: [1,0,0,0,0,1] },
+				{ cat: "dept", type: 1, name: "資訊科技", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "健康與護理", credits: [0,0,1,1,0,0] },
+				{ cat: "dept", type: 1, name: "體育", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "農業概論", credits: [3,3,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "生物技術概論", credits: [0,0,0,0,2,2] },
+				{ cat: "dept", type: 2, name: "農業安全衛生", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 2, name: "生命科學概論", credits: [0,0,2,2,0,0] },
+				{ cat: "dept", type: 3, name: "農業資訊管理實習", credits: [0,0,0,0,2,2] },
+				{ cat: "dept", type: 3, name: "農園場管理實習", credits: [0,0,3,3,0,0] },
+				{ cat: "dept", type: 3, name: "植物栽培實習", credits: [3,3,0,0,0,0] },
+				{ cat: "dept", type: 3, name: "農業資源應用實習", credits: [0,0,3,3,0,0] },
+				{ cat: "dept", type: 3, name: "植物識別實習", credits: [0,0,3,3,0,0] },
+				{ cat: "dept", type: 3, name: "植物保護實習", credits: [2,2,0,0,0,0] },
+				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1,1,0,0,0,0] },
+				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0,0,1,1,0,0] },
+				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_req", type: 1, name: "數學", credits: [0,0,3,3,0,0] },
+				{ cat: "sch_req", type: 2, name: "基礎園藝", credits: [0,3,0,0,0,0] },
+				{ cat: "sch_req", type: 2, name: "農業產業評析", credits: [0,0,0,0,2,2] },
+				{ cat: "sch_req", type: 3, name: "造園施工實習", credits: [0,0,3,3,0,0] },
+				{ cat: "sch_req", type: 3, name: "景觀設計", credits: [0,0,3,3,0,0] },
+				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0,0,0,0,3,3] },
+				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0,0,0,0,3,3] },
+				{ cat: "sch_opt", type: 2, name: "造園學", credits: [1,1,0,0,0,0] },
+				{ cat: "sch_opt", type: 2, name: "進階生物", credits: [0,0,0,0,2,2] },
+				{ cat: "sch_opt", type: 3, name: "植物組織培養實習", credits: [0,0,0,0,3,0] },
+				{ cat: "sch_opt", type: 3, name: "園產品處理與利用實習", credits: [0,0,0,0,3,3] },
+				{ cat: "sch_opt", type: 3, name: "同科單班(生態解說實習/庭園民宿規劃施作實習)", credits: [0,0,0,0,3,0] },
+				{ cat: "sch_opt", type: 3, name: "同科單班(展場設計及施作實習/設施園藝實習)", credits: [0,0,0,0,0,3] },
+				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0,0,2,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0,0,1,1,0,0], defaultUnchecked: true, isElective5: true }
+			],
+			"113_普通科(文史法商群)": [
+				{ cat: "dept", type: 1, name: "國語文", credits: [4,4,4,4,4,0] },
+				{ cat: "dept", type: 1, name: "本土語文", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "英語文", credits: [4,4,4,4,2,0] },
+				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4,4,4,4,0,0] },
+				{ cat: "dept", type: 1, name: "歷史", credits: [2,2,2,0,0,0] },
+				{ cat: "dept", type: 1, name: "地理", credits: [2,2,2,0,0,0] },
+				{ cat: "dept", type: 1, name: "公民與社會", credits: [2,2,2,0,0,0] },
+				{ cat: "dept", type: 1, name: "物理", credits: [2,0,2,0,0,0] },
+				{ cat: "dept", type: 1, name: "化學", credits: [0,2,0,2,0,0] },
+				{ cat: "dept", type: 1, name: "生物", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "地球科學", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "音樂", credits: [0,0,0,2,1,1] },
+				{ cat: "dept", type: 1, name: "美術", credits: [0,0,0,0,2,2] },
+				{ cat: "dept", type: 1, name: "藝術生活", credits: [0,0,0,0,0,2] },
+				{ cat: "dept", type: 1, name: "生命教育", credits: [1,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "家政", credits: [0,0,0,0,2,0] },
+				{ cat: "dept", type: 1, name: "生活科技", credits: [0,0,0,2,0,0] },
+				{ cat: "dept", type: 1, name: "資訊科技", credits: [0,0,0,2,0,0] },
+				{ cat: "dept", type: 1, name: "健康與護理", credits: [0,0,0,0,1,1] },
+				{ cat: "dept", type: 1, name: "體育", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0,0,1,1,0,0] },
+				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0,0,2,2,0,0] },
+				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2,0,0,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0,0,0,0,2,0] },
+				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0,0,0,0,4,4] },
+				{ cat: "sch_opt", type: 1, name: "族群、性別與國家的歷史", credits: [0,0,0,0,3,0] },
+				{ cat: "sch_opt", type: 1, name: "科技、環境與藝術的歷史", credits: [0,0,0,0,0,3] },
+				{ cat: "sch_opt", type: 1, name: "空間資訊科技", credits: [0,0,0,0,3,0] },
+				{ cat: "sch_opt", type: 1, name: "社會環境議題", credits: [0,0,0,0,0,3] },
+				{ cat: "sch_opt", type: 1, name: "現代社會與經濟", credits: [0,0,0,0,3,0] },
+				{ cat: "sch_opt", type: 1, name: "民主政治與法律", credits: [0,0,0,0,0,3] },
+				{ cat: "sch_opt", type: 1, name: "探究與實作：歷史學探究", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "探究與實作：地理與人文社會科學研究", credits: [0,0,0,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "探究與實作：公共議題與社會探究", credits: [0,0,0,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "表演創作/多媒體音樂/健康與休閒生活(3選1)", credits: [0,0,0,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_opt", type: 1, name: "思考：智慧的啟航", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2,0,0,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0,2,0,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0,2,0,0,0,0] }
+			],
+			"113_普通科(理工生醫群)": [
+				{ cat: "dept", type: 1, name: "國語文", credits: [4,4,4,4,4,0] },
+				{ cat: "dept", type: 1, name: "本土語文", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "英語文", credits: [4,4,4,4,2,0] },
+				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4,4,4,4,0,0] },
+				{ cat: "dept", type: 1, name: "歷史", credits: [2,2,0,2,0,0] },
+				{ cat: "dept", type: 1, name: "地理", credits: [2,2,0,2,0,0] },
+				{ cat: "dept", type: 1, name: "公民與社會", credits: [2,2,0,2,0,0] },
+				{ cat: "dept", type: 1, name: "物理", credits: [2,0,2,0,0,0] },
+				{ cat: "dept", type: 1, name: "化學", credits: [0,2,0,2,0,0] },
+				{ cat: "dept", type: 1, name: "生物", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "地球科學", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "音樂", credits: [0,0,2,0,1,1] },
+				{ cat: "dept", type: 1, name: "美術", credits: [0,0,0,0,2,2] },
+				{ cat: "dept", type: 1, name: "藝術生活", credits: [0,0,0,0,2,0] },
+				{ cat: "dept", type: 1, name: "生命教育", credits: [1,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "家政", credits: [0,0,0,0,0,2] },
+				{ cat: "dept", type: 1, name: "生活科技", credits: [0,0,2,0,0,0] },
+				{ cat: "dept", type: 1, name: "資訊科技", credits: [0,0,2,0,0,0] },
+				{ cat: "dept", type: 1, name: "健康與護理", credits: [0,0,0,0,1,1] },
+				{ cat: "dept", type: 1, name: "體育", credits: [2,2,2,2,2,2] },
+				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0,0,1,1,0,0] },
+				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0,0,2,2,0,0] },
+				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2,0,0,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0,0,0,0,2,0] },
+				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0,0,0,0,4,4] },
+				{ cat: "sch_opt", type: 1, name: "選修物理-力學一", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "選修物理-力學二與熱學", credits: [0,0,0,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "選修物理-波動、光及聲音", credits: [0,0,0,0,2,0] },
+				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象一", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象二與量子現象", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "選修化學-物質與能量", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "選修化學-物質構造與反應速率", credits: [0,0,0,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡一", credits: [0,0,0,0,2,0] },
+				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡二", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_opt", type: 1, name: "選修化學-有機化學與應用科技", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "選修生物-細胞與遺傳", credits: [0,0,0,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能/進階程式設計(2選1)", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "選修生物-生命的起源與植物體的構造與功能/大氣、海洋及天文(2選1)", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "選修生物-生態、演化及生物多樣性", credits: [0,0,0,0,2,0] },
+				{ cat: "sch_opt", type: 1, name: "選修地球科學-地質與環境", credits: [0,0,0,0,2,0] },
+				{ cat: "sch_opt", type: 1, name: "健康與休閒生活/未來想像與生涯進路/科技應用專題(3選1)", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2,0,0,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0,2,0,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0,2,0,0,0,0] }
+			],
+			"113_體育班": [
+				{ cat: "dept", type: 1, name: "國語文", credits: [4,4,4,4,4,0] },
+				{ cat: "dept", type: 1, name: "本土語文", credits: [1,1,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "英語文", credits: [4,4,4,4,2,0] },
+				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4,4,4,4,0,0] },
+				{ cat: "dept", type: 1, name: "歷史", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "地理", credits: [2,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "公民與社會", credits: [0,0,2,2,0,0] },
+				{ cat: "dept", type: 1, name: "物理", credits: [0,2,2,0,0,0] },
+				{ cat: "dept", type: 1, name: "化學", credits: [2,0,0,2,0,0] },
+				{ cat: "dept", type: 1, name: "生物", credits: [0,2,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "地球科學", credits: [2,0,0,0,0,0] },
+				{ cat: "dept", type: 1, name: "音樂", credits: [0,0,0,0,1,1] },
+				{ cat: "dept", type: 1, name: "藝術生活", credits: [0,0,0,0,1,1] },
+				{ cat: "dept", type: 1, name: "生命教育", credits: [0,0,1,0,0,0] },
+				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0,0,0,1,0,0] },
+				{ cat: "dept", type: 1, name: "資訊科技", credits: [0,0,0,0,2,0] },
+				{ cat: "dept", type: 1, name: "健康與護理", credits: [0,0,0,0,1,1] },
+				{ cat: "dept", type: 1, name: "體育", credits: [1,1,1,1,0,0] },
+				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0,0,1,1,0,0] },
+				{ cat: "dept_sports", type: 2, name: "運動學概論", credits: [0,0,0,0,1,1] },
+				{ cat: "dept_sports", type: 2, name: "專項體能訓練", credits: [4,4,4,4,4,4] },
+				{ cat: "dept_sports", type: 2, name: "專項技術訓練", credits: [4,4,4,4,4,4] },
+				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0,0,0,0,2,4] },
+				{ cat: "sch_opt", type: 1, name: "數學乙", credits: [0,0,0,0,4,2] },
+				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能", credits: [0,0,0,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_opt", type: 1, name: "領域課程：科技應用專題", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0,0,0,0,1,1] },
+				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [0,0,2,0,0,0] },
+				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0,0,0,2,0,0] },
+				{ cat: "sch_opt", type: 1, name: "水上安全救生", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 2, name: "體育專長：游泳", credits: [0,0,0,0,0,2] },
+				{ cat: "sch_opt", type: 2, name: "體育專長：運動裁判法", credits: [0,0,0,0,2,0] }
+			]
+		};
+
+		let curriculum = [], dbClient = null;
+		try {
+			if (typeof supabase !== 'undefined' && supabase) dbClient = supabase.createClient(SB_URL, SB_KEY);
+			else if (typeof window.supabase !== 'undefined' && window.supabase) dbClient = window.supabase.createClient(SB_URL, SB_KEY);
+		} catch (e) { console.warn(e); }
+
+		let currentUser = null, DEPT_THRESHOLD = 0, userDBRecord = null, activeStudentDBRecord = null,
+			hasLoadedInitialData = false, lastLoadedStudentId = null, adminListData = [], teacherNames = [],
+			isViewingClassList = false, deleteTargetId = null, editingStudentId = null, confirmAction = null,
+			currentYear = "113", currentDept = "商經科", lastUserId = null, currentLayoutMode = "subject",
+			currentUncheckedCredits = [];
+
+		function initDropdowns(isAdmin = false) {
+			const yearSelects = ['authEntryYear', 'dashSelectYear', 'profEntryYear', 'editUserEntryYear', 'newUserEntryYear'];
+			const deptSelects = ['authEntryDept', 'dashSelectDept', 'profEntryDept', 'editUserEntryDept', 'newUserEntryDept'];
+
+			yearSelects.forEach(id => {
+				const el = document.getElementById(id);
+				if (!el) return;
+				const currentVal = el.value;
+				let html = '';
+				if (id === 'authEntryYear') html += '<option value="">請選擇入學年</option>';
+				if (id === 'editUserEntryYear' || id === 'newUserEntryYear') html += '<option value="未設定">未設定</option>';
+				YEAR_OPTIONS.forEach(y => {
+					html += `<option value="${y}">${y} 學年度</option>`;
+				});
+				el.innerHTML = html;
+				if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) {
+					el.value = currentVal;
+				} else if (id === 'dashSelectYear') {
+					el.value = currentYear;
+				}
+			});
+
+			deptSelects.forEach(id => {
+				const el = document.getElementById(id);
+				if (!el) return;
+				const currentVal = el.value;
+				let html = '';
+				if (id === 'authEntryDept') html += '<option value="">請選擇科別</option>';
+				if (id === 'editUserEntryDept' || id === 'newUserEntryDept') html += '<option value="未設定">未設定</option>';
+				DEPT_OPTIONS.forEach(d => {
+					html += `<option value="${d}">${d}</option>`;
+				});
+				el.innerHTML = html;
+				if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) {
+					el.value = currentVal;
+				} else if (id === 'dashSelectDept') {
+					el.value = currentDept;
+				}
+			});
+
+			const fYear = document.getElementById('adminFilterYear');
+			if (fYear) {
+				let h = '<option value="all">所有年度</option>';
+				YEAR_OPTIONS.forEach(y => h += `<option value="${y}">${y} 年</option>`);
+				fYear.innerHTML = h;
+			}
+			const fDept = document.getElementById('adminFilterDept');
+			if (fDept) {
+				let h = '<option value="all">所有科別</option>';
+				DEPT_OPTIONS.forEach(d => h += `<option value="${d}">${d}</option>`);
+				fDept.innerHTML = h;
+			}
+		}
+
+		function getTrackType(deptName) {
+			if (!deptName) return 'vocational';
+			if (deptName.includes('普通科')) return 'academic';
+			if (deptName.includes('體育班')) return 'sports';
+			return 'vocational';
+		}
+
+		function getChkId(name, sIdx) {
+			return `chk_${name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}_${sIdx}`;
+		}
+
+		function translateError(msg) {
+			if (!msg) return "發生未知錯誤";
+			if (msg.includes("Invalid login credentials")) return "帳號或密碼錯誤，請重新確認！";
+			if (msg.includes("User already registered")) return "該帳號已經註冊過，請直接登入！";
+			if (msg.includes("Password should be at least")) return "密碼長度太短！";
+			return msg;
+		}
+
+		function toggleUIModal(show, modalId) {
+			const modal = document.getElementById(modalId);
+			if (modal) modal.style.display = show ? 'flex' : 'none';
+			if (show && modalId === 'helpModal') updateHelpModalDetails();
+		}
+
+		function updateHelpModalDetails() {
+			const track = getTrackType(currentDept);
+			const acad = document.getElementById('helpDetailsAcademic');
+			const voc = document.getElementById('helpDetailsVocational');
+			const sports = document.getElementById('helpDetailsSports');
+			if (acad) acad.open = (track === 'academic');
+			if (voc) voc.open = (track === 'vocational');
+			if (sports) sports.open = (track === 'sports');
+		}
+
+		async function findTutorByYearDept(yr, dept) {
+			if (!dbClient || yr === '未設定' || dept === '未設定') return '未設定';
+			try {
+				const { data } = await dbClient.from('grad_checks').select('full_name').eq('role', 'teacher').eq('entry_year', yr).eq('entry_dept', dept).maybeSingle();
+				return data?.full_name || '未設定';
+			} catch (e) {
+				return '未設定';
+			}
+		}
+
+		function determineCurriculumVersion(record) {
+			if (!record) return { year: currentYear, dept: currentDept, locked: false };
+			const role = record.role || 'student';
+			if (role === 'student' && record.entry_year && record.entry_year !== '未設定' && record.entry_dept && record.entry_dept !== '未設定') {
+				return { year: record.entry_year, dept: record.entry_dept, locked: true };
+			}
+			return {
+				year: record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113',
+				dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '商經科',
+				locked: false
+			};
+		}
+
+		function selectCurriculum(yr, dept) {
+			currentYear = yr;
+			currentDept = dept;
+			const key = `${yr}_${dept}`;
+			curriculum = curriculums[key] || [];
+			initThresholds();
+			updateCurriculumSelectorVisibility();
+		}
+
+		function updateCurriculumSelectorVisibility() {
+			const selectorArea = document.getElementById('curriculumSelectorArea');
+			if (!selectorArea) return;
+			const rec = editingStudentId ? activeStudentDBRecord : userDBRecord;
+			const version = determineCurriculumVersion(rec);
+			selectorArea.style.display = version.locked ? 'none' : 'flex';
+			
+			const yrSel = document.getElementById('dashSelectYear');
+			const dtSel = document.getElementById('dashSelectDept');
+			if (yrSel) yrSel.value = currentYear;
+			if (dtSel) dtSel.value = currentDept;
+		}
+
+		function initThresholds() {
+			let maxDept = 0;
+			curriculum.forEach(i => { if (i.cat === 'dept') maxDept += i.credits.reduce((a, b) => a + b, 0); });
+			DEPT_THRESHOLD = Math.ceil(maxDept * 0.85);
+			const el = document.getElementById('dept-limit-text'); if (el) el.innerText = `(${DEPT_THRESHOLD})`;
+		}
+
+		function calculateStats() {
+			let total = 0, dept = 0, prof = 0, prac = 0;
+			let reqEarned = 0, optEarned = 0;
+			let deptGenEarned = 0, deptGenMax = 0;
+			let deptSportsEarned = 0, deptSportsMax = 0;
+			let sportsOptEarned = 0, sportsOptMax = 0;
+
+			const trackType = getTrackType(currentDept);
+
+			document.querySelectorAll(".toggle-checkbox:checked").forEach(input => {
+				let v = parseInt(input.dataset.val), c = input.dataset.cat, t = parseInt(input.dataset.type);
+				total += v;
+				if (c === 'dept') dept += v;
+				if (t == 2 || t == 3) prof += v;
+				if (t == 3) prac += v;
+
+				if (c === 'dept' || c === 'sch_req') reqEarned += v;
+				if (c === 'sch_opt') optEarned += v;
+
+				if (c === 'dept' && t === 1) deptGenEarned += v;
+				if (c === 'dept_sports' || (c === 'dept' && t === 2)) deptSportsEarned += v;
+				if (c === 'sch_opt') sportsOptEarned += v;
+			});
+
+			if (trackType === 'academic') {
+				const pass = (total >= 150 && reqEarned >= 102 && optEarned >= 40);
+				return { total, pass, reqEarned, optEarned, trackType };
+			} else if (trackType === 'sports') {
+				curriculum.forEach(item => {
+					const sum = item.credits.reduce((a, b) => a + b, 0);
+					if (item.cat === 'dept' && item.type === 1) deptGenMax += sum;
+					else if (item.cat === 'dept_sports' || (item.cat === 'dept' && item.type === 2)) deptSportsMax += sum;
+					else if (item.cat === 'sch_opt') sportsOptMax += sum;
+				});
+				const targetGen = Math.ceil(deptGenMax * 0.8);
+				const targetSports = Math.ceil(deptSportsMax * 0.85);
+				const targetOpt = Math.ceil(sportsOptMax * 0.7);
+
+				const pass = (total >= 150 && deptGenEarned >= targetGen && deptSportsEarned >= targetSports && sportsOptEarned >= targetOpt);
+				return { total, pass, deptGenEarned, targetGen, deptSportsEarned, targetSports, sportsOptEarned, targetOpt, trackType };
+			} else {
+				const pass = (total >= 160 && dept >= DEPT_THRESHOLD && prof >= 60 && prac >= 45);
+				return { total, pass, dept, prof, prac, trackType };
+			}
+		}
+
+		function calculate() {
+			const isNullState = curriculum.length === 0;
+			const stats = isNullState ? { total: null, pass: false } : calculateStats();
+			const trackType = getTrackType(currentDept);
+
+			const cT = document.getElementById("cell-total"),
+				cD = document.getElementById("cell-dept"),
+				cF = document.getElementById("cell-prof-prac"),
+				cP = document.getElementById("cell-prac");
+
+			if (trackType === 'academic') {
+				if (cT) { 
+					cT.style.display = 'flex'; 
+					cT.style.gridColumn = '1 / -1'; 
+					cT.innerHTML = buildCardContent("畢業最低總學分", stats.total, isNullState ? null : 150, true); 
+				}
+				if (cD) { 
+					cD.style.display = 'flex'; 
+					cD.style.gridColumn = 'auto'; 
+					cD.innerHTML = buildCardContent("必修學分 (部定+校定)", isNullState ? null : stats.reqEarned, isNullState ? null : 102); 
+				}
+				if (cF) { 
+					cF.style.display = 'flex'; 
+					cF.style.gridColumn = 'auto'; 
+					cF.innerHTML = buildCardContent("選修學分 (加深+多元)", isNullState ? null : stats.optEarned, isNullState ? null : 40); 
+				}
+				if (cP) { 
+					cP.style.display = 'none'; 
+					cP.innerHTML = ''; 
+				}
+			} else if (trackType === 'sports') {
+				if (cT) cT.style.gridColumn = 'auto';
+				if (cD) cD.style.gridColumn = 'auto';
+				if (cF) cF.style.gridColumn = 'auto';
+				if (cP) cP.style.gridColumn = 'auto';
+				if (cP) { cP.style.display = 'flex'; }
+
+				if (cT) cT.innerHTML = buildCardContent("總學分", stats.total, isNullState ? null : 150, true);
+				if (cD) cD.innerHTML = buildCardContent("部定一般必修 (≥80%)", isNullState ? null : stats.deptGenEarned, isNullState ? null : stats.targetGen);
+				if (cF) cF.innerHTML = buildCardContent("體育專業必修 (≥85%)", isNullState ? null : stats.deptSportsEarned, isNullState ? null : stats.targetSports);
+				if (cP) cP.innerHTML = buildCardContent("選修科目 (≥70%)", isNullState ? null : stats.sportsOptEarned, isNullState ? null : stats.targetOpt);
+			} else {
+				if (cT) cT.style.gridColumn = 'auto';
+				if (cD) cD.style.gridColumn = 'auto';
+				if (cF) cF.style.gridColumn = 'auto';
+				if (cP) cP.style.gridColumn = 'auto';
+				if (cP) { cP.style.display = 'flex'; }
+
+				let dV = isNullState ? null : 0, fV = isNullState ? null : 0, pV = isNullState ? null : 0;
+				if (!isNullState) {
+					document.querySelectorAll(".toggle-checkbox:checked").forEach(i => {
+						let v = parseInt(i.dataset.val), c = i.dataset.cat, t = parseInt(i.dataset.type);
+						if (c === 'dept') dV += v;
+						if (t == 2 || t == 3) fV += v;
+						if (t == 3) pV += v;
+					});
+				}
+				if (cT) cT.innerHTML = buildCardContent("總學分", stats.total, isNullState ? null : 160, true);
+				if (cD) cD.innerHTML = buildCardContent("部定必修", dV, isNullState ? null : (DEPT_THRESHOLD || 1));
+				if (cF) cF.innerHTML = buildCardContent("專業與實習科目", fV, isNullState ? null : 60);
+				if (cP) cP.innerHTML = buildCardContent("實習科目", pV, isNullState ? null : 45);
+			}
+
+			const st = document.getElementById("finalStatus");
+			if (st) {
+				const reqMinTotal = (trackType === 'vocational') ? 160 : 150;
+				if (isNullState) {
+					st.innerText = "課程資料建置中，暫不提供試算數據";
+					st.className = "status-bar bg-slate-400 text-white shadow-sm";
+				} else if (stats.pass) {
+					st.innerText = "符合畢業門檻，核發畢業證書。";
+					st.className = "status-bar status-pass text-white";
+				} else if (stats.total >= reqMinTotal) {
+					st.innerText = "未符合畢業門檻，請重補修。";
+					st.className = "status-bar bg-gradient-to-r from-orange-500 to-red-500 text-white";
+				} else if (stats.total >= 120) {
+					st.innerText = "未符合畢業門檻，核發修業證明。";
+					st.className = "status-bar bg-gradient-to-r from-amber-500 to-orange-600 text-white";
+				} else {
+					st.innerText = "未符合畢業門檻，核發成績證明。";
+					st.className = "status-bar status-fail text-white";
+				}
+			}
+		}
+
+		function initHelpModalScrollGuard() {
+			const container = document.getElementById('helpScrollContainer');
+			if (!container) return;
+			container.addEventListener('scroll', () => {
+				if (container.scrollHeight - container.scrollTop <= container.clientHeight + 12) unlockConfirmButton();
+			});
+		}
+
+		function unlockConfirmButton() {
+			const btn = document.getElementById('btnConfirmHelp');
+			if (!btn) return;
+			btn.disabled = false;
+			btn.className = "action-btn btn-pass-all w-full py-3.5 text-base font-extrabold rounded-xl shadow-md transition duration-150 cursor-pointer opacity-100";
+			btn.style.pointerEvents = "auto";
+		}
+
+		function confirmReadHelp() { sessionStorage.setItem('helpModalShown', 'true'); toggleUIModal(false, 'helpModal'); }
+
+		function handleOutsideClick(event) {
+			if (event.target.classList.contains('modal-overlay')) {
+				if (!currentUser && event.target.id === 'authWorkspace') return;
+				event.target.style.display = 'none';
+			}
+		}
+
+		function showMsg(txt, type = 'info') {
+			const b = document.getElementById('msgBox'); b.innerText = txt; b.style.background = type === 'error' ? '#ef4444' : '#10b981'; b.style.display = 'block';
+			setTimeout(() => b.style.display = 'none', 2500);
+		}
+
+		function updateSyncStatusIndicator(status) {
+			const badge = document.getElementById('syncStatusIndicator'); if (!badge) return;
+			badge.className = "sync-badge " + (status === 'offline' ? 'sync-offline' : (status === 'saving' ? 'sync-saving' : 'sync-success'));
+			badge.innerHTML = `<span>${status === 'offline' ? '同步失敗，請聯繫管理員！' : (status === 'saving' ? '正在儲存...' : '同步成功')}</span>`;
+		}
+
+		function showConfirmModal(msg, title, action, confirmBtnText, confirmBtnBg) {
+			const btn = document.querySelector('#confirmModal .btn-pass-all');
+			btn.style.background = confirmBtnBg || (title.includes("重設") ? "linear-gradient(135deg, #6366f1, #4f46e5)" : "#dc3545");
+			btn.innerText = confirmBtnText || (title.includes("重設") ? "確認重設" : (title.includes("刪除") ? "確認刪除" : "確認操作"));
+			document.getElementById('confirmMsg').innerText = msg; document.getElementById('confirmModal').querySelector('.modal-header span').innerText = title;
+			confirmAction = action; toggleUIModal(true, 'confirmModal');
+		}
+
+		function triggerConfirmAction() { if (confirmAction) confirmAction(); }
+
+		async function directResetPasswordToSid() {
+			const id = document.getElementById('editUserId').value, sid = document.getElementById('editUserSid').value.trim(), name = document.getElementById('editUserName').value.trim();
+			if (!sid) { showMsg("無法重設：此帳號目前沒有設定帳號！", "error"); return; }
+			showConfirmModal(`您確定要將「${name}」的登入密碼立即重設為其帳號「${sid}」嗎？`, "確認重設密碼", async () => {
+				try {
+					updateSyncStatusIndicator('saving');
+					const { error } = await dbClient.rpc('admin_reset_user_password', { target_user_id: id, new_password: sid });
+					if (error) throw error;
+					updateSyncStatusIndicator('success');
+					showMsg(`已成功將「${name}」的密碼重置為「${sid}」！`);
+					toggleUIModal(false, 'confirmModal'); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
+				} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
+			});
+		}
+
+		async function handleAuth() {
+			if (!dbClient) { showMsg("無法進行登入 or 註冊！請聯絡管理員。", "error"); return; }
+			const sid = document.getElementById('authID').value.trim(), pwd = document.getElementById('authPassword').value;
+			if (!sid || !pwd) { showMsg("請輸入帳號密碼！", "error"); return; }
+			const cleanSid = sid.split('@')[0].toLowerCase().trim(), email = `${cleanSid}${EMAIL_DOMAIN}`;
+			try {
+				updateSyncStatusIndicator('saving');
+				if (document.getElementById('regFields').style.display === 'block') {
+					const name = document.getElementById('authName').value.trim(), entryYear = document.getElementById('authEntryYear').value, entryDept = document.getElementById('authEntryDept').value;
+					if (!name) throw new Error("請輸入姓名");
+					if (!entryYear || !entryDept || entryYear === '請選擇入學年' || entryDept === '請選擇科別') throw new Error("請務必選擇正確的入學年與科別！");
+					const matchedTutor = await findTutorByYearDept(entryYear, entryDept);
+					const { error } = await dbClient.auth.signUp({
+						email, password: pwd, options: { data: { full_name: name, student_id: cleanSid, role: 'student', tutor: matchedTutor, entry_year: entryYear, entry_dept: entryDept } }
+					});
+					if (error) throw error;
+					updateSyncStatusIndicator('success'); showMsg("註冊成功！"); switchAuthMode();
+				} else {
+					const { error } = await dbClient.auth.signInWithPassword({ email, password: pwd });
+					if (error) throw error;
+					sessionStorage.setItem('just_logged_in', 'true');
+					updateSyncStatusIndicator('success'); showMsg("登入成功！");
+					document.getElementById('authWorkspace').style.display = 'none'; document.getElementById('appWorkspace').style.display = 'flex';
+					hasLoadedInitialData = false; updateUI();
+				}
+			} catch (e) { updateSyncStatusIndicator('offline'); showMsg(translateError(e.message), 'error'); }
+		}
+
+		function switchAuthMode() {
+			const isReg = document.getElementById('regFields').style.display === 'none';
+			document.getElementById('regFields').style.display = isReg ? 'block' : 'none';
+			document.getElementById('authTitle').innerText = isReg ? '註冊新帳號' : '帳號登入';
+			const authBtn = document.querySelector(".auth-btn-primary");
+			if (authBtn) authBtn.innerText = isReg ? "確認註冊帳號" : "確認登入";
+			document.getElementById('authSwitchLink').innerText = isReg ? '已有帳號？請點此前往登入' : '尚未註冊帳號？請點此註冊';
+			initDropdowns(false);
+		}
+
+		async function handleLogout() { try { if (dbClient) await dbClient.auth.signOut(); window.location.reload(); } catch (e) { showMsg("登出失敗", 'error'); } }
+
+		if (dbClient) {
+			dbClient.auth.onAuthStateChange((event, session) => {
+				currentUser = session ? session.user : null;
+				const authWorkspace = document.getElementById('authWorkspace'), appWorkspace = document.getElementById('appWorkspace');
+				if (!currentUser) {
+					authWorkspace.style.display = 'flex'; appWorkspace.style.display = 'none'; userDBRecord = null;
+					hasLoadedInitialData = false; lastLoadedStudentId = null; activeStudentDBRecord = null; isViewingClassList = false;
+					editingStudentId = null; lastUserId = null; sessionStorage.removeItem('helpModalShown');
+				} else {
+					authWorkspace.style.display = 'none'; appWorkspace.style.display = 'flex';
+					if (lastUserId !== currentUser.id) { hasLoadedInitialData = false; userDBRecord = null; lastUserId = currentUser.id; }
+					updateUI();
+				}
+			});
+		} else {
+			setTimeout(() => {
+				document.getElementById('authWorkspace').style.display = 'flex'; document.getElementById('appWorkspace').style.display = 'none';
+			}, 100);
+		}
+
+		function changeDashCurriculum() {
+			const yr = document.getElementById('dashSelectYear').value, dept = document.getElementById('dashSelectDept').value;
+			sessionStorage.setItem('tempSelectedYear', yr); sessionStorage.setItem('tempSelectedDept', dept);
+			selectCurriculum(yr, dept); renderTable(); calculate(); saveToCloud(true);
+		}
+
+		function setLayoutMode(mode) {
+			currentLayoutMode = mode;
+			const btnSubject = document.getElementById('btnLayoutSubject'), btnSemester = document.getElementById('btnLayoutSemester');
+			btnSubject.className = mode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600 hover:text-slate-800";
+			btnSemester.className = mode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600 hover:text-slate-800";
+			renderTable(); calculate();
+		}
+
+		function updateUI() {
+			const mobileContainer = document.getElementById('mobileCardsContainer'), adminBackend = document.getElementById('adminBackend'),
+				dashboard = document.getElementById('dashboardSection'), userStatusDisplay = document.getElementById('userStatusDisplay'),
+				saveBtn = document.getElementById('saveBtn'), backToTrialBtn = document.getElementById('backToTopBtn'),
+				backToTrialAdminBtn = document.getElementById('backToTrialBtn'),
+				createUserBtn = document.getElementById('createUserBtn'), adminEditBanner = document.getElementById('adminEditBanner'),
+				layoutSwitcher = document.getElementById('layoutSwitcherArea'), currArea = document.getElementById('curriculumSelectorArea');
+			if (currentUser) {
+				if (adminEditBanner) adminEditBanner.style.display = editingStudentId ? 'block' : 'none';
+				document.getElementById('statusHeader').style.display = 'block';
+				const m = currentUser.user_metadata, role = userDBRecord?.role || m?.role || 'student', displayName = userDBRecord?.full_name || m?.full_name;
+				if (sessionStorage.getItem('just_logged_in') === 'true') {
+					toggleUIModal(true, 'helpModal');
+					sessionStorage.removeItem('just_logged_in');
+				}
+				if (!hasLoadedInitialData && !editingStudentId) isViewingClassList = false;
+				const myYear = userDBRecord?.entry_year || m?.entry_year || '未設定', myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
+				if (role === 'teacher' && (myYear === '未設定' || myDept === '未設定')) { saveBtn.style.display = 'none'; }
+				else {
+					saveBtn.innerText = role === 'admin' ? '管理後台' : (role === 'teacher' ? '班級資料' : '雲端存檔');
+					saveBtn.style.display = '';
+				}
+				const displayClass = (myYear === '未設定' || myDept === '未設定') ? `(${mapping.role[role] || '使用者'})` : `(${myYear}年 ${myDept} ${mapping.role[role] || '使用者'})`;
+				userStatusDisplay.innerHTML = `
+					<div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 w-full text-xs sm:text-sm leading-tight">
+						<div class="font-extrabold text-slate-100 shrink-0">您好，${displayName}${displayClass}</div>
+						<div class="user-info-actions flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap">
+							<span id="syncStatusIndicator" class="sync-badge sync-success shrink-0"><span>同步成功</span></span>
+							<a href="javascript:void(0)" onclick="openProfile()" class="hover:underline text-sky-400 font-bold whitespace-nowrap">個人資料</a>
+							<a href="javascript:void(0)" onclick="handleLogout()" class="hover:underline text-rose-400 font-bold whitespace-nowrap">登出</a>
+						</div>
+					</div>
+				`;
+				if (currArea) currArea.classList.remove('hidden');
+				if (editingStudentId) {
+					dashboard.style.display = 'block'; if (layoutSwitcher) layoutSwitcher.style.display = 'flex';
+					renderTable(); adminBackend.style.display = 'none';
+					if (lastLoadedStudentId !== editingStudentId) loadFromCloud(editingStudentId);
+					else updateCurriculumSelectorVisibility();
+				} else if (isViewingClassList) {
+					dashboard.style.display = 'none'; if (layoutSwitcher) layoutSwitcher.style.display = 'none';
+					mobileContainer.style.display = 'none';
+					const constructionBox = document.getElementById("underConstructionBox");
+					if (constructionBox) constructionBox.classList.add("hidden");
+					mobileContainer.innerHTML = ""; adminBackend.style.display = 'block';
+					document.getElementById('backendTitle').innerText = (role === 'admin') ? '資料管理' : '班級資料';
+					if (backToTrialAdminBtn) backToTrialAdminBtn.style.display = 'inline-block';
+					createUserBtn.style.display = (role === 'admin') ? 'inline-block' : 'none';
+					const fYear = document.getElementById('adminFilterYear'), fDept = document.getElementById('adminFilterDept');
+					if (fYear && fDept) {
+						if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') { fYear.style.display = 'none'; fDept.style.display = 'none'; }
+						else { fYear.style.display = ''; fDept.style.display = ''; }
+					}
+					fetchAdminList();
+				} else {
+					dashboard.style.display = 'block'; if (layoutSwitcher) layoutSwitcher.style.display = 'flex';
+					renderTable(); adminBackend.style.display = 'none';
+					if (!hasLoadedInitialData) loadFromCloud();
+					else updateCurriculumSelectorVisibility();
+				}
+			}
+		}
+
+		function handleMainAction() {
+			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+			if (role === 'student') saveToCloud();
+			else {
+				if (role === 'teacher') {
+					const myYear = userDBRecord?.entry_year || currentUser.user_metadata?.entry_year || '未設定';
+					const myDept = userDBRecord?.entry_dept || currentUser.user_metadata?.entry_dept || '未設定';
+					if (myYear === '未設定' || myDept === '未設定') {
+						showMsg("您尚未設定負責的班級年度與科別，無法檢視班級資料！", "error"); return;
+					}
+				}
+				isViewingClassList = true; editingStudentId = null; updateUI();
+			}
+		}
+
+		function handleReturnToTrial() {
+			isViewingClassList = false;
+			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+			let myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定', myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
+			if (role === 'admin' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
+				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '商經科';
+			}
+			selectCurriculum(myYear, myDept); updateUI(); loadFromCloud();
+		}
+
+		function openProfile() {
+			if (!currentUser) return;
+			const curData = userDBRecord || currentUser.user_metadata, role = curData.role || 'student';
+			initDropdowns(role === 'admin' || role === 'teacher');
+			const accountInput = document.getElementById('profAccount'), yrSel = document.getElementById('profEntryYear'),
+				dtSel = document.getElementById('profEntryDept'), tipMsg = document.getElementById('profTipMessage'),
+				accountLabel = document.getElementById('profAccountLabel'), tutorArea = document.getElementById('profStudentTutorArea'),
+				nameInput = document.getElementById('profName');
+			accountInput.value = curData.student_id || ''; nameInput.value = curData.full_name || '';
+			yrSel.value = curData.entry_year || '未設定'; dtSel.value = curData.entry_dept || '未設定';
+			const isAdmin = (role === 'admin'), isStudent = (role === 'student');
+			accountInput.disabled = !isAdmin; yrSel.disabled = !isAdmin; dtSel.disabled = !isAdmin;
+			nameInput.disabled = true; accountLabel.innerText = "帳號";
+			accountInput.style.backgroundColor = '#f1f5f9'; accountInput.style.color = '#64748b'; accountInput.style.borderColor = '#cbd5e1';
+			yrSel.style.backgroundColor = '#f1f5f9'; yrSel.style.color = '#64748b'; yrSel.style.borderColor = '#cbd5e1';
+			dtSel.style.backgroundColor = '#f1f5f9'; dtSel.style.color = '#64748b'; dtSel.style.borderColor = '#cbd5e1';
+			nameInput.style.backgroundColor = '#f1f5f9'; nameInput.style.color = '#64748b'; nameInput.style.borderColor = '#cbd5e1';
+			if (isAdmin) {
+				accountInput.disabled = false; yrSel.disabled = false; dtSel.disabled = false; nameInput.disabled = false;
+				accountInput.style.backgroundColor = '#fff'; accountInput.style.color = '#334155'; accountInput.style.borderColor = '#cbd5e1';
+				yrSel.style.backgroundColor = '#fff'; yrSel.style.color = '#334155'; yrSel.style.borderColor = '#cbd5e1';
+				dtSel.style.backgroundColor = '#fff'; dtSel.style.color = '#334155'; dtSel.style.borderColor = '#cbd5e1';
+				nameInput.style.backgroundColor = '#fff'; nameInput.style.color = '#334155'; nameInput.style.borderColor = '#cbd5e1';
+				tipMsg.innerText = "※ 您是管理員，可以修改帳號資料。"; tipMsg.style.color = "#10b981";
+			} else {
+				tipMsg.innerText = "※ 帳號資料有誤請洽管理員更正，僅能修改密碼。";
+				tipMsg.style.color = "#d946ef";
+			}
+			tutorArea.style.display = isStudent ? 'block' : 'none';
+			if (isStudent) document.getElementById('profTutor').value = curData.tutor || '未設定';
+			document.getElementById('profPassword').value = ''; toggleUIModal(true, 'profileModal');
+		}
+
+		async function updateProfile() {
+			const n = document.getElementById('profName').value, p = document.getElementById('profPassword').value, d = { data: { full_name: n } };
+			if (p) d.password = p;
+			try {
+				const curData = userDBRecord || currentUser.user_metadata, role = curData.role || 'student';
+				updateSyncStatusIndicator('saving');
+				if (role === 'admin') {
+					const sid = document.getElementById('profAccount').value.split('@')[0].toLowerCase().trim(), ey = document.getElementById('profEntryYear').value, ed = document.getElementById('profEntryDept').value;
+					d.data.student_id = sid; d.data.entry_year = ey; d.data.entry_dept = ed; d.email = `${sid}${EMAIL_DOMAIN}`;
+					await dbClient.auth.updateUser(d);
+					await dbClient.rpc('admin_update_user_sid', { target_user_id: currentUser.id, new_sid: sid, new_name: n, new_year: ey, new_dept: ed, new_role: role, new_tutor: curData.tutor || '管理員免設定' });
+				} else {
+					const cleanSid = curData.student_id.split('@')[0].toLowerCase().trim();
+					await dbClient.auth.updateUser(d);
+					await dbClient.rpc('admin_update_user_sid', { target_user_id: currentUser.id, new_sid: cleanSid, new_name: curData.full_name, new_year: curData.entry_year, new_dept: curData.entry_dept, new_role: role, new_tutor: curData.tutor || (role === 'teacher' ? '教師帳號免設定' : '未設定') });
+				}
+				updateSyncStatusIndicator('success'); showMsg("個人資料已更新！");
+				hasLoadedInitialData = false; await loadFromCloud(); toggleUIModal(false, 'profileModal');
+			} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error'); }
+		}
+
+		async function saveToCloud(isAuto = false) {
+			if (!currentUser || !dbClient || curriculum.length === 0) { updateSyncStatusIndicator('offline'); return; }
+			const targetId = editingStudentId || currentUser.id, curRecord = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata),
+				targetRole = curRecord?.role || 'student', entryYear = curRecord?.entry_year || '未設定', entryDept = curRecord?.entry_dept || '未設定',
+				targetName = curRecord?.full_name || '學生', targetSid = (curRecord?.student_id || '').split('@')[0].toLowerCase().trim();
+			updateSyncStatusIndicator('saving');
+			const checks = {};
+			document.querySelectorAll(".toggle-checkbox").forEach(c => checks[c.id] = c.checked);
+			const version = determineCurriculumVersion(curRecord);
+			checks['_view_year'] = version.locked ? entryYear : currentYear;
+			checks['_view_dept'] = version.locked ? entryDept : currentDept;
+			const res = calculateStats();
+			let matchedTutor = curRecord?.tutor || '未設定';
+			if (targetRole === 'student') {
+				if (matchedTutor === '未設定' || !matchedTutor) matchedTutor = await findTutorByYearDept(entryYear, entryDept);
+			} else if (targetRole === 'admin') {
+				matchedTutor = '管理員免設定';
+			} else if (targetRole === 'teacher') {
+				matchedTutor = '教師帳號免設定';
+			}
+			const { error: rpcError } = await dbClient.rpc('admin_save_grad_checks', {
+				target_id: targetId, target_student_id: targetSid, target_full_name: targetName, target_entry_year: entryYear,
+				target_entry_dept: entryDept, target_role: targetRole, target_tutor: matchedTutor, target_credits_json: checks, target_total_credits: res.total
+			});
+			let finalError = rpcError;
+			if (rpcError) {
+				const { error: directError } = await dbClient.from('grad_checks').upsert({ id: targetId, student_id: targetSid, full_name: targetName, entry_year: entryYear, entry_dept: entryDept, role: targetRole, tutor: matchedTutor, credits_json: checks, total_credits: res.total, updated_at: new Date().toISOString() });
+				finalError = directError;
+			}
+			if (finalError) {
+				updateSyncStatusIndicator('offline');
+				if (!isAuto) showMsg(translateError(finalError.message), 'error');
+			} else {
+				const rec = editingStudentId ? activeStudentDBRecord : userDBRecord;
+				if (rec) { rec.credits_json = checks; rec.total_credits = res.total; }
+				updateSyncStatusIndicator('success'); if (!isAuto) showMsg("同步成功！");
+			}
+		}
+
+		function deleteStudentData(id, name) { deleteTargetId = id; showConfirmModal(`確定要刪除「${name}」資料與其登入帳號嗎？`, "確認刪除資料", execDelete); }
+
+		async function execDelete() {
+			if (!deleteTargetId || !dbClient) return;
+			try {
+				updateSyncStatusIndicator('saving');
+				const { error } = await dbClient.rpc('admin_delete_user', { target_user_id: deleteTargetId });
+				if (error) throw error;
+				updateSyncStatusIndicator('success'); showMsg("已成功刪除該帳號資料！");
+				toggleUIModal(false, 'confirmModal'); fetchAdminList();
+			} catch (e) { updateSyncStatusIndicator('offline'); showMsg("刪除失敗：" + translateError(e.message), "error"); toggleUIModal(false, 'confirmModal'); }
+		}
+
+		async function enterAdminEditMode(id, name) { editingStudentId = id; updateUI(); }
+
+		function exitAdminEditMode() {
+			editingStudentId = null; lastLoadedStudentId = null; activeStudentDBRecord = null;
+			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+			let myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定', myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
+			if (role === 'admin' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
+				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '商經科';
+			}
+			selectCurriculum(myYear, myDept); updateUI();
+		}
+
+		function toggleAdminTutorField(role, currentVal = "未設定") {
+			const section = document.getElementById('editTutorSection'), wrapper = document.getElementById('editTutorWrapper');
+			if (role === 'student') {
+				section.style.display = 'block';
+				let html = `<select id="editUserTutor"><option value="未設定">未設定</option>`;
+				teacherNames.forEach(tn => { html += `<option value="${tn}" ${tn === currentVal ? 'selected' : ''}>${tn}</option>`; });
+				wrapper.innerHTML = html + `</select>`;
+			} else section.style.display = 'none';
+		}
+
+		async function openAdminUserEdit(index) {
+			const s = applyFilters()[index]; if (!s) return;
+			initDropdowns(true);
+			document.getElementById('editUserId').value = s.id; document.getElementById('editUserSid').value = s.student_id || '';
+			document.getElementById('editUserName').value = s.full_name || ''; document.getElementById('editUserEntryYear').value = s.entry_year || '未設定';
+			document.getElementById('editUserEntryDept').value = s.entry_dept || '未設定'; document.getElementById('editUserRole').value = s.role || 'student';
+			toggleAdminTutorField(s.role || 'student', s.tutor || '未設定'); toggleUIModal(true, 'adminUserModal');
+		}
+
+		async function saveAdminUserEdit() {
+			if (!dbClient) return;
+			const id = document.getElementById('editUserId').value, sid = document.getElementById('editUserSid').value.split('@')[0].toLowerCase().trim(),
+				n = document.getElementById('editUserName').value.trim(), y = document.getElementById('editUserEntryYear').value,
+				dDept = document.getElementById('editUserEntryDept').value, r = document.getElementById('editUserRole').value,
+				t = (r === 'student') ? document.getElementById('editUserTutor').value : (r === 'admin' ? '管理員免設定' : '教師帳號免設定');
+			try {
+				updateSyncStatusIndicator('saving');
+				const { error } = await dbClient.rpc('admin_update_user_sid', { target_user_id: id, new_sid: sid, new_name: n, new_year: y, new_dept: dDept, new_role: r, new_tutor: t });
+				if (error) throw error;
+				updateSyncStatusIndicator('success'); showMsg("資料更新成功！"); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
+			} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error'); }
+		}
+
+		function openCreateUserModal() {
+			initDropdowns(true);
+			document.getElementById('newUserSid').value = ''; document.getElementById('newUserName').value = '';
+			document.getElementById('newUserEntryYear').value = '未設定'; document.getElementById('newUserEntryDept').value = '未設定';
+			document.getElementById('newUserRole').value = 'student'; toggleNewUserTutorField('student'); toggleUIModal(true, 'createUserModal');
+		}
+
+		function toggleNewUserTutorField(role, currentVal = "未設定") {
+			const section = document.getElementById('newTutorSection'), wrapper = document.getElementById('newTutorWrapper');
+			if (role === 'student') {
+				section.style.display = 'block';
+				let html = `<select id="newUserTutor"><option value="未設定">未設定</option>`;
+				teacherNames.forEach(tn => { html += `<option value="${tn}" ${tn === currentVal ? 'selected' : ''}>${tn}</option>`; });
+				wrapper.innerHTML = html + `</select>`;
+			} else section.style.display = 'none';
+		}
+
+		async function saveNewUser() {
+			if (!dbClient) return;
+			const sid = document.getElementById('newUserSid').value.split('@')[0].toLowerCase().trim(), name = document.getElementById('newUserName').value.trim(),
+				year = document.getElementById('newUserEntryYear').value, dept = document.getElementById('newUserEntryDept').value,
+				role = document.getElementById('newUserRole').value, tutor = (role === 'student') ? document.getElementById('newUserTutor').value : (role === 'admin' ? '管理員免設定' : '教師帳號免設定');
+			if (!sid || !name) { showMsg("請務必填寫帳號與姓名！", "error"); return; }
+			try {
+				updateSyncStatusIndicator('saving');
+				const { error } = await dbClient.rpc('admin_create_auth_user', { new_sid: sid, new_name: name, new_year: year, new_dept: dept, new_role: role, new_tutor: tutor });
+				if (error) throw error;
+				updateSyncStatusIndicator('success'); showMsg(`系統帳號「${name}」已成功直接建立！`); toggleUIModal(false, 'createUserModal'); fetchAdminList();
+			} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); }
+		}
+
+		async function loadFromCloud(tid = null) {
+			const uid = tid || currentUser?.id; if (!uid || !dbClient) return;
+			try {
+				let { data, error } = await dbClient.from('grad_checks').select('*').eq('id', uid).maybeSingle();
+				if (error) throw error;
+				if (!data && !tid && currentUser) {
+					const sid = (currentUser.user_metadata?.student_id || '').split('@')[0].toLowerCase().trim();
+					if (sid) {
+						const { data: preCreated } = await dbClient.from('grad_checks').select('*').eq('student_id', sid).maybeSingle();
+						if (preCreated) {
+							const { error: updateError } = await dbClient.from('grad_checks').update({ id: uid }).eq('id', preCreated.id);
+							if (!updateError) data = { ...preCreated, id: uid };
+						}
+					}
+				}
+				if (data) {
+					if (!tid) { userDBRecord = data; activeStudentDBRecord = null; isViewingClassList = false; hasLoadedInitialData = true; updateUI(); }
+					else {
+						lastLoadedStudentId = tid; activeStudentDBRecord = data;
+						const targetSpan = document.getElementById('targetStudentName');
+						if (targetSpan) {
+							const classLabel = (data.entry_year !== '未設定' || data.entry_dept !== '未設定') ? ` (${data.entry_year !== '未設定' ? data.entry_year + '年' : ''}${data.entry_dept !== '未設定' ? data.entry_dept : ''})` : '';
+							targetSpan.innerText = `${data.full_name}${classLabel}`;
+						}
+					}
+					const role = data.role || 'student', version = determineCurriculumVersion(data);
+					if (role === 'student') {
+						const activeTutor = await findTutorByYearDept(data.entry_year, data.entry_dept);
+						if (activeTutor && activeTutor !== data.tutor) { data.tutor = activeTutor; await dbClient.from('grad_checks').update({ tutor: activeTutor }).eq('id', uid); }
+					} else if (role === 'admin' && data.tutor !== '管理員免設定') {
+						data.tutor = '管理員免設定'; await dbClient.from('grad_checks').update({ tutor: '管理員免設定' }).eq('id', uid);
+					} else if (role === 'teacher' && data.tutor !== '教師帳號免設定') {
+						data.tutor = '教師帳號免設定'; await dbClient.from('grad_checks').update({ tutor: '教師帳號免設定' }).eq('id', uid);
+					}
+					let targetYear = version.year, targetDept = version.dept;
+					if (!tid && (role === 'admin' || (role === 'teacher' && data.entry_year === '未設定' && data.entry_dept === '未設定'))) {
+						targetYear = sessionStorage.getItem('tempSelectedYear') || targetYear; targetDept = sessionStorage.getItem('tempSelectedDept') || targetDept;
+					}
+					selectCurriculum(targetYear, targetDept); renderTable();
+					const currArea = document.getElementById('curriculumSelectorArea');
+					if (currArea) currArea.style.display = version.locked ? 'none' : 'flex';
+					document.querySelectorAll(".toggle-checkbox").forEach(c => {
+						const defUnchecked = c.dataset.defaultUnchecked === 'true';
+						c.checked = (data.credits_json && data.credits_json[c.id] !== undefined) ? data.credits_json[c.id] : !defUnchecked;
+					});
+					calculate(); updateSyncStatusIndicator('success');
+				} else if (!tid && currentUser) {
+					const m = currentUser.user_metadata, initialYear = m?.entry_year || '未設定', initialDept = m?.entry_dept || '未設定',
+						initialRole = m?.role || 'student', initialName = m?.full_name || '學生', initialSid = (m?.student_id || '').split('@')[0].toLowerCase().trim();
+					await dbClient.rpc('admin_save_grad_checks', { target_id: uid, target_student_id: initialSid, target_full_name: initialName, target_entry_year: initialYear, target_entry_dept: initialDept, target_role: initialRole, target_tutor: (initialRole === 'admin' ? '管理員免設定' : (initialRole === 'teacher' ? '教師帳號免設定' : '未設定')), target_credits_json: {}, target_total_credits: 0 });
+					const { data: newData } = await dbClient.from('grad_checks').select('*').eq('id', uid).maybeSingle();
+					if (newData) {
+						userDBRecord = newData; hasLoadedInitialData = true; updateUI();
+						const version = determineCurriculumVersion(newData); selectCurriculum(version.year, version.dept);
+						const currArea = document.getElementById('curriculumSelectorArea'); if (currArea) currArea.style.display = version.locked ? 'none' : 'flex';
+						renderTable(); calculate();
+					} else hasLoadedInitialData = true;
+				}
+			} catch (e) { hasLoadedInitialData = true; updateSyncStatusIndicator('offline'); showMsg("雲端加載錯誤：" + translateError(e.message), "error"); }
+		}
+
+		async function fetchAdminList(onlyRefreshUI = false) {
+			if (!dbClient) return;
+			if (!onlyRefreshUI) {
+				const { data } = await dbClient.from('grad_checks').select('*');
+				if (data) { adminListData = data; teacherNames = data.filter(u => u.role === 'teacher').map(u => u.full_name); }
+			}
+			renderAdminTable();
+		}
+
+		function applyFilters() {
+			const searchText = document.getElementById('adminSearchInput').value.toLowerCase(), filterYear = document.getElementById('adminFilterYear').value,
+				filterDept = document.getElementById('adminFilterDept').value, sortType = document.getElementById('adminSort').value,
+				role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student', myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year,
+				myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept;
+			let filtered = [...adminListData];
+			if (role === 'teacher') {
+				filtered = (myYear !== '未設定' && myDept !== '未設定') ? filtered.filter(s => s.entry_year === myYear && s.entry_dept === myDept && s.role === 'student') : filtered.filter(s => s.role === 'student');
+			}
+			if (searchText) {
+				filtered = filtered.filter(s => (s.full_name && s.full_name.toLowerCase().includes(searchText)) || (s.student_id && s.student_id.toLowerCase().includes(searchText)));
+			}
+			if (filterYear !== 'all') filtered = filtered.filter(s => s.entry_year === filterYear);
+			if (filterDept !== 'all') filtered = filtered.filter(s => s.entry_dept === filterDept);
+			if (sortType === 'save') filtered.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+			else if (sortType === 'join') filtered.sort((a, b) => new Date(a.created_at || a.updated_at) - new Date(b.created_at || b.updated_at));
+			else if (sortType === 'sid') filtered.sort((a, b) => (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true }));
+			else if (sortType === 'name') filtered.sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''));
+			return filtered;
+		}
+
+		function renderAdminTable() {
+			const tableBody = document.getElementById('adminListBody'), cardsContainer = document.getElementById('adminCardsContainer');
+			tableBody.innerHTML = ""; cardsContainer.innerHTML = "";
+			const filtered = applyFilters(), role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+			filtered.forEach((s, i) => {
+				const roleClass = s.role === 'admin' ? 'badge-admin' : (s.role === 'teacher' ? 'badge-teacher' : 'badge-student'),
+					classInfo = (s.entry_year === '未設定' || s.entry_dept === '未設定') ? '未設定' : `${s.entry_year}年/${s.entry_dept}`,
+					tr = document.createElement('tr');
+				let btnsDesktop = '<div class="flex gap-1.5 w-[310px]">';
+				if (s.role === 'student') {
+					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${s.id}','${s.full_name}')">檢視學分狀態</button>`;
+				}
+				if (role === 'admin') {
+					btnsDesktop += `<button class="btn-mini flex-1" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號資料設定</button>
+									<button class="btn-mini flex-1" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除帳號資料</button>`;
+				} else if (role === 'teacher' && s.role !== 'student') {
+					btnsDesktop += `<button class="btn-mini flex-1" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號資料設定</button>
+									<button class="btn-mini flex-1" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除帳號資料</button>`;
+				}
+				btnsDesktop += '</div>';
+				tr.innerHTML = `<td><b>${s.full_name}</b></td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${mapping.role[s.role] || '使用者'}</span></td><td>${classInfo}</td><td>${btnsDesktop}</td>`;
+				tableBody.appendChild(tr);
+				const card = document.createElement('div');
+				card.className = "mobile-card p-4 flex flex-col gap-3";
+				let btnsMobile = '';
+				if (s.role === 'student') {
+					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition shadow-sm select-none truncate" onclick="enterAdminEditMode('${s.id}','${s.full_name}')">檢視學分狀態</button>`;
+				}
+				if (role === 'admin') {
+					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none truncate" onclick="openAdminUserEdit(${i})">帳號資料設定</button>
+						<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none truncate" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除帳號資料</button>`;
+				} else if (role === 'teacher' && s.role !== 'student') {
+					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none truncate" onclick="openAdminUserEdit(${i})">帳號資料設定</button>
+						<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none truncate" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除帳號資料</button>`;
+				}
+				card.innerHTML = `
+					<div class="flex justify-between items-start border-b border-slate-100 pb-2">
+						<div class="min-w-0"><div class="text-sm font-bold text-slate-800 truncate">${s.full_name}</div><div class="text-xs text-slate-500 mt-0.5">帳號: ${s.student_id || '-'}</div></div>
+						<span class="role-badge ${roleClass} text-xs py-1 px-2.5 rounded-full font-bold text-white shrink-0">${mapping.role[s.role] || '使用者'}</span>
+					</div>
+					<div class="text-xs text-slate-600 flex justify-between"><span>入學年/科別:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
+					<div class="flex gap-1.5 flex-nowrap mt-1 w-full">${btnsMobile}</div>
+				`;
+				cardsContainer.appendChild(card);
+			});
+		}
+
+		function renderMobileCards(checkedStates = {}) {
+			const container = document.getElementById("mobileCardsContainer");
+			container.innerHTML = ""; container.className = "grid grid-cols-1 gap-4 mt-4 w-full";
+			curriculum.forEach((item) => {
+				const card = document.createElement("div");
+				card.className = "mobile-card flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 bg-white border border-slate-200 rounded-xl shadow-sm";
+				let titleHtml = `<span class="mobile-card-title text-[0.85rem] md:text-[0.98rem] font-extrabold text-slate-800 break-words leading-tight">${item.name}</span>`;
+				
+				let noteHtml = "";
+				if (item.name.includes("彈性")) {
+					noteHtml = `<div class="mt-1.5 text-xs text-amber-800 font-extrabold bg-amber-50 border border-amber-200/80 rounded-lg px-2.5 py-1 inline-flex items-center gap-1.5 w-fit">
+						<span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+						備註：自主學習無學分
+					</div>`;
+				}
+
+				let semHtml = "";
+				const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
+				item.credits.forEach((c, sIdx) => {
+					const id = getChkId(item.name, sIdx);
+					const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (item.defaultUnchecked ? false : true);
+					semHtml += `<div class="mobile-sem-item"><span class="mobile-sem-label">${semNames[sIdx]}</span>
+						${c > 0 ? `<div class="mobile-score-box"><input type="checkbox" class="toggle-checkbox" id="${id}" data-val="${c}" data-cat="${item.cat}" data-type="${item.type}" data-name="${item.name}" data-sem="${sIdx}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" onchange="calculate(); saveToCloud(true);" ${isChecked ? 'checked' : ''}><label class="score-label" for="${id}">${c}</label></div>` : '<div class="mobile-score-box zero-score score-label" style="cursor: default;">-</div>'}
+					</div>`;
+				});
+				card.innerHTML = `
+					<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 md:w-[38%] min-w-0">
+						<div class="flex flex-col gap-1 w-full">
+							${titleHtml}
+							<div class="mobile-card-badges flex flex-wrap gap-1.5 shrink-0 mt-0.5">
+								<span class="mobile-badge ${mapping.cat[item.cat].class} text-[0.7rem] px-2 py-0.5">${mapping.cat[item.cat].text}</span>
+								<span class="mobile-badge bg-slate-100 text-slate-600 border border-slate-200 text-[0.7rem] px-2 py-0.5">${mapping.type[item.type]}</span>
+							</div>
+							${noteHtml}
+						</div>
+					</div>
+					<div class="mobile-semesters-grid md:w-[62%] min-w-0">${semHtml}</div>
+				`;
+				container.appendChild(card);
+			});
+		}
+
+		function renderSemesterCards(checkedStates = {}) {
+			const container = document.getElementById("mobileCardsContainer");
+			container.innerHTML = ""; container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4 w-full";
+			const semesterFullLabels = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
+			for (let sIdx = 0; sIdx < 6; sIdx++) {
+				const activeSubjects = [];
+				let semEarned = 0, semMax = 0;
+
+				curriculum.forEach((item) => {
+					const c = item.credits[sIdx];
+					if (c > 0) {
+						const id = getChkId(item.name, sIdx);
+						const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (item.defaultUnchecked ? false : true);
+						semMax += c; if (isChecked) semEarned += c;
+						activeSubjects.push({ item, c, id, isChecked });
+					}
+				});
+				const progressPercent = semMax > 0 ? Math.round((semEarned / semMax) * 100) : 0;
+				let listHtml = "";
+				if (activeSubjects.length === 0) {
+					listHtml = `<div class="text-slate-400 text-xs italic py-6 text-center w-full">此學期無課程學分</div>`;
+				} else {
+					activeSubjects.forEach(sub => {
+						let subNoteHtml = "";
+						if (sub.item.name.includes("彈性")) {
+							subNoteHtml = `<div class="text-[0.72rem] text-amber-900 font-extrabold bg-amber-100/80 border border-amber-300 rounded-md px-2 py-0.5 mt-1 inline-flex items-center gap-1 w-fit">
+								<span class="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0"></span>
+								備註：自主學習無學分
+							</div>`;
+						}
+						listHtml += `
+							<div class="sem-subject-item relative flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0 hover:bg-slate-50/80 px-2 rounded-xl transition-colors min-w-0">
+								<input type="checkbox" class="toggle-checkbox sem-checkbox hidden" id="${sub.id}" data-val="${sub.c}" data-cat="${sub.item.cat}" data-type="${sub.item.type}" data-name="${sub.item.name}" data-sem="${sIdx}" data-default-unchecked="${sub.item.defaultUnchecked ? 'true' : 'false'}" onchange="calculate(); saveToCloud(true); updateSemesterProgress(this, ${sIdx});" ${sub.isChecked ? 'checked' : ''}>
+								<label for="${sub.id}" class="sem-label flex items-center justify-between w-full cursor-pointer min-w-0">
+									<div class="checkbox-indicator w-5 h-5 rounded-full border-2 border-slate-400 flex items-center justify-center transition-all duration-150 shrink-0 bg-white select-none">
+										<span class="check-mark text-white text-[0.65rem] font-black hidden">✓</span>
+									</div>
+									<div class="flex flex-col flex-grow pl-3 min-w-0">
+										<span class="sub-name text-sm font-bold text-slate-800 break-words transition-colors duration-150 leading-tight min-w-0">${sub.item.name}</span>
+										<div class="flex flex-wrap gap-1 mt-1">
+											<span class="text-[0.68rem] font-extrabold ${mapping.cat[sub.item.cat].class} px-1.5 py-0.5 rounded">${mapping.cat[sub.item.cat].text}</span>
+											<span class="text-[0.68rem] font-extrabold bg-slate-200 text-slate-800 border border-slate-300 px-1.5 py-0.5 rounded">${mapping.type[sub.item.type]}</span>
+										</div>
+										${subNoteHtml}
+									</div>
+									<span class="credit-badge text-[0.72rem] font-extrabold px-2.5 py-1 rounded-lg transition-all shrink-0 ml-2 bg-slate-100 text-slate-800 border border-slate-300">${sub.c}學分</span>
+								</label>
+							</div>`;
+					});
+				}
+				const cardHtml = `
+					<div class="semester-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition-all duration-150 hover:shadow-md hover:border-slate-300 min-w-0">
+						<div>
+							<div class="flex justify-between items-center mb-3"><h4 class="text-sm font-black text-slate-800 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>${semesterFullLabels[sIdx]}</h4>
+								<span class="text-[0.7rem] font-bold text-slate-500 bg-slate-100 py-0.5 px-2.5 rounded-md border border-slate-200">已得學分 <b class="text-emerald-600 font-extrabold sem-earned-val">${semEarned}</b> / <span class="sem-max-val">${semMax}</span></span>
+							</div>
+							<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-4"><div class="sem-progress-bar h-full bg-emerald-500 transition-all duration-300 rounded-full" style="width: ${progressPercent}%"></div></div>
+							<div class="flex flex-col gap-1 pr-1 min-w-0">${listHtml}</div>
+						</div>
+					</div>`;
+				const cardWrapper = document.createElement('div'); cardWrapper.innerHTML = cardHtml; container.appendChild(cardWrapper.firstElementChild);
+			}
+		}
+
+		function updateSemesterProgress(inputEl, semIdx) {
+			const card = inputEl.closest('.semester-card');
+			if (!card) return;
+			let earned = 0;
+			card.querySelectorAll('.toggle-checkbox:checked').forEach(chk => {
+				earned += parseInt(chk.dataset.val || 0);
+			});
+			const earnedEl = card.querySelector('.sem-earned-val');
+			const maxEl = card.querySelector('.sem-max-val');
+			const barEl = card.querySelector('.sem-progress-bar');
+			if (earnedEl) earnedEl.innerText = earned;
+			if (maxEl && barEl) {
+				const max = parseInt(maxEl.innerText || 0);
+				const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+				barEl.style.width = pct + '%';
+			}
+		}
+
+		function renderTable() {
+			const mobileContainer = document.getElementById("mobileCardsContainer"), constructionBox = document.getElementById("underConstructionBox"), constYearDeptSpan = document.getElementById("constYearDept");
+			const checkedStates = {};
+			document.querySelectorAll(".toggle-checkbox").forEach(chk => checkedStates[chk.id] = chk.checked);
+			if (curriculum.length === 0) {
+				mobileContainer.style.display = "none"; mobileContainer.innerHTML = ""; constructionBox.classList.remove("hidden");
+				constYearDeptSpan.innerText = `${currentYear}年入學 ${currentDept}`; return;
+			}
+			constructionBox.classList.add("hidden"); mobileContainer.style.display = "grid";
+			if (currentLayoutMode === 'subject') renderMobileCards(checkedStates);
+			else renderSemesterCards(checkedStates);
+		}
+
+		function buildCardContent(title, value, target, isTotalCard = false) {
+			const percentage = (value === null || target === null) ? 0 : Math.min(100, Math.round((value / target) * 100));
+			let barColor = '#d97706';
+			if (value !== null && target !== null) {
+				if (isTotalCard) {
+					if (value >= 160) barColor = '#059669';
+					else if (value >= 120) barColor = '#d97706';
+					else barColor = '#dc2626';
+				} else {
+					barColor = (value >= target) ? '#059669' : '#d97706';
+				}
+			}
+			return `
+				<div class="card-title">${title}</div>
+				<div class="flex items-baseline justify-center gap-1 text-lg xs:text-xl md:text-2xl font-black text-slate-900"><span>${value === null ? "-" : value}</span><span style="font-size: 0.85rem; color: #475569; font-weight: 700;">/ ${target === null ? "-" : target}</span></div>
+				<div class="card-progress-bg"><div class="card-progress-fill" style="width: ${percentage}%; background-color: ${barColor};"></div></div>`;
+		}
+		function renderMobileCards(checkedStates = {}) {
+			const container = document.getElementById("mobileCardsContainer");
+			container.innerHTML = ""; container.className = "grid grid-cols-1 gap-4 mt-4 w-full";
+			curriculum.forEach((item) => {
+				const card = document.createElement("div");
+				card.className = "mobile-card flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 bg-white border border-slate-300 rounded-xl shadow-sm";
+				let titleHtml = `<span class="mobile-card-title text-[0.88rem] md:text-[1rem] font-extrabold text-slate-900 break-words leading-tight">${item.name}</span>`;
+				
+				let noteHtml = "";
+				if (item.name.includes("彈性")) {
+					noteHtml = `<div class="mt-1.5 text-xs text-amber-900 font-extrabold bg-amber-100/80 border border-amber-300 rounded-lg px-2.5 py-1 inline-flex items-center gap-1.5 w-fit">
+						<span class="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span>
+						備註：自主學習無學分
+					</div>`;
+				}
+
+				let semHtml = "";
+				const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
+				item.credits.forEach((c, sIdx) => {
+					const id = getChkId(item.name, sIdx);
+					const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (item.defaultUnchecked ? false : true);
+					semHtml += `<div class="mobile-sem-item"><span class="mobile-sem-label">${semNames[sIdx]}</span>
+						${c > 0 ? `<div class="mobile-score-box"><input type="checkbox" class="toggle-checkbox" id="${id}" data-val="${c}" data-cat="${item.cat}" data-type="${item.type}" data-name="${item.name}" data-sem="${sIdx}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" onchange="calculate(); saveToCloud(true);" ${isChecked ? 'checked' : ''}><label class="score-label" for="${id}">${c}</label></div>` : '<div class="mobile-score-box zero-score score-label" style="cursor: default;">-</div>'}
+					</div>`;
+				});
+				card.innerHTML = `
+					<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 md:w-[38%] min-w-0">
+						<div class="flex flex-col gap-1 w-full">
+							${titleHtml}
+							<div class="mobile-card-badges flex flex-wrap gap-1.5 shrink-0 mt-0.5">
+								<span class="mobile-badge ${mapping.cat[item.cat].class} text-[0.72rem] px-2 py-0.5 font-extrabold">${mapping.cat[item.cat].text}</span>
+								<span class="mobile-badge bg-slate-200 text-slate-800 border border-slate-300 text-[0.72rem] px-2 py-0.5 font-extrabold">${mapping.type[item.type]}</span>
+							</div>
+							${noteHtml}
+						</div>
+					</div>
+					<div class="mobile-semesters-grid md:w-[62%] min-w-0">${semHtml}</div>
+				`;
+				container.appendChild(card);
+			});
+		}
+
+		function setAllStatus(p) {
+			document.querySelectorAll(".toggle-checkbox").forEach(chk => {
+				chk.checked = p;
+			});
+			calculate();
+			saveToCloud(true);
+			renderTable();
+		}
+
+		function initBackToTop() {
+			const sc = document.getElementById('scrollContainer');
+			if (sc) {
+				sc.addEventListener('scroll', () => {
+					const btn = document.getElementById('backToTopBtn');
+					if (!btn) return;
+					if (sc.scrollTop > 300) {
+						btn.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+						btn.classList.add('opacity-100', 'translate-y-0');
+					} else {
+						btn.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+						btn.classList.remove('opacity-100', 'translate-y-0');
+					}
+				});
+			}
+		}
+
+		function scrollToTop() {
+			const sc = document.getElementById('scrollContainer');
+			if (sc) sc.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+
+		function showMissingCreditsModal() {
+			if (curriculum.length === 0) { showMsg("目前版本的課表尚未建置！", "error"); return; }
+			const semFullNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
+			currentUncheckedCredits = [];
+			document.querySelectorAll(".toggle-checkbox:not(:checked)").forEach(input => {
+				const name = input.dataset.name, semIdx = parseInt(input.dataset.sem), val = parseInt(input.dataset.val), cat = input.dataset.cat, type = parseInt(input.dataset.type);
+				if (name) currentUncheckedCredits.push({ name, sem: semFullNames[semIdx], val, cat, type, semIdx });
+			});
+			const filterSel = document.getElementById("missingCreditsFilter");
+			if (filterSel) {
+				let optionsHtml = `<option value="all">全部學期</option>`;
+				semFullNames.forEach((sem, idx) => {
+					optionsHtml += `<option value="${idx}">${sem}</option>`;
+				});
+				filterSel.innerHTML = optionsHtml;
+				filterSel.value = "all";
+			}
+			renderMissingCreditsFiltered();
+			toggleUIModal(true, 'missingCreditsModal');
+		}
+
+		function renderMissingCreditsFiltered() {
+			const filterVal = document.getElementById("missingCreditsFilter").value;
+			const listContainer = document.getElementById("missingCreditsList");
+			const semFullNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
+			let filtered = [...currentUncheckedCredits];
+			if (filterVal !== "all") {
+				const targetIdx = parseInt(filterVal);
+				filtered = filtered.filter(item => item.semIdx === targetIdx);
+			}
+			if (filtered.length === 0) {
+				listContainer.innerHTML = `<div class="text-center py-10 px-4"><div class="text-5xl mb-4">🎉</div><p class="font-black text-lg text-emerald-600">目前無任何未得學分！</p></div>`;
+			} else {
+				let totalCredits = filtered.reduce((sum, i) => sum + i.val, 0);
+				let html = `<p class="text-xs text-slate-500 font-extrabold mb-4 bg-amber-50 border border-amber-200/60 rounded-lg p-2.5 text-amber-800">篩選結果共計 <span class="text-red-500 font-black text-sm">${filtered.length}</span> 科，累計未取得：<span class="text-red-500 font-black text-sm">${totalCredits}</span> 學分</p>`;
+				const grouped = {}; filtered.forEach(item => { if (!grouped[item.sem]) grouped[item.sem] = []; grouped[item.sem].push(item); });
+				semFullNames.forEach(sem => {
+					if (grouped[sem] && grouped[sem].length > 0) {
+						html += `
+							<div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 shadow-sm mb-3">
+								<h5 class="text-xs font-black text-slate-700 border-b border-slate-200/80 pb-2 mb-2.5 flex justify-between items-center">
+									<span class="flex items-center gap-1.5"><span class="w-1.5 h-3 bg-slate-400 rounded-full"></span>📅 ${sem}</span>
+									<span class="text-[0.7rem] bg-red-50 text-red-600 px-2 py-0.5 rounded-md font-bold border border-red-100">未得 ${grouped[sem].reduce((sum, i) => sum + i.val, 0)} 學分</span>
+								</h5>
+								<div class="space-y-2">`;
+						grouped[sem].forEach(item => {
+							html += `
+								<div class="flex items-center justify-between text-xs py-1 px-1.5 rounded hover:bg-slate-200/40 transition-colors min-w-0">
+									<div class="flex items-center gap-2 min-w-0 flex-wrap">
+										<span class="font-bold text-slate-800 truncate max-w-[120px] xs:max-w-none">${item.name}</span>
+										<span class="text-[9px] scale-90 ${mapping.cat[item.cat].class} py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.cat[item.cat].text}</span>
+										<span class="text-[9px] scale-90 bg-slate-100 text-slate-600 border border-slate-200 py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.type[item.type]}</span>
+									</div>
+									<span class="font-extrabold text-red-500 shrink-0 pl-1">${item.val} 學分</span>
+								</div>`;
+						});
+						html += `</div></div>`;
+					}
+				});
+				listContainer.innerHTML = html;
+			}
+		}
+
+		initDropdowns(false);
+		selectCurriculum(currentYear, currentDept);
+		renderTable();
+		calculate();
+		initHelpModalScrollGuard();
+		initBackToTop();
+	</script>
+</body>
+</html>
