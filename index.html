@@ -1106,17 +1106,17 @@
 				if (cT) { 
 					cT.style.display = 'flex'; 
 					cT.style.gridColumn = '1 / -1'; 
-					cT.innerHTML = buildCardContent("畢業最低總學分", stats.total, isNullState ? null : 150, true); 
+					cT.innerHTML = buildCardContent("總學分", stats.total, isNullState ? null : 150, true); 
 				}
 				if (cD) { 
 					cD.style.display = 'flex'; 
 					cD.style.gridColumn = 'auto'; 
-					cD.innerHTML = buildCardContent("必修學分 (部定+校定)", isNullState ? null : stats.reqEarned, isNullState ? null : 102); 
+					cD.innerHTML = buildCardContent("必修學分", isNullState ? null : stats.reqEarned, isNullState ? null : 102); 
 				}
 				if (cF) { 
 					cF.style.display = 'flex'; 
 					cF.style.gridColumn = 'auto'; 
-					cF.innerHTML = buildCardContent("選修學分 (加深+多元)", isNullState ? null : stats.optEarned, isNullState ? null : 40); 
+					cF.innerHTML = buildCardContent("選修學分", isNullState ? null : stats.optEarned, isNullState ? null : 40); 
 				}
 				if (cP) { 
 					cP.style.display = 'none'; 
@@ -1130,9 +1130,9 @@
 				if (cP) { cP.style.display = 'flex'; }
 
 				if (cT) cT.innerHTML = buildCardContent("總學分", stats.total, isNullState ? null : 150, true);
-				if (cD) cD.innerHTML = buildCardContent("部定一般必修 (≥80%)", isNullState ? null : stats.deptGenEarned, isNullState ? null : stats.targetGen);
-				if (cF) cF.innerHTML = buildCardContent("體育專業必修 (≥85%)", isNullState ? null : stats.deptSportsEarned, isNullState ? null : stats.targetSports);
-				if (cP) cP.innerHTML = buildCardContent("選修科目 (≥70%)", isNullState ? null : stats.sportsOptEarned, isNullState ? null : stats.targetOpt);
+				if (cD) cD.innerHTML = buildCardContent("部定一般必修", isNullState ? null : stats.deptGenEarned, isNullState ? null : stats.targetGen);
+				if (cF) cF.innerHTML = buildCardContent("體育專業必修", isNullState ? null : stats.deptSportsEarned, isNullState ? null : stats.targetSports);
+				if (cP) cP.innerHTML = buildCardContent("選修科目", isNullState ? null : stats.sportsOptEarned, isNullState ? null : stats.targetOpt);
 			} else {
 				if (cT) cT.style.gridColumn = 'auto';
 				if (cD) cD.style.gridColumn = 'auto';
@@ -1334,7 +1334,7 @@
 					saveBtn.innerText = role === 'admin' ? '管理後台' : (role === 'teacher' ? '班級資料' : '雲端存檔');
 					saveBtn.style.display = '';
 				}
-				const displayClass = (myYear === '未設定' || myDept === '未設定') ? `(${mapping.role[role] || '使用者'})` : `(${myYear}年 ${myDept} ${mapping.role[role] || '使用者'})`;
+				const displayClass = (myYear === '未設定' || myDept === '未設定') ? ` ｜ ${mapping.role[role] || '使用者'}` : ` ｜ ${myYear}年 ${myDept} ${mapping.role[role] || '使用者'}`;
 				userStatusDisplay.innerHTML = `
 					<div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 w-full text-xs sm:text-sm leading-tight">
 						<div class="font-extrabold text-slate-100 shrink-0">您好，${displayName}${displayClass}</div>
@@ -1598,12 +1598,12 @@
 					}
 				}
 				if (data) {
-					if (!tid) { userDBRecord = data; activeStudentDBRecord = null; isViewingClassList = false; hasLoadedInitialData = true; updateUI(); }
+					if (!tid) { userDBRecord = data; activeStudentDBRecord = null; hasLoadedInitialData = true; updateUI(); }
 					else {
 						lastLoadedStudentId = tid; activeStudentDBRecord = data;
 						const targetSpan = document.getElementById('targetStudentName');
 						if (targetSpan) {
-							const classLabel = (data.entry_year !== '未設定' || data.entry_dept !== '未設定') ? ` (${data.entry_year !== '未設定' ? data.entry_year + '年' : ''}${data.entry_dept !== '未設定' ? data.entry_dept : ''})` : '';
+							const classLabel = (data.entry_year !== '未設定' || data.entry_dept !== '未設定') ? ` ｜ ${data.entry_year !== '未設定' ? data.entry_year + '年 ' : ''}${data.entry_dept !== '未設定' ? data.entry_dept : ''}` : '';
 							targetSpan.innerText = `${data.full_name}${classLabel}`;
 						}
 					}
