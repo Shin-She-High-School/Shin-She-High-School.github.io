@@ -180,6 +180,11 @@
 			</div>
 			<button class="auth-btn-primary" onclick="handleAuth()">確認登入</button>
 			<div id="authSwitchLink" class="auth-switch-link" onclick="switchAuthMode()">尚未有帳號？點此註冊</div>
+			<div class="mt-4 border-t border-slate-100 pt-3">
+				<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#06C755] hover:bg-[#05b34c] text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-sm transition-all w-full text-center">
+					<span>💬 聯絡管理員</span>
+				</a>
+			</div>
 		</div>
 	</div>
 
@@ -216,6 +221,9 @@
 						<button id="saveBtn" class="action-btn btn-cloud" onclick="handleMainAction()">班級資料</button>
 						<button class="action-btn btn-pass-all" onclick="confirmSetAllStatus(true)">全部及格</button>
 						<button class="action-btn btn-fail-all" onclick="confirmSetAllStatus(false)">學分歸零</button>
+						<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="action-btn flex items-center justify-center gap-1.5" style="background: linear-gradient(135deg, #06C755, #05b34c);">
+							<span>💬 聯絡管理員</span>
+						</a>
 					</div>
 				</div>
 			</div>
@@ -309,7 +317,12 @@
 				<label id="profTutorLabel">導師 (系統自動對應)</label>
 				<input type="text" id="profTutor" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;">
 			</div>
-			<p id="profTipMessage" style="font-size:0.85rem; color:#d946ef; margin-bottom:15px; font-weight:bold;">※ 帳號資料有誤請洽管理員更正，僅能修改密碼。</p>
+			<p id="profTipMessage" style="font-size:0.85rem; color:#d946ef; margin-bottom:10px; font-weight:bold;">※ 帳號資料有誤請洽管理員更正，僅能修改密碼。</p>
+			<div class="mb-4">
+				<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#06C755] hover:bg-[#05b34c] text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-sm transition-all w-full text-center">
+					<span>💬 聯絡管理員</span>
+				</a>
+			</div>
 			<div class="input-group"><label>更改密碼 (不更改保持空白)</label><input type="password" id="profPassword"></div>
 			<div class="flex gap-2">
 				<button class="action-btn btn-admin" style="width:100%;" onclick="updateProfile()">儲存修改</button>
@@ -1242,17 +1255,17 @@
 				if (cT) { 
 					cT.style.display = 'flex'; 
 					cT.style.gridColumn = '1 / -1'; 
-					cT.innerHTML = buildCardContent("畢業最低總學分", stats.total, isNullState ? null : 150, true); 
+					cT.innerHTML = buildCardContent("總學分", stats.total, isNullState ? null : 150, true); 
 				}
 				if (cD) { 
 					cD.style.display = 'flex'; 
 					cD.style.gridColumn = 'auto'; 
-					cD.innerHTML = buildCardContent("必修學分 (部定+校定)", isNullState ? null : stats.reqEarned, isNullState ? null : 102); 
+					cD.innerHTML = buildCardContent("必修學分", isNullState ? null : stats.reqEarned, isNullState ? null : 102); 
 				}
 				if (cF) { 
 					cF.style.display = 'flex'; 
 					cF.style.gridColumn = 'auto'; 
-					cF.innerHTML = buildCardContent("選修學分 (加深+多元)", isNullState ? null : stats.optEarned, isNullState ? null : 40); 
+					cF.innerHTML = buildCardContent("選修學分", isNullState ? null : stats.optEarned, isNullState ? null : 40); 
 				}
 				if (cP) { 
 					cP.style.display = 'none'; 
@@ -1266,9 +1279,9 @@
 				if (cP) { cP.style.display = 'flex'; }
 
 				if (cT) cT.innerHTML = buildCardContent("總學分", stats.total, isNullState ? null : 150, true);
-				if (cD) cD.innerHTML = buildCardContent("部定一般必修 (≥80%)", isNullState ? null : stats.deptGenEarned, isNullState ? null : stats.targetGen);
-				if (cF) cF.innerHTML = buildCardContent("體育專業必修 (≥85%)", isNullState ? null : stats.deptSportsEarned, isNullState ? null : stats.targetSports);
-				if (cP) cP.innerHTML = buildCardContent("選修科目 (≥70%)", isNullState ? null : stats.sportsOptEarned, isNullState ? null : stats.targetOpt);
+				if (cD) cD.innerHTML = buildCardContent("部定一般必修", isNullState ? null : stats.deptGenEarned, isNullState ? null : stats.targetGen);
+				if (cF) cF.innerHTML = buildCardContent("體育專業必修", isNullState ? null : stats.deptSportsEarned, isNullState ? null : stats.targetSports);
+				if (cP) cP.innerHTML = buildCardContent("選修科目", isNullState ? null : stats.sportsOptEarned, isNullState ? null : stats.targetOpt);
 			} else {
 				if (cT) cT.style.gridColumn = 'auto';
 				if (cD) cD.style.gridColumn = 'auto';
@@ -1479,9 +1492,7 @@
 					sessionStorage.removeItem('just_logged_in');
 				}
 				if (!hasLoadedInitialData && !editingStudentId) isViewingClassList = false;
-				const myYear = userDBRecord?.entry_year || m?.entry_year || '未設定',
-					myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
-				
+				const myYear = userDBRecord?.entry_year || m?.entry_year || '未設定', myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
 				if (role === 'teacher' && (myYear === '未設定' || myDept === '未設定')) { saveBtn.style.display = 'none'; }
 				else {
 					saveBtn.innerText = role === 'admin' ? '管理後台' : (role === 'teacher' ? '班級資料' : '雲端存檔');
@@ -1526,7 +1537,7 @@
 					else updateCurriculumSelectorVisibility();
 				}
 			}
-		};
+		}
 
 		window.handleMainAction = function() {
 			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
@@ -1562,8 +1573,7 @@
 				accountLabel = document.getElementById('profAccountLabel'), tutorArea = document.getElementById('profStudentTutorArea'),
 				nameInput = document.getElementById('profName');
 			accountInput.value = curData.student_id || ''; nameInput.value = curData.full_name || '';
-			yrSel.value = curData.entry_year || '未設定';
-			dtSel.value = curData.entry_dept || '未設定';
+			yrSel.value = curData.entry_year || '未設定'; dtSel.value = curData.entry_dept || '未設定';
 			const isAdmin = (role === 'admin'), isStudent = (role === 'student');
 			accountInput.disabled = !isAdmin; yrSel.disabled = !isAdmin; dtSel.disabled = !isAdmin;
 			nameInput.disabled = true; accountLabel.innerText = "帳號";
@@ -1594,8 +1604,7 @@
 				const curData = userDBRecord || currentUser.user_metadata, role = curData.role || 'student';
 				updateSyncStatusIndicator('saving');
 				if (role === 'admin') {
-					const sid = document.getElementById('profAccount').value.split('@')[0].toLowerCase().trim(), ey = document.getElementById('profEntryYear').value,
-						ed = document.getElementById('profEntryDept').value;
+					const sid = document.getElementById('profAccount').value.split('@')[0].toLowerCase().trim(), ey = document.getElementById('profEntryYear').value, ed = document.getElementById('profEntryDept').value;
 					d.data.student_id = sid; d.data.entry_year = ey; d.data.entry_dept = ed; d.email = `${sid}${EMAIL_DOMAIN}`;
 					await dbClient.auth.updateUser(d);
 					await dbClient.rpc('admin_update_user_sid', { target_user_id: currentUser.id, new_sid: sid, new_name: n, new_year: ey, new_dept: ed, new_role: role, new_tutor: curData.tutor || '管理員免設定' });
@@ -1809,10 +1818,8 @@
 		};
 
 		window.applyFilters = function() {
-			const searchText = document.getElementById('adminSearchInput').value.toLowerCase(),
-				filterYear = document.getElementById('adminFilterYear').value,
-				filterDept = document.getElementById('adminFilterDept').value,
-				sortType = document.getElementById('adminSort').value,
+			const searchText = document.getElementById('adminSearchInput').value.toLowerCase(), filterYear = document.getElementById('adminFilterYear').value,
+				filterDept = document.getElementById('adminFilterDept').value, sortType = document.getElementById('adminSort').value,
 				role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student', myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year,
 				myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept;
 			let filtered = [...adminListData];
