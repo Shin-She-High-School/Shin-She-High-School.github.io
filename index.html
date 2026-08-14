@@ -117,7 +117,7 @@
 		.admin-toolbar > * { flex: 1; min-width: 130px; }
 		@media (max-width: 640px) { .admin-toolbar > * { flex: 1 1 calc(50% - 6px) !important; } #adminSearchInput { flex: 1 1 100% !important; } }
 		.admin-table-container { display: none; }
-		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 800px; }
+		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 900px; }
 		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 14px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; color: #1e293b; font-weight: 600; }
 		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 330px !important; min-width: 330px !important; }
 		.admin-table th { background: #e2e8f0; color: #0f172a; font-weight: 800; }
@@ -126,8 +126,8 @@
 		@media (min-width: 640px) and (max-width: 1024px) { .admin-cards-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 		@media (min-width: 1025px) { .admin-table-container { display: block !important; } }
 		@media (max-width: 1024px) { .admin-cards-grid { display: grid !important; } }
-		.btn-mini { display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; height: 32px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.82rem; color: white; font-weight: 800; transition: opacity 0.2s; box-sizing: border-box; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-		.btn-mini:hover { opacity: 0.9; }
+		.btn-mini { display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; height: 34px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.82rem; color: white; font-weight: 800; transition: opacity 0.2s, transform 0.1s; box-sizing: border-box; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; shadow: 0 1px 2px rgba(0,0,0,0.05); }
+		.btn-mini:hover { opacity: 0.92; transform: translateY(-1px); }
 		.input-group { margin-bottom: 16px; text-align: left; }
 		.input-group label { display: block; margin-bottom: 6px; font-weight: 800; font-size: 0.92rem; color: #1e293b; }
 		.input-group input, .input-group select { width: 100%; padding: 10px 12px; border: 1.5px solid #94a3b8; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; color: #0f172a; background-color: #fff; outline: none; transition: border-color 0.2s; font-weight: 600; }
@@ -285,7 +285,7 @@
 								<col style="width: 10%; min-width: 70px;">
 								<col style="width: 20%; min-width: 120px;">
 								<col style="width: 22%; min-width: 140px;">
-								<col style="width: 24%; min-width: 230px;">
+								<col style="width: 24%; min-width: 330px;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -348,7 +348,7 @@
 	</div>
 
 	<div id="adminUserModal" class="modal-overlay" onclick="handleOutsideClick(event)">
-		<div class="modal-content" style="max-width:400px;">
+		<div class="modal-content" style="max-width:420px;">
 			<div class="modal-header"><span>更改帳號資料</span><span class="close-modal-btn" onclick="toggleUIModal(false,'adminUserModal')">&times;</span></div>
 			<input type="hidden" id="editUserId">
 			<div class="input-group"><label>帳號</label><input type="text" id="editUserSid"></div>
@@ -1551,7 +1551,7 @@
 					else updateCurriculumSelectorVisibility();
 				}
 			}
-		}
+		};
 
 		window.handleMainAction = function() {
 			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
@@ -1919,7 +1919,7 @@
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 w-[220px]">';
+				let btnsDesktop = '<div class="flex gap-1.5 w-[310px] min-w-[310px] items-center">';
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${s.id}','${s.full_name}')">檢視學分狀態</button>`;
 				}
