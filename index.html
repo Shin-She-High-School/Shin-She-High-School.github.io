@@ -1093,7 +1093,7 @@
 			const hash = window.location.hash;
 			if (hash.startsWith('#edit-')) {
 				const tid = hash.replace('#edit-', '');
-				if (tid && editingStudentId !== tid) {
+				if (tid) {
 					editingStudentId = tid;
 					isViewingClassList = false;
 				}
@@ -1560,9 +1560,26 @@
 					fetchAdminList();
 				} else {
 					dashboard.style.display = 'block'; if (layoutSwitcher) layoutSwitcher.style.display = 'flex';
-					renderTable(); adminBackend.style.display = 'none';
-					if (!hasLoadedInitialData) loadFromCloud();
-					else updateCurriculumSelectorVisibility();
+					adminBackend.style.display = 'none';
+
+					if (editingStudentId) {
+						if (lastLoadedStudentId !== editingStudentId) {
+							loadFromCloud(editingStudentId);
+						} else {
+							renderTable();
+							calculate();
+							updateCurriculumSelectorVisibility();
+						}
+					} else {
+						if (!hasLoadedInitialData || lastLoadedStudentId !== null) {
+							lastLoadedStudentId = null;
+							loadFromCloud();
+						} else {
+							renderTable();
+							calculate();
+							updateCurriculumSelectorVisibility();
+						}
+					}
 				}
 			}
 		};
