@@ -1080,7 +1080,7 @@
 		window.updateHash = function() {
 			if (!currentUser) return;
 			if (editingStudentId) {
-				window.location.hash = `#edit-${editingStudentId}`;
+				window.location.hash = `#${editingStudentId}`;
 			} else if (isViewingClassList) {
 				window.location.hash = '#class-data';
 			} else {
@@ -1091,18 +1091,18 @@
 		window.handleHashRouting = function() {
 			if (!currentUser) return;
 			const hash = window.location.hash;
-			if (hash.startsWith('#edit-')) {
-				const tid = hash.replace('#edit-', '');
+			if (hash === '#class-data') {
+				isViewingClassList = true;
+				editingStudentId = null;
+			} else if (hash === '#dashboard' || hash === '' || hash === '#') {
+				isViewingClassList = false;
+				editingStudentId = null;
+			} else {
+				let tid = hash.replace('#', '');
 				if (tid) {
 					editingStudentId = tid;
 					isViewingClassList = false;
 				}
-			} else if (hash === '#class-data') {
-				isViewingClassList = true;
-				editingStudentId = null;
-			} else {
-				isViewingClassList = false;
-				editingStudentId = null;
 			}
 		};
 
