@@ -280,11 +280,12 @@
 					<div id="adminTableContainer" class="admin-table-container overflow-x-auto w-full custom-scrollbar" style="-webkit-overflow-scrolling: touch;">
 						<table class="admin-table">
 							<colgroup>
-								<col style="width: 14%; min-width: 80px;">
-								<col style="width: 14%; min-width: 80px;">
-								<col style="width: 12%; min-width: 70px;">
-								<col style="width: 28%; min-width: 140px;">
-								<col style="width: 32%; min-width: 310px;">
+								<col style="width: 12%; min-width: 80px;">
+								<col style="width: 12%; min-width: 80px;">
+								<col style="width: 10%; min-width: 70px;">
+								<col style="width: 20%; min-width: 120px;">
+								<col style="width: 22%; min-width: 140px;">
+								<col style="width: 24%; min-width: 230px;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -292,6 +293,7 @@
 									<th>帳號</th>
 									<th>身份</th>
 									<th>入學年 / 科別</th>
+									<th>畢業門檻</th>
 									<th>操作</th>
 								</tr>
 							</thead>
@@ -1915,21 +1917,21 @@
 				const roleClass = s.role === 'admin' ? 'badge-admin' : (s.role === 'teacher' ? 'badge-teacher' : 'badge-student'),
 					classInfo = (s.entry_year === '未設定' || s.entry_dept === '未設定') ? '未設定' : `${s.entry_year}年/${s.entry_dept}`,
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
-					statusTagHtml = evalRes ? `<div class="mt-1"><span class="text-[0.68rem] font-bold px-2 py-0.5 rounded-md ${evalRes.badgeClass}">${evalRes.statusText} (${evalRes.total}學分)</span></div>` : '',
+					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 w-[310px]">';
+				let btnsDesktop = '<div class="flex gap-1.5 w-[220px]">';
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${s.id}','${s.full_name}')">檢視學分狀態</button>`;
 				}
 				if (role === 'admin') {
-					btnsDesktop += `<button class="btn-mini flex-1" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號資料設定</button>
-									<button class="btn-mini flex-1" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除帳號資料</button>`;
+					btnsDesktop += `<button class="btn-mini flex-1" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
+									<button class="btn-mini flex-1" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				} else if (role === 'teacher' && s.role !== 'student') {
-					btnsDesktop += `<button class="btn-mini flex-1" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號資料設定</button>
-									<button class="btn-mini flex-1" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除帳號資料</button>`;
+					btnsDesktop += `<button class="btn-mini flex-1" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
+									<button class="btn-mini flex-1" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				}
 				btnsDesktop += '</div>';
-				tr.innerHTML = `<td><b>${s.full_name}</b>${statusTagHtml}</td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${mapping.role[s.role] || '使用者'}</span></td><td>${classInfo}</td><td>${btnsDesktop}</td>`;
+				tr.innerHTML = `<td><b>${s.full_name}</b></td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${mapping.role[s.role] || '使用者'}</span></td><td>${classInfo}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
 				tableBody.appendChild(tr);
 				const card = document.createElement('div');
 				card.className = "mobile-card p-4 flex flex-col gap-3";
@@ -1938,22 +1940,22 @@
 					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition shadow-sm select-none truncate" onclick="enterAdminEditMode('${s.id}','${s.full_name}')">檢視學分狀態</button>`;
 				}
 				if (role === 'admin') {
-					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none truncate" onclick="openAdminUserEdit(${i})">帳號資料設定</button>
-						<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none truncate" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除帳號資料</button>`;
+					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none truncate" onclick="openAdminUserEdit(${i})">帳號設定</button>
+						<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none truncate" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				} else if (role === 'teacher' && s.role !== 'student') {
-					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none truncate" onclick="openAdminUserEdit(${i})">帳號資料設定</button>
-						<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none truncate" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除帳號資料</button>`;
+					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none truncate" onclick="openAdminUserEdit(${i})">帳號設定</button>
+						<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none truncate" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				}
 				card.innerHTML = `
 					<div class="flex justify-between items-start border-b border-slate-100 pb-2">
 						<div class="min-w-0">
 							<div class="text-sm font-bold text-slate-800 truncate">${s.full_name}</div>
 							<div class="text-xs text-slate-500 mt-0.5">帳號: ${s.student_id || '-'}</div>
-							${statusTagHtml}
 						</div>
 						<span class="role-badge ${roleClass} text-xs py-1 px-2.5 rounded-full font-bold text-white shrink-0">${mapping.role[s.role] || '使用者'}</span>
 					</div>
-					<div class="text-xs text-slate-600 flex justify-between"><span>入學年 / 科別:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
+					<div class="text-xs text-slate-600 flex justify-between items-center"><span>入學年 / 科別:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
+					<div class="text-xs text-slate-600 flex justify-between items-center border-t border-dashed border-slate-200 pt-2"><span>畢業門檻資格:</span><div>${evalRes ? `<span class="text-[0.68rem] font-bold px-2 py-0.5 rounded-md ${evalRes.badgeClass}">${evalRes.statusText} (${evalRes.total}學分)</span>` : '<span class="text-slate-400 font-semibold">-</span>'}</div></div>
 					<div class="flex gap-1.5 flex-nowrap mt-1 w-full">${btnsMobile}</div>
 				`;
 				cardsContainer.appendChild(card);
