@@ -1071,6 +1071,12 @@
 			return msg;
 		};
 
+		window.scrollToTop = function() {
+			const sc = document.getElementById('scrollContainer');
+			if (sc) sc.scrollTo({ top: 0, behavior: 'smooth' });
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		};
+
 		window.updateHash = function() {
 			if (!currentUser) return;
 			if (editingStudentId) {
@@ -1492,6 +1498,7 @@
 			const btnSubject = document.getElementById('btnLayoutSubject'), btnSemester = document.getElementById('btnLayoutSemester');
 			btnSubject.className = mode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600 hover:text-slate-800";
 			btnSemester.className = mode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900";
+			scrollToTop();
 			renderTable(); calculate();
 		};
 
@@ -1571,7 +1578,9 @@
 						showMsg("您尚未設定負責的班級年度與科別，無法檢視班級資料！", "error"); return;
 					}
 				}
-				isViewingClassList = true; editingStudentId = null; updateUI();
+				isViewingClassList = true; editingStudentId = null; 
+				scrollToTop();
+				updateUI();
 			}
 		};
 
@@ -1582,7 +1591,9 @@
 			if (role === 'admin' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
 				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '普通科(文史法商群)-1';
 			}
-			selectCurriculum(myYear, myDept); updateUI(); loadFromCloud();
+			selectCurriculum(myYear, myDept); 
+			scrollToTop();
+			updateUI(); loadFromCloud();
 		};
 
 		window.openProfile = function() {
@@ -2009,6 +2020,7 @@
 			editingStudentId = id; isViewingClassList = false;
 			const targetNameEl = document.getElementById('targetStudentName');
 			if (targetNameEl) targetNameEl.innerText = `${name || '學生'} (資料讀取中...)`;
+			scrollToTop();
 			updateUI(); 
 			loadFromCloud(id);
 		};
@@ -2017,6 +2029,7 @@
 			editingStudentId = null; activeStudentDBRecord = null; lastLoadedStudentId = null; isViewingClassList = true;
 			const targetNameEl = document.getElementById('targetStudentName');
 			if (targetNameEl) targetNameEl.innerText = '學生';
+			scrollToTop();
 			updateUI();
 		};
 
@@ -2261,11 +2274,6 @@
 					}
 				});
 			}
-		};
-
-		window.scrollToTop = function() {
-			const sc = document.getElementById('scrollContainer');
-			if (sc) sc.scrollTo({ top: 0, behavior: 'smooth' });
 		};
 
 		window.showMissingCreditsModal = function() {
