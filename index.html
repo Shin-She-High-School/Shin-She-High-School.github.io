@@ -90,18 +90,9 @@
 			border-color: #059669 !important;
 			box-shadow: 0 2px 5px rgba(5, 150, 105, 0.3) !important;
 		}
-		.sem-checkbox:checked + .sem-label .check-mark {
-			display: inline-block !important;
-		}
-		.sem-checkbox:checked + .sem-label .sub-name {
-			color: #065f46 !important;
-			font-weight: 800 !important;
-		}
-		.sem-checkbox:checked + .sem-label .credit-badge {
-			background-color: #dcfce7 !important;
-			color: #14532d !important;
-			border-color: #86efac !important;
-		}
+		.sem-checkbox:checked + .sem-label .check-mark { display: inline-block !important; }
+		.sem-checkbox:checked + .sem-label .sub-name { color: #065f46 !important; font-weight: 800 !important; }
+		.sem-checkbox:checked + .sem-label .credit-badge { background-color: #dcfce7 !important; color: #14532d !important; border-color: #86efac !important; }
 
 		.mobile-badge { font-size: 0.78rem; font-weight: 800; padding: 4px 9px; border-radius: 6px; display: inline-flex; align-items: center; }
 		.bg-dept-main { background-color: #fee2e2 !important; color: #7f1d1d !important; border: 1px solid #fca5a5 !important; }
@@ -151,6 +142,7 @@
 <body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col">
 	<div id="msgBox"></div>
 
+	<!-- Auth Workspace -->
 	<div id="authWorkspace">
 		<div class="auth-glow-1"></div>
 		<div class="auth-glow-2"></div>
@@ -192,6 +184,7 @@
 		</div>
 	</div>
 
+	<!-- App Main Workspace -->
 	<div id="appWorkspace" style="display: none;" class="flex-grow flex flex-col h-full overflow-hidden">
 		<div id="statusHeader" class="shrink-0" style="display: none;">
 			<div class="app-container">
@@ -325,6 +318,7 @@
 		</button>
 	</div>
 
+	<!-- Modals -->
 	<div id="profileModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:400px;">
 			<div class="modal-header"><span>個人資料管理</span><span class="close-modal-btn" onclick="toggleUIModal(false,'profileModal')">&times;</span></div>
@@ -404,7 +398,6 @@
 				<span class="close-modal-btn" onclick="toggleUIModal(false,'auditLogModal')">&times;</span>
 			</div>
 
-			<!-- 統計分析概覽 -->
 			<div id="auditAnalyticsPanel" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
 				<div class="bg-indigo-50/80 border border-indigo-200 p-3 rounded-xl">
 					<div class="text-[11px] font-black text-indigo-700 uppercase">總稽核筆數</div>
@@ -424,7 +417,6 @@
 				</div>
 			</div>
 
-			<!-- 篩選工具列 -->
 			<div class="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 				<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 					<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
@@ -1142,6 +1134,7 @@
 				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
 				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
 			],
+
 			"114_普通科(文史法商群)-1": [
 				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
 				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
@@ -3247,12 +3240,14 @@
 								</h5>
 								<div class="space-y-2">`;
 						grouped[sem].forEach(item => {
+							const catObj = mapping.cat[item.cat] || { text: item.cat, class: 'bg-slate-100 text-slate-600' };
+							const typeStr = mapping.type[item.type] || '一般';
 							html += `
 								<div class="flex items-center justify-between text-xs py-1 px-1.5 rounded hover:bg-slate-200/40 transition-colors min-w-0">
 									<div class="flex items-center gap-2 min-w-0 flex-wrap">
 										<span class="font-bold text-slate-800 truncate max-w-[120px] xs:max-w-none">${item.name}</span>
-										<span class="text-[9px] scale-90 ${mapping.cat[item.cat].class} py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.cat[item.cat].text}</span>
-										<span class="text-[9px] scale-90 bg-slate-100 text-slate-600 border border-slate-200 py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.type[item.type]}</span>
+										<span class="text-[9px] scale-90 ${catObj.class} py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${catObj.text}</span>
+										<span class="text-[9px] scale-90 bg-slate-100 text-slate-600 border border-slate-200 py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${typeStr}</span>
 									</div>
 									<span class="font-extrabold text-red-500 shrink-0 pl-1">${item.val} 學分</span>
 								</div>`;
