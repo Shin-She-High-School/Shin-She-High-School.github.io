@@ -114,7 +114,7 @@
 		.admin-table-container { display: none; }
 		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1020px; }
 		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; color: #1e293b; font-weight: 600; }
-		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 310px !important; min-width: 310px !important; }
+		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 350px !important; min-width: 350px !important; }
 		.admin-table th { background: #e2e8f0; color: #0f172a; font-weight: 800; }
 		.admin-table tr:hover { background-color: #f1f5f9; }
 		.admin-cards-grid { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 15px; }
@@ -283,10 +283,10 @@
 							<colgroup>
 								<col style="width: 11%; min-width: 90px;">
 								<col style="width: 11%; min-width: 90px;">
-								<col style="width: 9%; min-width: 75px;">
-								<col style="width: 22%; min-width: 150px;">
+								<col style="width: 8%; min-width: 75px;">
 								<col style="width: 20%; min-width: 150px;">
-								<col style="width: 310px; min-width: 310px;">
+								<col style="width: 15%; min-width: 150px;">
+								<col style="width: 350px; min-width: 350px;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -2847,7 +2847,7 @@
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[310px] shrink-0">';
+				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[350px] shrink-0">';
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
