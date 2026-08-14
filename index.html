@@ -401,7 +401,7 @@
 						<button type="button" class="px-2.5 py-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-lg shrink-0 transition shadow-sm whitespace-nowrap" onclick="customResetPassword()">確認重設</button>
 					</div>
 					<button type="button" class="action-btn shrink-0 w-full sm:w-auto" style="border-radius: 8px; background: linear-gradient(135deg, #6366f1, #4f46e5); font-size: 0.8rem; padding: 9px 10px; margin: 0; white-space: nowrap;" onclick="directResetPasswordToSid()">
-						⚡ 一鍵重設為「帳號」
+						重設為「帳號」
 					</button>
 				</div>
 				<p style="font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.4;">※ 點擊任意重設按鈕後，系統會立即將該使用者的登入密碼覆寫。</p>
@@ -2276,7 +2276,7 @@
 					if (error) throw error;
 					updateSyncStatusIndicator('success');
 					showMsg(`已成功將「${name}」的密碼重置為「${sid}」！`);
-					logAuditRecord("重設帳號密碼", sid, name, { method: "一鍵重設為帳號" });
+					logAuditRecord("重設帳號密碼", sid, name, { method: "重設為帳號" });
 					toggleUIModal(false, 'confirmModal'); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
 				} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
 			});
