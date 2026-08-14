@@ -34,9 +34,10 @@
 			-webkit-font-smoothing: antialiased;
 			-moz-osx-font-smoothing: grayscale;
 			text-rendering: optimizeLegibility;
+			overflow-x: hidden;
 		}
 		@media (min-width: 768px) { html, body { font-size: 16px; } }
-		.app-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
+		.app-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; overflow-x: hidden; }
 		.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
 		.custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
 		.custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
@@ -78,7 +79,7 @@
 		.card-progress-bg { width: 100%; background-color: #cbd5e1; height: 7px; border-radius: 4px; margin-top: 8px; overflow: hidden; }
 		.card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 		.btn-group { display: flex; gap: 8px; margin-top: 15px; width: 100%; box-sizing: border-box; flex-wrap: wrap; }
-		.action-btn { flex: 1 1 calc(50% - 4px); min-width: 110px; padding: 12px 6px; border: none; border-radius: 10px; font-size: 0.88rem; font-weight: 800; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; text-align: center; text-overflow: ellipsis; overflow: hidden; box-sizing: border-box; }
+		.action-btn { flex: 1 1 calc(50% - 4px); min-width: 110px; padding: 12px 6px; border: none; border-radius: 10px; font-size: 0.88rem; font-weight: 800; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); text-align: center; box-sizing: border-box; }
 		@media (min-width: 768px) { .btn-group { gap: 12px; } .action-btn { flex: 1; padding: 12px 16px; font-size: 0.95rem; } }
 		.btn-pass-all { background: linear-gradient(135deg, #059669, #047857); }
 		.btn-fail-all { background: linear-gradient(135deg, #64748b, #475569); }
@@ -122,30 +123,29 @@
 		.bg-dept-main { background-color: #fee2e2 !important; color: #7f1d1d !important; border: 1px solid #fca5a5 !important; }
 		.bg-sch-req-main { background-color: #dcfce7 !important; color: #14532d !important; border: 1px solid #86efac !important; }
 		.bg-sch-opt-main { background-color: #dbeafe !important; color: #1e3a8a !important; border: 1px solid #93c5fd !important; }
-		.modal-overlay { display: none; position: fixed !important; z-index: 99999 !important; left: 0; top: 0; width: 100vw; height: 100vh; height: 100dvh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; box-sizing: border-box; padding: 16px; }
-		.modal-content { background-color: #fff; width: 100%; max-width: 500px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); position: relative; max-height: 80dvh; overflow-y: auto; animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); box-sizing: border-box; margin: auto; }
+		.modal-overlay { display: none; position: fixed !important; z-index: 99999 !important; left: 0; top: 0; width: 100vw; height: 100vh; height: 100dvh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; box-sizing: border-box; padding: 16px; overflow-x: hidden; }
+		.modal-content { background-color: #fff; width: 100%; max-width: 500px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); position: relative; max-height: 80dvh; overflow-y: auto; overflow-x: hidden; animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); box-sizing: border-box; margin: auto; }
 		.modal-header { font-size: 1.3rem; font-weight: 800; margin-bottom: 18px; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 14px; display: flex; justify-content: space-between; align-items: center; color: #0f172a; }
 		.close-modal-btn { font-size: 2rem; color: #64748b; cursor: pointer; line-height: 1; padding: 0 5px; transition: color 0.2s; font-weight: 800; }
 		.close-modal-btn:hover { color: #0f172a; }
 		.modal-body { font-size: 1rem; line-height: 1.7; color: #334155; font-weight: 500; }
 
-		.admin-backend { display: none; padding: 16px; background: white; margin: 15px 0; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); border: 1.5px solid #cbd5e1; box-sizing: border-box; }
+		.admin-backend { display: none; padding: 16px; background: white; margin: 15px 0; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); border: 1.5px solid #cbd5e1; box-sizing: border-box; overflow-x: hidden; }
 		@media (min-width: 640px) { .admin-backend { padding: 24px; } }
 		.admin-header { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; color: #0f172a; border-left: 6px solid #4f46e5; padding-left: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 		.admin-toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1.5px solid #cbd5e1; box-sizing: border-box; }
 		.admin-toolbar > * { flex: 1; min-width: 130px; }
 		@media (max-width: 640px) { .admin-toolbar > * { flex: 1 1 calc(50% - 6px) !important; } #adminSearchInput { flex: 1 1 100% !important; } }
-		.admin-table-container { display: none; }
-		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1100px; }
-		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; color: #1e293b; font-weight: 600; }
-		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 380px !important; min-width: 380px !important; }
+		.admin-table-container { display: none; width: 100%; overflow-x: hidden; }
+		.admin-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 12px 8px; text-align: left; font-size: 0.9rem; color: #1e293b; font-weight: 600; word-break: break-word; vertical-align: middle; }
 		.admin-table th { background: #e2e8f0; color: #0f172a; font-weight: 800; }
 		.admin-table tr:hover { background-color: #f1f5f9; }
 		.admin-cards-grid { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 15px; }
 		@media (min-width: 640px) and (max-width: 1024px) { .admin-cards-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 		@media (min-width: 1025px) { .admin-table-container { display: block !important; } }
 		@media (max-width: 1024px) { .admin-cards-grid { display: grid !important; } }
-		.btn-mini { display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; height: 34px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.82rem; color: white; font-weight: 800; transition: opacity 0.2s, transform 0.1s; box-sizing: border-box; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; shadow: 0 1px 2px rgba(0,0,0,0.05); }
+		.btn-mini { display: inline-flex; align-items: center; justify-content: center; padding: 6px 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; color: white; font-weight: 800; transition: opacity 0.2s, transform 0.1s; box-sizing: border-box; text-align: center; }
 		.btn-mini:hover { opacity: 0.92; transform: translateY(-1px); }
 		.input-group { margin-bottom: 16px; text-align: left; }
 		.input-group label { display: block; margin-bottom: 6px; font-weight: 800; font-size: 0.92rem; color: #1e293b; }
@@ -154,7 +154,7 @@
 		.input-group select:disabled { background-color: #e2e8f0; cursor: not-allowed; color: #475569; font-weight: 700; }
 		.sort-select, .admin-filter-input { padding: 10px; border-radius: 8px; border: 1.5px solid #94a3b8; font-size: 0.92rem; outline: none; color: #0f172a; background-color: #fff; font-weight: 600; }
 		.sort-select:focus, .admin-filter-input:focus { border-color: #4f46e5; }
-		.role-badge { padding: 4px 9px; border-radius: 6px; font-size: 0.78rem; color: white; font-weight: 800; }
+		.role-badge { padding: 4px 9px; border-radius: 6px; font-size: 0.78rem; color: white; font-weight: 800; display: inline-block; }
 		.badge-student { background-color: #2563eb; }
 		.badge-teacher { background-color: #059669; }
 		.badge-admin { background-color: #4f46e5; }
@@ -163,7 +163,7 @@
 		@keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 	</style>
 </head>
-<body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col">
+<body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-x-hidden overflow-y-hidden flex flex-col">
 	<div id="msgBox"></div>
 
 	<div id="authWorkspace">
@@ -214,7 +214,7 @@
 			</div>
 		</div>
 
-		<div id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar pb-[calc(96px+env(safe-area-inset-bottom,24px))]">
+		<div id="scrollContainer" class="flex-grow overflow-y-auto overflow-x-hidden custom-scrollbar pb-[calc(96px+env(safe-area-inset-bottom,24px))]">
 			<div id="dashboardSection" class="app-container mt-4" style="display: none;">
 				<div class="bg-white border border-slate-200 rounded-2xl py-6 px-5 shadow-sm">
 					<div id="curriculumSelectorArea" class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center mb-6 pb-4 border-b border-slate-100">
@@ -301,15 +301,15 @@
 							<option value="name">姓名排序</option>
 						</select>
 					</div>
-					<div id="adminTableContainer" class="admin-table-container overflow-x-auto w-full custom-scrollbar" style="-webkit-overflow-scrolling: touch;">
-						<table class="admin-table">
+					<div id="adminTableContainer" class="admin-table-container w-full overflow-x-hidden">
+						<table class="admin-table w-full">
 							<colgroup>
-								<col style="width: 9%; min-width: 85px;">
-								<col style="width: 11%; min-width: 95px;">
-								<col style="width: 8%; min-width: 75px;">
-								<col style="width: 22%; min-width: 180px;">
-								<col style="width: 15%; min-width: 140px;">
-								<col style="width: 35%; min-width: 380px;">
+								<col style="width: 10%;">
+								<col style="width: 12%;">
+								<col style="width: 8%;">
+								<col style="width: 24%;">
+								<col style="width: 16%;">
+								<col style="width: 30%;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -420,7 +420,6 @@
 				<span class="close-modal-btn" onclick="toggleUIModal(false,'auditLogModal')">&times;</span>
 			</div>
 
-			<!-- 統計分析概覽 -->
 			<div id="auditAnalyticsPanel" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
 				<div class="bg-indigo-50/80 border border-indigo-200 p-3 rounded-xl">
 					<div class="text-[11px] font-black text-indigo-700 uppercase">總稽核筆數</div>
@@ -440,7 +439,6 @@
 				</div>
 			</div>
 
-			<!-- 篩選工具列 -->
 			<div class="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 				<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 					<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
@@ -473,20 +471,21 @@
 					</div>
 					<div class="flex items-center gap-2 w-full sm:w-auto justify-end">
 						<button type="button" class="text-xs font-extrabold text-slate-600 hover:text-slate-900 bg-white border border-slate-300 px-3 py-1.5 rounded-lg shadow-sm transition" onclick="resetAuditFilters()">重設篩選</button>
+						<button type="button" class="text-xs font-extrabold text-indigo-700 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg shadow-sm transition flex items-center gap-1" onclick="refreshAuditLogs()">🔄 重新整理</button>
 						<span id="auditCountText" class="text-xs font-bold text-slate-500">共 0 筆紀錄</span>
 					</div>
 				</div>
 			</div>
 
 			<div class="modal-body">
-				<div class="overflow-x-auto w-full custom-scrollbar max-h-[50dvh] border border-slate-200 rounded-xl">
-					<table class="w-full border-collapse text-left text-xs min-w-[760px]">
+				<div class="w-full custom-scrollbar max-h-[50dvh] overflow-y-auto border border-slate-200 rounded-xl">
+					<table class="w-full border-collapse text-left text-xs">
 						<thead>
 							<tr class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
-								<th class="p-3 w-36">異動時間</th>
-								<th class="p-3 w-32">操作者 (IP)</th>
-								<th class="p-3 w-32">目標對象</th>
-								<th class="p-3 w-28">異動項目</th>
+								<th class="p-3">異動時間</th>
+								<th class="p-3">操作者 (IP)</th>
+								<th class="p-3">目標對象</th>
+								<th class="p-3">異動項目</th>
 								<th class="p-3">前後比對與詳細變更紀錄</th>
 							</tr>
 						</thead>
@@ -1661,14 +1660,12 @@
 				const ip = await getClientIP();
 				const curRec = userDBRecord || user?.user_metadata || {};
 				
-				// 驗證 operator_id 是否符合 UUID 格式，防止外鍵約束報錯
 				let opId = user?.id || null;
 				const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 				if (opId && !uuidRegex.test(opId)) {
 					opId = null;
 				}
 
-				// 精確對照 public.audit_logs 資料表 Schema
 				const payload = {
 					operator_id: opId,
 					operator_name: curRec.full_name || '未知使用者',
@@ -1682,19 +1679,15 @@
 					created_at: new Date().toISOString()
 				};
 
-				// 直連即時寫入 Supabase audit_logs 資料表
 				const { error } = await dbClient.from('audit_logs').insert([payload]);
 				if (error) {
 					console.error('Supabase audit_logs 寫入失敗:', error);
-					// 若因外鍵 constraints 失敗，嘗試移除 operator_id 後重試一次
 					if (error.code === '23503' && opId) {
 						payload.operator_id = null;
 						await dbClient.from('audit_logs').insert([payload]);
 					} else if (error.code === '42501') {
 						showMsg("稽核紀錄寫入失敗：Supabase RLS 權限尚未開啟！", "error");
 					}
-				} else {
-					console.log('Supabase audit_logs 即時寫入成功:', actionType);
 				}
 			} catch (e) {
 				console.error('Audit log write exception:', e);
@@ -1729,7 +1722,6 @@
 			try {
 				const { data, error } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(500);
 				if (error) {
-					console.warn("Supabase audit_logs fetch error:", error);
 					dbErrorMsg = error.message || 'Supabase 尚未建立 audit_logs 資料表';
 				} else {
 					remoteLogs = data || [];
@@ -1738,10 +1730,7 @@
 				dbErrorMsg = e.message || '資料庫連線失敗';
 			}
 
-			// 自動清理過往殘留的本地暫存，避免資料重複
 			try { localStorage.removeItem('sshs_audit_logs'); } catch (e) {}
-
-			// 100% 採用 Supabase 雲端資料庫資料
 			auditLogsData = remoteLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 			renderAuditLogList(dbErrorMsg);
 		};
@@ -1778,13 +1767,8 @@
 				);
 			}
 
-			if (actionFilter !== 'all') {
-				filtered = filtered.filter(l => l.action_type === actionFilter);
-			}
-
-			if (roleFilter !== 'all') {
-				filtered = filtered.filter(l => l.operator_role === roleFilter);
-			}
+			if (actionFilter !== 'all') filtered = filtered.filter(l => l.action_type === actionFilter);
+			if (roleFilter !== 'all') filtered = filtered.filter(l => l.operator_role === roleFilter);
 
 			if (startDate) {
 				const startMs = new Date(startDate + 'T00:00:00').getTime();
@@ -1855,7 +1839,7 @@
 				}
 
 				tr.innerHTML = `
-					<td class="p-3 text-slate-500 whitespace-nowrap">${timeStr}</td>
+					<td class="p-3 text-slate-500 break-words">${timeStr}</td>
 					<td class="p-3 font-bold min-w-0">
 						<div class="text-slate-800">${log.operator_name || '系統'} <span class="text-[10px] text-slate-400">(${mapping.role[log.operator_role] || log.operator_role})</span></div>
 						<div class="text-[10px] font-mono text-slate-400 mt-0.5">${log.ip_address || '未知 IP'}</div>
@@ -1864,7 +1848,7 @@
 						<div>${log.target_student_name || '-'}</div>
 						<div class="text-[10px] text-slate-400 font-normal">${log.target_student_id || ''}</div>
 					</td>
-					<td class="p-3"><span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-black text-[11px] whitespace-nowrap">${log.action_type}</span></td>
+					<td class="p-3"><span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-black text-[11px] inline-block">${log.action_type}</span></td>
 					<td class="p-3 text-slate-700">${diffHtml}</td>
 				`;
 				listBody.appendChild(tr);
@@ -2962,14 +2946,14 @@
 				const roleClass = s.role === 'admin' ? 'badge-admin' : (s.role === 'teacher' ? 'badge-teacher' : 'badge-student'),
 					classInfo = (s.entry_year === '未設定' || s.entry_dept === '未設定') ? '未設定' : `${s.entry_year}年/${s.entry_dept}`,
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
-					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
+					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[380px] shrink-0">';
+				let btnsDesktop = '<div class="flex flex-wrap gap-1.5 items-center w-full">';
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
 					if (role === 'admin') {
-						btnsDesktop += `<button class="btn-mini" style="background:#6366f1; padding: 0 8px;" onclick="openAuditLogModal('${s.student_id}')" title="檢視個人異動歷程">📜 歷程</button>`;
+						btnsDesktop += `<button class="btn-mini" style="background:#6366f1;" onclick="openAuditLogModal('${s.student_id}')" title="檢視個人異動歷程">📜 歷程</button>`;
 					}
 				}
 				if (role === 'admin') {
@@ -2980,7 +2964,7 @@
 									<button class="btn-mini flex-1" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				}
 				btnsDesktop += '</div>';
-				tr.innerHTML = `<td><b>${s.full_name}</b></td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${mapping.role[s.role] || '使用者'}</span></td><td>${classInfo}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
+				tr.innerHTML = `<td class="font-bold">${s.full_name}</td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${mapping.role[s.role] || '使用者'}</span></td><td class="break-words">${classInfo}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
 				tableBody.appendChild(tr);
 
 				const card = document.createElement('div');
@@ -3007,9 +2991,9 @@
 						</div>
 						<span class="role-badge ${roleClass} text-xs py-1 px-2.5 rounded-full font-bold text-white shrink-0">${mapping.role[s.role] || '使用者'}</span>
 					</div>
-					<div class="text-xs text-slate-600 flex justify-between items-center"><span>入學年 / 科別:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
+					<div class="text-xs text-slate-600 flex justify-between items-center"><span>入學年 / 科別:</span><span class="font-semibold text-slate-800 break-words">${classInfo}</span></div>
 					<div class="text-xs text-slate-600 flex justify-between items-center border-t border-dashed border-slate-200 pt-2"><span>畢業門檻資格:</span><div>${evalRes ? `<span class="text-[0.68rem] font-bold px-2 py-0.5 rounded-md ${evalRes.badgeClass}">${evalRes.statusText} (${evalRes.total}學分)</span>` : '<span class="text-slate-400 font-semibold">-</span>'}</div></div>
-					<div class="flex gap-1.5 flex-nowrap mt-1 w-full">${btnsMobile}</div>
+					<div class="flex gap-1.5 flex-wrap mt-1 w-full">${btnsMobile}</div>
 				`;
 				cardsContainer.appendChild(card);
 			});
@@ -3250,7 +3234,7 @@
 						<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
 							<div class="sem-progress-bar bg-emerald-500 h-full transition-all duration-300" style="width: ${pct}%;"></div>
 						</div>
-						<div class="flex gap-2 mb-3 pt-1 border-b border-slate-100 pb-3">
+						<div class="flex gap-2 mb-3 pt-1 border-b border-slate-100 pb-3 flex-wrap">
 							<button type="button" class="flex-1 py-1.5 px-2 text-xs font-extrabold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition" onclick="setSemesterStatus(${sIdx}, true)">✔ 本學期全部及格</button>
 							<button type="button" class="flex-1 py-1.5 px-2 text-xs font-extrabold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg transition" onclick="setSemesterStatus(${sIdx}, false)">✕ 本學期學分歸零</button>
 						</div>
@@ -3361,8 +3345,8 @@
 								<div class="flex items-center justify-between text-xs py-1 px-1.5 rounded hover:bg-slate-200/40 transition-colors min-w-0">
 									<div class="flex items-center gap-2 min-w-0 flex-wrap">
 										<span class="font-bold text-slate-800 truncate max-w-[120px] xs:max-w-none">${item.name}</span>
-										<span class="text-[9px] scale-90 ${mapping.cat[item.cat].class} py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.cat[item.cat].text}</span>
-										<span class="text-[9px] scale-90 bg-slate-100 text-slate-600 border border-slate-200 py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.type[item.type]}</span>
+										<span class="text-[9px] scale-90 ${mapping.cat[item.cat].class} py-0.5 px-2 rounded-full font-bold shrink-0">${mapping.cat[item.cat].text}</span>
+										<span class="text-[9px] scale-90 bg-slate-100 text-slate-600 border border-slate-200 py-0.5 px-2 rounded-full font-bold shrink-0">${mapping.type[item.type]}</span>
 									</div>
 									<span class="font-extrabold text-red-500 shrink-0 pl-1">${item.val} 學分</span>
 								</div>`;
