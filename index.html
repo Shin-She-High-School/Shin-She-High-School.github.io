@@ -26,6 +26,7 @@
 		.custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
 		.custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
 		.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+		
 		#authWorkspace { position: fixed; inset: 0; background: linear-gradient(135deg, #052e16 0%, #022c22 40%, #091a14 100%); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 9999; overflow: hidden; }
 		.auth-glow-1 { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0) 70%); top: -150px; right: -150px; pointer-events: none; }
 		.auth-glow-2 { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 70%); bottom: -200px; left: -200px; pointer-events: none; }
@@ -41,6 +42,7 @@
 		.auth-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3); filter: brightness(1.05); }
 		.auth-switch-link { text-align: center; margin-top: 20px; font-size: 0.88rem; color: #334155; cursor: pointer; font-weight: 700; transition: color 0.2s; }
 		.auth-switch-link:hover { color: #059669; text-decoration: underline; }
+
 		#statusHeader { background: linear-gradient(135deg, #0f172a, #020617); color: #f8fafc; padding-top: calc(12px + env(safe-area-inset-top, 0px)); padding-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
 		#userStatusDisplay { font-size: 0.92rem; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; width: 100%; }
 		.user-info-actions { display: flex; align-items: center; gap: 12px; }
@@ -68,6 +70,7 @@
 		.btn-help { background: linear-gradient(135deg, #0891b2, #0e7490); }
 		.btn-cloud { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 		.btn-admin { background: linear-gradient(135deg, #4f46e5, #4338ca); }
+
 		.mobile-cards-grid { display: grid !important; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 30px; }
 		.mobile-card { background-color: white; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; min-width: 0; }
 		.mobile-semesters-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -110,6 +113,7 @@
 		.close-modal-btn { font-size: 2rem; color: #64748b; cursor: pointer; line-height: 1; padding: 0 5px; transition: color 0.2s; font-weight: 800; }
 		.close-modal-btn:hover { color: #0f172a; }
 		.modal-body { font-size: 1rem; line-height: 1.7; color: #334155; font-weight: 500; }
+
 		.admin-backend { display: none; padding: 16px; background: white; margin: 15px 0; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); border: 1.5px solid #cbd5e1; box-sizing: border-box; }
 		@media (min-width: 640px) { .admin-backend { padding: 24px; } }
 		.admin-header { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; color: #0f172a; border-left: 6px solid #4f46e5; padding-left: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
@@ -117,9 +121,9 @@
 		.admin-toolbar > * { flex: 1; min-width: 130px; }
 		@media (max-width: 640px) { .admin-toolbar > * { flex: 1 1 calc(50% - 6px) !important; } #adminSearchInput { flex: 1 1 100% !important; } }
 		.admin-table-container { display: none; }
-		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 900px; }
-		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 14px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; color: #1e293b; font-weight: 600; }
-		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 330px !important; min-width: 330px !important; }
+		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1020px; }
+		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; color: #1e293b; font-weight: 600; }
+		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 310px !important; min-width: 310px !important; }
 		.admin-table th { background: #e2e8f0; color: #0f172a; font-weight: 800; }
 		.admin-table tr:hover { background-color: #f1f5f9; }
 		.admin-cards-grid { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 15px; }
@@ -280,12 +284,12 @@
 					<div id="adminTableContainer" class="admin-table-container overflow-x-auto w-full custom-scrollbar" style="-webkit-overflow-scrolling: touch;">
 						<table class="admin-table">
 							<colgroup>
-								<col style="width: 12%; min-width: 80px;">
-								<col style="width: 12%; min-width: 80px;">
-								<col style="width: 10%; min-width: 70px;">
-								<col style="width: 20%; min-width: 120px;">
-								<col style="width: 22%; min-width: 140px;">
-								<col style="width: 24%; min-width: 330px;">
+								<col style="width: 11%; min-width: 90px;">
+								<col style="width: 11%; min-width: 90px;">
+								<col style="width: 9%; min-width: 75px;">
+								<col style="width: 22%; min-width: 150px;">
+								<col style="width: 20%; min-width: 150px;">
+								<col style="width: 310px; min-width: 310px;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -1493,7 +1497,7 @@
 				dashboard = document.getElementById('dashboardSection'), userStatusDisplay = document.getElementById('userStatusDisplay'),
 				saveBtn = document.getElementById('saveBtn'), backToTrialAdminBtn = document.getElementById('backToTrialBtn'),
 				adminEditBanner = document.getElementById('adminEditBanner'),
-				layoutSwitcher = document.getElementById('layoutSwitcherArea'), currArea = document.getElementById('curriculumSelectorArea');
+				layoutSwitcher = document.getElementById('layoutSwitcherArea');
 			if (currentUser) {
 				updateHash();
 				const savedLayout = sessionStorage.getItem('tempLayoutMode');
@@ -1919,7 +1923,7 @@
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 w-[310px] min-w-[310px] items-center">';
+				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[295px] shrink-0">';
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${s.id}','${s.full_name}')">檢視學分狀態</button>`;
 				}
