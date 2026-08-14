@@ -253,6 +253,7 @@
 						<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
 							<span id="backendTitle">資料管理</span>
 							<button id="backToTrialBtn" class="btn-mini" style="background:#6c757d; display:none;" onclick="handleReturnToTrial()">返回檢核表試算</button>
+							<button id="auditLogHeaderBtn" class="btn-mini" style="background:#4f46e5; display:none;" onclick="openAuditLogModal()">📜 歷史異動紀錄</button>
 						</div>
 					</div>
 
@@ -390,6 +391,39 @@
 				<p style="font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.4;">※ 點擊任意重設按鈕後，系統會立即將該使用者的登入密碼覆寫。</p>
 			</div>
 			<button class="action-btn btn-admin" style="width:100%; margin-top: 15px;" onclick="saveAdminUserEdit()">儲存帳號修改</button>
+		</div>
+	</div>
+
+	<div id="auditLogModal" class="modal-overlay" onclick="handleOutsideClick(event)">
+		<div class="modal-content !max-w-4xl !w-full">
+			<div class="modal-header">
+				<span class="font-black text-slate-800 text-xl flex items-center gap-2">
+					<span class="w-2.5 h-5 rounded-full bg-indigo-600"></span>
+					📜 系統歷史異動紀錄 (Audit Logs)
+				</span>
+				<span class="close-modal-btn" onclick="toggleUIModal(false,'auditLogModal')">&times;</span>
+			</div>
+			<div class="mb-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
+				<input type="text" id="auditSearchInput" class="admin-filter-input w-full sm:w-72" placeholder="搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
+				<span id="auditCountText" class="text-xs font-bold text-slate-500 shrink-0">共 0 筆紀錄</span>
+			</div>
+			<div class="modal-body">
+				<div class="overflow-x-auto w-full custom-scrollbar max-h-[55dvh] border border-slate-200 rounded-xl">
+					<table class="w-full border-collapse text-left text-xs min-w-[700px]">
+						<thead>
+							<tr class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
+								<th class="p-3 w-36">異動時間</th>
+								<th class="p-3 w-28">操作者</th>
+								<th class="p-3 w-28">目標學生</th>
+								<th class="p-3 w-32">異動項目</th>
+								<th class="p-3 w-28">IP 位置</th>
+								<th class="p-3">詳細備註</th>
+							</tr>
+						</thead>
+						<tbody id="auditLogListBody" class="divide-y divide-slate-100 font-semibold text-slate-800"></tbody>
+					</table>
+				</div>
+			</div>
 		</div>
 	</div>
 
@@ -1002,10 +1036,119 @@
 		} catch (e) { console.warn(e); }
 
 		let currentUser = null, DEPT_THRESHOLD = 0, userDBRecord = null, activeStudentDBRecord = null,
-			hasLoadedInitialData = false, lastLoadedStudentId = null, adminListData = [], teacherNames = [],
+			hasLoadedInitialData = false, lastLoadedStudentId = null, adminListData = [], auditLogsData = [], teacherNames = [],
 			isViewingClassList = false, editingStudentId = null, confirmAction = null,
 			currentYear = "113", currentDept = "普通科(文史法商群)-1", lastUserId = null, currentLayoutMode = "subject",
 			currentUncheckedCredits = [];
+
+		window.getClientIP = async function() {
+			try {
+				const controller = new AbortController();
+				const timeoutId = setTimeout(() => controller.abort(), 2000);
+				const res = await fetch('https://api.ipify.org?format=json', { signal: controller.signal });
+				const data = await res.json();
+				return data.ip || '未知 IP';
+			} catch (e) {
+				return '內網/無法取得 IP';
+			}
+		};
+
+		window.logAuditRecord = async function(actionType, targetSid, targetName, details) {
+			if (!dbClient || !currentUser) return;
+			try {
+				const ip = await getClientIP();
+				const curRec = userDBRecord || currentUser?.user_metadata || {};
+				const payload = {
+					operator_id: currentUser.id,
+					operator_name: curRec.full_name || '未知使用者',
+					operator_role: curRec.role || 'student',
+					target_student_id: targetSid || '無',
+					target_student_name: targetName || '無',
+					action_type: actionType,
+					details: details || {},
+					ip_address: ip,
+					user_agent: navigator.userAgent,
+					created_at: new Date().toISOString()
+				};
+				await dbClient.from('audit_logs').insert([payload]);
+			} catch (e) {
+				console.warn('Audit log write skipped or table missing:', e);
+			}
+		};
+
+		window.openAuditLogModal = async function(filterStudentId = null) {
+			if (!dbClient) return;
+			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+			if (role !== 'admin') {
+				showMsg("僅系統管理員有權限檢視歷史異動紀錄！", "error");
+				return;
+			}
+			toggleUIModal(true, 'auditLogModal');
+			const searchInput = document.getElementById('auditSearchInput');
+			if (filterStudentId && searchInput) {
+				searchInput.value = filterStudentId;
+			} else if (searchInput) {
+				searchInput.value = '';
+			}
+			try {
+				const { data } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(200);
+				auditLogsData = data || [];
+				renderAuditLogList();
+			} catch (e) {
+				console.warn('Failed to fetch audit logs:', e);
+				auditLogsData = [];
+				renderAuditLogList();
+			}
+		};
+
+		window.renderAuditLogList = function() {
+			const searchTxt = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
+			const listBody = document.getElementById('auditLogListBody');
+			const countText = document.getElementById('auditCountText');
+			if (!listBody) return;
+
+			let filtered = [...auditLogsData];
+			if (searchTxt) {
+				filtered = filtered.filter(l => 
+					(l.operator_name && l.operator_name.toLowerCase().includes(searchTxt)) ||
+					(l.target_student_name && l.target_student_name.toLowerCase().includes(searchTxt)) ||
+					(l.target_student_id && l.target_student_id.toLowerCase().includes(searchTxt)) ||
+					(l.action_type && l.action_type.toLowerCase().includes(searchTxt)) ||
+					(l.ip_address && l.ip_address.toLowerCase().includes(searchTxt))
+				);
+			}
+
+			if (countText) countText.innerText = `共 ${filtered.length} 筆紀錄`;
+			listBody.innerHTML = '';
+
+			if (filtered.length === 0) {
+				listBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 font-bold">尚無異動紀錄資料</td></tr>`;
+				return;
+			}
+
+			filtered.forEach(log => {
+				const timeStr = log.created_at ? new Date(log.created_at).toLocaleString('zh-TW', { hour12: false }) : '-';
+				const tr = document.createElement('tr');
+				tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
+				
+				let detailsText = '';
+				if (typeof log.details === 'string') {
+					detailsText = log.details;
+				} else if (log.details && typeof log.details === 'object') {
+					detailsText = JSON.stringify(log.details);
+				}
+
+				tr.innerHTML = `
+					<td class="p-3 text-slate-500 whitespace-nowrap">${timeStr}</td>
+					<td class="p-3 font-bold">${log.operator_name || '系統'} <span class="text-[10px] text-slate-400">(${mapping.role[log.operator_role] || log.operator_role})</span></td>
+					<td class="p-3 font-bold text-indigo-700">${log.target_student_name || '-'}<br><span class="text-[10px] text-slate-400">${log.target_student_id || ''}</span></td>
+					<td class="p-3"><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-extrabold text-[11px]">${log.action_type}</span></td>
+					<td class="p-3 text-slate-600 font-mono text-[11px]">${log.ip_address || '未知'}</td>
+					<td class="p-3 text-slate-500 max-w-xs truncate" title="${detailsText.replace(/"/g, '&quot;')}">${detailsText || '-'}</td>
+				`;
+				listBody.appendChild(tr);
+			});
+		};
 
 		window.initDropdowns = function(isAdmin = false) {
 			const yearSelects = ['authEntryYear', 'dashSelectYear', 'profEntryYear', 'editUserEntryYear'];
@@ -1080,7 +1223,9 @@
 		window.updateHash = function() {
 			if (!currentUser) return;
 			if (editingStudentId) {
-				window.location.hash = `#${editingStudentId}`;
+				const curRec = activeStudentDBRecord;
+				const sid = curRec?.student_id || editingStudentId;
+				window.location.hash = `#${sid}`;
 			} else if (isViewingClassList) {
 				window.location.hash = '#class-data';
 			} else {
@@ -1336,6 +1481,22 @@
 			calculate();
 			saveToCloud(true);
 			renderTable();
+			const targetRec = editingStudentId ? activeStudentDBRecord : userDBRecord;
+			logAuditRecord(p ? "批次全部及格" : "批次學分歸零", targetRec?.student_id, targetRec?.full_name, { mode: "全課表" });
+		};
+
+		window.setSemesterStatus = function(sIdx, p) {
+			if (curriculum.length === 0) return;
+			const semNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
+			document.querySelectorAll(`.toggle-checkbox[data-sem="${sIdx}"]`).forEach(chk => {
+				chk.checked = p;
+			});
+			calculate();
+			saveToCloud(true);
+			renderTable();
+			showMsg(p ? `已將 ${semNames[sIdx]} 設為全部及格` : `已將 ${semNames[sIdx]} 學分歸零`);
+			const targetRec = editingStudentId ? activeStudentDBRecord : userDBRecord;
+			logAuditRecord(p ? "單學期全選及格" : "單學期學分歸零", targetRec?.student_id, targetRec?.full_name, { semester: semNames[sIdx] });
 		};
 
 		window.initHelpModalScrollGuard = function() {
@@ -1394,13 +1555,14 @@
 					if (error) throw error;
 					updateSyncStatusIndicator('success');
 					showMsg(`已成功將「${name}」的密碼重置為「${sid}」！`);
+					logAuditRecord("重設帳號密碼", sid, name, { method: "一鍵重設為帳號" });
 					toggleUIModal(false, 'confirmModal'); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
 				} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
 			});
 		};
 
 		window.customResetPassword = async function() {
-			const id = document.getElementById('editUserId').value, name = document.getElementById('editUserName').value.trim();
+			const id = document.getElementById('editUserId').value, name = document.getElementById('editUserName').value.trim(), sid = document.getElementById('editUserSid').value.trim();
 			const newPwd = document.getElementById('editUserCustomPassword').value.trim();
 			if (!newPwd) { showMsg("請輸入自訂新密碼！", "error"); return; }
 			if (newPwd.length < 6) { showMsg("密碼長度至少需 6 個字元！", "error"); return; }
@@ -1411,6 +1573,7 @@
 					if (error) throw error;
 					updateSyncStatusIndicator('success');
 					showMsg(`已成功將「${name}」的密碼重置！`);
+					logAuditRecord("重設帳號密碼", sid, name, { method: "自訂密碼" });
 					document.getElementById('editUserCustomPassword').value = '';
 					toggleUIModal(false, 'confirmModal'); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
 				} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
@@ -1434,6 +1597,7 @@
 					});
 					if (error) throw error;
 					updateSyncStatusIndicator('success'); showMsg("註冊成功！"); switchAuthMode();
+					logAuditRecord("使用者註冊", cleanSid, name, { year: entryYear, dept: entryDept });
 				} else {
 					const { error } = await dbClient.auth.signInWithPassword({ email, password: pwd });
 					if (error) throw error;
@@ -1441,6 +1605,7 @@
 					updateSyncStatusIndicator('success'); showMsg("登入成功！");
 					document.getElementById('authWorkspace').style.display = 'none'; document.getElementById('appWorkspace').style.display = 'flex';
 					hasLoadedInitialData = false; updateUI();
+					logAuditRecord("使用者登入", cleanSid, cleanSid, { status: "登入成功" });
 				}
 			} catch (e) { updateSyncStatusIndicator('offline'); showMsg(translateError(e.message), 'error'); }
 		};
@@ -1455,7 +1620,17 @@
 			initDropdowns(false);
 		};
 
-		window.handleLogout = async function() { try { if (dbClient) await dbClient.auth.signOut(); window.location.hash = ''; window.location.reload(); } catch (e) { showMsg("登出失敗", 'error'); } };
+		window.handleLogout = async function() { 
+			try { 
+				if (currentUser) {
+					const curRec = userDBRecord || currentUser?.user_metadata || {};
+					logAuditRecord("使用者登出", curRec.student_id, curRec.full_name, { status: "登出成功" });
+				}
+				if (dbClient) await dbClient.auth.signOut(); 
+				window.location.hash = ''; 
+				window.location.reload(); 
+			} catch (e) { showMsg("登出失敗", 'error'); } 
+		};
 
 		if (dbClient) {
 			dbClient.auth.onAuthStateChange((event, session) => {
@@ -1544,6 +1719,10 @@
 					mobileContainer.innerHTML = ""; adminBackend.style.display = 'block';
 					document.getElementById('backendTitle').innerText = (role === 'admin') ? '資料管理' : '班級資料';
 					if (backToTrialAdminBtn) backToTrialAdminBtn.style.display = 'inline-block';
+					
+					const auditLogHeaderBtn = document.getElementById('auditLogHeaderBtn');
+					if (auditLogHeaderBtn) auditLogHeaderBtn.style.display = (role === 'admin') ? 'inline-flex' : 'none';
+
 					const fRole = document.getElementById('adminFilterRole'), fYear = document.getElementById('adminFilterYear'), fDept = document.getElementById('adminFilterDept');
 					if (fYear && fDept) {
 						if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') { 
@@ -1663,6 +1842,7 @@
 					await dbClient.rpc('admin_update_user_sid', { target_user_id: currentUser.id, new_sid: cleanSid, new_name: curData.full_name, new_year: curData.entry_year, new_dept: curData.entry_dept, new_role: role, new_tutor: curData.tutor || (role === 'teacher' ? '教師帳號免設定' : '未設定') });
 				}
 				updateSyncStatusIndicator('success'); showMsg("個人資料已更新！");
+				logAuditRecord("更新個人資料", curData.student_id, curData.full_name, { passwordChanged: !!p });
 				hasLoadedInitialData = false; await loadFromCloud(); toggleUIModal(false, 'profileModal');
 			} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error'); }
 		};
@@ -1739,6 +1919,9 @@
 					if (!userDBRecord) userDBRecord = {};
 					userDBRecord.credits_json = checks;
 					userDBRecord.total_credits = res.total || 0;
+				}
+				if (!isAuto) {
+					logAuditRecord("變更學分紀錄", targetSid, targetName, { totalCredits: res.total || 0 });
 				}
 			} catch (err) {
 				console.error("saveToCloud error:", err);
@@ -1997,10 +2180,13 @@
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[295px] shrink-0">';
+				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[310px] shrink-0">';
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
+					if (role === 'admin') {
+						btnsDesktop += `<button class="btn-mini" style="background:#6366f1; padding: 0 8px;" onclick="openAuditLogModal('${s.student_id}')" title="檢視個人異動歷程">📜 歷程</button>`;
+					}
 				}
 				if (role === 'admin') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
@@ -2018,6 +2204,9 @@
 				let btnsMobile = '';
 				if (s.role === 'student') {
 					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition shadow-sm select-none truncate" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
+					if (role === 'admin') {
+						btnsMobile += `<button class="py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm select-none shrink-0" onclick="openAuditLogModal('${s.student_id}')">📜 歷程</button>`;
+					}
 				}
 				if (role === 'admin') {
 					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none truncate" onclick="openAdminUserEdit(${i})">帳號設定</button>
@@ -2115,7 +2304,9 @@
 				updateSyncStatusIndicator('saving');
 				const { error } = await dbClient.rpc('admin_update_user_sid', { target_user_id: id, new_sid: sid, new_name: name, new_year: year, new_dept: dept, new_role: role, new_tutor: tutor });
 				if (error) throw error;
-				updateSyncStatusIndicator('success'); showMsg("使用者帳號資料已更新！"); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
+				updateSyncStatusIndicator('success'); showMsg("使用者帳號資料已更新！");
+				logAuditRecord("更改帳號資料", sid, name, { year, dept, role, tutor });
+				toggleUIModal(false, 'adminUserModal'); fetchAdminList();
 			} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); }
 		};
 
@@ -2125,7 +2316,9 @@
 					updateSyncStatusIndicator('saving');
 					const { error } = await dbClient.rpc('admin_delete_auth_user', { target_user_id: id });
 					if (error) throw error;
-					updateSyncStatusIndicator('success'); showMsg(`已成功刪除「${name}」的資料`); toggleUIModal(false, 'confirmModal'); fetchAdminList();
+					updateSyncStatusIndicator('success'); showMsg(`已成功刪除「${name}」的資料`);
+					logAuditRecord("刪除學生帳號", id, name, { status: "帳號與紀錄已移除" });
+					toggleUIModal(false, 'confirmModal'); fetchAdminList();
 				} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
 			});
 		};
@@ -2228,7 +2421,12 @@
 							<div class="flex justify-between items-center mb-3"><h4 class="text-sm font-black text-slate-800 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>${semesterFullLabels[sIdx]}</h4>
 								<span class="text-[0.7rem] font-bold text-slate-500 bg-slate-100 py-0.5 px-2.5 rounded-md border border-slate-200">已得學分 <b class="text-emerald-600 font-extrabold sem-earned-val">${semEarned}</b> / <span class="sem-max-val">${semMax}</span></span>
 							</div>
-							<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-4"><div class="sem-progress-bar h-full bg-emerald-500 transition-all duration-300 rounded-full" style="width: ${progressPercent}%"></div></div>
+							<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-3"><div class="sem-progress-bar h-full bg-emerald-500 transition-all duration-300 rounded-full" style="width: ${progressPercent}%"></div></div>
+							${activeSubjects.length > 0 ? `
+							<div class="flex gap-2 mb-3 pb-3 border-b border-slate-100">
+								<button type="button" class="text-[0.75rem] font-extrabold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2 py-1.5 rounded-xl transition-all flex-1 text-center" onclick="setSemesterStatus(${sIdx}, true)">✔ 本學期全部及格</button>
+								<button type="button" class="text-[0.75rem] font-extrabold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2 py-1.5 rounded-xl transition-all flex-1 text-center" onclick="setSemesterStatus(${sIdx}, false)">✕ 本學期歸零</button>
+							</div>` : ''}
 							<div class="flex flex-col gap-1 pr-1 min-w-0">${listHtml}</div>
 						</div>
 					</div>`;
