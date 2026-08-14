@@ -4,14 +4,30 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 	<title>新社高中畢業自我檢核系統</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		tailwind.config = {
+			theme: {
+				extend: {
+					fontFamily: {
+						sans: ['"Noto Sans TC"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"PingFang TC"', '"Microsoft JhengHei"', 'sans-serif'],
+					}
+				}
+			}
+		}
+	</script>
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 	<style>
-		@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap');
+		html, body, input, select, button, textarea {
+			font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+		}
 		html, body {
 			margin: 0;
 			padding: 0;
-			font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
 			font-size: 14px;
 			background-color: #f4f6f9;
 			color: #0f172a;
@@ -20,7 +36,6 @@
 			text-rendering: optimizeLegibility;
 		}
 		@media (min-width: 768px) { html, body { font-size: 16px; } }
-		input, select, button, textarea { font-family: inherit; }
 		.app-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
 		.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
 		.custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
@@ -90,9 +105,18 @@
 			border-color: #059669 !important;
 			box-shadow: 0 2px 5px rgba(5, 150, 105, 0.3) !important;
 		}
-		.sem-checkbox:checked + .sem-label .check-mark { display: inline-block !important; }
-		.sem-checkbox:checked + .sem-label .sub-name { color: #065f46 !important; font-weight: 800 !important; }
-		.sem-checkbox:checked + .sem-label .credit-badge { background-color: #dcfce7 !important; color: #14532d !important; border-color: #86efac !important; }
+		.sem-checkbox:checked + .sem-label .check-mark {
+			display: inline-block !important;
+		}
+		.sem-checkbox:checked + .sem-label .sub-name {
+			color: #065f46 !important;
+			font-weight: 800 !important;
+		}
+		.sem-checkbox:checked + .sem-label .credit-badge {
+			background-color: #dcfce7 !important;
+			color: #14532d !important;
+			border-color: #86efac !important;
+		}
 
 		.mobile-badge { font-size: 0.78rem; font-weight: 800; padding: 4px 9px; border-radius: 6px; display: inline-flex; align-items: center; }
 		.bg-dept-main { background-color: #fee2e2 !important; color: #7f1d1d !important; border: 1px solid #fca5a5 !important; }
@@ -114,7 +138,7 @@
 		.admin-table-container { display: none; }
 		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1020px; }
 		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; color: #1e293b; font-weight: 600; }
-		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 350px !important; min-width: 350px !important; }
+		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 310px !important; min-width: 310px !important; }
 		.admin-table th { background: #e2e8f0; color: #0f172a; font-weight: 800; }
 		.admin-table tr:hover { background-color: #f1f5f9; }
 		.admin-cards-grid { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 15px; }
@@ -142,7 +166,6 @@
 <body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col">
 	<div id="msgBox"></div>
 
-	<!-- Auth Workspace -->
 	<div id="authWorkspace">
 		<div class="auth-glow-1"></div>
 		<div class="auth-glow-2"></div>
@@ -184,7 +207,6 @@
 		</div>
 	</div>
 
-	<!-- App Main Workspace -->
 	<div id="appWorkspace" style="display: none;" class="flex-grow flex flex-col h-full overflow-hidden">
 		<div id="statusHeader" class="shrink-0" style="display: none;">
 			<div class="app-container">
@@ -283,10 +305,10 @@
 							<colgroup>
 								<col style="width: 11%; min-width: 90px;">
 								<col style="width: 11%; min-width: 90px;">
-								<col style="width: 8%; min-width: 75px;">
+								<col style="width: 9%; min-width: 75px;">
+								<col style="width: 22%; min-width: 150px;">
 								<col style="width: 20%; min-width: 150px;">
-								<col style="width: 15%; min-width: 150px;">
-								<col style="width: 350px; min-width: 350px;">
+								<col style="width: 310px; min-width: 310px;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -318,7 +340,6 @@
 		</button>
 	</div>
 
-	<!-- Modals -->
 	<div id="profileModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:400px;">
 			<div class="modal-header"><span>個人資料管理</span><span class="close-modal-btn" onclick="toggleUIModal(false,'profileModal')">&times;</span></div>
@@ -398,6 +419,7 @@
 				<span class="close-modal-btn" onclick="toggleUIModal(false,'auditLogModal')">&times;</span>
 			</div>
 
+			<!-- 統計分析概覽 -->
 			<div id="auditAnalyticsPanel" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
 				<div class="bg-indigo-50/80 border border-indigo-200 p-3 rounded-xl">
 					<div class="text-[11px] font-black text-indigo-700 uppercase">總稽核筆數</div>
@@ -417,6 +439,7 @@
 				</div>
 			</div>
 
+			<!-- 篩選工具列 -->
 			<div class="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 				<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 					<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
@@ -1134,7 +1157,6 @@
 				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
 				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
 			],
-
 			"114_普通科(文史法商群)-1": [
 				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
 				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
@@ -1628,12 +1650,26 @@
 		};
 
 		window.logAuditRecord = async function(actionType, targetSid, targetName, details) {
-			if (!dbClient || !currentUser) return;
+			if (!dbClient) return;
 			try {
+				let user = currentUser;
+				if (!user && dbClient.auth) {
+					const userData = await dbClient.auth.getUser();
+					user = userData?.data?.user;
+				}
 				const ip = await getClientIP();
-				const curRec = userDBRecord || currentUser?.user_metadata || {};
+				const curRec = userDBRecord || user?.user_metadata || {};
+				
+				// 驗證 operator_id 是否符合 UUID 格式，防止外鍵約束報錯
+				let opId = user?.id || null;
+				const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+				if (opId && !uuidRegex.test(opId)) {
+					opId = null;
+				}
+
+				// 精確對照 public.audit_logs 資料表 Schema
 				const payload = {
-					operator_id: currentUser.id,
+					operator_id: opId,
 					operator_name: curRec.full_name || '未知使用者',
 					operator_role: curRec.role || 'student',
 					target_student_id: targetSid || '無',
@@ -1644,9 +1680,23 @@
 					user_agent: navigator.userAgent,
 					created_at: new Date().toISOString()
 				};
-				await dbClient.from('audit_logs').insert([payload]);
+
+				// 直連即時寫入 Supabase audit_logs 資料表
+				const { error } = await dbClient.from('audit_logs').insert([payload]);
+				if (error) {
+					console.error('Supabase audit_logs 寫入失敗:', error);
+					// 若因外鍵 constraints 失敗，嘗試移除 operator_id 後重試一次
+					if (error.code === '23503' && opId) {
+						payload.operator_id = null;
+						await dbClient.from('audit_logs').insert([payload]);
+					} else if (error.code === '42501') {
+						showMsg("稽核紀錄寫入失敗：Supabase RLS 權限尚未開啟！", "error");
+					}
+				} else {
+					console.log('Supabase audit_logs 即時寫入成功:', actionType);
+				}
 			} catch (e) {
-				console.warn('Audit log write skipped or table missing:', e);
+				console.error('Audit log write exception:', e);
 			}
 		};
 
@@ -1664,15 +1714,35 @@
 			} else if (searchInput) {
 				searchInput.value = '';
 			}
-			try {
-				const { data } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(300);
-				auditLogsData = data || [];
-				renderAuditLogList();
-			} catch (e) {
-				console.warn('Failed to fetch audit logs:', e);
-				auditLogsData = [];
-				renderAuditLogList();
+			await refreshAuditLogs();
+		};
+
+		window.refreshAuditLogs = async function() {
+			if (!dbClient) return;
+			const listBody = document.getElementById('auditLogListBody');
+			if (listBody) {
+				listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在從 Supabase 資料庫載入稽核日誌...</td></tr>`;
 			}
+			let remoteLogs = [];
+			let dbErrorMsg = null;
+			try {
+				const { data, error } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(500);
+				if (error) {
+					console.warn("Supabase audit_logs fetch error:", error);
+					dbErrorMsg = error.message || 'Supabase 尚未建立 audit_logs 資料表';
+				} else {
+					remoteLogs = data || [];
+				}
+			} catch (e) {
+				dbErrorMsg = e.message || '資料庫連線失敗';
+			}
+
+			// 自動清理過往殘留的本地暫存，避免資料重複
+			try { localStorage.removeItem('sshs_audit_logs'); } catch (e) {}
+
+			// 100% 採用 Supabase 雲端資料庫資料
+			auditLogsData = remoteLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+			renderAuditLogList(dbErrorMsg);
 		};
 
 		window.resetAuditFilters = function() {
@@ -1739,7 +1809,7 @@
 			listBody.innerHTML = '';
 
 			if (filtered.length === 0) {
-				listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 font-bold">尚無符合條件的異動紀錄資料</td></tr>`;
+				listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 font-bold">目前資料庫尚無符合條件的稽核異動紀錄</td></tr>`;
 				return;
 			}
 
@@ -1753,17 +1823,24 @@
 					const d = log.details;
 					if (d.old_total !== undefined && d.new_total !== undefined) {
 						diffHtml += `<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 font-extrabold text-[11px] mb-1">
-							<span class="text-slate-500">舊: ${d.old_total} 學分</span> 
+							<span class="text-slate-500">舊總分: ${d.old_total} 學分</span> 
 							<span class="text-indigo-600 font-black">➔</span> 
-							<span class="text-emerald-600 font-black">新: ${d.new_total} 學分</span>
-						</div> `;
+							<span class="text-emerald-600 font-black">新總分: ${d.new_total} 學分</span>
+						</div><br>`;
 					}
 					if (d.changed_fields && Array.isArray(d.changed_fields) && d.changed_fields.length > 0) {
+						diffHtml += `<div class="flex flex-wrap gap-1.5 mt-1">`;
 						d.changed_fields.forEach(f => {
-							diffHtml += `<div class="inline-block bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded text-[11px] font-bold mr-1.5 mb-1">
-								${f.field}: <s class="text-rose-500 font-bold mr-1">${f.oldVal}</s>➔<b class="text-emerald-700 ml-1 font-black">${f.newVal}</b>
-							</div> `;
+							const isGain = f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格');
+							const badgeStyle = isGain ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200';
+							diffHtml += `<div class="inline-flex items-center gap-1 border px-2 py-0.5 rounded-lg text-[11px] font-bold ${badgeStyle}">
+								<span>${f.field}:</span>
+								<s class="opacity-60">${f.oldVal}</s>
+								<span class="font-black">➔</span>
+								<b class="font-black">${f.newVal}</b>
+							</div>`;
 						});
+						diffHtml += `</div>`;
 					} else {
 						for (const [k, v] of Object.entries(d)) {
 							if (k !== 'old_total' && k !== 'new_total' && k !== 'changed_fields') {
@@ -2349,9 +2426,9 @@
 					<div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 w-full text-xs sm:text-sm leading-tight">
 						<div class="font-extrabold text-slate-100 shrink-0">您好，${displayName}${displayClass}</div>
 						<div class="user-info-actions flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap">
-							<span id="syncStatusIndicator" class="sync-badge sync-success shrink-0"><span>同步成功</span></span>
-							<a href="javascript:void(0)" onclick="openProfile()" class="hover:underline text-sky-400 font-bold whitespace-nowrap">個人資料</a>
-							<a href="javascript:void(0)" onclick="handleLogout()" class="hover:underline text-rose-400 font-bold whitespace-nowrap">登出</a>
+							<span id="syncStatusIndicator" class="sync-badge sync-success"><span>同步成功</span></span>
+							<a href="javascript:void(0)" onclick="openProfile()" class="text-sky-400 hover:text-sky-300 font-extrabold transition">👤 個人資料</a>
+							<a href="javascript:void(0)" onclick="handleLogout()" class="text-rose-400 hover:text-rose-300 font-extrabold transition">🚪 登出</a>
 						</div>
 					</div>`;
 				if (isViewingClassList) {
@@ -2501,10 +2578,35 @@
 			const targetSid = (curRecord?.student_id || '').split('@')[0].toLowerCase().trim();
 			
 			const oldTotal = editingStudentId ? (activeStudentDBRecord?.total_credits || 0) : (userDBRecord?.total_credits || 0);
+			const oldChecks = (editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {};
 
 			updateSyncStatusIndicator('saving');
 			const checks = {};
-			document.querySelectorAll(".toggle-checkbox").forEach(c => checks[c.id] = c.checked);
+			const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
+			const changedFields = [];
+
+			document.querySelectorAll(".toggle-checkbox").forEach(c => {
+				checks[c.id] = c.checked;
+				
+				const id = c.id;
+				const semIdx = parseInt(c.dataset.sem || "0");
+				const semStr = semNames[semIdx] || `第${semIdx + 1}學期`;
+				const subName = c.dataset.name || "未知名科目";
+				const credVal = c.dataset.val || "0";
+				const isDefaultUnchecked = c.dataset.defaultUnchecked === 'true';
+
+				const wasChecked = oldChecks[id] !== undefined ? !!oldChecks[id] : !isDefaultUnchecked;
+				const nowChecked = c.checked;
+
+				if (wasChecked !== nowChecked) {
+					changedFields.push({
+						field: `📘 ${subName} 【${semStr}】 (${credVal}學分)`,
+						oldVal: wasChecked ? '及格' : '未及格',
+						newVal: nowChecked ? '✔及格' : '✕未及格'
+					});
+				}
+			});
+
 			const version = determineCurriculumVersion(curRecord);
 			checks['_view_year'] = version.locked ? entryYear : currentYear;
 			checks['_view_dept'] = version.locked ? entryDept : currentDept;
@@ -2565,8 +2667,13 @@
 					userDBRecord.credits_json = checks;
 					userDBRecord.total_credits = res.total || 0;
 				}
-				if (!isAuto) {
-					logAuditRecord("變更學分紀錄", targetSid, targetName, { old_total: oldTotal, new_total: res.total || 0 });
+
+				if (oldTotal !== (res.total || 0) || changedFields.length > 0) {
+					await logAuditRecord("變更學分紀錄", targetSid, targetName, {
+						old_total: oldTotal,
+						new_total: res.total || 0,
+						changed_fields: changedFields
+					});
 				}
 			} catch (err) {
 				console.error("saveToCloud error:", err);
@@ -2847,7 +2954,7 @@
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[350px] shrink-0">';
+				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[310px] shrink-0">';
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
@@ -3030,7 +3137,7 @@
 							<div class="mobile-sem-item">
 								<span class="mobile-sem-label">${semLabels[sIdx]}</span>
 								<div class="mobile-score-box">
-									<input type="checkbox" id="${id}" class="toggle-checkbox" data-cat="${item.cat}" data-type="${item.type}" data-val="${c}" data-sem="${sIdx}" data-name="${item.name}" ${isChecked ? 'checked' : ''} onchange="calculate(); saveToCloud(true);">
+									<input type="checkbox" id="${id}" class="toggle-checkbox" data-cat="${item.cat}" data-type="${item.type}" data-val="${c}" data-sem="${sIdx}" data-name="${item.name}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); saveToCloud(true);">
 									<label for="${id}" class="score-label">${c}</label>
 								</div>
 							</div>`;
@@ -3099,7 +3206,7 @@
 						itemsHtml += `
 							<div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100/80 transition-colors">
 								<div class="flex items-center gap-2.5 min-w-0 pr-2">
-									<input type="checkbox" id="${id}" class="toggle-checkbox sem-checkbox shrink-0 w-4 h-4 accent-emerald-600 cursor-pointer" data-cat="${item.cat}" data-type="${item.type}" data-val="${c}" data-sem="${sIdx}" data-name="${item.name}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); saveToCloud(true);">
+									<input type="checkbox" id="${id}" class="toggle-checkbox sem-checkbox shrink-0 w-4 h-4 accent-emerald-600 cursor-pointer" data-cat="${item.cat}" data-type="${item.type}" data-val="${c}" data-sem="${sIdx}" data-name="${item.name}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); saveToCloud(true);">
 									<label for="${id}" class="sem-label flex items-center gap-2 min-w-0 cursor-pointer select-none">
 										<span class="sub-name text-xs sm:text-sm font-bold text-slate-800 truncate">${item.name}</span>
 										<span class="credit-badge text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 shrink-0">${c} 學分</span>
@@ -3240,14 +3347,12 @@
 								</h5>
 								<div class="space-y-2">`;
 						grouped[sem].forEach(item => {
-							const catObj = mapping.cat[item.cat] || { text: item.cat, class: 'bg-slate-100 text-slate-600' };
-							const typeStr = mapping.type[item.type] || '一般';
 							html += `
 								<div class="flex items-center justify-between text-xs py-1 px-1.5 rounded hover:bg-slate-200/40 transition-colors min-w-0">
 									<div class="flex items-center gap-2 min-w-0 flex-wrap">
 										<span class="font-bold text-slate-800 truncate max-w-[120px] xs:max-w-none">${item.name}</span>
-										<span class="text-[9px] scale-90 ${catObj.class} py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${catObj.text}</span>
-										<span class="text-[9px] scale-90 bg-slate-100 text-slate-600 border border-slate-200 py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${typeStr}</span>
+										<span class="text-[9px] scale-90 ${mapping.cat[item.cat].class} py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.cat[item.cat].text}</span>
+										<span class="text-[9px] scale-90 bg-slate-100 text-slate-600 border border-slate-200 py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.type[item.type]}</span>
 									</div>
 									<span class="font-extrabold text-red-500 shrink-0 pl-1">${item.val} 學分</span>
 								</div>`;
