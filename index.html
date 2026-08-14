@@ -296,6 +296,7 @@
 							<option value="fail">⚠️ 需重補修/成績證明</option>
 						</select>
 						<select id="adminSort" class="sort-select" onchange="fetchAdminList(true)">
+							<option value="role" selected>👑 身分排序 (管理員 > 教師 > 學生)</option>
 							<option value="sid">帳號排序</option>
 							<option value="name">姓名排序</option>
 						</select>
@@ -2874,7 +2875,7 @@
 				filterYear = document.getElementById('adminFilterYear').value,
 				filterDept = document.getElementById('adminFilterDept').value,
 				filterStatus = document.getElementById('adminFilterStatus')?.value || 'all',
-				sortType = document.getElementById('adminSort').value,
+				sortType = document.getElementById('adminSort')?.value || 'role',
 				role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student', myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year,
 				myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept;
 			let filtered = [...adminListData];
@@ -2897,7 +2898,16 @@
 				});
 			}
 
-			if (sortType === 'save') filtered.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+			if (sortType === 'role') {
+				const roleOrder = { admin: 1, teacher: 2, student: 3 };
+				filtered.sort((a, b) => {
+					const orderA = roleOrder[a.role] || 4;
+					const orderB = roleOrder[b.role] || 4;
+					if (orderA !== orderB) return orderA - orderB;
+					return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
+				});
+			}
+			else if (sortType === 'save') filtered.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 			else if (sortType === 'join') filtered.sort((a, b) => new Date(a.created_at || a.updated_at) - new Date(b.created_at || b.updated_at));
 			else if (sortType === 'sid') filtered.sort((a, b) => (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true }));
 			else if (sortType === 'name') filtered.sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''));
@@ -2954,7 +2964,7 @@
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[350px] shrink-0">';
+				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[310px] shrink-0">';
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
