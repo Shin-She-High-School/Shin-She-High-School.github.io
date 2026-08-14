@@ -136,9 +136,9 @@
 		.admin-toolbar > * { flex: 1; min-width: 130px; }
 		@media (max-width: 640px) { .admin-toolbar > * { flex: 1 1 calc(50% - 6px) !important; } #adminSearchInput { flex: 1 1 100% !important; } }
 		.admin-table-container { display: none; }
-		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1020px; }
+		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1100px; }
 		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; color: #1e293b; font-weight: 600; }
-		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 310px !important; min-width: 310px !important; }
+		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 380px !important; min-width: 380px !important; }
 		.admin-table th { background: #e2e8f0; color: #0f172a; font-weight: 800; }
 		.admin-table tr:hover { background-color: #f1f5f9; }
 		.admin-cards-grid { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 15px; }
@@ -304,12 +304,12 @@
 					<div id="adminTableContainer" class="admin-table-container overflow-x-auto w-full custom-scrollbar" style="-webkit-overflow-scrolling: touch;">
 						<table class="admin-table">
 							<colgroup>
-								<col style="width: 10%; min-width: 90px;">
-								<col style="width: 12%; min-width: 100px;">
-								<col style="width: 8%; min-width: 80px;">
-								<col style="width: 24%; min-width: 190px;">
-								<col style="width: 16%; min-width: 150px;">
-								<col style="width: 30%; min-width: 310px;">
+								<col style="width: 9%; min-width: 85px;">
+								<col style="width: 11%; min-width: 95px;">
+								<col style="width: 8%; min-width: 75px;">
+								<col style="width: 22%; min-width: 180px;">
+								<col style="width: 15%; min-width: 140px;">
+								<col style="width: 35%; min-width: 380px;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -2964,7 +2964,7 @@
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[310px] shrink-0">';
+				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[380px] shrink-0">';
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
