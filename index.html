@@ -209,8 +209,11 @@
 							<select id="dashSelectDept" class="sort-select text-xs sm:text-sm py-1.5 px-2.5 flex-grow sm:flex-initial max-w-full truncate bg-white" onchange="changeDashCurriculum()"></select>
 						</div>
 					</div>
-					<div id="adminEditBanner" class="admin-edit-banner" style="display:none; background:#6366f1; color:white; padding:10px; text-align:center; font-weight:bold; border-radius:8px; margin-bottom:12px;">
-						正在編輯 <span id="targetStudentName">學生</span> 的資料 | <a href="javascript:void(0)" onclick="exitAdminEditMode()" style="color:white; text-decoration:underline;">取消返回列表</a>
+					<div id="adminEditBanner" class="admin-edit-banner" style="display:none; background:#4f46e5; color:white; padding:12px 16px; text-align:center; font-weight:bold; border-radius:12px; margin-bottom:16px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">
+						<div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-xs sm:text-sm md:text-base">
+							<span>✏️ <span id="targetStudentName" class="text-amber-300 font-black">正在編輯學生資料...</span></span>
+							<a href="javascript:void(0)" onclick="exitAdminEditMode()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-xs font-extrabold transition-all ml-2 underline decoration-white/50">✕ 完成編輯 / 返回列表</a>
+						</div>
 					</div>
 					<div id="finalStatus" class="status-bar status-fail">計算中...</div>
 					<div class="result-grid">
@@ -584,7 +587,6 @@
 				role: { student: "學生", teacher: "教師", admin: "管理員" }
 			};
 
-		/* --- 各科別模組化課表定義 --- */
 		const academicLib = [
 			{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
 			{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
@@ -1001,7 +1003,7 @@
 
 		let currentUser = null, DEPT_THRESHOLD = 0, userDBRecord = null, activeStudentDBRecord = null,
 			hasLoadedInitialData = false, lastLoadedStudentId = null, adminListData = [], teacherNames = [],
-			isViewingClassList = false, deleteTargetId = null, editingStudentId = null, confirmAction = null,
+			isViewingClassList = false, editingStudentId = null, confirmAction = null,
 			currentYear = "113", currentDept = "普通科(文史法商群)-1", lastUserId = null, currentLayoutMode = "subject",
 			currentUncheckedCredits = [];
 
@@ -1065,6 +1067,7 @@
 			if (msg.includes("Invalid login credentials")) return "帳號或密碼錯誤，請重新確認！";
 			if (msg.includes("User already registered")) return "該帳號已經註冊過，請直接登入！";
 			if (msg.includes("Password should be at least")) return "密碼長度太短！";
+			if (msg.includes("Database error querying schema") || msg.includes("Could not choose")) return "資料庫 RPC 結構衝突，已自動切換備援模式！";
 			return msg;
 		};
 
@@ -1638,9 +1641,14 @@
 
 		window.saveToCloud = async function(isAuto = false) {
 			if (!currentUser || !dbClient || curriculum.length === 0) { updateSyncStatusIndicator('offline'); return; }
-			const targetId = editingStudentId || currentUser.id, curRecord = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata),
-				targetRole = curRecord?.role || 'student', entryYear = curRecord?.entry_year || '未設定', entryDept = curRecord?.entry_dept || '未設定',
-				targetName = curRecord?.full_name || '學生', targetSid = (curRecord?.student_id || '').split('@')[0].toLowerCase().trim();
+			const targetId = editingStudentId || currentUser.id;
+			const curRecord = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata);
+			const targetRole = curRecord?.role || 'student';
+			const entryYear = curRecord?.entry_year || '未設定';
+			const entryDept = curRecord?.entry_dept || '未設定';
+			const targetName = curRecord?.full_name || '學生';
+			const targetSid = (curRecord?.student_id || '').split('@')[0].toLowerCase().trim();
+			
 			updateSyncStatusIndicator('saving');
 			const checks = {};
 			document.querySelectorAll(".toggle-checkbox").forEach(c => checks[c.id] = c.checked);
@@ -1656,21 +1664,43 @@
 			} else if (targetRole === 'teacher') {
 				matchedTutor = '教師帳號免設定';
 			}
+			
 			try {
-				const payload = {
-					id: targetId,
-					student_id: targetSid,
-					full_name: targetName,
-					entry_year: entryYear,
-					entry_dept: entryDept,
-					role: targetRole,
-					tutor: matchedTutor,
-					credits_json: checks,
-					total_credits: res.total || 0,
-					updated_at: new Date().toISOString()
-				};
-				const { error } = await dbClient.from('grad_checks').upsert(payload);
-				if (error) throw error;
+				let rpcSuccess = false;
+				try {
+					const { data, error: rpcErr } = await dbClient.rpc('admin_save_student_credits', {
+						target_id: targetId,
+						target_sid: targetSid,
+						target_name: targetName,
+						entry_year: entryYear,
+						entry_dept: entryDept,
+						target_role: targetRole,
+						tutor_name: matchedTutor,
+						credits_data: checks,
+						total_credits_val: res.total || 0
+					});
+					if (!rpcErr) rpcSuccess = true;
+				} catch (e) {
+					console.warn("RPC admin_save_student_credits failed, fallback to direct upsert:", e);
+				}
+
+				if (!rpcSuccess) {
+					const payload = {
+						id: targetId,
+						student_id: targetSid,
+						full_name: targetName,
+						entry_year: entryYear,
+						entry_dept: entryDept,
+						role: targetRole,
+						tutor: matchedTutor,
+						credits_json: checks,
+						total_credits: res.total || 0,
+						updated_at: new Date().toISOString()
+					};
+					const { error } = await dbClient.from('grad_checks').upsert(payload);
+					if (error) throw error;
+				}
+
 				updateSyncStatusIndicator('success');
 				if (!isAuto) showMsg("雲端存檔成功！");
 				if (editingStudentId) {
@@ -1683,6 +1713,7 @@
 					userDBRecord.total_credits = res.total || 0;
 				}
 			} catch (err) {
+				console.error("saveToCloud error:", err);
 				updateSyncStatusIndicator('offline');
 				if (!isAuto) showMsg(translateError(err.message), 'error');
 			}
@@ -1697,7 +1728,13 @@
 					if (error) throw error;
 					activeStudentDBRecord = data; lastLoadedStudentId = tid;
 					const targetNameEl = document.getElementById('targetStudentName');
-					if (targetNameEl) targetNameEl.innerText = data.full_name || '學生';
+					if (targetNameEl) {
+						const name = data.full_name || '學生';
+						const sid = data.student_id ? ` (帳號: ${data.student_id})` : '';
+						const classStr = (data.entry_year && data.entry_dept && data.entry_year !== '未設定' && data.entry_dept !== '未設定') ? ` ｜ ${data.entry_year}年 ${data.entry_dept}` : '';
+						const tutorStr = (data.tutor && data.tutor !== '未設定') ? ` ｜ 導師：${data.tutor}` : '';
+						targetNameEl.innerHTML = `<b class="text-amber-300">${name}</b>${sid}${classStr}${tutorStr}`;
+					}
 					const version = determineCurriculumVersion(data);
 					selectCurriculum(version.year, version.dept);
 					applyLoadedChecks(data.credits_json || {});
@@ -1717,7 +1754,9 @@
 				}
 				updateHelpModalDetails();
 				updateSyncStatusIndicator('success');
-			} catch (err) { updateSyncStatusIndicator('offline'); }
+			} catch (err) {
+				updateSyncStatusIndicator('offline');
+			}
 		};
 
 		window.applyLoadedChecks = function(checks) {
@@ -1968,40 +2007,70 @@
 
 		window.enterAdminEditMode = function(id, name) {
 			editingStudentId = id; isViewingClassList = false;
-			updateUI(); loadFromCloud(id);
+			const targetNameEl = document.getElementById('targetStudentName');
+			if (targetNameEl) targetNameEl.innerText = `${name || '學生'} (資料讀取中...)`;
+			updateUI(); 
+			loadFromCloud(id);
 		};
 
 		window.exitAdminEditMode = function() {
 			editingStudentId = null; activeStudentDBRecord = null; lastLoadedStudentId = null; isViewingClassList = true;
+			const targetNameEl = document.getElementById('targetStudentName');
+			if (targetNameEl) targetNameEl.innerText = '學生';
 			updateUI();
 		};
 
-		window.openAdminUserEdit = function(idx) {
-			const filtered = applyFilters(); const s = filtered[idx]; if (!s) return;
-			initDropdowns(true);
-			document.getElementById('editUserId').value = s.id; document.getElementById('editUserSid').value = s.student_id || '';
-			document.getElementById('editUserName').value = s.full_name || ''; document.getElementById('editUserEntryYear').value = s.entry_year || '未設定';
-			document.getElementById('editUserEntryDept').value = s.entry_dept || '未設定'; document.getElementById('editUserRole').value = s.role || 'student';
-			toggleAdminTutorField(s.role || 'student', s.tutor || '未設定'); toggleUIModal(true, 'adminUserModal');
+		window.openAdminUserEdit = function(index) {
+			const filtered = applyFilters();
+			const s = filtered[index];
+			if (!s) return;
+			document.getElementById('editUserId').value = s.id;
+			document.getElementById('editUserSid').value = s.student_id || '';
+			document.getElementById('editUserName').value = s.full_name || '';
+			
+			const yrSel = document.getElementById('editUserEntryYear');
+			const dtSel = document.getElementById('editUserEntryDept');
+			const roleSel = document.getElementById('editUserRole');
+			
+			if (yrSel) yrSel.value = s.entry_year || '未設定';
+			if (dtSel) dtSel.value = s.entry_dept || '未設定';
+			if (roleSel) roleSel.value = s.role || 'student';
+			
+			toggleAdminTutorField(s.role || 'student', s.tutor);
+			document.getElementById('editUserCustomPassword').value = '';
+			toggleUIModal(true, 'adminUserModal');
 		};
 
-		window.toggleAdminTutorField = function(role, currentTutor = '未設定') {
-			const section = document.getElementById('editTutorSection'), wrapper = document.getElementById('editTutorWrapper');
-			if (role === 'student') {
-				section.style.display = 'block';
-				let opts = '<option value="未設定">自動隨入學年及科別綁定導師</option>';
-				teacherNames.forEach(t => { opts += `<option value="${t}" ${t === currentTutor ? 'selected' : ''}>${t}</option>`; });
-				wrapper.innerHTML = `<select id="editUserTutor">${opts}</select>`;
+		window.toggleAdminTutorField = function(roleVal, currentTutor = '') {
+			const sec = document.getElementById('editTutorSection');
+			const wrapper = document.getElementById('editTutorWrapper');
+			if (!sec || !wrapper) return;
+			if (roleVal === 'student') {
+				sec.style.display = 'block';
+				let optionsHtml = `<select id="editUserTutor" class="sort-select w-full bg-white"><option value="未設定">未設定</option>`;
+				teacherNames.forEach(tName => {
+					optionsHtml += `<option value="${tName}">${tName}</option>`;
+				});
+				optionsHtml += `</select>`;
+				wrapper.innerHTML = optionsHtml;
+				const sel = document.getElementById('editUserTutor');
+				if (sel && currentTutor) sel.value = currentTutor;
 			} else {
-				section.style.display = 'none'; wrapper.innerHTML = '';
+				sec.style.display = 'none';
+				wrapper.innerHTML = '';
 			}
 		};
 
 		window.saveAdminUserEdit = async function() {
-			const id = document.getElementById('editUserId').value, sid = document.getElementById('editUserSid').value.split('@')[0].toLowerCase().trim(),
-				name = document.getElementById('editUserName').value.trim(), year = document.getElementById('editUserEntryYear').value,
-				dept = document.getElementById('editUserEntryDept').value, role = document.getElementById('editUserRole').value,
-				tutor = role === 'student' ? (document.getElementById('editUserTutor')?.value || '未設定') : (role === 'admin' ? '管理員免設定' : '教師帳號免設定');
+			if (!dbClient) return;
+			const id = document.getElementById('editUserId').value;
+			const sid = document.getElementById('editUserSid').value.split('@')[0].toLowerCase().trim();
+			const name = document.getElementById('editUserName').value.trim();
+			const year = document.getElementById('editUserEntryYear').value;
+			const dept = document.getElementById('editUserEntryDept').value;
+			const role = document.getElementById('editUserRole').value;
+			const tutor = (role === 'student') ? (document.getElementById('editUserTutor')?.value || '未設定') : (role === 'admin' ? '管理員免設定' : '教師帳號免設定');
+			
 			if (!sid || !name) { showMsg("請填寫完整帳號與姓名", "error"); return; }
 			try {
 				updateSyncStatusIndicator('saving');
