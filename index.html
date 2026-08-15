@@ -2042,20 +2042,20 @@
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex flex-wrap gap-1.5 items-center w-full">';
+				let btnsDesktop = '<div class="flex items-center w-full gap-1.5 flex-nowrap">';
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
-					btnsDesktop += `<button class="btn-mini px-2.5" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
+					btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
 					if (role === 'admin') {
-						btnsDesktop += `<button class="btn-mini px-2" style="background:#6366f1;" onclick="openAuditLogModal('${s.student_id}')" title="檢視個人異動歷程">📜 歷程</button>`;
+						btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#6366f1;" onclick="openAuditLogModal('${s.student_id}')" title="檢視個人異動歷程">📜 歷程</button>`;
 					}
 				}
 				if (role === 'admin') {
-					btnsDesktop += `<button class="btn-mini px-2.5" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
-									<button class="btn-mini px-2" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
+					btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
+									<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				} else if (role === 'teacher' && s.role !== 'student') {
-					btnsDesktop += `<button class="btn-mini px-2.5" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
-									<button class="btn-mini px-2" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
+					btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
+									<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				}
 				btnsDesktop += '</div>';
 				tr.innerHTML = `<td><b>${s.full_name}</b></td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${mapping.role[s.role] || '使用者'}</span></td><td>${classInfo}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
@@ -2065,17 +2065,17 @@
 				card.className = "mobile-card p-4 flex flex-col gap-3";
 				let btnsMobile = '';
 				if (s.role === 'student') {
-					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition shadow-sm select-none truncate" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
+					btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition shadow-sm select-none whitespace-nowrap" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
 					if (role === 'admin') {
-						btnsMobile += `<button class="py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm select-none shrink-0" onclick="openAuditLogModal('${s.student_id}')">📜 歷程</button>`;
+						btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm select-none whitespace-nowrap" onclick="openAuditLogModal('${s.student_id}')">📜 歷程</button>`;
 					}
 				}
 				if (role === 'admin') {
-					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none truncate" onclick="openAdminUserEdit(${i})">帳號設定</button>
-						<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none truncate" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
+					btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none whitespace-nowrap" onclick="openAdminUserEdit(${i})">帳號設定</button>
+						<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none whitespace-nowrap" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				} else if (role === 'teacher' && s.role !== 'student') {
-					btnsMobile += `<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none truncate" onclick="openAdminUserEdit(${i})">帳號設定</button>
-						<button class="flex-1 min-w-0 py-2 px-1 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none truncate" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
+					btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none whitespace-nowrap" onclick="openAdminUserEdit(${i})">帳號設定</button>
+						<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none whitespace-nowrap" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				}
 				card.innerHTML = `
 					<div class="flex justify-between items-start border-b border-slate-100 pb-2">
