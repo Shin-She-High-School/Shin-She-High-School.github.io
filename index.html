@@ -129,7 +129,7 @@
 		@media (min-width: 640px) and (max-width: 1024px) { .admin-cards-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 		@media (min-width: 1025px) { .admin-table-container { display: block !important; } }
 		@media (max-width: 1024px) { .admin-cards-grid { display: grid !important; } }
-		.btn-mini { display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; height: 32px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; color: white; font-weight: 800; transition: opacity 0.2s, transform 0.1s; box-sizing: border-box; text-align: center; }
+		.btn-mini { display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; height: 32px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; color: white; font-weight: 800; transition: opacity 0.2s, transform 0.1s; box-sizing: border-box; text-align: center; white-space: nowrap; }
 		.btn-mini:hover { opacity: 0.92; transform: translateY(-1px); }
 		.input-group { margin-bottom: 16px; text-align: left; }
 		.input-group label { display: block; margin-bottom: 6px; font-weight: 800; font-size: 0.92rem; color: #1e293b; }
@@ -288,12 +288,12 @@
 					<div id="adminTableContainer" class="admin-table-container custom-scrollbar">
 						<table class="admin-table">
 							<colgroup>
-								<col style="width: 12%;">
-								<col style="width: 12%;">
 								<col style="width: 10%;">
-								<col style="width: 22%;">
-								<col style="width: 18%;">
-								<col style="width: 26%;">
+								<col style="width: 11%;">
+								<col style="width: 8%;">
+								<col style="width: 19%;">
+								<col style="width: 16%;">
+								<col style="width: 36%;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -2045,17 +2045,17 @@
 				let btnsDesktop = '<div class="flex flex-wrap gap-1.5 items-center w-full">';
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
-					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
+					btnsDesktop += `<button class="btn-mini px-2.5" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
 					if (role === 'admin') {
-						btnsDesktop += `<button class="btn-mini" style="background:#6366f1; padding: 0 8px;" onclick="openAuditLogModal('${s.student_id}')" title="檢視個人異動歷程">📜 歷程</button>`;
+						btnsDesktop += `<button class="btn-mini px-2" style="background:#6366f1;" onclick="openAuditLogModal('${s.student_id}')" title="檢視個人異動歷程">📜 歷程</button>`;
 					}
 				}
 				if (role === 'admin') {
-					btnsDesktop += `<button class="btn-mini flex-1" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
-									<button class="btn-mini flex-1" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
+					btnsDesktop += `<button class="btn-mini px-2.5" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
+									<button class="btn-mini px-2" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				} else if (role === 'teacher' && s.role !== 'student') {
-					btnsDesktop += `<button class="btn-mini flex-1" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
-									<button class="btn-mini flex-1" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
+					btnsDesktop += `<button class="btn-mini px-2.5" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
+									<button class="btn-mini px-2" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				}
 				btnsDesktop += '</div>';
 				tr.innerHTML = `<td><b>${s.full_name}</b></td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${mapping.role[s.role] || '使用者'}</span></td><td>${classInfo}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
