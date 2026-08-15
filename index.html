@@ -34,6 +34,7 @@
 			-webkit-font-smoothing: antialiased;
 			-moz-osx-font-smoothing: grayscale;
 			text-rendering: optimizeLegibility;
+			overflow-x: hidden;
 		}
 		@media (min-width: 768px) { html, body { font-size: 16px; } }
 		.app-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
@@ -100,24 +101,6 @@
 		.toggle-checkbox:not(:checked) + .score-label { background-color: #fef2f2; color: #991b1b; border: 2px solid #fca5a5; }
 		.zero-score { color: #94a3b8; font-size: 1.1em; background: #f1f5f9; border: 1px dashed #94a3b8; font-weight: 800; }
 		
-		.sem-checkbox:checked + .sem-label .checkbox-indicator {
-			background-color: #059669 !important;
-			border-color: #059669 !important;
-			box-shadow: 0 2px 5px rgba(5, 150, 105, 0.3) !important;
-		}
-		.sem-checkbox:checked + .sem-label .check-mark {
-			display: inline-block !important;
-		}
-		.sem-checkbox:checked + .sem-label .sub-name {
-			color: #065f46 !important;
-			font-weight: 800 !important;
-		}
-		.sem-checkbox:checked + .sem-label .credit-badge {
-			background-color: #dcfce7 !important;
-			color: #14532d !important;
-			border-color: #86efac !important;
-		}
-
 		.mobile-badge { font-size: 0.78rem; font-weight: 800; padding: 4px 9px; border-radius: 6px; display: inline-flex; align-items: center; }
 		.bg-dept-main { background-color: #fee2e2 !important; color: #7f1d1d !important; border: 1px solid #fca5a5 !important; }
 		.bg-sch-req-main { background-color: #dcfce7 !important; color: #14532d !important; border: 1px solid #86efac !important; }
@@ -135,17 +118,16 @@
 		.admin-toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1.5px solid #cbd5e1; box-sizing: border-box; }
 		.admin-toolbar > * { flex: 1; min-width: 130px; }
 		@media (max-width: 640px) { .admin-toolbar > * { flex: 1 1 calc(50% - 6px) !important; } #adminSearchInput { flex: 1 1 100% !important; } }
-		.admin-table-container { display: none; }
-		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1100px; }
-		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; color: #1e293b; font-weight: 600; }
-		.admin-table th:last-child, .admin-table td:last-child { overflow: visible !important; text-overflow: clip !important; white-space: nowrap !important; width: 380px !important; min-width: 380px !important; }
+		.admin-table-container { display: none; width: 100%; }
+		.admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+		.admin-table th, .admin-table td { border-bottom: 1px solid #cbd5e1; padding: 12px; text-align: left; font-size: 0.92rem; color: #1e293b; font-weight: 600; word-break: break-word; }
 		.admin-table th { background: #e2e8f0; color: #0f172a; font-weight: 800; }
 		.admin-table tr:hover { background-color: #f1f5f9; }
 		.admin-cards-grid { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 15px; }
 		@media (min-width: 640px) and (max-width: 1024px) { .admin-cards-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 		@media (min-width: 1025px) { .admin-table-container { display: block !important; } }
 		@media (max-width: 1024px) { .admin-cards-grid { display: grid !important; } }
-		.btn-mini { display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; height: 34px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.82rem; color: white; font-weight: 800; transition: opacity 0.2s, transform 0.1s; box-sizing: border-box; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; shadow: 0 1px 2px rgba(0,0,0,0.05); }
+		.btn-mini { display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; height: 32px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; color: white; font-weight: 800; transition: opacity 0.2s, transform 0.1s; box-sizing: border-box; text-align: center; }
 		.btn-mini:hover { opacity: 0.92; transform: translateY(-1px); }
 		.input-group { margin-bottom: 16px; text-align: left; }
 		.input-group label { display: block; margin-bottom: 6px; font-weight: 800; font-size: 0.92rem; color: #1e293b; }
@@ -301,15 +283,15 @@
 							<option value="name">姓名排序</option>
 						</select>
 					</div>
-					<div id="adminTableContainer" class="admin-table-container overflow-x-auto w-full custom-scrollbar" style="-webkit-overflow-scrolling: touch;">
+					<div id="adminTableContainer" class="admin-table-container custom-scrollbar">
 						<table class="admin-table">
 							<colgroup>
-								<col style="width: 9%; min-width: 85px;">
-								<col style="width: 11%; min-width: 95px;">
-								<col style="width: 8%; min-width: 75px;">
-								<col style="width: 22%; min-width: 180px;">
-								<col style="width: 15%; min-width: 140px;">
-								<col style="width: 35%; min-width: 380px;">
+								<col style="width: 10%;">
+								<col style="width: 12%;">
+								<col style="width: 8%;">
+								<col style="width: 24%;">
+								<col style="width: 16%;">
+								<col style="width: 30%;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -328,7 +310,7 @@
 				</div>
 				<div id="underConstructionBox" class="hidden bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm my-6">
 					<h3 class="text-xl font-bold text-slate-800 mb-2">資料建置中</h3>
-					<p class="text-slate-500 text-sm">目前選擇的年度與科別（<span id="constYearDept" class="font-bold text-[#059669]"></span>）課程學分資料正在建置中，敬請期待！</p>
+					<p class="text-slate-500 text-sm">目前選擇的年度與科別（<span id="constYearDept" class="font-bold text-[#059669]"></span>）課程學分資料正在建置中，請使用後台「📥 匯入課綱 Excel」建檔！</p>
 				</div>
 				<div id="mobileCardsContainer" class="mobile-cards-grid"></div>
 			</div>
@@ -401,7 +383,7 @@
 						<button type="button" class="px-2.5 py-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-lg shrink-0 transition shadow-sm whitespace-nowrap" onclick="customResetPassword()">確認重設</button>
 					</div>
 					<button type="button" class="action-btn shrink-0 w-full sm:w-auto" style="border-radius: 8px; background: linear-gradient(135deg, #6366f1, #4f46e5); font-size: 0.8rem; padding: 9px 10px; margin: 0; white-space: nowrap;" onclick="directResetPasswordToSid()">
-						重設為「帳號」
+						⚡ 一鍵重設為「帳號」
 					</button>
 				</div>
 				<p style="font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.4;">※ 點擊任意重設按鈕後，系統會立即將該使用者的登入密碼覆寫。</p>
@@ -420,7 +402,6 @@
 				<span class="close-modal-btn" onclick="toggleUIModal(false,'auditLogModal')">&times;</span>
 			</div>
 
-			<!-- 統計分析概覽 -->
 			<div id="auditAnalyticsPanel" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
 				<div class="bg-indigo-50/80 border border-indigo-200 p-3 rounded-xl">
 					<div class="text-[11px] font-black text-indigo-700 uppercase">總稽核筆數</div>
@@ -440,7 +421,6 @@
 				</div>
 			</div>
 
-			<!-- 篩選工具列 -->
 			<div class="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 				<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 					<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
@@ -479,14 +459,14 @@
 			</div>
 
 			<div class="modal-body">
-				<div class="overflow-x-auto w-full custom-scrollbar max-h-[50dvh] border border-slate-200 rounded-xl">
-					<table class="w-full border-collapse text-left text-xs min-w-[760px]">
+				<div class="overflow-x-hidden w-full custom-scrollbar max-h-[50dvh] border border-slate-200 rounded-xl">
+					<table class="w-full border-collapse text-left text-xs">
 						<thead>
 							<tr class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
-								<th class="p-3 w-36">異動時間</th>
-								<th class="p-3 w-32">操作者 (IP)</th>
-								<th class="p-3 w-32">目標對象</th>
-								<th class="p-3 w-28">異動項目</th>
+								<th class="p-3 w-32">異動時間</th>
+								<th class="p-3 w-28">操作者 (IP)</th>
+								<th class="p-3 w-28">目標對象</th>
+								<th class="p-3 w-24">異動項目</th>
 								<th class="p-3">前後比對與詳細變更紀錄</th>
 							</tr>
 						</thead>
@@ -691,940 +671,8 @@
 				role: { student: "學生", teacher: "教師", admin: "管理員" }
 			};
 
-		const curriculums = {
-			"113_普通科(文史法商群)-1": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 2, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "家政", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生活科技", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "族群、性別與國家的歷史", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "科技、環境與藝術的歷史", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "空間資訊科技", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "社會環境議題", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "現代社會與經濟", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "民主政治與法律", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：歷史學探究", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：地理與人文社會科學研究", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：公共議題與社會探究", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "表演創作/多媒體音樂/健康與休閒生活(3選1)", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "思考：智慧的啟航", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0, 2, 0, 0, 0, 0] }
-			],
-			"113_普通科(文史法商群)-2": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 2, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "家政", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生活科技", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "族群、性別與國家的歷史", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "科技、環境與藝術的歷史", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "空間資訊科技", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "社會環境議題", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "現代社會與經濟", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "民主政治與法律", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：歷史學探究", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：地理與人文社會科學研究", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：公共議題與社會探究", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "表演創作/多媒體音樂/健康與休閒生活(3選1)", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "思考：智慧的啟航", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0, 2, 0, 0, 0, 0] }
-			],
-			"113_普通科(理工生醫群)-3": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 2, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "家政", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生活科技", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-力學一", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-力學二與熱學", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-波動、光及聲音", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象一", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象二與量子現象", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-物質與能量", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-物質構造與反應速率", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡一", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡二", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-有機化學與應用科技", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-細胞與遺傳", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能/進階程式設計(2選1)", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-生命的起源與植物體的構造與功能/大氣、海洋及天文(2選1)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-生態、演化及生物多樣性", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修地球科學-地質與環境", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活/未來想像與生涯進路/科技應用專題(3選1)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0, 2, 0, 0, 0, 0] }
-			],
-			"113_普通科(理工生醫群)-4": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 2, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "家政", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生活科技", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-力學一", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-力學二與熱學", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-波動、光及聲音", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象一", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象二與量子現象", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-物質與能量", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-物質構造與反應速率", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡一", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡二", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-有機化學與應用科技", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-細胞與遺傳", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能/進階程式設計(2選1)", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-生命的起源與植物體的構造與功能/大氣、海洋及天文(2選1)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-生態、演化及生物多樣性", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修地球科學-地質與環境", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活/未來想像與生涯進路/科技應用專題(3選1)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0, 2, 0, 0, 0, 0] }
-			],
-			"113_體育班-5": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [0, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [2, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [0, 0, 1, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 0, 0, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [1, 1, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept_sports", type: 2, name: "運動學概論", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept_sports", type: 2, name: "專項體能訓練", credits: [4, 4, 4, 4, 4, 4] },
-				{ cat: "dept_sports", type: 2, name: "專項技術訓練", credits: [4, 4, 4, 4, 4, 4] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 2, 4] },
-				{ cat: "sch_opt", type: 1, name: "數學乙", credits: [0, 0, 0, 0, 4, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "領域課程：科技應用專題", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "水上安全救生", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 2, name: "體育專長：游泳", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 2, name: "體育專長：運動裁判法", credits: [0, 0, 0, 0, 2, 0] }
-			],
-			"113_體育班-6": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [0, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [2, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [0, 0, 1, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 0, 0, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [1, 1, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept_sports", type: 2, name: "運動學概論", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept_sports", type: 2, name: "專項體能訓練", credits: [4, 4, 4, 4, 4, 4] },
-				{ cat: "dept_sports", type: 2, name: "專項技術訓練", credits: [4, 4, 4, 4, 4, 4] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 2, 4] },
-				{ cat: "sch_opt", type: 1, name: "數學乙", credits: [0, 0, 0, 0, 4, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "領域課程：科技應用專題", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "水上安全救生", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 2, name: "體育專長：游泳", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 2, name: "體育專長：運動裁判法", credits: [0, 0, 0, 0, 2, 0] }
-			],
-			"113_農經科-7": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [3, 3, 3, 3, 2, 2] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "數學", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [1, 0, 0, 0, 0, 1] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "農業概論", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "生物技術概論", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 2, name: "農業安全衛生", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "生命科學概論", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "農業資訊管理實習", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 3, name: "農園場管理實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物栽培實習", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 3, name: "農業資源應用實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物識別實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物保護實習", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "數學", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 2, name: "作物生產", credits: [2, 3, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0, 0, 0, 2, 2, 0] },
-				{ cat: "sch_req", type: 3, name: "農業機械實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 2, name: "進階生物", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_opt", type: 2, name: "農業產業評析", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_opt", type: 3, name: "在地特用 作物栽培", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "科技農業基礎實習", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 3, name: "智慧農業實習", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 3, name: "植物組織培養實習", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 3, name: "農業加工實習", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 3, name: "農產行銷實習", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 3, name: "種苗生產實習", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(安全農業實習/精緻農業實務)", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(休閒農業實務/有機農業實務)", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
-			],
-			"113_園藝科-8": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [3, 3, 3, 3, 2, 2] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "數學", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [1, 0, 0, 0, 0, 1] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "農業概論", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "生物技術概論", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 2, name: "農業安全衛生", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "生命科學概論", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "農業資訊管理實習", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 3, name: "農園場管理實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物栽培實習", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 3, name: "農業資源應用實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物識別實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物保護實習", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "數學", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 2, name: "基礎園藝", credits: [0, 3, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 2, name: "農業產業評析", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_req", type: 3, name: "造園施工實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "景觀設計", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 2, name: "造園學", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 2, name: "進階生物", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_opt", type: 3, name: "植物組織培養實習", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 3, name: "園產品處理與利用實習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(生態解說實習/庭園民宿規劃施作實習)", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(展場設計及施作實習/設施園藝實習)", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
-			],
-			"113_商經科-9": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [3, 3, 3, 3, 2, 2] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "數學", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "美術", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "商業概論", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "數位科技概論", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "會計學", credits: [3, 3, 2, 2, 0, 0] },
-				{ cat: "dept", type: 2, name: "經濟學", credits: [0, 0, 4, 4, 0, 0] },
-				{ cat: "dept", type: 3, name: "數位科技應用", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "商業溝通", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 3, name: "門市經營實務", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 3, name: "行銷實務", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "會計軟體應用", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "金融與證券投資實務", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "數學", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0, 0, 0, 2, 2, 0] },
-				{ cat: "sch_req", type: 3, name: "進階門市實務", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "會計實務", credits: [0, 0, 2, 2, 4, 4] },
-				{ cat: "sch_req", type: 3, name: "經濟應用實務", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 2, name: "計算機探究", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 2, name: "商業專論", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_opt", type: 3, name: "文書處理", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "記帳實務", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "商業簡報實務", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(市場調查實務/電腦記帳實務)", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(財務報表分析/電子商務實務)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
-			],
-			"113_資處科-10": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [3, 3, 3, 3, 2, 2] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "數學", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "美術", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "商業概論", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "數位科技概論", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "會計學", credits: [3, 3, 2, 2, 0, 0] },
-				{ cat: "dept", type: 2, name: "經濟學", credits: [0, 0, 4, 4, 0, 0] },
-				{ cat: "dept", type: 3, name: "數位科技應用", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "商業溝通", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 3, name: "程式語言與設計", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 3, name: "多媒體製作與應用", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "資料庫應用", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "數學", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "計算機探究", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_req", type: 1, name: "商業專論", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_req", type: 3, name: "記帳實務", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0, 0, 0, 2, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 3, name: "文書處理", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "專題前導", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "軟體應用", credits: [0, 0, 3, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "會計實務", credits: [0, 0, 2, 2, 4, 4] },
-				{ cat: "sch_opt", type: 3, name: "經濟應用實務", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(進階軟體應用/網站規劃實務)", credits: [0, 0, 0, 3, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(進階程式設計/電腦繪圖實務)", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
-			],
-			"114_普通科(文史法商群)-1": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 2, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "家政", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生活科技", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "族群、性別與國家的歷史", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "科技、環境與藝術的歷史", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "空間資訊科技", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "社會環境議題", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "現代社會與經濟", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "民主政治與法律", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：歷史學探究", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：地理與人文社會科學研究", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：公共議題與社會探究", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "表演創作/多媒體音樂/健康與休閒生活(3選1)", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "思考：智慧的啟航", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0, 2, 0, 0, 0, 0] }
-			],
-			"114_普通科(文史法商群)-2": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [2, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 2, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "家政", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生活科技", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "族群、性別與國家的歷史", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "科技、環境與藝術的歷史", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "空間資訊科技", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "社會環境議題", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "現代社會與經濟", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 1, name: "民主政治與法律", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：歷史學探究", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：地理與人文社會科學研究", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "探究與實作：公共議題與社會探究", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "表演創作/多媒體音樂/健康與休閒生活(3選1)", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "思考：智慧的啟航", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0, 2, 0, 0, 0, 0] }
-			],
-			"114_普通科(理工生醫群)-3": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 2, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "家政", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生活科技", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-力學一", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-力學二與熱學", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-波動、光及聲音", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象一", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象二與量子現象", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-物質與能量", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-物質構造與反應速率", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡一", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡二", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-有機化學與應用科技", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-細胞與遺傳", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能/進階程式設計(2選1)", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-生命的起源與植物體的構造與功能/大氣、海洋及天文(2選1)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-生態、演化及生物多樣性", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修地球科學-地質與環境", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活/未來想像與生涯進路/科技應用專題(3選1)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0, 2, 0, 0, 0, 0] }
-			],
-			"114_普通科(理工生醫群)-4": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [2, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 2, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "家政", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生活科技", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "專題探究", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英文閱讀與寫作", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "英文作文/閩南語文口語溝通與表達", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "數學甲/數學乙", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-力學一", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-力學二與熱學", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-波動、光及聲音", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象一", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "選修物理-電磁現象二與量子現象", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-物質與能量", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-物質構造與反應速率", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡一", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-化學反應與平衡二", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "選修化學-有機化學與應用科技", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-細胞與遺傳", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能/進階程式設計(2選1)", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-生命的起源與植物體的構造與功能/大氣、海洋及天文(2選1)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-生態、演化及生物多樣性", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "選修地球科學-地質與環境", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活/未來想像與生涯進路/科技應用專題(3選1)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 C課群(6選1)", credits: [0, 2, 0, 0, 0, 0] }
-			],
-			"114_體育班-5": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [0, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [2, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [0, 0, 1, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 0, 0, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [1, 1, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept_sports", type: 2, name: "運動學概論", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept_sports", type: 2, name: "專項體能訓練", credits: [4, 4, 4, 4, 4, 4] },
-				{ cat: "dept_sports", type: 2, name: "專項技術訓練", credits: [4, 4, 4, 4, 4, 4] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 2, 4] },
-				{ cat: "sch_opt", type: 1, name: "數學乙", credits: [0, 0, 0, 0, 4, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "領域課程：科技應用專題", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "水上安全救生", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 2, name: "體育專長：游泳", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 2, name: "體育專長：運動裁判法", credits: [0, 0, 0, 0, 2, 0] }
-			],
-			"114_體育班-6": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [4, 4, 4, 4, 4, 0] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [4, 4, 4, 4, 2, 0] },
-				{ cat: "dept", type: 1, name: "數學A/數學B", credits: [4, 4, 4, 4, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [0, 2, 2, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [2, 0, 0, 2, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地球科學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "藝術生活", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "生命教育", credits: [0, 0, 1, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 0, 0, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "體育", credits: [1, 1, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept_sports", type: 2, name: "運動學概論", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept_sports", type: 2, name: "專項體能訓練", credits: [4, 4, 4, 4, 4, 4] },
-				{ cat: "dept_sports", type: 2, name: "專項技術訓練", credits: [4, 4, 4, 4, 4, 4] },
-				{ cat: "sch_req", type: 1, name: "探索新識力", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "語文表達與傳播應用", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "英語聽講", credits: [0, 0, 0, 0, 2, 4] },
-				{ cat: "sch_opt", type: 1, name: "數學乙", credits: [0, 0, 0, 0, 4, 2] },
-				{ cat: "sch_opt", type: 1, name: "選修生物-動物體的構造與功能", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "未來想像與生涯進路", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "領域課程：科技應用專題", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 1, name: "健康與休閒生活", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 A課群(9選1)", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "多元選修 B課群(9選1)", credits: [0, 0, 0, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "水上安全救生", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 2, name: "體育專長：游泳", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 2, name: "體育專長：運動裁判法", credits: [0, 0, 0, 0, 2, 0] }
-			],
-			"114_農經科-7": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [3, 3, 3, 3, 2, 2] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "數學", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [1, 0, 0, 0, 0, 1] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "農業概論", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "生物技術概論", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 2, name: "農業安全衛生", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "生命科學概論", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "農業資訊管理實習", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 3, name: "農園場管理實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物栽培實習", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 3, name: "農業資源應用實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物識別實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物保護實習", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "數學", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 2, name: "作物生產", credits: [2, 3, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0, 0, 0, 2, 2, 0] },
-				{ cat: "sch_req", type: 3, name: "農業機械實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 2, name: "進階生物", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_opt", type: 2, name: "農業產業評析", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_opt", type: 3, name: "在地特用 作物栽培", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "科技農業基礎實習", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 3, name: "智慧農業實習", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 3, name: "植物組織培養實習", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 3, name: "農業加工實習", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 3, name: "農產行銷實習", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 3, name: "種苗生產實習", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(安全農業實習/精緻農業實務)", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(休閒農業實務/有機農業實務)", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
-			],
-			"114_園藝科-8": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [3, 3, 3, 3, 2, 2] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "數學", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "美術", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [1, 0, 0, 0, 0, 1] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "農業概論", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "生物技術概論", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 2, name: "農業安全衛生", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "生命科學概論", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "農業資訊管理實習", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "dept", type: 3, name: "農園場管理實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物栽培實習", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 3, name: "農業資源應用實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物識別實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "植物保護實習", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "數學", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 2, name: "基礎園藝", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 2, name: "農業產業評析", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_req", type: 3, name: "造園施工實習", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "景觀設計", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 2, name: "造園學", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 2, name: "進階生物", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 3, name: "植物組織培養實習", credits: [0, 0, 0, 0, 4, 0] },
-				{ cat: "sch_opt", type: 3, name: "園產品處理與利用實習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(生態解說實習/庭園民宿規劃施作實習)", credits: [0, 0, 0, 0, 3, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(展場設計及施作實習/設施園藝實習)", credits: [0, 0, 0, 0, 0, 3] },
-				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
-			],
-			"114_商經科-9": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [3, 3, 3, 3, 2, 2] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "數學", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "dept", type: 1, name: "物理", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [1, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "美術", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "商業概論", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "數位科技概論", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "會計學", credits: [3, 3, 2, 2, 0, 0] },
-				{ cat: "dept", type: 2, name: "經濟學", credits: [0, 0, 4, 4, 0, 0] },
-				{ cat: "dept", type: 3, name: "數位科技應用", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "商業溝通", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 3, name: "門市經營實務", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 3, name: "行銷實務", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "會計軟體應用", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "金融與證券投資實務", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "數學", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0, 0, 0, 2, 2, 0] },
-				{ cat: "sch_req", type: 3, name: "進階門市實務", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "會計實務", credits: [0, 0, 2, 2, 4, 4] },
-				{ cat: "sch_req", type: 3, name: "經濟應用實務", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 2, name: "計算機探究", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 2, name: "商業專論", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_opt", type: 3, name: "文書處理", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "記帳實務", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "商業簡報實務", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(市場調查實務/電腦記帳實務)", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(財務報表分析/電子商務實務)", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
-			],
-			"114_資處科-10": [
-				{ cat: "dept", type: 1, name: "國語文", credits: [3, 3, 3, 3, 2, 2] },
-				{ cat: "dept", type: 1, name: "英語文", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "本土語文", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "數學", credits: [3, 3, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "歷史", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "地理", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "公民與社會", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 1, name: "物理", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "化學", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生物", credits: [0, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "音樂", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "美術", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "生涯規劃", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "dept", type: 1, name: "資訊科技", credits: [0, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "健康與護理", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 1, name: "體育", credits: [2, 2, 2, 2, 2, 2] },
-				{ cat: "dept", type: 1, name: "全民國防教育", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "商業概論", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "數位科技概論", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 2, name: "會計學", credits: [3, 3, 2, 2, 0, 0] },
-				{ cat: "dept", type: 2, name: "經濟學", credits: [0, 0, 4, 4, 0, 0] },
-				{ cat: "dept", type: 3, name: "數位科技應用", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "dept", type: 3, name: "商業溝通", credits: [0, 0, 0, 0, 0, 2] },
-				{ cat: "dept", type: 3, name: "程式語言與設計", credits: [2, 2, 0, 0, 0, 0] },
-				{ cat: "dept", type: 3, name: "多媒體製作與應用", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "dept", type: 3, name: "資料庫應用", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_req", type: 1, name: "各類文學選讀", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "英文會話", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀初階", credits: [0, 0, 1, 1, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "英文閱讀進階", credits: [0, 0, 0, 0, 1, 1] },
-				{ cat: "sch_req", type: 1, name: "數學", credits: [0, 0, 3, 3, 0, 0] },
-				{ cat: "sch_req", type: 1, name: "計算機探究", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_req", type: 1, name: "商業專論", credits: [0, 0, 0, 0, 2, 2] },
-				{ cat: "sch_req", type: 3, name: "記帳實務", credits: [1, 1, 0, 0, 0, 0] },
-				{ cat: "sch_req", type: 3, name: "專題實作", credits: [0, 0, 0, 2, 2, 0] },
-				{ cat: "sch_opt", type: 1, name: "數學演習", credits: [0, 0, 0, 0, 3, 3] },
-				{ cat: "sch_opt", type: 3, name: "文書處理", credits: [2, 0, 0, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "專題前導", credits: [0, 0, 2, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "軟體應用", credits: [0, 0, 3, 0, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "會計實務", credits: [0, 0, 2, 2, 4, 4] },
-				{ cat: "sch_opt", type: 3, name: "經濟應用實務", credits: [0, 0, 0, 0, 4, 4] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(進階軟體應用/網站規劃實務)", credits: [0, 0, 0, 3, 0, 0] },
-				{ cat: "sch_opt", type: 3, name: "同科單班(進階程式設計/電腦繪圖實務)", credits: [0, 0, 0, 0, 2, 0] },
-				{ cat: "sch_opt", type: 3, name: "跨群選修(6選1)", credits: [0, 0, 2, 2, 0, 0] },
-				{ cat: "sch_opt", type: 1, name: "彈性選修 (田野在走調查要有/果樹產業大探查/讀懂一篇好報告/達人訪談秀/簡報達人特訓班)", credits: [0, 0, 1, 1, 0, 0], defaultUnchecked: true, isElective5: true }
-			]
-		};
+		// 雲端課綱物件 (完全由 Supabase 資料庫 SQL 寫入與讀取)
+		let curriculums = {};
 
 		let curriculum = [], dbClient = null;
 		try {
@@ -1661,14 +709,12 @@
 				const ip = await getClientIP();
 				const curRec = userDBRecord || user?.user_metadata || {};
 				
-				// 驗證 operator_id 是否符合 UUID 格式，防止外鍵約束報錯
 				let opId = user?.id || null;
 				const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 				if (opId && !uuidRegex.test(opId)) {
 					opId = null;
 				}
 
-				// 精確對照 public.audit_logs 資料表 Schema
 				const payload = {
 					operator_id: opId,
 					operator_name: curRec.full_name || '未知使用者',
@@ -1682,19 +728,15 @@
 					created_at: new Date().toISOString()
 				};
 
-				// 直連即時寫入 Supabase audit_logs 資料表
 				const { error } = await dbClient.from('audit_logs').insert([payload]);
 				if (error) {
 					console.error('Supabase audit_logs 寫入失敗:', error);
-					// 若因外鍵 constraints 失敗，嘗試移除 operator_id 後重試一次
 					if (error.code === '23503' && opId) {
 						payload.operator_id = null;
 						await dbClient.from('audit_logs').insert([payload]);
 					} else if (error.code === '42501') {
 						showMsg("稽核紀錄寫入失敗：Supabase RLS 權限尚未開啟！", "error");
 					}
-				} else {
-					console.log('Supabase audit_logs 即時寫入成功:', actionType);
 				}
 			} catch (e) {
 				console.error('Audit log write exception:', e);
@@ -1738,10 +780,7 @@
 				dbErrorMsg = e.message || '資料庫連線失敗';
 			}
 
-			// 自動清理過往殘留的本地暫存，避免資料重複
 			try { localStorage.removeItem('sshs_audit_logs'); } catch (e) {}
-
-			// 100% 採用 Supabase 雲端資料庫資料
 			auditLogsData = remoteLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 			renderAuditLogList(dbErrorMsg);
 		};
@@ -1778,13 +817,8 @@
 				);
 			}
 
-			if (actionFilter !== 'all') {
-				filtered = filtered.filter(l => l.action_type === actionFilter);
-			}
-
-			if (roleFilter !== 'all') {
-				filtered = filtered.filter(l => l.operator_role === roleFilter);
-			}
+			if (actionFilter !== 'all') filtered = filtered.filter(l => l.action_type === actionFilter);
+			if (roleFilter !== 'all') filtered = filtered.filter(l => l.operator_role === roleFilter);
 
 			if (startDate) {
 				const startMs = new Date(startDate + 'T00:00:00').getTime();
@@ -1855,12 +889,12 @@
 				}
 
 				tr.innerHTML = `
-					<td class="p-3 text-slate-500 whitespace-nowrap">${timeStr}</td>
-					<td class="p-3 font-bold min-w-0">
+					<td class="p-3 text-slate-500">${timeStr}</td>
+					<td class="p-3 font-bold">
 						<div class="text-slate-800">${log.operator_name || '系統'} <span class="text-[10px] text-slate-400">(${mapping.role[log.operator_role] || log.operator_role})</span></div>
 						<div class="text-[10px] font-mono text-slate-400 mt-0.5">${log.ip_address || '未知 IP'}</div>
 					</td>
-					<td class="p-3 font-bold text-indigo-700 min-w-0">
+					<td class="p-3 font-bold text-indigo-700">
 						<div>${log.target_student_name || '-'}</div>
 						<div class="text-[10px] text-slate-400 font-normal">${log.target_student_id || ''}</div>
 					</td>
@@ -1869,6 +903,22 @@
 				`;
 				listBody.appendChild(tr);
 			});
+		};
+
+		window.fetchCloudCurriculums = async function() {
+			if (!dbClient) return;
+			try {
+				const { data, error } = await dbClient.from('curriculums').select('*');
+				if (!error && data && data.length > 0) {
+					data.forEach(item => {
+						if (item.curriculum_key && item.courses && Array.isArray(item.courses)) {
+							curriculums[item.curriculum_key] = item.courses;
+						}
+					});
+				}
+			} catch (e) {
+				console.warn("讀取雲端課綱失敗:", e);
+			}
 		};
 
 		window.initDropdowns = function(isAdmin = false) {
@@ -1931,7 +981,6 @@
 			if (msg.includes("Invalid login credentials")) return "帳號或密碼錯誤，請重新確認！";
 			if (msg.includes("User already registered")) return "該帳號已經註冊過，請直接登入！";
 			if (msg.includes("Password should be at least")) return "密碼長度太短！";
-			if (msg.includes("Database error querying schema") || msg.includes("Could not choose")) return "資料庫 RPC 結構衝突，已自動切換備援模式！";
 			return msg;
 		};
 
@@ -2171,7 +1220,7 @@
 			if (st) {
 				const reqMinTotal = (trackType === 'vocational') ? 160 : 150;
 				if (isNullState) {
-					st.innerText = "課程資料建置中，暫不提供試算數據";
+					st.innerText = "課程資料建置中，請透過後台「📥 匯入課綱 Excel」載入計畫表";
 					st.className = "status-bar bg-slate-400 text-white shadow-sm";
 				} else if (stats.pass) {
 					st.innerText = "符合畢業門檻，核發畢業證書。";
@@ -2276,7 +1325,7 @@
 					if (error) throw error;
 					updateSyncStatusIndicator('success');
 					showMsg(`已成功將「${name}」的密碼重置為「${sid}」！`);
-					logAuditRecord("重設帳號密碼", sid, name, { method: "重設為帳號" });
+					logAuditRecord("重設帳號密碼", sid, name, { method: "一鍵重設為帳號" });
 					toggleUIModal(false, 'confirmModal'); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
 				} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
 			});
@@ -2964,7 +2013,7 @@
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
 					tr = document.createElement('tr');
-				let btnsDesktop = '<div class="flex gap-1.5 items-center w-[380px] shrink-0">';
+				let btnsDesktop = '<div class="flex flex-wrap gap-1.5 items-center w-full">';
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-1" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
@@ -3375,9 +2424,11 @@
 		};
 
 		initDropdowns(false);
-		selectCurriculum(currentYear, currentDept);
-		renderTable();
-		calculate();
+		fetchCloudCurriculums().then(() => {
+			selectCurriculum(currentYear, currentDept);
+			renderTable();
+			calculate();
+		});
 		initHelpModalScrollGuard();
 		initBackToTop();
 	</script>
