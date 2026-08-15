@@ -37,7 +37,8 @@
 			overflow-x: hidden;
 		}
 		@media (min-width: 768px) { html, body { font-size: 16px; } }
-		.app-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
+		.app-container { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 12px; box-sizing: border-box; }
+		@media (min-width: 640px) { .app-container { padding: 0 20px; } }
 		.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
 		.custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
 		.custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
@@ -72,7 +73,8 @@
 		@media (min-width: 768px) { .status-bar { font-size: 1.25rem; } }
 		.status-pass { background: linear-gradient(135deg, #059669, #047857); }
 		.status-fail { background: linear-gradient(135deg, #dc2626, #b91c1c); }
-		.result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 10px 0 20px 0; width: 100%; box-sizing: border-box; }
+		.result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0 20px 0; width: 100%; box-sizing: border-box; }
+		@media (min-width: 640px) { .result-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; } }
 		.result-card { background-color: #fff; padding: 14px 8px; border: 1.5px solid #cbd5e1; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; min-height: 95px; box-sizing: border-box; min-width: 0; }
 		.result-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08); border-color: #94a3b8; }
 		.card-title { font-size: 0.78rem; font-weight: 800; color: #334155; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -286,12 +288,12 @@
 					<div id="adminTableContainer" class="admin-table-container custom-scrollbar">
 						<table class="admin-table">
 							<colgroup>
-								<col style="width: 10%;">
 								<col style="width: 12%;">
-								<col style="width: 8%;">
-								<col style="width: 24%;">
-								<col style="width: 16%;">
-								<col style="width: 30%;">
+								<col style="width: 12%;">
+								<col style="width: 10%;">
+								<col style="width: 22%;">
+								<col style="width: 18%;">
+								<col style="width: 26%;">
 							</colgroup>
 							<thead>
 								<tr>
@@ -427,6 +429,7 @@
 					<select id="auditFilterAction" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
 						<option value="all">所有異動項目</option>
 						<option value="變更學分紀錄">變更學分紀錄</option>
+						<option value="切換版本">切換版本</option>
 						<option value="批次全部及格">批次全部及格</option>
 						<option value="批次學分歸零">批次學分歸零</option>
 						<option value="單學期全選及格">單學期全選及格</option>
@@ -856,6 +859,13 @@
 				let diffHtml = '';
 				if (log.details && typeof log.details === 'object') {
 					const d = log.details;
+					if (d.old_version && d.new_version) {
+						diffHtml += `<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 font-extrabold text-[11px]">
+							<span class="text-slate-500">原版本: ${d.old_version}</span> 
+							<span class="text-sky-600 font-black">➔</span> 
+							<span class="text-indigo-700 font-black">新版本: ${d.new_version}</span>
+						</div>`;
+					}
 					if (d.old_total !== undefined && d.new_total !== undefined) {
 						diffHtml += `<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 font-extrabold text-[11px] mb-1">
 							<span class="text-slate-500">舊總分: ${d.old_total} 學分</span> 
@@ -878,7 +888,7 @@
 						diffHtml += `</div>`;
 					} else {
 						for (const [k, v] of Object.entries(d)) {
-							if (k !== 'old_total' && k !== 'new_total' && k !== 'changed_fields') {
+							if (k !== 'old_total' && k !== 'new_total' && k !== 'changed_fields' && k !== 'old_version' && k !== 'new_version') {
 								const valStr = typeof v === 'object' ? JSON.stringify(v) : v;
 								diffHtml += `<span class="text-slate-600 text-[11px] mr-2 inline-block"><b>${k}:</b> ${valStr}</span>`;
 							}
@@ -1434,7 +1444,10 @@
 		window.changeDashCurriculum = function() {
 			const yr = document.getElementById('dashSelectYear').value, dept = document.getElementById('dashSelectDept').value;
 			sessionStorage.setItem('tempSelectedYear', yr); sessionStorage.setItem('tempSelectedDept', dept);
-			selectCurriculum(yr, dept); renderTable(); calculate(); saveToCloud(true);
+			selectCurriculum(yr, dept);
+			const curRecord = editingStudentId ? activeStudentDBRecord : userDBRecord;
+			applyLoadedChecks(curRecord?.credits_json || {});
+			saveToCloud(true);
 		};
 
 		window.setLayoutMode = function(mode) {
@@ -1630,6 +1643,9 @@
 			const oldTotal = editingStudentId ? (activeStudentDBRecord?.total_credits || 0) : (userDBRecord?.total_credits || 0);
 			const oldChecks = (editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {};
 
+			const oldViewYr = oldChecks['_view_year'] || entryYear;
+			const oldViewDept = oldChecks['_view_dept'] || entryDept;
+
 			updateSyncStatusIndicator('saving');
 			const checks = {};
 			const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
@@ -1658,8 +1674,14 @@
 			});
 
 			const version = determineCurriculumVersion(curRecord);
-			checks['_view_year'] = version.locked ? entryYear : currentYear;
-			checks['_view_dept'] = version.locked ? entryDept : currentDept;
+			const newViewYr = version.locked ? entryYear : currentYear;
+			const newViewDept = version.locked ? entryDept : currentDept;
+
+			checks['_view_year'] = newViewYr;
+			checks['_view_dept'] = newViewDept;
+
+			const isVersionChanged = (oldViewYr !== '未設定' && newViewYr !== '未設定') && (oldViewYr !== newViewYr || oldViewDept !== newViewDept);
+
 			const res = calculateStats();
 			let matchedTutor = curRecord?.tutor || '未設定';
 			if (targetRole === 'student') {
@@ -1718,7 +1740,14 @@
 					userDBRecord.total_credits = res.total || 0;
 				}
 
-				if (oldTotal !== (res.total || 0) || changedFields.length > 0) {
+				if (isVersionChanged) {
+					await logAuditRecord("切換版本", targetSid, targetName, {
+						old_version: `${oldViewYr}年 ${oldViewDept}`,
+						new_version: `${newViewYr}年 ${newViewDept}`
+					});
+				}
+
+				if (changedFields.length > 0) {
 					await logAuditRecord("變更學分紀錄", targetSid, targetName, {
 						old_total: oldTotal,
 						new_total: res.total || 0,
