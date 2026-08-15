@@ -2343,6 +2343,12 @@
 
 		window.renderTable = function() {
 			const mobileContainer = document.getElementById("mobileCardsContainer"), constructionBox = document.getElementById("underConstructionBox"), constYearDeptSpan = document.getElementById("constYearDept");
+			if (isViewingClassList) {
+				mobileContainer.style.display = "none";
+				mobileContainer.innerHTML = "";
+				constructionBox.classList.add("hidden");
+				return;
+			}
 			const checkedStates = {};
 			document.querySelectorAll(".toggle-checkbox").forEach(chk => checkedStates[chk.id] = chk.checked);
 			if (curriculum.length === 0) {
