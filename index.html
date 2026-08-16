@@ -37,8 +37,11 @@
 			overflow-x: hidden;
 		}
 		@media (min-width: 768px) { html, body { font-size: 16px; } }
-		.app-container { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 12px; box-sizing: border-box; }
+		@media (min-width: 1600px) { html, body { font-size: 17px; } }
+		@media (min-width: 1920px) { html, body { font-size: 18px; } }
+		.app-container { width: 100%; max-width: 1680px; margin: 0 auto; padding: 0 12px; box-sizing: border-box; }
 		@media (min-width: 640px) { .app-container { padding: 0 20px; } }
+		@media (min-width: 1600px) { .app-container { padding: 0 32px; } }
 		.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
 		.custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
 		.custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
@@ -90,6 +93,8 @@
 		.btn-admin { background: linear-gradient(135deg, #4f46e5, #4338ca); }
 
 		.mobile-cards-grid { display: grid !important; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; margin-bottom: 30px; }
+		@media (min-width: 768px) { .mobile-cards-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+		@media (min-width: 1400px) { .mobile-cards-grid { grid-template-columns: repeat(3, 1fr) !important; } }
 		.mobile-card { background-color: white; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; min-width: 0; }
 		.mobile-semesters-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 		@media (min-width: 480px) { .mobile-semesters-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; } }
@@ -2266,7 +2271,7 @@
 		window.renderSemesterCards = function(checkedStates) {
 			const container = document.getElementById("mobileCardsContainer");
 			if (!container) return;
-			container.className = "grid grid-cols-1 md:grid-cols-2 gap-4 my-4";
+			container.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 my-4";
 			container.innerHTML = "";
 
 			const semNames = [
