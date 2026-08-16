@@ -533,35 +533,6 @@
 				<span class="close-modal-btn" onclick="toggleUIModal(false,'auditLogModal')">&times;</span>
 			</div>
 
-			<div id="auditAnalyticsPanel" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-				<div class="bg-indigo-50/80 border border-indigo-200 p-3 rounded-xl">
-					<div class="text-[11px] font-black text-indigo-700 uppercase">總稽核筆數</div>
-					<div id="auditStatTotal" class="text-xl font-black text-indigo-900 mt-0.5">0</div>
-				</div>
-				<div class="bg-emerald-50/80 border border-emerald-200 p-3 rounded-xl">
-					<div class="text-[11px] font-black text-emerald-700 uppercase">篩選後筆數</div>
-					<div id="auditStatFiltered" class="text-xl font-black text-emerald-900 mt-0.5">0</div>
-				</div>
-				<div class="bg-amber-50/80 border border-amber-200 p-3 rounded-xl">
-					<div class="text-[11px] font-black text-amber-700 uppercase">獨立操作者</div>
-					<div id="auditStatOperators" class="text-xl font-black text-amber-900 mt-0.5">0</div>
-				</div>
-				<div class="bg-sky-50/80 border border-sky-200 p-3 rounded-xl">
-					<div class="text-[11px] font-black text-sky-700 uppercase">影響學生數</div>
-					<div id="auditStatTargets" class="text-xl font-black text-sky-900 mt-0.5">0</div>
-				</div>
-			</div>
-
-			<!-- 💡 異動項目快速主題分類切換頁籤 -->
-			<div class="flex flex-wrap items-center gap-1.5 mb-3 px-1">
-				<span class="text-xs font-black text-slate-500 mr-1 shrink-0">異動快捷分類：</span>
-				<button type="button" class="audit-cat-chip active px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-xs" onclick="filterAuditCategory('all', this)">🌐 全部項目</button>
-				<button type="button" class="audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100" onclick="filterAuditCategory('credits', this)">📘 學分與課綱</button>
-				<button type="button" class="audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100" onclick="filterAuditCategory('account', this)">📝 帳號管理</button>
-				<button type="button" class="audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100" onclick="filterAuditCategory('security', this)">🔑 登入與安全</button>
-				<button type="button" class="audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100" onclick="filterAuditCategory('danger', this)">⚠️ 刪除與警示</button>
-			</div>
-
 			<div class="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 				<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 					<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
