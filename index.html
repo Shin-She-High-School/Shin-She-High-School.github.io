@@ -2618,7 +2618,7 @@
 					const studentRec = adminListData.find(s => s.id === id);
 					const sid = (studentRec?.student_id || id).split('@')[0].toLowerCase().trim();
 					
-					// 1. 優先嘗試 RPC 函數一次跨表刪除 (grad_checks, user_feedbacks, auth.users)
+					// 1. 優先嘗試 RPC 函數一次跨表刪除 (grad_checks, user_feedbacks, audit_logs, curriculums, auth.users)
 					let rpcSuccess = false;
 					try {
 						const { error: rpcErr } = await dbClient.rpc('admin_delete_user', { target_user_id: id });
@@ -2627,12 +2627,14 @@
 						console.warn("RPC admin_delete_user 未設定或調用失敗，執行前端多表分步刪除機制:", e);
 					}
 
-					// 2. 若 RPC 未設定，執行前端備援刪除機制（同時刪除 grad_checks 與 user_feedbacks 表格資料）
+					// 2. 若 RPC 未設定，執行前端備援刪除機制（同時刪除四個 public 表格資料：grad_checks, user_feedbacks, audit_logs, curriculums）
 					if (!rpcSuccess) {
 						await dbClient.from('grad_checks').delete().eq('id', id);
 						if (sid) {
 							await dbClient.from('grad_checks').delete().eq('student_id', sid);
 							await dbClient.from('user_feedbacks').delete().eq('student_id', sid);
+							await dbClient.from('audit_logs').delete().or(`target_student_id.eq.${sid},operator_id.eq.${id}`);
+							await dbClient.from('curriculums').delete().or(`student_id.eq.${sid},curriculum_key.eq.${sid}`);
 						}
 					}
 
