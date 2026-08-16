@@ -548,24 +548,43 @@
 				</div>
 			</div>
 
+			<!-- 💡 異動項目快速主題分類切換頁籤 -->
+			<div class="flex flex-wrap items-center gap-1.5 mb-3 px-1">
+				<span class="text-xs font-black text-slate-500 mr-1 shrink-0">異動快捷分類：</span>
+				<button type="button" class="audit-cat-chip active px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-xs" onclick="filterAuditCategory('all', this)">🌐 全部項目</button>
+				<button type="button" class="audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100" onclick="filterAuditCategory('credits', this)">📘 學分與課綱</button>
+				<button type="button" class="audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100" onclick="filterAuditCategory('account', this)">📝 帳號管理</button>
+				<button type="button" class="audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100" onclick="filterAuditCategory('security', this)">🔑 登入與安全</button>
+				<button type="button" class="audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100" onclick="filterAuditCategory('danger', this)">⚠️ 刪除與警示</button>
+			</div>
+
 			<div class="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 				<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 					<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
 					<select id="auditFilterAction" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
 						<option value="all">所有異動項目</option>
-						<option value="變更學分紀錄">變更學分紀錄</option>
-						<option value="切換版本">切換版本</option>
-						<option value="批次全部及格">批次全部及格</option>
-						<option value="批次學分歸零">批次學分歸零</option>
-						<option value="單學期全選及格">單學期全選及格</option>
-						<option value="單學期學分歸零">單學期學分歸零</option>
-						<option value="更改帳號資料">更改帳號資料</option>
-						<option value="重設帳號密碼">重設帳號密碼</option>
-						<option value="刪除學生帳號">刪除學生帳號</option>
-						<option value="更新個人資料">更新個人資料</option>
-						<option value="送出系統回饋">送出系統回饋</option>
-						<option value="使用者登入">使用者登入</option>
-						<option value="使用者登出">使用者登出</option>
+						<optgroup label="📘 學分與課綱類">
+							<option value="變更學分紀錄">📘 變更學分紀錄</option>
+							<option value="切換版本">🔄 切換版本</option>
+							<option value="批次全部及格">✅ 批次全部及格</option>
+							<option value="批次學分歸零">🧹 批次學分歸零</option>
+							<option value="單學期全選及格">✔ 單學期全選及格</option>
+							<option value="單學期學分歸零">⚠️ 單學期學分歸零</option>
+						</optgroup>
+						<optgroup label="📝 帳號與個人資料">
+							<option value="更改帳號資料">📝 更改帳號資料</option>
+							<option value="重設帳號密碼">⚡ 重設帳號密碼</option>
+							<option value="更新個人資料">👤 更新個人資料</option>
+							<option value="送出系統回饋">💡 送出系統回饋</option>
+						</optgroup>
+						<optgroup label="🔑 系統登入與安全">
+							<option value="使用者登入">🔑 使用者登入</option>
+							<option value="使用者登出">🚪 使用者登出</option>
+							<option value="使用者註冊">✨ 使用者註冊</option>
+						</optgroup>
+						<optgroup label="⚠️ 刪除與警示">
+							<option value="刪除學生帳號">🗑️ 刪除學生帳號</option>
+						</optgroup>
 					</select>
 					<select id="auditFilterOperatorRole" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
 						<option value="all">所有操作身分</option>
@@ -816,14 +835,25 @@
 
 		let realtimeGradChecksChannel = null, realtimeFeedbacksChannel = null, realtimeAuditLogsChannel = null;
 
+		window.isWebSocketAllowed = function() {
+			if (typeof WebSocket === 'undefined') return false;
+			try {
+				const testWs = new WebSocket('wss://tsavuxtqwfugoraomoyc.supabase.co/realtime/v1/websocket?apikey=' + SB_KEY + '&vsn=2.0.0');
+				testWs.close();
+				return true;
+			} catch (e) {
+				console.warn('WebSocket connection is not allowed in this environment. Realtime subscriptions skipped.');
+				return false;
+			}
+		};
+
 		window.setupRealtimeSubscriptions = function() {
 			if (!dbClient) return;
 
 			window.cleanupRealtimeSubscriptions();
 
 			try {
-				if (typeof WebSocket === 'undefined') {
-					console.warn('WebSocket is not available in this environment. Realtime subscriptions skipped.');
+				if (!window.isWebSocketAllowed()) {
 					return;
 				}
 
@@ -1211,6 +1241,33 @@
 			if (document.getElementById('auditFilterOperatorRole')) document.getElementById('auditFilterOperatorRole').value = 'all';
 			if (document.getElementById('auditStartDate')) document.getElementById('auditStartDate').value = '';
 			if (document.getElementById('auditEndDate')) document.getElementById('auditEndDate').value = '';
+			
+			// 重設快捷分類頁籤樣式
+			document.querySelectorAll('.audit-cat-chip').forEach(btn => {
+				btn.className = "audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100";
+			});
+			const allBtn = document.querySelector('.audit-cat-chip');
+			if (allBtn) allBtn.className = "audit-cat-chip active px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-xs";
+
+			renderAuditLogList();
+		};
+
+		// 快捷主題分類切換函式
+		window.filterAuditCategory = function(catKey, btnEl) {
+			document.querySelectorAll('.audit-cat-chip').forEach(btn => {
+				btn.className = "audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100";
+			});
+			if (btnEl) btnEl.className = "audit-cat-chip active px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-xs";
+
+			const actionSelect = document.getElementById('auditFilterAction');
+			if (!actionSelect) return;
+
+			if (catKey === 'all') actionSelect.value = 'all';
+			else if (catKey === 'credits') actionSelect.value = '變更學分紀錄';
+			else if (catKey === 'account') actionSelect.value = '更改帳號資料';
+			else if (catKey === 'security') actionSelect.value = '使用者登入';
+			else if (catKey === 'danger') actionSelect.value = '刪除學生帳號';
+
 			renderAuditLogList();
 		};
 
@@ -1268,37 +1325,72 @@
 				return;
 			}
 
+			// 高質感立體漸層異動項目樣式表
+			const actionConfig = {
+				'使用者登入': { icon: '🔑', class: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-xs font-black' },
+				'使用者登出': { icon: '🚪', class: 'bg-gradient-to-r from-slate-500 to-gray-600 text-white shadow-xs font-black' },
+				'使用者註冊': { icon: '✨', class: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-xs font-black' },
+				'變更學分紀錄': { icon: '📘', class: 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xs font-black' },
+				'切換版本': { icon: '🔄', class: 'bg-gradient-to-r from-sky-500 to-cyan-600 text-white shadow-xs font-black' },
+				'批次全部及格': { icon: '✅', class: 'bg-gradient-to-r from-emerald-600 to-green-700 text-white shadow-xs font-black' },
+				'批次學分歸零': { icon: '🧹', class: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-xs font-black' },
+				'單學期全選及格': { icon: '✔', class: 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-xs font-black' },
+				'單學期學分歸零': { icon: '⚠️', class: 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-xs font-black' },
+				'更改帳號資料': { icon: '📝', class: 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-xs font-black' },
+				'重設帳號密碼': { icon: '⚡', class: 'bg-gradient-to-r from-violet-600 to-indigo-700 text-white shadow-xs font-black' },
+				'刪除學生帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-xs font-black' },
+				'更新個人資料': { icon: '👤', class: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-xs font-black' },
+				'送出系統回饋': { icon: '💡', class: 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-xs font-black' }
+			};
+
 			filtered.forEach(log => {
 				const timeStr = log.created_at ? new Date(log.created_at).toLocaleString('zh-TW', { hour12: false }) : '-';
 				const tr = document.createElement('tr');
 				tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
 				
 				let diffHtml = '';
-				if (log.details && typeof log.details === 'object') {
+				if (log.action_type === '刪除學生帳號') {
+					const d = log.details || {};
+					const delName = d.deleted_name || log.target_student_name || '未知姓名';
+					const delSid = d.deleted_sid || log.target_student_id || '未知帳號';
+					const delId = d.deleted_id || '-';
+					const shortUuid = (delId && delId.length > 16) ? `${delId.substring(0, 8)}...${delId.substring(delId.length - 6)}` : delId;
+					diffHtml = `
+						<div class="inline-flex flex-wrap items-center gap-2 p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 font-bold text-xs shadow-xs">
+							<span class="px-2 py-0.5 rounded-md bg-rose-600 text-white font-black text-[11px]">🗑️ 帳號與所有資料已刪除</span>
+							<span>被刪除姓名：<b class="text-rose-950 font-black text-sm">${delName}</b></span>
+							<span class="text-rose-300">|</span>
+							<span>帳號/學號：<b class="font-mono text-rose-900 font-extrabold">${delSid}</b></span>
+							<span class="text-rose-300">|</span>
+							<span class="text-[10px] text-rose-600 font-mono" title="${delId}">ID: ${shortUuid}</span>
+						</div>`;
+				} else if (log.details && typeof log.details === 'object') {
 					const d = log.details;
 					let headerChips = [];
 					if (d.old_version && d.new_version) {
-						headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 font-extrabold text-[11px]">
+						headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 font-extrabold text-[11px] shadow-xs">
 							<span class="text-slate-500">原版本: ${d.old_version}</span> 
 							<span class="text-sky-600 font-black">➔</span> 
 							<span class="text-indigo-700 font-black">新版本: ${d.new_version}</span>
 						</div>`);
 					}
 					if (d.old_total !== undefined && d.new_total !== undefined) {
-						headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 font-extrabold text-[11px]">
-							<span class="text-slate-500">舊總分: ${d.old_total} 學分</span> 
-							<span class="text-indigo-600 font-black">➔</span> 
-							<span class="text-emerald-600 font-black">新總分: ${d.new_total} 學分</span>
+						const isIncreased = d.new_total > d.old_total;
+						const totalBadgeColor = isIncreased ? 'bg-emerald-50 border-emerald-200' : (d.new_total < d.old_total ? 'bg-rose-50 border-rose-200' : 'bg-indigo-50 border-indigo-100');
+						headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-extrabold text-[11px] shadow-xs ${totalBadgeColor}">
+							<span class="text-slate-500">舊學分: ${d.old_total}</span> 
+							<span class="text-slate-400 font-black">➔</span> 
+							<span class="${isIncreased ? 'text-emerald-700 font-black' : 'text-indigo-700 font-black'}">新學分: ${d.new_total}</span>
 						</div>`);
 					}
 					if (d.semester) {
-						headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 font-extrabold text-[11px]">
-							<span class="text-slate-500">範圍: ${d.semester}</span>
+						headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 font-extrabold text-[11px]">
+							<span class="text-amber-800">📅 ${d.semester}</span>
 						</div>`);
 					}
 					if (d.mode) {
-						headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 font-extrabold text-[11px]">
-							<span class="text-slate-500">範圍: ${d.mode}</span>
+						headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 font-extrabold text-[11px]">
+							<span class="text-purple-800">🎯 範圍: ${d.mode}</span>
 						</div>`);
 					}
 
@@ -1310,11 +1402,11 @@
 						diffHtml += `<div class="flex flex-wrap gap-1.5">`;
 						d.changed_fields.forEach(f => {
 							const isGain = f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格');
-							const badgeStyle = isGain ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200';
-							diffHtml += `<div class="inline-flex items-center gap-1 border px-2 py-0.5 rounded-lg text-[11px] font-bold ${badgeStyle}">
+							const badgeStyle = isGain ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-rose-50 text-rose-900 border-rose-300';
+							diffHtml += `<div class="inline-flex items-center gap-1 border px-2 py-0.5 rounded-lg text-[11px] font-bold shadow-xs ${badgeStyle}">
 								<span>${f.field}:</span>
-								<s class="opacity-60">${f.oldVal}</s>
-								<span class="font-black">➔</span>
+								<s class="opacity-60 font-semibold">${f.oldVal}</s>
+								<span class="font-black opacity-80">➔</span>
 								<b class="font-black">${f.newVal}</b>
 							</div>`;
 						});
@@ -1323,20 +1415,26 @@
 						let chipItems = [];
 						for (const [k, v] of Object.entries(d)) {
 							if (k !== 'old_total' && k !== 'new_total' && k !== 'changed_fields' && k !== 'old_version' && k !== 'new_version' && k !== 'semester' && k !== 'mode') {
-								const valStr = typeof v === 'object' ? JSON.stringify(v) : v;
+								let valStr = typeof v === 'object' ? JSON.stringify(v) : v;
 								let chipClass = "bg-slate-100 text-slate-700 border-slate-200";
 								let label = k;
-								if (k === 'status') {
+								if (k === 'deleted_id') {
+									label = '🗑️ 已刪除 ID';
+									const fullUuid = String(valStr);
+									const shortUuid = fullUuid.length > 16 ? `${fullUuid.substring(0, 8)}...${fullUuid.substring(fullUuid.length - 6)}` : fullUuid;
+									chipClass = "bg-rose-50 text-rose-800 border-rose-200/80 font-mono font-bold shadow-xs";
+									valStr = `<span title="${fullUuid}" class="cursor-help underline decoration-dashed decoration-rose-300">${shortUuid}</span>`;
+								} else if (k === 'status') {
 									label = '狀態';
-									if (v.includes('成功') || v.includes('登入')) chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-sm";
-									else if (v.includes('登出')) chipClass = "bg-slate-100 text-slate-700 border-slate-300 font-black shadow-sm";
-									else chipClass = "bg-amber-50 text-amber-800 border-amber-300 font-black shadow-sm";
+									if (String(v).includes('成功') || String(v).includes('登入')) chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-xs";
+									else if (String(v).includes('登出')) chipClass = "bg-slate-100 text-slate-700 border-slate-300 font-black shadow-xs";
+									else chipClass = "bg-amber-50 text-amber-800 border-amber-300 font-black shadow-xs";
 								} else if (k === 'category') {
 									label = '類別';
-									chipClass = "bg-violet-50 text-violet-700 border-violet-200 font-black";
+									chipClass = "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 font-black";
 								} else if (k === 'method') {
 									label = '重設方式';
-									chipClass = "bg-indigo-50 text-indigo-700 border-indigo-200 font-black";
+									chipClass = "bg-violet-50 text-violet-700 border-violet-200 font-black";
 								} else if (k === 'year') {
 									label = '入學年';
 									chipClass = "bg-blue-50 text-blue-700 border-blue-200 font-black";
@@ -1346,6 +1444,7 @@
 								} else if (k === 'passwordChanged') {
 									label = '修改密碼';
 									chipClass = v ? "bg-amber-50 text-amber-800 border-amber-200 font-black" : "bg-slate-50 text-slate-500 border-slate-200";
+									valStr = v ? '✔ 已重設' : '無變更';
 								}
 								chipItems.push(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] ${chipClass}">
 									<span class="opacity-60 text-[10px] font-bold">${label}:</span>
@@ -1361,28 +1460,37 @@
 					diffHtml = `<span class="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-bold border border-slate-200">${log.details || '-'}</span>`;
 				}
 
-				let actionBadgeClass = "bg-slate-100 text-slate-700 border-slate-200";
-				if (log.action_type === '使用者登入') actionBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-300";
-				else if (log.action_type === '使用者登出') actionBadgeClass = "bg-slate-100 text-slate-600 border-slate-300";
-				else if (log.action_type === '送出系統回饋') actionBadgeClass = "bg-violet-50 text-violet-700 border-violet-200";
-				else if (log.action_type === '變更學分紀錄') actionBadgeClass = "bg-blue-50 text-blue-700 border-blue-200";
-				else if (log.action_type === '切換版本') actionBadgeClass = "bg-sky-50 text-sky-700 border-sky-200";
-				else if (log.action_type === '重設帳號密碼' || log.action_type === '更改帳號資料') actionBadgeClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
-				else if (log.action_type === '刪除學生帳號') actionBadgeClass = "bg-rose-50 text-rose-700 border-rose-200";
-				else if (log.action_type.includes('全選') || log.action_type.includes('及格')) actionBadgeClass = "bg-teal-50 text-teal-700 border-teal-200";
-				else if (log.action_type.includes('歸零')) actionBadgeClass = "bg-amber-50 text-amber-700 border-amber-200";
+				// 取得該事件的設定檔
+				const cfg = actionConfig[log.action_type] || { icon: '📌', class: 'bg-slate-700 text-white font-bold' };
+
+				let roleBadgeColor = "bg-slate-100 text-slate-600";
+				if (log.operator_role === 'admin') roleBadgeColor = "bg-indigo-100 text-indigo-800";
+				else if (log.operator_role === 'teacher') roleBadgeColor = "bg-emerald-100 text-emerald-800";
+				else if (log.operator_role === 'student') roleBadgeColor = "bg-blue-100 text-blue-800";
+
+				const isDeleteAction = log.action_type === '刪除學生帳號';
+				const targetNameDisplay = isDeleteAction ? `${log.target_student_name || '-'} <span class="text-[9px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-black ml-1">已刪除</span>` : (log.target_student_name || '-');
+				const targetClass = isDeleteAction ? 'text-rose-700 font-black' : 'text-indigo-700 font-bold';
 
 				tr.innerHTML = `
-					<td class="p-3 text-slate-500">${timeStr}</td>
+					<td class="p-3 text-slate-500 font-mono text-[11px] leading-tight">${timeStr}</td>
 					<td class="p-3 font-bold">
-						<div class="text-slate-800">${log.operator_name || '系統'} <span class="text-[10px] text-slate-400">(${mapping.role[log.operator_role] || log.operator_role})</span></div>
+						<div class="text-slate-800 flex items-center gap-1">
+							<span>${log.operator_name || '系統'}</span>
+							<span class="text-[9px] px-1.5 py-0.5 rounded font-black ${roleBadgeColor}">${mapping.role[log.operator_role] || log.operator_role}</span>
+						</div>
 						<div class="text-[10px] font-mono text-slate-400 mt-0.5">${log.ip_address || '未知 IP'}</div>
 					</td>
-					<td class="p-3 font-bold text-indigo-700">
-						<div>${log.target_student_name || '-'}</div>
-						<div class="text-[10px] text-slate-400 font-normal">${log.target_student_id || ''}</div>
+					<td class="p-3 ${targetClass}">
+						<div class="truncate max-w-[130px] flex items-center" title="${log.target_student_name || '-'}">${targetNameDisplay}</div>
+						<div class="text-[10px] text-slate-400 font-mono font-normal">${log.target_student_id || ''}</div>
 					</td>
-					<td class="p-3"><span class="px-2.5 py-1 rounded-full border font-black text-[11px] whitespace-nowrap ${actionBadgeClass}">${log.action_type}</span></td>
+					<td class="p-3">
+						<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] whitespace-nowrap font-black ${cfg.class}">
+							<span>${cfg.icon}</span>
+							<span>${log.action_type}</span>
+						</span>
+					</td>
 					<td class="p-3 text-slate-700">${diffHtml}</td>
 				`;
 				listBody.appendChild(tr);
@@ -1835,11 +1943,13 @@
 		window.handleAuth = async function() {
 			if (!dbClient) { showMsg("無法進行登入 or 註冊！請聯絡管理員。", "error"); return; }
 			const sid = document.getElementById('authID').value.trim(), pwd = document.getElementById('authPassword').value;
-			if (!sid || !pwd) { showMsg("請輸入帳號密碼！", "error"); return; }
+			if (!sid) { showMsg("請輸入帳號！", "error"); return; }
 			const cleanSid = sid.split('@')[0].toLowerCase().trim(), email = `${cleanSid}${EMAIL_DOMAIN}`;
+			const isReg = document.getElementById('regFields').style.display === 'block';
+
 			try {
 				updateSyncStatusIndicator('saving');
-				if (document.getElementById('regFields').style.display === 'block') {
+				if (isReg) {
 					const name = document.getElementById('authName').value.trim(), entryYear = document.getElementById('authEntryYear').value, entryDept = document.getElementById('authEntryDept').value;
 					if (!name) throw new Error("請輸入姓名");
 					if (!entryYear || !entryDept || entryYear === '請選擇入學年' || entryDept === '請選擇科別') throw new Error("請務必選擇正確的入學年與科別！");
@@ -1849,10 +1959,47 @@
 					});
 					if (error) throw error;
 					updateSyncStatusIndicator('success'); showMsg("註冊成功！"); switchAuthMode();
+					document.getElementById('authID').value = cleanSid;
 					logAuditRecord("使用者註冊", cleanSid, name, { year: entryYear, dept: entryDept });
 				} else {
+					if (!pwd) {
+						let accountExists = false;
+						try {
+							const { data } = await dbClient.from('grad_checks').select('student_id').eq('student_id', cleanSid).maybeSingle();
+							if (data) accountExists = true;
+						} catch (e) {}
+
+						if (!accountExists) {
+							updateSyncStatusIndicator('offline');
+							showMsg("查無此帳號資料，請先註冊！");
+							switchAuthMode();
+							document.getElementById('authID').value = cleanSid;
+							return;
+						} else {
+							updateSyncStatusIndicator('offline');
+							showMsg("請輸入密碼！", "error");
+							return;
+						}
+					}
+
 					const { error } = await dbClient.auth.signInWithPassword({ email, password: pwd });
-					if (error) throw error;
+					if (error) {
+						let accountExists = false;
+						try {
+							const { data } = await dbClient.from('grad_checks').select('student_id').eq('student_id', cleanSid).maybeSingle();
+							if (data) accountExists = true;
+						} catch (e) {}
+
+						if (!accountExists) {
+							updateSyncStatusIndicator('offline');
+							showMsg("查無此帳號資料，請先註冊！");
+							switchAuthMode();
+							document.getElementById('authID').value = cleanSid;
+							return;
+						}
+						throw error;
+					}
+
 					updateSyncStatusIndicator('success'); showMsg("登入成功！");
 					document.getElementById('authWorkspace').style.display = 'none'; document.getElementById('appWorkspace').style.display = 'flex';
 					hasLoadedInitialData = false; updateUI();
@@ -2418,25 +2565,39 @@
 
 		window.deleteStudentData = function(id, name) {
 			if (!dbClient) return;
-			showConfirmModal(`您確定要刪除「${name}」的帳號與所有資料嗎？此操作無法恢復！`, "刪除學生帳號", async () => {
+			showConfirmModal(`您確定要刪除「${name}」的帳號與所有表格資料嗎？此操作將清除該學生的學分紀錄、意見回饋與 Supabase 登入帳號，無法恢復！`, "刪除學生帳號", async () => {
 				try {
 					updateSyncStatusIndicator('saving');
 					const studentRec = adminListData.find(s => s.id === id);
-					const sid = studentRec?.student_id || id;
+					const sid = (studentRec?.student_id || id).split('@')[0].toLowerCase().trim();
 					
-					let { error } = await dbClient.from('grad_checks').delete().eq('id', id);
-					if (error && studentRec?.student_id) {
-						const fallback = await dbClient.from('grad_checks').delete().eq('student_id', studentRec.student_id);
-						error = fallback.error;
+					// 1. 優先嘗試 RPC 函數一次跨表刪除 (grad_checks, user_feedbacks, auth.users)
+					let rpcSuccess = false;
+					try {
+						const { error: rpcErr } = await dbClient.rpc('admin_delete_user', { target_user_id: id });
+						if (!rpcErr) rpcSuccess = true;
+					} catch (e) {
+						console.warn("RPC admin_delete_user 未設定或調用失敗，執行前端多表分步刪除機制:", e);
 					}
-					if (error) throw error;
+
+					// 2. 若 RPC 未設定，執行前端備援刪除機制（同時刪除 grad_checks 與 user_feedbacks 表格資料）
+					if (!rpcSuccess) {
+						await dbClient.from('grad_checks').delete().eq('id', id);
+						if (sid) {
+							await dbClient.from('grad_checks').delete().eq('student_id', sid);
+							await dbClient.from('user_feedbacks').delete().eq('student_id', sid);
+						}
+					}
 
 					adminListData = adminListData.filter(s => s.id !== id && s.student_id !== sid);
 					renderAdminTable();
 
 					updateSyncStatusIndicator('success');
-					showMsg(`已成功刪除「${name}」的資料！`);
-					logAuditRecord("刪除學生帳號", sid, name, { deleted_id: id });
+					showMsg(`已成功刪除「${name}」的所有表格資料與帳號！`);
+					
+					// 寫入詳細稽核紀錄，明確記錄刪除的姓名、學號與識別碼
+					await logAuditRecord("刪除學生帳號", sid, name, { deleted_name: name, deleted_sid: sid, deleted_id: id });
+
 					toggleUIModal(false, 'confirmModal');
 					fetchAdminList();
 				} catch (err) {
@@ -2444,7 +2605,7 @@
 					showMsg(translateError(err.message), "error");
 					toggleUIModal(false, 'confirmModal');
 				}
-			}, "確認刪除", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
+			}, "確認刪除所有資料", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 		};
 
 		window.renderAdminTable = function() {
@@ -2581,27 +2742,17 @@
 				updateSyncStatusIndicator('saving');
 				const { error } = await dbClient.rpc('admin_update_user_sid', { target_user_id: id, new_sid: sid, new_name: name, new_year: year, new_dept: dept, new_role: role, new_tutor: tutor });
 				if (error) throw error;
-				updateSyncStatusIndicator('success'); showMsg("使用者帳號資料已更新！");
-				logAuditRecord("更改帳號資料", sid, name, { changed_fields: changedFields });
-				toggleUIModal(false, 'adminUserModal'); fetchAdminList();
-			} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); }
-		};
 
-		window.updateSemesterProgress = function(inputEl, semIdx) {
-			const card = inputEl.closest('.semester-card');
-			if (!card) return;
-			let earned = 0;
-			card.querySelectorAll('.toggle-checkbox:checked').forEach(chk => {
-				earned += parseInt(chk.dataset.val || 0);
-			});
-			const earnedEl = card.querySelector('.sem-earned-val');
-			const maxEl = card.querySelector('.sem-max-val');
-			const barEl = card.querySelector('.sem-progress-bar');
-			if (earnedEl) earnedEl.innerText = earned;
-			if (maxEl && barEl) {
-				const max = parseInt(maxEl.innerText || 0);
-				const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
-				barEl.style.width = pct + '%';
+				updateSyncStatusIndicator('success');
+				showMsg("帳號資料修改成功！");
+				if (changedFields.length > 0) {
+					logAuditRecord("更改帳號資料", sid, name, { changed_fields: changedFields });
+				}
+				toggleUIModal(false, 'adminUserModal');
+				fetchAdminList();
+			} catch (err) {
+				updateSyncStatusIndicator('offline');
+				showMsg(translateError(err.message), 'error');
 			}
 		};
 
@@ -2611,24 +2762,23 @@
 			container.className = "mobile-cards-grid";
 			container.innerHTML = "";
 
-			const semLabels = ["一上", "一下", "二上", "二下", "三上", "三下"];
+			const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
 
 			curriculum.forEach(item => {
+				const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700 border border-slate-200" };
+				const typeText = mapping.type[item.type] || "一般";
+
 				const card = document.createElement("div");
 				card.className = "mobile-card";
 
-				const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700" };
-				const typeText = mapping.type[item.type] || "一般";
-
 				let semGridHtml = `<div class="mobile-semesters-grid">`;
 				item.credits.forEach((c, sIdx) => {
-					const id = getChkId(item.name, sIdx);
-					const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (!item.defaultUnchecked);
-
 					if (c > 0) {
+						const id = getChkId(item.name, sIdx);
+						const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (!item.defaultUnchecked);
 						semGridHtml += `
 							<div class="mobile-sem-item">
-								<span class="mobile-sem-label">${semLabels[sIdx]}</span>
+								<span class="mobile-sem-label">${semNames[sIdx]}</span>
 								<div class="mobile-score-box">
 									<input type="checkbox" id="${id}" class="toggle-checkbox" data-cat="${item.cat}" data-type="${item.type}" data-val="${c}" data-sem="${sIdx}" data-name="${item.name}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); saveToCloud(true);">
 									<label for="${id}" class="score-label">${c}</label>
@@ -2637,7 +2787,7 @@
 					} else {
 						semGridHtml += `
 							<div class="mobile-sem-item">
-								<span class="mobile-sem-label">${semLabels[sIdx]}</span>
+								<span class="mobile-sem-label">${semNames[sIdx]}</span>
 								<div class="mobile-score-box">
 									<div class="score-label zero-score">-</div>
 								</div>
