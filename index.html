@@ -308,6 +308,7 @@
 						</select>
 						<select id="adminSort" class="sort-select" onchange="fetchAdminList(true)">
 							<option value="role" selected>預設排序</option>
+							<option value="class">🏫 班級排序 (113 ➔ 114)</option>
 							<option value="sid">帳號排序</option>
 							<option value="name">姓名排序</option>
 						</select>
@@ -2217,19 +2218,36 @@
 				});
 			}
 
-			if (sortType === 'role') {
-				const roleOrder = { admin: 1, teacher: 2, student: 3 };
-				filtered.sort((a, b) => {
-					const orderA = roleOrder[a.role] || 4;
-					const orderB = roleOrder[b.role] || 4;
-					if (orderA !== orderB) return orderA - orderB;
+			const roleOrder = { admin: 1, teacher: 2, student: 3 };
+
+			filtered.sort((a, b) => {
+				// 第一順位：永遠先按身份階層排序 (管理員 ➔ 教師 ➔ 學生)
+				const orderA = roleOrder[a.role] || 4;
+				const orderB = roleOrder[b.role] || 4;
+				if (orderA !== orderB) return orderA - orderB;
+
+				// 第二順位：同身分內依選取的次要排序規則
+				if (sortType === 'class') {
+					const yA = a.entry_year || '999';
+					const yB = b.entry_year || '999';
+					if (yA !== yB) return yA.localeCompare(yB, undefined, { numeric: true });
+					const dA = a.entry_dept || '';
+					const dB = b.entry_dept || '';
+					if (dA !== dB) return dA.localeCompare(dB);
 					return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
-				});
-			}
-			else if (sortType === 'save') filtered.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-			else if (sortType === 'join') filtered.sort((a, b) => new Date(a.created_at || a.updated_at) - new Date(b.created_at || b.updated_at));
-			else if (sortType === 'sid') filtered.sort((a, b) => (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true }));
-			else if (sortType === 'name') filtered.sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''));
+				} else if (sortType === 'sid') {
+					return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
+				} else if (sortType === 'name') {
+					return (a.full_name || '').localeCompare(b.full_name || '');
+				} else if (sortType === 'save') {
+					return new Date(b.updated_at) - new Date(a.updated_at);
+				} else if (sortType === 'join') {
+					return new Date(a.created_at || a.updated_at) - new Date(b.created_at || b.updated_at);
+				} else {
+					return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
+				}
+			});
+
 			return filtered;
 		};
 
