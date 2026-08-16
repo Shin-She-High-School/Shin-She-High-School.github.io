@@ -802,6 +802,95 @@
 			currentYear = "113", currentDept = "普通科(文史法商群)-1", lastUserId = null, currentLayoutMode = "subject",
 			currentUncheckedCredits = [];
 
+		let realtimeGradChecksChannel = null, realtimeFeedbacksChannel = null, realtimeAuditLogsChannel = null;
+
+		window.setupRealtimeSubscriptions = function() {
+			if (!dbClient) return;
+
+			window.cleanupRealtimeSubscriptions();
+
+			realtimeGradChecksChannel = dbClient
+				.channel('realtime_grad_checks')
+				.on('postgres_changes', { event: '*', schema: 'public', table: 'grad_checks' }, (payload) => {
+					const { eventType, new: newRow, old: oldRow } = payload;
+
+					if (eventType === 'INSERT') {
+						if (!adminListData.some(item => item.id === newRow.id)) {
+							adminListData.push(newRow);
+						}
+					} else if (eventType === 'UPDATE') {
+						const idx = adminListData.findIndex(item => item.id === newRow.id);
+						if (idx !== -1) {
+							adminListData[idx] = newRow;
+						} else {
+							adminListData.push(newRow);
+						}
+					} else if (eventType === 'DELETE') {
+						adminListData = adminListData.filter(item => item.id !== oldRow.id);
+					}
+
+					if (isViewingClassList) {
+						renderAdminTable();
+					}
+
+					const activeTargetId = editingStudentId ? (activeStudentDBRecord?.id || editingStudentId) : currentUser?.id;
+					if (newRow && (newRow.id === activeTargetId || newRow.student_id === activeTargetId)) {
+						if (editingStudentId) {
+							activeStudentDBRecord = newRow;
+						} else {
+							userDBRecord = newRow;
+						}
+						renderUserStatusDisplay();
+						if (!isViewingClassList) {
+							applyLoadedChecks(newRow.credits_json || {});
+						}
+					}
+				})
+				.subscribe();
+
+			realtimeFeedbacksChannel = dbClient
+				.channel('realtime_user_feedbacks')
+				.on('postgres_changes', { event: '*', schema: 'public', table: 'user_feedbacks' }, (payload) => {
+					const { eventType, new: newRow, old: oldRow } = payload;
+					if (eventType === 'INSERT') {
+						userFeedbacksData.unshift(newRow);
+					} else if (eventType === 'UPDATE') {
+						const idx = userFeedbacksData.findIndex(item => item.id === newRow.id);
+						if (idx !== -1) userFeedbacksData[idx] = newRow;
+					} else if (eventType === 'DELETE') {
+						userFeedbacksData = userFeedbacksData.filter(item => item.id !== oldRow.id);
+					}
+					const modal = document.getElementById('feedbackListModal');
+					if (modal && modal.style.display !== 'none') {
+						renderFeedbackList();
+					}
+				})
+				.subscribe();
+
+			realtimeAuditLogsChannel = dbClient
+				.channel('realtime_audit_logs')
+				.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'audit_logs' }, (payload) => {
+					if (payload.new) {
+						auditLogsData.unshift(payload.new);
+						const modal = document.getElementById('auditLogModal');
+						if (modal && modal.style.display !== 'none') {
+							renderAuditLogList();
+						}
+					}
+				})
+				.subscribe();
+		};
+
+		window.cleanupRealtimeSubscriptions = function() {
+			if (!dbClient) return;
+			if (realtimeGradChecksChannel) dbClient.removeChannel(realtimeGradChecksChannel);
+			if (realtimeFeedbacksChannel) dbClient.removeChannel(realtimeFeedbacksChannel);
+			if (realtimeAuditLogsChannel) dbClient.removeChannel(realtimeAuditLogsChannel);
+			realtimeGradChecksChannel = null;
+			realtimeFeedbacksChannel = null;
+			realtimeAuditLogsChannel = null;
+		};
+
 		window.buildCardContent = function(title, value, target, isTotalCard = false) {
 			const percentage = (value === null || target === null) ? 0 : Math.min(100, Math.round((value / target) * 100));
 			let barColor = '#d97706';
@@ -1750,6 +1839,7 @@
 					const curName = curRec.full_name || curSid;
 					await logAuditRecord("使用者登出", curSid, curName, { status: "登出成功" });
 				}
+				cleanupRealtimeSubscriptions();
 				if (dbClient) await dbClient.auth.signOut(); 
 				window.location.hash = ''; 
 				window.location.reload(); 
@@ -2829,6 +2919,7 @@
 				currentUser = session ? session.user : null;
 				const authWorkspace = document.getElementById('authWorkspace'), appWorkspace = document.getElementById('appWorkspace');
 				if (!currentUser) {
+					cleanupRealtimeSubscriptions();
 					authWorkspace.style.display = 'flex'; appWorkspace.style.display = 'none'; userDBRecord = null;
 					hasLoadedInitialData = false; lastLoadedStudentId = null; activeStudentDBRecord = null; isViewingClassList = false;
 					editingStudentId = null; lastUserId = null; sessionStorage.removeItem('helpModalShown');
@@ -2837,6 +2928,7 @@
 					authWorkspace.style.display = 'none'; appWorkspace.style.display = 'flex';
 					if (lastUserId !== currentUser.id) { hasLoadedInitialData = false; userDBRecord = null; lastUserId = currentUser.id; }
 					handleHashRouting();
+					setupRealtimeSubscriptions();
 					updateUI();
 				}
 			});
