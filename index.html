@@ -337,6 +337,18 @@
 					</div>
 					<div id="adminCardsContainer" class="admin-cards-grid"></div>
 				</div>
+				<div id="unsetNoticeBox" class="hidden app-container my-6">
+					<div class="bg-white border-2 border-amber-300 rounded-2xl p-8 text-center shadow-md max-w-xl mx-auto">
+						<div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black">⚠️</div>
+						<h3 class="text-xl font-black text-slate-800 mb-2">帳號資料未設定，請聯絡管理員更改！</h3>
+						<p class="text-slate-600 text-sm mb-6 font-semibold leading-relaxed">
+							您目前的入學年或科別班級尚未設定，無法進行學分試算。<br>請點擊下方按鈕聯繫管理員協助更正帳號設定。
+						</p>
+						<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#06C755] hover:bg-[#05b34c] text-white text-sm font-extrabold rounded-xl shadow-md transition-all">
+							<span>💬 聯絡管理員</span>
+						</a>
+					</div>
+				</div>
 				<div id="underConstructionBox" class="hidden bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm my-6">
 					<h3 class="text-xl font-bold text-slate-800 mb-2">資料建置中</h3>
 					<p class="text-slate-500 text-sm">目前選擇的年度與科別（<span id="constYearDept" class="font-bold text-[#059669]"></span>）課程學分資料正在建置中，請透過 Supabase 資料庫寫入課綱腳本！</p>
@@ -809,83 +821,112 @@
 
 			window.cleanupRealtimeSubscriptions();
 
-			realtimeGradChecksChannel = dbClient
-				.channel('realtime_grad_checks')
-				.on('postgres_changes', { event: '*', schema: 'public', table: 'grad_checks' }, (payload) => {
-					const { eventType, new: newRow, old: oldRow } = payload;
+			try {
+				if (typeof WebSocket === 'undefined') {
+					console.warn('WebSocket is not available in this environment. Realtime subscriptions skipped.');
+					return;
+				}
 
-					if (eventType === 'INSERT') {
-						if (!adminListData.some(item => item.id === newRow.id)) {
-							adminListData.push(newRow);
+				realtimeGradChecksChannel = dbClient
+					.channel('realtime_grad_checks')
+					.on('postgres_changes', { event: '*', schema: 'public', table: 'grad_checks' }, (payload) => {
+						const eventType = payload.eventType;
+						const newRow = payload.new;
+						const oldRow = payload.old;
+
+						if (eventType === 'INSERT') {
+							if (!adminListData.some(item => item.id === newRow.id)) {
+								adminListData.push(newRow);
+							}
+						} else if (eventType === 'UPDATE') {
+							const idx = adminListData.findIndex(item => item.id === newRow.id);
+							if (idx !== -1) {
+								adminListData[idx] = newRow;
+							} else {
+								adminListData.push(newRow);
+							}
+						} else if (eventType === 'DELETE') {
+							adminListData = adminListData.filter(item => item.id !== oldRow.id);
 						}
-					} else if (eventType === 'UPDATE') {
-						const idx = adminListData.findIndex(item => item.id === newRow.id);
-						if (idx !== -1) {
-							adminListData[idx] = newRow;
-						} else {
-							adminListData.push(newRow);
+
+						if (isViewingClassList) {
+							renderAdminTable();
 						}
-					} else if (eventType === 'DELETE') {
-						adminListData = adminListData.filter(item => item.id !== oldRow.id);
-					}
 
-					if (isViewingClassList) {
-						renderAdminTable();
-					}
-
-					const activeTargetId = editingStudentId ? (activeStudentDBRecord?.id || editingStudentId) : currentUser?.id;
-					if (newRow && (newRow.id === activeTargetId || newRow.student_id === activeTargetId)) {
-						if (editingStudentId) {
-							activeStudentDBRecord = newRow;
-						} else {
-							userDBRecord = newRow;
+						const activeTargetId = editingStudentId ? (activeStudentDBRecord?.id || editingStudentId) : currentUser?.id;
+						if (newRow && (newRow.id === activeTargetId || newRow.student_id === activeTargetId)) {
+							if (editingStudentId) {
+								activeStudentDBRecord = newRow;
+							} else {
+								userDBRecord = newRow;
+							}
+							renderUserStatusDisplay();
+							if (!isViewingClassList) {
+								applyLoadedChecks(newRow.credits_json || {});
+							}
 						}
-						renderUserStatusDisplay();
-						if (!isViewingClassList) {
-							applyLoadedChecks(newRow.credits_json || {});
+					})
+					.subscribe((status, err) => {
+						if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+							console.warn('Realtime subscription grad_checks error/warning:', status, err);
 						}
-					}
-				})
-				.subscribe();
+					});
 
-			realtimeFeedbacksChannel = dbClient
-				.channel('realtime_user_feedbacks')
-				.on('postgres_changes', { event: '*', schema: 'public', table: 'user_feedbacks' }, (payload) => {
-					const { eventType, new: newRow, old: oldRow } = payload;
-					if (eventType === 'INSERT') {
-						userFeedbacksData.unshift(newRow);
-					} else if (eventType === 'UPDATE') {
-						const idx = userFeedbacksData.findIndex(item => item.id === newRow.id);
-						if (idx !== -1) userFeedbacksData[idx] = newRow;
-					} else if (eventType === 'DELETE') {
-						userFeedbacksData = userFeedbacksData.filter(item => item.id !== oldRow.id);
-					}
-					const modal = document.getElementById('feedbackListModal');
-					if (modal && modal.style.display !== 'none') {
-						renderFeedbackList();
-					}
-				})
-				.subscribe();
-
-			realtimeAuditLogsChannel = dbClient
-				.channel('realtime_audit_logs')
-				.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'audit_logs' }, (payload) => {
-					if (payload.new) {
-						auditLogsData.unshift(payload.new);
-						const modal = document.getElementById('auditLogModal');
+				realtimeFeedbacksChannel = dbClient
+					.channel('realtime_user_feedbacks')
+					.on('postgres_changes', { event: '*', schema: 'public', table: 'user_feedbacks' }, (payload) => {
+						const eventType = payload.eventType;
+						const newRow = payload.new;
+						const oldRow = payload.old;
+						if (eventType === 'INSERT') {
+							userFeedbacksData.unshift(newRow);
+						} else if (eventType === 'UPDATE') {
+							const idx = userFeedbacksData.findIndex(item => item.id === newRow.id);
+							if (idx !== -1) userFeedbacksData[idx] = newRow;
+						} else if (eventType === 'DELETE') {
+							userFeedbacksData = userFeedbacksData.filter(item => item.id !== oldRow.id);
+						}
+						const modal = document.getElementById('feedbackListModal');
 						if (modal && modal.style.display !== 'none') {
-							renderAuditLogList();
+							renderFeedbackList();
 						}
-					}
-				})
-				.subscribe();
+					})
+					.subscribe((status, err) => {
+						if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+							console.warn('Realtime subscription user_feedbacks error/warning:', status, err);
+						}
+					});
+
+				realtimeAuditLogsChannel = dbClient
+					.channel('realtime_audit_logs')
+					.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'audit_logs' }, (payload) => {
+						if (payload.new) {
+							auditLogsData.unshift(payload.new);
+							const modal = document.getElementById('auditLogModal');
+							if (modal && modal.style.display !== 'none') {
+								renderAuditLogList();
+							}
+						}
+					})
+					.subscribe((status, err) => {
+						if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+							console.warn('Realtime subscription audit_logs error/warning:', status, err);
+						}
+					});
+			} catch (e) {
+				console.warn('Realtime subscriptions skipped due to WebSocket restrictions in current environment:', e);
+			}
 		};
 
 		window.cleanupRealtimeSubscriptions = function() {
 			if (!dbClient) return;
-			if (realtimeGradChecksChannel) dbClient.removeChannel(realtimeGradChecksChannel);
-			if (realtimeFeedbacksChannel) dbClient.removeChannel(realtimeFeedbacksChannel);
-			if (realtimeAuditLogsChannel) dbClient.removeChannel(realtimeAuditLogsChannel);
+			try {
+				if (realtimeGradChecksChannel) dbClient.removeChannel(realtimeGradChecksChannel);
+				if (realtimeFeedbacksChannel) dbClient.removeChannel(realtimeFeedbacksChannel);
+				if (realtimeAuditLogsChannel) dbClient.removeChannel(realtimeAuditLogsChannel);
+			} catch (e) {
+				console.warn('Cleanup realtime channels warning:', e);
+			}
 			realtimeGradChecksChannel = null;
 			realtimeFeedbacksChannel = null;
 			realtimeAuditLogsChannel = null;
@@ -1812,7 +1853,6 @@
 				} else {
 					const { error } = await dbClient.auth.signInWithPassword({ email, password: pwd });
 					if (error) throw error;
-					sessionStorage.setItem('just_logged_in', 'true');
 					updateSyncStatusIndicator('success'); showMsg("登入成功！");
 					document.getElementById('authWorkspace').style.display = 'none'; document.getElementById('appWorkspace').style.display = 'flex';
 					hasLoadedInitialData = false; updateUI();
@@ -1872,7 +1912,8 @@
 				dashboard = document.getElementById('dashboardSection'),
 				saveBtn = document.getElementById('saveBtn'), backToTrialAdminBtn = document.getElementById('backToTrialBtn'),
 				adminEditBanner = document.getElementById('adminEditBanner'),
-				layoutSwitcher = document.getElementById('layoutSwitcherArea');
+				layoutSwitcher = document.getElementById('layoutSwitcherArea'),
+				unsetBox = document.getElementById('unsetNoticeBox');
 			
 			if (currentUser) {
 				updateHash();
@@ -1883,13 +1924,26 @@
 				document.getElementById('statusHeader').style.display = 'block';
 				
 				const m = currentUser.user_metadata;
-				const role = userDBRecord?.role || m?.role || 'student';
-				const myYear = userDBRecord?.entry_year || m?.entry_year || '未設定';
-				const myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
+				const role = userDBRecord ? userDBRecord.role : (m ? m.role : 'student');
+				const myYear = userDBRecord ? userDBRecord.entry_year : (m ? m.entry_year : '未設定');
+				const myDept = userDBRecord ? userDBRecord.entry_dept : (m ? m.entry_dept : '未設定');
 
-				if (sessionStorage.getItem('just_logged_in') === 'true') {
-					toggleUIModal(true, 'helpModal');
-					sessionStorage.removeItem('just_logged_in');
+				const isStudentUnset = (!editingStudentId && role === 'student' && (myYear === '未設定' || myDept === '未設定'));
+				if (isStudentUnset) {
+					if (unsetBox) unsetBox.classList.remove('hidden');
+					if (dashboard) dashboard.style.display = 'none';
+					if (layoutSwitcher) layoutSwitcher.style.display = 'none';
+					if (mobileContainer) {
+						mobileContainer.style.display = 'none';
+						mobileContainer.innerHTML = '';
+					}
+					const constructionBox = document.getElementById("underConstructionBox");
+					if (constructionBox) constructionBox.classList.add("hidden");
+					if (adminBackend) adminBackend.style.display = 'none';
+					renderUserStatusDisplay();
+					return;
+				} else {
+					if (unsetBox) unsetBox.classList.add('hidden');
 				}
 
 				if (role === 'teacher' && (myYear === '未設定' || myDept === '未設定')) { 
@@ -2700,7 +2754,12 @@
 			const constructionBox = document.getElementById("underConstructionBox");
 			const constYearDeptSpan = document.getElementById("constYearDept");
 
-			if (isViewingClassList) {
+			const role = userDBRecord ? userDBRecord.role : (currentUser && currentUser.user_metadata ? currentUser.user_metadata.role : 'student');
+			const myYear = userDBRecord ? userDBRecord.entry_year : (currentUser && currentUser.user_metadata ? currentUser.user_metadata.entry_year : '未設定');
+			const myDept = userDBRecord ? userDBRecord.entry_dept : (currentUser && currentUser.user_metadata ? currentUser.user_metadata.entry_dept : '未設定');
+			const isStudentUnset = (!editingStudentId && role === 'student' && (myYear === '未設定' || myDept === '未設定'));
+
+			if (isViewingClassList || isStudentUnset) {
 				if (mobileContainer) {
 					mobileContainer.style.display = "none";
 					mobileContainer.innerHTML = "";
