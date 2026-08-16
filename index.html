@@ -1672,6 +1672,11 @@
 				
 				renderUserStatusDisplay();
 
+				const m = currentUser.user_metadata || {};
+				const role = userDBRecord?.role || m?.role || 'student';
+				const myYear = userDBRecord?.entry_year || m?.entry_year || '未設定';
+				const myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
+
 				if (isViewingClassList) {
 					dashboard.style.display = 'none'; if (layoutSwitcher) layoutSwitcher.style.display = 'none';
 					mobileContainer.style.display = 'none';
