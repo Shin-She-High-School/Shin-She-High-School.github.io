@@ -587,7 +587,7 @@
 							<option value="使用者註冊">✨ 使用者註冊</option>
 						</optgroup>
 						<optgroup label="⚠️ 刪除與警示">
-							<option value="刪除學生帳號">🗑️ 刪除學生帳號</option>
+							<option value="刪除帳號">🗑️ 刪除帳號</option>
 						</optgroup>
 					</select>
 					<select id="auditFilterOperatorRole" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
@@ -1342,6 +1342,7 @@
 				'單學期學分歸零': { icon: '⚠️', class: 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-xs font-black' },
 				'更改帳號資料': { icon: '📝', class: 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-xs font-black' },
 				'重設帳號密碼': { icon: '⚡', class: 'bg-gradient-to-r from-violet-600 to-indigo-700 text-white shadow-xs font-black' },
+				'刪除帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-xs font-black' },
 				'刪除學生帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-xs font-black' },
 				'更新個人資料': { icon: '👤', class: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-xs font-black' },
 				'送出系統回饋': { icon: '💡', class: 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-xs font-black' }
@@ -1353,7 +1354,7 @@
 				tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
 				
 				let diffHtml = '';
-				if (log.action_type === '刪除學生帳號') {
+				if (log.action_type === '刪除帳號' || log.action_type === '刪除學生帳號') {
 					const d = log.details || {};
 					const delName = d.deleted_name || log.target_student_name || '未知姓名';
 					const delSid = d.deleted_sid || log.target_student_id || '未知帳號';
@@ -2615,7 +2616,7 @@
 
 		window.deleteStudentData = function(id, name) {
 			if (!dbClient) return;
-			showConfirmModal(`您確定要刪除「${name}」的帳號與所有表格資料嗎？此操作將清除該學生的學分紀錄、意見回饋與 Supabase 登入帳號，無法恢復！`, "刪除學生帳號", async () => {
+			showConfirmModal(`您確定要刪除「${name}」嗎？此操作將清除該帳號所有資料，無法恢復！`, "刪除帳號", async () => {
 				try {
 					updateSyncStatusIndicator('saving');
 					const studentRec = adminListData.find(s => s.id === id);
@@ -2646,7 +2647,7 @@
 					showMsg(`已成功刪除「${name}」的所有表格資料與帳號！`);
 					
 					// 寫入詳細稽核紀錄，明確記錄刪除的姓名、學號與識別碼
-					await logAuditRecord("刪除學生帳號", sid, name, { deleted_name: name, deleted_sid: sid, deleted_id: id });
+					await logAuditRecord("刪除帳號", sid, name, { deleted_name: name, deleted_sid: sid, deleted_id: id });
 
 					toggleUIModal(false, 'confirmModal');
 					fetchAdminList();
@@ -2655,7 +2656,7 @@
 					showMsg(translateError(err.message), "error");
 					toggleUIModal(false, 'confirmModal');
 				}
-			}, "確認刪除所有資料", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
+			}, "確認刪除資料", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 		};
 
 		window.renderAdminTable = function() {
