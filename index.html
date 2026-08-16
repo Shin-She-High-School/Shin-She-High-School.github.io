@@ -398,7 +398,7 @@
 						<button type="button" class="px-2.5 py-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-lg shrink-0 transition shadow-sm whitespace-nowrap" onclick="customResetPassword()">確認重設</button>
 					</div>
 					<button type="button" class="action-btn shrink-0 w-full sm:w-auto" style="border-radius: 8px; background: linear-gradient(135deg, #6366f1, #4f46e5); font-size: 0.8rem; padding: 9px 10px; margin: 0; white-space: nowrap;" onclick="directResetPasswordToSid()">
-						⚡ 一鍵重設為「帳號」
+						⚡ 重設為「帳號」
 					</button>
 				</div>
 				<p style="font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.4;">※ 點擊任意重設按鈕後，系統會立即將該使用者的登入密碼覆寫。</p>
@@ -452,6 +452,7 @@
 						<option value="刪除學生帳號">刪除學生帳號</option>
 						<option value="更新個人資料">更新個人資料</option>
 						<option value="使用者登入">使用者登入</option>
+						<option value="使用者登出">使用者登出</option>
 					</select>
 					<select id="auditFilterOperatorRole" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
 						<option value="all">所有操作身分</option>
@@ -873,7 +874,7 @@
 				if (log.details && typeof log.details === 'object') {
 					const d = log.details;
 					if (d.old_version && d.new_version) {
-						diffHtml += `<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 font-extrabold text-[11px]">
+						diffHtml += `<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 font-extrabold text-[11px] mb-1">
 							<span class="text-slate-500">原版本: ${d.old_version}</span> 
 							<span class="text-sky-600 font-black">➔</span> 
 							<span class="text-indigo-700 font-black">新版本: ${d.new_version}</span>
@@ -900,16 +901,59 @@
 						});
 						diffHtml += `</div>`;
 					} else {
+						let chipItems = [];
 						for (const [k, v] of Object.entries(d)) {
 							if (k !== 'old_total' && k !== 'new_total' && k !== 'changed_fields' && k !== 'old_version' && k !== 'new_version') {
 								const valStr = typeof v === 'object' ? JSON.stringify(v) : v;
-								diffHtml += `<span class="text-slate-600 text-[11px] mr-2 inline-block"><b>${k}:</b> ${valStr}</span>`;
+								let chipClass = "bg-slate-100 text-slate-700 border-slate-200";
+								let label = k;
+								if (k === 'status') {
+									label = '狀態';
+									if (v.includes('成功') || v.includes('登入')) chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-sm";
+									else if (v.includes('登出')) chipClass = "bg-slate-100 text-slate-700 border-slate-300 font-black shadow-sm";
+									else chipClass = "bg-amber-50 text-amber-800 border-amber-300 font-black shadow-sm";
+								} else if (k === 'method') {
+									label = '重設方式';
+									chipClass = "bg-indigo-50 text-indigo-700 border-indigo-200 font-black";
+								} else if (k === 'year') {
+									label = '入學年';
+									chipClass = "bg-blue-50 text-blue-700 border-blue-200 font-black";
+								} else if (k === 'dept') {
+									label = '科別';
+									chipClass = "bg-purple-50 text-purple-700 border-purple-200 font-black";
+								} else if (k === 'semester') {
+									label = '學期';
+									chipClass = "bg-sky-50 text-sky-700 border-sky-200 font-black";
+								} else if (k === 'mode') {
+									label = '範圍';
+									chipClass = "bg-teal-50 text-teal-700 border-teal-200 font-black";
+								} else if (k === 'passwordChanged') {
+									label = '修改密碼';
+									chipClass = v ? "bg-amber-50 text-amber-800 border-amber-200 font-black" : "bg-slate-50 text-slate-500 border-slate-200";
+								}
+								chipItems.push(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] ${chipClass}">
+									<span class="opacity-60 text-[10px] font-bold">${label}:</span>
+									<span class="font-extrabold">${valStr}</span>
+								</span>`);
 							}
+						}
+						if (chipItems.length > 0) {
+							diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">${chipItems.join('')}</div>`;
 						}
 					}
 				} else {
-					diffHtml = `<span class="text-slate-500 text-[11px]">${log.details || '-'}</span>`;
+					diffHtml = `<span class="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-bold border border-slate-200">${log.details || '-'}</span>`;
 				}
+
+				let actionBadgeClass = "bg-slate-100 text-slate-700 border-slate-200";
+				if (log.action_type === '使用者登入') actionBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-300";
+				else if (log.action_type === '使用者登出') actionBadgeClass = "bg-slate-100 text-slate-600 border-slate-300";
+				else if (log.action_type === '變更學分紀錄') actionBadgeClass = "bg-blue-50 text-blue-700 border-blue-200";
+				else if (log.action_type === '切換版本') actionBadgeClass = "bg-sky-50 text-sky-700 border-sky-200";
+				else if (log.action_type === '重設帳號密碼' || log.action_type === '更改帳號資料') actionBadgeClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
+				else if (log.action_type === '刪除學生帳號') actionBadgeClass = "bg-rose-50 text-rose-700 border-rose-200";
+				else if (log.action_type.includes('全選') || log.action_type.includes('及格')) actionBadgeClass = "bg-teal-50 text-teal-700 border-teal-200";
+				else if (log.action_type.includes('歸零')) actionBadgeClass = "bg-amber-50 text-amber-700 border-amber-200";
 
 				tr.innerHTML = `
 					<td class="p-3 text-slate-500">${timeStr}</td>
@@ -921,7 +965,7 @@
 						<div>${log.target_student_name || '-'}</div>
 						<div class="text-[10px] text-slate-400 font-normal">${log.target_student_id || ''}</div>
 					</td>
-					<td class="p-3"><span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-black text-[11px] whitespace-nowrap">${log.action_type}</span></td>
+					<td class="p-3"><span class="px-2.5 py-1 rounded-full border font-black text-[11px] whitespace-nowrap ${actionBadgeClass}">${log.action_type}</span></td>
 					<td class="p-3 text-slate-700">${diffHtml}</td>
 				`;
 				listBody.appendChild(tr);
@@ -1417,7 +1461,9 @@
 			try { 
 				if (currentUser) {
 					const curRec = userDBRecord || currentUser?.user_metadata || {};
-					logAuditRecord("使用者登出", curRec.student_id, curRec.full_name, { status: "登出成功" });
+					const curSid = (curRec.student_id || currentUser.email?.split('@')[0] || '未知帳號').toLowerCase().trim();
+					const curName = curRec.full_name || curSid;
+					await logAuditRecord("使用者登出", curSid, curName, { status: "登出成功" });
 				}
 				if (dbClient) await dbClient.auth.signOut(); 
 				window.location.hash = ''; 
@@ -2059,11 +2105,9 @@
 				const studentTargetId = s.student_id || s.id;
 				if (s.role === 'student') {
 					btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
-					if (role === 'admin') {
-						btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#6366f1;" onclick="openAuditLogModal('${s.student_id}')" title="檢視個人異動歷程">📜 歷程</button>`;
-					}
 				}
 				if (role === 'admin') {
+					btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#6366f1;" onclick="openAuditLogModal('${s.student_id}')" title="檢視個人異動歷程">📜 歷程</button>`;
 					btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
 									<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				} else if (role === 'teacher' && s.role !== 'student') {
@@ -2079,11 +2123,9 @@
 				let btnsMobile = '';
 				if (s.role === 'student') {
 					btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition shadow-sm select-none whitespace-nowrap" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
-					if (role === 'admin') {
-						btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm select-none whitespace-nowrap" onclick="openAuditLogModal('${s.student_id}')">📜 歷程</button>`;
-					}
 				}
 				if (role === 'admin') {
+					btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm select-none whitespace-nowrap" onclick="openAuditLogModal('${s.student_id}')">📜 歷程</button>`;
 					btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 transition shadow-sm select-none whitespace-nowrap" onclick="openAdminUserEdit(${i})">帳號設定</button>
 						<button class="flex-auto min-w-0 py-2 px-2 text-[11px] xs:text-xs text-center rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-sm select-none whitespace-nowrap" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				} else if (role === 'teacher' && s.role !== 'student') {
