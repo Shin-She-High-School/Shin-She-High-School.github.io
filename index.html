@@ -102,6 +102,14 @@
 		.mobile-sem-label { font-size: 0.78rem; color: #334155; font-weight: 700; }
 		.mobile-score-box { width: 100%; height: 42px; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-sizing: border-box; background-color: transparent; position: relative; }
 		.toggle-checkbox { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+		.toggle-checkbox.sem-checkbox { position: absolute !important; opacity: 0 !important; width: 0 !important; height: 0 !important; pointer-events: none !important; }
+		
+		.sem-item-row { background-color: #ffffff; border: 1.5px solid #e2e8f0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+		.sem-item-row:hover { border-color: #cbd5e1; background-color: #f8fafc; }
+		.sem-item-row:has(.sem-checkbox:checked) { background-color: #f0fdf4 !important; border-color: #86efac !important; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08); }
+		.sem-item-row:has(.sem-checkbox:checked) .custom-check-box { background-color: #10b981; border-color: #10b981; transform: scale(1.05); }
+		.sem-item-row:has(.sem-checkbox:checked) .custom-check-box i { opacity: 1; transform: scale(1); }
+
 		.score-label { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: pointer; font-weight: 900; font-size: 1.15rem; position: relative; border-radius: 8px; transition: all 0.15s ease; box-sizing: border-box; border: 2px solid transparent; }
 		.toggle-checkbox:checked + .score-label { background-color: #dcfce7; color: #14532d; border: 2px solid #059669; }
 		.toggle-checkbox:checked + .score-label::after { content: '✔'; font-size: 0.75em; color: #059669; font-weight: 900; position: absolute; right: 4px; top: 4px; line-height: 1; }
@@ -2252,11 +2260,11 @@
 				}
 
 				card.innerHTML = `
-					<div class="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-100">
-						<div class="flex items-center gap-2 min-w-0">
-							<span class="font-extrabold text-sm sm:text-base text-slate-800 truncate">${item.name}</span>
+					<div class="flex items-start justify-between gap-2 mb-3 pb-2 border-b border-slate-100">
+						<div class="flex items-center gap-2 min-w-0 flex-1">
+							<span class="font-extrabold text-sm sm:text-base text-slate-800 break-words leading-snug">${item.name}</span>
 						</div>
-						<div class="flex items-center gap-1.5 shrink-0">
+						<div class="flex items-center gap-1.5 shrink-0 pt-0.5">
 							<span class="mobile-badge ${catInfo.class}">${catInfo.text}</span>
 							<span class="mobile-badge bg-slate-100 text-slate-600 border border-slate-200">${typeText}</span>
 						</div>
@@ -2297,18 +2305,21 @@
 						const typeText = mapping.type[item.type] || "一般";
 
 						itemsHtml += `
-							<div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100/80 transition-colors">
-								<div class="flex items-center gap-2.5 min-w-0 pr-2">
-									<input type="checkbox" id="${id}" class="toggle-checkbox sem-checkbox shrink-0 w-4 h-4 accent-emerald-600 cursor-pointer" data-cat="${item.cat}" data-type="${item.type}" data-val="${c}" data-sem="${sIdx}" data-name="${item.name}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); saveToCloud(true);">
-									<label for="${id}" class="sem-label flex items-center gap-2 min-w-0 cursor-pointer select-none">
-										<span class="sub-name text-xs sm:text-sm font-bold text-slate-800 truncate">${item.name}</span>
-										<span class="credit-badge text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 shrink-0">${c} 學分</span>
-									</label>
-								</div>
-								<div class="flex items-center gap-1 shrink-0">
-									<span class="mobile-badge text-[10px] py-0.5 px-2 ${catInfo.class}">${catInfo.text}</span>
-									<span class="mobile-badge text-[10px] py-0.5 px-1.5 bg-slate-100 text-slate-600 border border-slate-200">${typeText}</span>
-								</div>
+							<div class="sem-item-row flex items-center justify-between p-2.5 rounded-xl transition-all gap-2 cursor-pointer select-none">
+								<input type="checkbox" id="${id}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${item.cat}" data-type="${item.type}" data-val="${c}" data-sem="${sIdx}" data-name="${item.name}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); saveToCloud(true);">
+								<label for="${id}" class="sem-label flex items-center justify-between w-full cursor-pointer gap-2 min-w-0">
+									<div class="flex items-center gap-2.5 min-w-0 flex-1">
+										<div class="custom-check-box w-5 h-5 rounded-lg border-2 border-slate-300 flex items-center justify-center transition-all shrink-0 bg-white shadow-sm">
+											<i class="fa-solid fa-check text-[10px] text-white opacity-0 transform scale-50 transition-all"></i>
+										</div>
+										<span class="sub-name text-xs sm:text-sm font-extrabold text-slate-800 break-words leading-snug">${item.name}</span>
+										<span class="credit-badge text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-700 shrink-0">${c} 學分</span>
+									</div>
+									<div class="flex items-center gap-1 shrink-0 pt-0.5">
+										<span class="mobile-badge text-[10px] py-0.5 px-1.5 ${catInfo.class}">${catInfo.text}</span>
+										<span class="mobile-badge text-[10px] py-0.5 px-1.5 bg-slate-100 text-slate-600 border border-slate-200">${typeText}</span>
+									</div>
+								</label>
 							</div>`;
 					}
 				});
@@ -2448,8 +2459,8 @@
 						grouped[sem].forEach(item => {
 							html += `
 								<div class="flex items-center justify-between text-xs py-1 px-1.5 rounded hover:bg-slate-200/40 transition-colors min-w-0">
-									<div class="flex items-center gap-2 min-w-0 flex-wrap">
-										<span class="font-bold text-slate-800 truncate max-w-[120px] xs:max-w-none">${item.name}</span>
+									<div class="flex items-center gap-2 min-w-0 flex-wrap flex-1 pr-2">
+										<span class="font-bold text-slate-800 break-words">${item.name}</span>
 										<span class="text-[9px] scale-90 ${mapping.cat[item.cat].class} py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.cat[item.cat].text}</span>
 										<span class="text-[9px] scale-90 bg-slate-100 text-slate-600 border border-slate-200 py-0.5 px-2 rounded-full font-bold whitespace-nowrap shrink-0">${mapping.type[item.type]}</span>
 									</div>
