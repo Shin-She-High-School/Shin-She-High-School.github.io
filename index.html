@@ -396,7 +396,6 @@
 		</div>
 	</div>
 
-	<!-- 💡 管理員檢視意見回饋彈窗 -->
 	<div id="feedbackListModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-4xl !w-full">
 			<div class="modal-header">
@@ -583,15 +582,15 @@
 			</div>
 
 			<div class="modal-body">
-				<div class="overflow-x-hidden w-full custom-scrollbar max-h-[50dvh] border border-slate-200 rounded-xl">
+				<div id="auditLogTableContainer" class="overflow-x-hidden overflow-y-auto w-full custom-scrollbar max-h-[50dvh] border border-slate-200 rounded-xl relative">
 					<table class="w-full border-collapse text-left text-xs">
-						<thead>
-							<tr class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
-								<th class="p-3 w-32">異動時間</th>
-								<th class="p-3 w-28">操作者 (IP)</th>
-								<th class="p-3 w-28">目標對象</th>
-								<th class="p-3 w-24">異動項目</th>
-								<th class="p-3">前後比對與詳細變更紀錄</th>
+						<thead class="sticky top-0 z-20 bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200 shadow-xs">
+							<tr>
+								<th class="p-3 w-32 bg-slate-100">異動時間</th>
+								<th class="p-3 w-28 bg-slate-100">操作者 (IP)</th>
+								<th class="p-3 w-28 bg-slate-100">目標對象</th>
+								<th class="p-3 w-24 bg-slate-100">異動項目</th>
+								<th class="p-3 bg-slate-100">前後比對與詳細變更紀錄</th>
 							</tr>
 						</thead>
 						<tbody id="auditLogListBody" class="divide-y divide-slate-100 font-semibold text-slate-800"></tbody>
@@ -817,20 +816,17 @@
 				testWs.close();
 				return true;
 			} catch (e) {
-				console.warn('WebSocket connection is not allowed in this environment. Realtime subscriptions skipped.');
+				console.warn('WebSocket connection is not allowed in this environment.');
 				return false;
 			}
 		};
 
 		window.setupRealtimeSubscriptions = function() {
 			if (!dbClient) return;
-
 			window.cleanupRealtimeSubscriptions();
 
 			try {
-				if (!window.isWebSocketAllowed()) {
-					return;
-				}
+				if (!window.isWebSocketAllowed()) return;
 
 				realtimeGradChecksChannel = dbClient
 					.channel('realtime_grad_checks')
@@ -840,42 +836,26 @@
 						const oldRow = payload.old;
 
 						if (eventType === 'INSERT') {
-							if (!adminListData.some(item => item.id === newRow.id)) {
-								adminListData.push(newRow);
-							}
+							if (!adminListData.some(item => item.id === newRow.id)) adminListData.push(newRow);
 						} else if (eventType === 'UPDATE') {
 							const idx = adminListData.findIndex(item => item.id === newRow.id);
-							if (idx !== -1) {
-								adminListData[idx] = newRow;
-							} else {
-								adminListData.push(newRow);
-							}
+							if (idx !== -1) adminListData[idx] = newRow;
+							else adminListData.push(newRow);
 						} else if (eventType === 'DELETE') {
 							adminListData = adminListData.filter(item => item.id !== oldRow.id);
 						}
 
-						if (isViewingClassList) {
-							renderAdminTable();
-						}
+						if (isViewingClassList) renderAdminTable();
 
 						const activeTargetId = editingStudentId ? (activeStudentDBRecord?.id || editingStudentId) : currentUser?.id;
 						if (newRow && (newRow.id === activeTargetId || newRow.student_id === activeTargetId)) {
-							if (editingStudentId) {
-								activeStudentDBRecord = newRow;
-							} else {
-								userDBRecord = newRow;
-							}
+							if (editingStudentId) activeStudentDBRecord = newRow;
+							else userDBRecord = newRow;
 							renderUserStatusDisplay();
-							if (!isViewingClassList) {
-								applyLoadedChecks(newRow.credits_json || {});
-							}
+							if (!isViewingClassList) applyLoadedChecks(newRow.credits_json || {});
 						}
 					})
-					.subscribe((status, err) => {
-						if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-							console.warn('Realtime subscription grad_checks error/warning:', status, err);
-						}
-					});
+					.subscribe();
 
 				realtimeFeedbacksChannel = dbClient
 					.channel('realtime_user_feedbacks')
@@ -883,24 +863,17 @@
 						const eventType = payload.eventType;
 						const newRow = payload.new;
 						const oldRow = payload.old;
-						if (eventType === 'INSERT') {
-							userFeedbacksData.unshift(newRow);
-						} else if (eventType === 'UPDATE') {
+						if (eventType === 'INSERT') userFeedbacksData.unshift(newRow);
+						else if (eventType === 'UPDATE') {
 							const idx = userFeedbacksData.findIndex(item => item.id === newRow.id);
 							if (idx !== -1) userFeedbacksData[idx] = newRow;
 						} else if (eventType === 'DELETE') {
 							userFeedbacksData = userFeedbacksData.filter(item => item.id !== oldRow.id);
 						}
 						const modal = document.getElementById('feedbackListModal');
-						if (modal && modal.style.display !== 'none') {
-							renderFeedbackList();
-						}
+						if (modal && modal.style.display !== 'none') renderFeedbackList();
 					})
-					.subscribe((status, err) => {
-						if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-							console.warn('Realtime subscription user_feedbacks error/warning:', status, err);
-						}
-					});
+					.subscribe();
 
 				realtimeAuditLogsChannel = dbClient
 					.channel('realtime_audit_logs')
@@ -908,18 +881,12 @@
 						if (payload.new) {
 							auditLogsData.unshift(payload.new);
 							const modal = document.getElementById('auditLogModal');
-							if (modal && modal.style.display !== 'none') {
-								renderAuditLogList();
-							}
+							if (modal && modal.style.display !== 'none') renderAuditLogList();
 						}
 					})
-					.subscribe((status, err) => {
-						if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-							console.warn('Realtime subscription audit_logs error/warning:', status, err);
-						}
-					});
+					.subscribe();
 			} catch (e) {
-				console.warn('Realtime subscriptions skipped due to WebSocket restrictions in current environment:', e);
+				console.warn('Realtime subscriptions skipped:', e);
 			}
 		};
 
@@ -980,9 +947,7 @@
 				
 				let opId = user?.id || null;
 				const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-				if (opId && !uuidRegex.test(opId)) {
-					opId = null;
-				}
+				if (opId && !uuidRegex.test(opId)) opId = null;
 
 				const payload = {
 					operator_id: opId,
@@ -999,7 +964,6 @@
 
 				const { error } = await dbClient.from('audit_logs').insert([payload]);
 				if (error) {
-					console.error('Supabase audit_logs 寫入失敗:', error);
 					if (error.code === '23503' && opId) {
 						payload.operator_id = null;
 						await dbClient.from('audit_logs').insert([payload]);
@@ -1019,17 +983,11 @@
 		};
 
 		window.submitUserFeedback = async function() {
-			if (!dbClient) {
-				showMsg("資料庫連線異常，無法送出！", "error");
-				return;
-			}
+			if (!dbClient) { showMsg("資料庫連線異常，無法送出！", "error"); return; }
 			const category = document.getElementById('fbCategory').value;
 			const content = document.getElementById('fbContent').value.trim();
 
-			if (!content) {
-				showMsg("請輸入您的寶貴意見！", "error");
-				return;
-			}
+			if (!content) { showMsg("請輸入您的寶貴意見！", "error"); return; }
 
 			const curRec = userDBRecord || currentUser?.user_metadata || {};
 			const cleanSid = (curRec.student_id || currentUser?.email?.split('@')[0] || 'guest').toLowerCase().trim();
@@ -1054,7 +1012,6 @@
 				toggleUIModal(false, 'feedbackModal');
 				logAuditRecord("送出系統回饋", cleanSid, fullName, { category });
 			} catch (err) {
-				console.error("submitUserFeedback error:", err);
 				updateSyncStatusIndicator('offline');
 				showMsg("送出失敗，請確認 Supabase user_feedbacks 資料表已建立！", "error");
 			}
@@ -1074,19 +1031,14 @@
 		window.refreshFeedbackList = async function() {
 			if (!dbClient) return;
 			const listBody = document.getElementById('feedbackListBody');
-			if (listBody) {
-				listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入意見回饋列表...</td></tr>`;
-			}
+			if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入意見回饋列表...</td></tr>`;
 			try {
 				const { data, error } = await dbClient.from('user_feedbacks').select('*').order('created_at', { ascending: false });
 				if (error) throw error;
 				userFeedbacksData = data || [];
 				renderFeedbackList();
 			} catch (e) {
-				console.error("Fetch user_feedbacks error:", e);
-				if (listBody) {
-					listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-500 font-bold">⚠️ 載入失敗，請確認 Supabase 已建立 user_feedbacks 資料表並啟用 RLS 政策！</td></tr>`;
-				}
+				if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-500 font-bold">⚠️ 載入失敗！</td></tr>`;
 			}
 		};
 
@@ -1152,10 +1104,8 @@
 					updateSyncStatusIndicator('saving');
 					const { error } = await dbClient.from('user_feedbacks').delete().eq('id', id);
 					if (error) throw error;
-					
 					userFeedbacksData = userFeedbacksData.filter(f => String(f.id) !== String(id));
 					renderFeedbackList();
-					
 					updateSyncStatusIndicator('success');
 					showMsg("已成功刪除該筆意見回饋！");
 					toggleUIModal(false, 'confirmModal');
@@ -1177,37 +1127,23 @@
 			}
 			toggleUIModal(true, 'auditLogModal');
 			const searchInput = document.getElementById('auditSearchInput');
-			if (filterStudentId && searchInput) {
-				searchInput.value = filterStudentId;
-			} else if (searchInput) {
-				searchInput.value = '';
-			}
+			if (filterStudentId && searchInput) searchInput.value = filterStudentId;
+			else if (searchInput) searchInput.value = '';
 			await refreshAuditLogs();
 		};
 
 		window.refreshAuditLogs = async function() {
 			if (!dbClient) return;
 			const listBody = document.getElementById('auditLogListBody');
-			if (listBody) {
-				listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在從 Supabase 資料庫載入稽核日誌...</td></tr>`;
-			}
+			if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入稽核日誌...</td></tr>`;
 			let remoteLogs = [];
-			let dbErrorMsg = null;
 			try {
 				const { data, error } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(500);
-				if (error) {
-					console.warn("Supabase audit_logs fetch error:", error);
-					dbErrorMsg = error.message || 'Supabase 尚未建立 audit_logs 資料表';
-				} else {
-					remoteLogs = data || [];
-				}
-			} catch (e) {
-				dbErrorMsg = e.message || '資料庫連線失敗';
-			}
+				if (!error) remoteLogs = data || [];
+			} catch (e) { console.warn(e); }
 
-			try { localStorage.removeItem('sshs_audit_logs'); } catch (e) {}
 			auditLogsData = remoteLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-			renderAuditLogList(dbErrorMsg);
+			renderAuditLogList();
 		};
 
 		window.resetAuditFilters = function() {
@@ -1216,33 +1152,6 @@
 			if (document.getElementById('auditFilterOperatorRole')) document.getElementById('auditFilterOperatorRole').value = 'all';
 			if (document.getElementById('auditStartDate')) document.getElementById('auditStartDate').value = '';
 			if (document.getElementById('auditEndDate')) document.getElementById('auditEndDate').value = '';
-			
-			// 重設快捷分類頁籤樣式
-			document.querySelectorAll('.audit-cat-chip').forEach(btn => {
-				btn.className = "audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100";
-			});
-			const allBtn = document.querySelector('.audit-cat-chip');
-			if (allBtn) allBtn.className = "audit-cat-chip active px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-xs";
-
-			renderAuditLogList();
-		};
-
-		// 快捷主題分類切換函式
-		window.filterAuditCategory = function(catKey, btnEl) {
-			document.querySelectorAll('.audit-cat-chip').forEach(btn => {
-				btn.className = "audit-cat-chip px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100";
-			});
-			if (btnEl) btnEl.className = "audit-cat-chip active px-2.5 py-1 rounded-lg text-xs font-black transition-all bg-indigo-600 text-white shadow-xs";
-
-			const actionSelect = document.getElementById('auditFilterAction');
-			if (!actionSelect) return;
-
-			if (catKey === 'all') actionSelect.value = 'all';
-			else if (catKey === 'credits') actionSelect.value = '變更學分紀錄';
-			else if (catKey === 'account') actionSelect.value = '更改帳號資料';
-			else if (catKey === 'security') actionSelect.value = '使用者登入';
-			else if (catKey === 'danger') actionSelect.value = '刪除學生帳號';
-
 			renderAuditLogList();
 		};
 
@@ -1256,6 +1165,10 @@
 			const listBody = document.getElementById('auditLogListBody');
 			const countText = document.getElementById('auditCountText');
 			if (!listBody) return;
+
+			// 當搜尋或篩選時，滾動容器回到最頂端
+			const auditContainer = document.getElementById('auditLogTableContainer');
+			if (auditContainer) auditContainer.scrollTop = 0;
 
 			let filtered = [...auditLogsData];
 
@@ -1282,17 +1195,7 @@
 				filtered = filtered.filter(l => new Date(l.created_at).getTime() <= endMs);
 			}
 
-			const totalOps = auditLogsData.length;
-			const filteredCount = filtered.length;
-			const uniqueOps = new Set(auditLogsData.map(l => l.operator_id || l.operator_name)).size;
-			const uniqueTargets = new Set(auditLogsData.map(l => l.target_student_id).filter(id => id && id !== '無')).size;
-
-			if (document.getElementById('auditStatTotal')) document.getElementById('auditStatTotal').innerText = totalOps;
-			if (document.getElementById('auditStatFiltered')) document.getElementById('auditStatFiltered').innerText = filteredCount;
-			if (document.getElementById('auditStatOperators')) document.getElementById('auditStatOperators').innerText = uniqueOps;
-			if (document.getElementById('auditStatTargets')) document.getElementById('auditStatTargets').innerText = uniqueTargets;
-
-			if (countText) countText.innerText = `共 ${filteredCount} 筆紀錄`;
+			if (countText) countText.innerText = `共 ${filtered.length} 筆紀錄`;
 			listBody.innerHTML = '';
 
 			if (filtered.length === 0) {
@@ -1300,23 +1203,22 @@
 				return;
 			}
 
-			// 高質感立體漸層異動項目樣式表
 			const actionConfig = {
-				'使用者登入': { icon: '🔑', class: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-xs font-black' },
-				'使用者登出': { icon: '🚪', class: 'bg-gradient-to-r from-slate-500 to-gray-600 text-white shadow-xs font-black' },
-				'使用者註冊': { icon: '✨', class: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-xs font-black' },
-				'變更學分紀錄': { icon: '📘', class: 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xs font-black' },
-				'切換版本': { icon: '🔄', class: 'bg-gradient-to-r from-sky-500 to-cyan-600 text-white shadow-xs font-black' },
-				'批次全部及格': { icon: '✅', class: 'bg-gradient-to-r from-emerald-600 to-green-700 text-white shadow-xs font-black' },
-				'批次學分歸零': { icon: '🧹', class: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-xs font-black' },
-				'單學期全選及格': { icon: '✔', class: 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-xs font-black' },
-				'單學期學分歸零': { icon: '⚠️', class: 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-xs font-black' },
-				'更改帳號資料': { icon: '📝', class: 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-xs font-black' },
-				'重設帳號密碼': { icon: '⚡', class: 'bg-gradient-to-r from-violet-600 to-indigo-700 text-white shadow-xs font-black' },
-				'刪除帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-xs font-black' },
-				'刪除學生帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white shadow-xs font-black' },
-				'更新個人資料': { icon: '👤', class: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-xs font-black' },
-				'送出系統回饋': { icon: '💡', class: 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-xs font-black' }
+				'使用者登入': { icon: '🔑', class: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black' },
+				'使用者登出': { icon: '🚪', class: 'bg-gradient-to-r from-slate-500 to-gray-600 text-white font-black' },
+				'使用者註冊': { icon: '✨', class: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-black' },
+				'變更學分紀錄': { icon: '📘', class: 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black' },
+				'切換版本': { icon: '🔄', class: 'bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-black' },
+				'批次全部及格': { icon: '✅', class: 'bg-gradient-to-r from-emerald-600 to-green-700 text-white font-black' },
+				'批次學分歸零': { icon: '🧹', class: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black' },
+				'單學期全選及格': { icon: '✔', class: 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-black' },
+				'單學期學分歸零': { icon: '⚠️', class: 'bg-gradient-to-r from-orange-500 to-red-500 text-white font-black' },
+				'更改帳號資料': { icon: '📝', class: 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black' },
+				'重設帳號密碼': { icon: '⚡', class: 'bg-gradient-to-r from-violet-600 to-indigo-700 text-white font-black' },
+				'刪除帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white font-black' },
+				'刪除學生帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white font-black' },
+				'更新個人資料': { icon: '👤', class: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-black' },
+				'送出系統回饋': { icon: '💡', class: 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white font-black' }
 			};
 
 			filtered.forEach(log => {
@@ -1360,11 +1262,6 @@
 							<span class="text-amber-800">📅 ${d.semester}</span>
 						</div>`);
 					}
-					if (d.mode) {
-						headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 font-extrabold text-[11px]">
-							<span class="text-purple-800">🎯 範圍: ${d.mode}</span>
-						</div>`);
-					}
 
 					if (headerChips.length > 0) {
 						diffHtml += `<div class="flex flex-wrap gap-1.5 mb-1.5">${headerChips.join('')}</div>`;
@@ -1390,13 +1287,7 @@
 								let valStr = typeof v === 'object' ? JSON.stringify(v) : v;
 								let chipClass = "bg-slate-100 text-slate-700 border-slate-200";
 								let label = k;
-								if (k === 'deleted_id') {
-									label = '🗑️ 已刪除 ID';
-									const fullUuid = String(valStr);
-									const shortUuid = fullUuid.length > 16 ? `${fullUuid.substring(0, 8)}...${fullUuid.substring(fullUuid.length - 6)}` : fullUuid;
-									chipClass = "bg-rose-50 text-rose-800 border-rose-200/80 font-mono font-bold shadow-xs";
-									valStr = `<span title="${fullUuid}" class="cursor-help underline decoration-dashed decoration-rose-300">${shortUuid}</span>`;
-								} else if (k === 'status') {
+								if (k === 'status') {
 									label = '狀態';
 									if (String(v).includes('成功') || String(v).includes('登入')) chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-xs";
 									else if (String(v).includes('登出')) chipClass = "bg-slate-100 text-slate-700 border-slate-300 font-black shadow-xs";
@@ -1407,12 +1298,6 @@
 								} else if (k === 'method') {
 									label = '重設方式';
 									chipClass = "bg-violet-50 text-violet-700 border-violet-200 font-black";
-								} else if (k === 'year') {
-									label = '入學年';
-									chipClass = "bg-blue-50 text-blue-700 border-blue-200 font-black";
-								} else if (k === 'dept') {
-									label = '科別';
-									chipClass = "bg-purple-50 text-purple-700 border-purple-200 font-black";
 								} else if (k === 'passwordChanged') {
 									label = '修改密碼';
 									chipClass = v ? "bg-amber-50 text-amber-800 border-amber-200 font-black" : "bg-slate-50 text-slate-500 border-slate-200";
@@ -1424,15 +1309,12 @@
 								</span>`);
 							}
 						}
-						if (chipItems.length > 0) {
-							diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">${chipItems.join('')}</div>`;
-						}
+						if (chipItems.length > 0) diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">${chipItems.join('')}</div>`;
 					}
 				} else {
 					diffHtml = `<span class="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-bold border border-slate-200">${log.details || '-'}</span>`;
 				}
 
-				// 取得該事件的設定檔
 				const cfg = actionConfig[log.action_type] || { icon: '📌', class: 'bg-slate-700 text-white font-bold' };
 
 				let roleBadgeColor = "bg-slate-100 text-slate-600";
@@ -1440,7 +1322,6 @@
 				else if (log.operator_role === 'teacher') roleBadgeColor = "bg-emerald-100 text-emerald-800";
 				else if (log.operator_role === 'student') roleBadgeColor = "bg-blue-100 text-blue-800";
 
-				// 反查對應學生真實姓名與帳號
 				const matchedStudent = adminListData.find(s => 
 					(s.student_id && log.target_student_id && s.student_id.toLowerCase() === log.target_student_id.toLowerCase()) || 
 					(s.id && log.target_student_id && s.id === log.target_student_id)
@@ -1458,22 +1339,6 @@
 				}
 				if (!finalSid || finalSid === '無') finalSid = '-';
 
-				const isDeleteAction = log.action_type === '刪除學生帳號';
-
-				// 目標對象顏色格式優化
-				let targetNameStyle = "text-slate-900 font-black";
-				let targetSidStyle = "bg-slate-100 text-slate-600 border-slate-200/90";
-
-				if (isDeleteAction) {
-					targetNameStyle = "text-rose-700 font-black";
-					targetSidStyle = "bg-rose-50 text-rose-700 border-rose-200/90";
-				} else if (finalName === '-' || finalName === '無') {
-					targetNameStyle = "text-slate-400 font-medium italic";
-					targetSidStyle = "bg-slate-50 text-slate-400 border-slate-200/60";
-				}
-
-				const nameTagHtml = isDeleteAction ? `<span class="text-[9px] bg-rose-100 text-rose-700 border border-rose-200 px-1.5 py-0.5 rounded-md font-black shrink-0">已刪除</span>` : '';
-
 				tr.innerHTML = `
 					<td class="p-3 text-slate-500 font-mono text-[11px] leading-tight">${timeStr}</td>
 					<td class="p-3 font-bold">
@@ -1484,15 +1349,8 @@
 						<div class="text-[10px] font-mono text-slate-400 mt-0.5">${log.ip_address || '未知 IP'}</div>
 					</td>
 					<td class="p-3">
-						<div class="flex items-center gap-1.5 leading-snug ${targetNameStyle}" title="${finalName}">
-							<span class="truncate max-w-[120px] text-xs sm:text-sm">${finalName}</span>
-							${nameTagHtml}
-						</div>
-						<div class="mt-1">
-							<span class="inline-block text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-md border shadow-2xs ${targetSidStyle}">
-								${finalSid}
-							</span>
-						</div>
+						<div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${finalName}</div>
+						<div class="text-slate-500 font-mono text-[11px] mt-0.5">${finalSid}</div>
 					</td>
 					<td class="p-3">
 						<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] whitespace-nowrap font-black ${cfg.class}">
@@ -1861,7 +1719,7 @@
 			calculate();
 			renderTable();
 			const actionType = p ? "批次全部及格" : "批次學分歸零";
-			saveToCloud(true, { actionType, details: { mode: "全課表" } });
+			saveToCloud(true, { actionType });
 		};
 
 		window.setSemesterStatus = function(sIdx, p) {
@@ -2253,7 +2111,7 @@
 					});
 					if (!rpcErr) rpcSuccess = true;
 				} catch (e) {
-					console.warn("RPC admin_save_student_credits failed, fallback to direct upsert:", e);
+					console.warn("RPC admin_save_student_credits failed:", e);
 				}
 
 				if (!rpcSuccess) {
@@ -2589,16 +2447,14 @@
 					const studentRec = adminListData.find(s => s.id === id);
 					const sid = (studentRec?.student_id || id).split('@')[0].toLowerCase().trim();
 					
-					// 1. 優先嘗試 RPC 函數一次跨表刪除 (grad_checks, user_feedbacks, audit_logs, curriculums, auth.users)
 					let rpcSuccess = false;
 					try {
 						const { error: rpcErr } = await dbClient.rpc('admin_delete_user', { target_user_id: id });
 						if (!rpcErr) rpcSuccess = true;
 					} catch (e) {
-						console.warn("RPC admin_delete_user 未設定或調用失敗，執行前端多表分步刪除機制:", e);
+						console.warn("RPC admin_delete_user 未設定，執行前端多表分步刪除機制:", e);
 					}
 
-					// 2. 若 RPC 未設定，執行前端備援刪除機制（同時刪除四個 public 表格資料：grad_checks, user_feedbacks, audit_logs, curriculums）
 					if (!rpcSuccess) {
 						await dbClient.from('grad_checks').delete().eq('id', id);
 						if (sid) {
@@ -2615,8 +2471,7 @@
 					updateSyncStatusIndicator('success');
 					showMsg(`已成功刪除「${name}」的所有表格資料與帳號！`);
 					
-					// 寫入詳細稽核紀錄，明確記錄刪除的姓名、學號與識別碼
-					await logAuditRecord("刪除帳號", sid, name, { deleted_name: name, deleted_sid: sid, deleted_id: id });
+					await logAuditRecord("刪除帳號", sid, name, { deleted_name: name, deleted_sid: sid });
 
 					toggleUIModal(false, 'confirmModal');
 					fetchAdminList();
@@ -2836,6 +2691,25 @@
 				`;
 				container.appendChild(card);
 			});
+		};
+
+		window.updateSemesterProgress = function(input, sIdx) {
+			const card = input.closest('.semester-card');
+			if (!card) return;
+			let semMax = 0;
+			let semEarned = 0;
+			card.querySelectorAll('.toggle-checkbox').forEach(chk => {
+				const val = parseInt(chk.dataset.val || '0');
+				semMax += val;
+				if (chk.checked) semEarned += val;
+			});
+			const earnedEl = card.querySelector('.sem-earned-val');
+			if (earnedEl) earnedEl.innerText = semEarned;
+			const barEl = card.querySelector('.sem-progress-bar');
+			if (barEl) {
+				const pct = semMax > 0 ? Math.min(100, Math.round((semEarned / semMax) * 100)) : 0;
+				barEl.style.width = `${pct}%`;
+			}
 		};
 
 		window.renderSemesterCards = function(checkedStates) {
