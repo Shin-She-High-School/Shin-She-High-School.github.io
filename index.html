@@ -307,8 +307,7 @@
 							<option value="fail">⚠️ 需重補修/成績證明</option>
 						</select>
 						<select id="adminSort" class="sort-select" onchange="fetchAdminList(true)">
-							<option value="role" selected>預設排序</option>
-							<option value="class">🏫 班級排序 (113 ➔ 114)</option>
+							<option value="class" selected>預設排序</option>
 							<option value="sid">帳號排序</option>
 							<option value="name">姓名排序</option>
 						</select>
@@ -353,7 +352,6 @@
 		</button>
 	</div>
 
-	<!-- 💡 使用者意見回饋提交彈窗 -->
 	<div id="feedbackModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:420px;">
 			<div class="modal-header">
@@ -2221,19 +2219,27 @@
 			const roleOrder = { admin: 1, teacher: 2, student: 3 };
 
 			filtered.sort((a, b) => {
-				// 第一順位：永遠先按身份階層排序 (管理員 ➔ 教師 ➔ 學生)
 				const orderA = roleOrder[a.role] || 4;
 				const orderB = roleOrder[b.role] || 4;
 				if (orderA !== orderB) return orderA - orderB;
 
-				// 第二順位：同身分內依選取的次要排序規則
-				if (sortType === 'class') {
+				if (sortType === 'class' || sortType === 'role') {
 					const yA = a.entry_year || '999';
 					const yB = b.entry_year || '999';
 					if (yA !== yB) return yA.localeCompare(yB, undefined, { numeric: true });
-					const dA = a.entry_dept || '';
-					const dB = b.entry_dept || '';
-					if (dA !== dB) return dA.localeCompare(dB);
+
+					const getDeptNum = (dept) => {
+						if (!dept || dept === '未設定') return 999;
+						const match = dept.match(/-(\d+)$/);
+						if (match) return parseInt(match[1], 10);
+						const idx = DEPT_OPTIONS.indexOf(dept);
+						return idx !== -1 ? idx + 1 : 999;
+					};
+
+					const numA = getDeptNum(a.entry_dept);
+					const numB = getDeptNum(b.entry_dept);
+					if (numA !== numB) return numA - numB;
+
 					return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
 				} else if (sortType === 'sid') {
 					return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
