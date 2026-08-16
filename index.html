@@ -1358,16 +1358,12 @@
 					const d = log.details || {};
 					const delName = d.deleted_name || log.target_student_name || '未知姓名';
 					const delSid = d.deleted_sid || log.target_student_id || '未知帳號';
-					const delId = d.deleted_id || '-';
-					const shortUuid = (delId && delId.length > 16) ? `${delId.substring(0, 8)}...${delId.substring(delId.length - 6)}` : delId;
 					diffHtml = `
 						<div class="inline-flex flex-wrap items-center gap-2 p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 font-bold text-xs shadow-xs">
-							<span class="px-2 py-0.5 rounded-md bg-rose-600 text-white font-black text-[11px]">🗑️ 帳號與所有資料已刪除</span>
-							<span>被刪除姓名：<b class="text-rose-950 font-black text-sm">${delName}</b></span>
+							<span class="px-2 py-0.5 rounded-md bg-rose-600 text-white font-black text-[11px]">🗑️ 被刪除帳號資料</span>
+							<span>姓名：<b class="text-rose-950 font-black text-sm">${delName}</b></span>
 							<span class="text-rose-300">|</span>
-							<span>帳號/學號：<b class="font-mono text-rose-900 font-extrabold">${delSid}</b></span>
-							<span class="text-rose-300">|</span>
-							<span class="text-[10px] text-rose-600 font-mono" title="${delId}">ID: ${shortUuid}</span>
+							<span>帳號：<b class="font-mono text-rose-900 font-extrabold">${delSid}</b></span>
 						</div>`;
 				} else if (log.details && typeof log.details === 'object') {
 					const d = log.details;
