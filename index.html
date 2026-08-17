@@ -242,9 +242,6 @@
 					<span>載入最新公告中...</span>
 				</div>
 			</div>
-			<button type="button" class="text-xs font-bold text-slate-400 hover:text-white shrink-0 z-10 bg-[#1e1b4b] pl-2" onclick="event.stopPropagation(); openAnnouncementModal();">
-				檢視全部 ➔
-			</button>
 		</div>
 
 		<div id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar pb-[calc(96px+env(safe-area-inset-bottom,24px))]">
@@ -273,6 +270,7 @@
 					<div class="btn-group">
 						<button class="action-btn btn-help" onclick="toggleUIModal(true,'helpModal')">使用說明</button>
 						<button class="action-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="showMissingCreditsModal()">未得學分清單</button>
+						<button class="action-btn" style="background: linear-gradient(135deg, #eab308, #ca8a04);" onclick="openAnnouncementModal()">📢 系統公告</button>
 						<button class="action-btn btn-feedback" onclick="openFeedbackModal()">💡 意見回饋</button>
 						<button id="saveBtn" class="action-btn btn-cloud" onclick="handleMainAction()">班級資料</button>
 						<button class="action-btn btn-pass-all" onclick="confirmSetAllStatus(true)">全部及格</button>
@@ -375,8 +373,8 @@
 					</div>
 				</div>
 				<div id="underConstructionBox" class="hidden bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm my-6">
-					<h3 class="text-xl font-bold text-slate-800 mb-2">資料建置中</h3>
-					<p class="text-slate-500 text-sm">目前選擇的年度與科別（<span id="constYearDept" class="font-bold text-[#059669]"></span>）課程學分資料正在建置中，請透過 Supabase 資料庫寫入課綱腳本！</p>
+					<h3 class="text-xl font-bold text-slate-800 mb-2">課程資料建置中！</h3>
+					<p class="text-slate-500 text-sm">目前選擇的年度與科別（<span id="constYearDept" class="font-bold text-[#059669]"></span>）課程資料建置中！</p>
 				</div>
 				<div id="mobileCardsContainer" class="mobile-cards-grid"></div>
 			</div>
@@ -1991,7 +1989,7 @@
 			if (st) {
 				const reqMinTotal = (trackType === 'vocational') ? 160 : 150;
 				if (isNullState) {
-					st.innerText = "課程資料建置中，請透過 Supabase 資料庫寫入課綱腳本！";
+					st.innerText = "課程資料建置中！";
 					st.className = "status-bar bg-slate-400 text-white shadow-sm";
 				} else if (stats.pass) {
 					st.innerText = "符合畢業門檻，核發畢業證書。";
@@ -2555,7 +2553,7 @@
 			const ed = (s.entry_dept && s.entry_dept !== '未設定') ? s.entry_dept : '普通科(理工生醫群)-1';
 			const key = `${ey}_${ed}`;
 			const curr = curriculums[key] || [];
-			if (!curr || curr.length === 0) return { status: 'unknown', total: 0, statusText: '資料未建置', badgeClass: 'bg-slate-100 text-slate-600' };
+			if (!curr || curr.length === 0) return { status: 'unknown', total: 0, statusText: '課程資料建置中！', badgeClass: 'bg-slate-100 text-slate-600' };
 
 			const trackType = getTrackType(ed);
 			const checks = s.credits_json || {};
