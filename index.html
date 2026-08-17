@@ -172,11 +172,11 @@
 		.input-group select:disabled { background-color: #e2e8f0; cursor: not-allowed; color: #475569; font-weight: 700; }
 		.sort-select, .admin-filter-input { padding: 10px; border-radius: 8px; border: 1.5px solid #94a3b8; font-size: 0.92rem; outline: none; color: #0f172a; background-color: #fff; font-weight: 600; }
 		.sort-select:focus, .admin-filter-input:focus { border-color: #4f46e5; }
-		.role-badge { padding: 4px 9px; border-radius: 6px; font-size: 0.78rem; color: white; font-weight: 800; }
-		.badge-student { background-color: #2563eb; }
-		.badge-teacher { background-color: #059669; }
-		.badge-tutor { background-color: #0d9488; }
-		.badge-admin { background-color: #4f46e5; }
+		.role-badge { padding: 4px 9px; border-radius: 6px; font-size: 0.78rem; color: white; font-weight: 800; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+		.badge-admin { background-color: #1e293b; }
+		.badge-tutor { background-color: #e11d48; }
+		.badge-teacher { background-color: #0ea5e9; }
+		.badge-student { background-color: #10b981; }
 		#msgBox { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 14px 28px; border-radius: 50px; color: white; font-weight: 800; display: none; z-index: 100000 !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); font-size: 0.98rem; }
 		@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 		@keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -329,6 +329,9 @@
 									<input type="checkbox" value="student" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 🎓 學生
 								</label>
 								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="tutor" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👨‍🏫 導師
+								</label>
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
 									<input type="checkbox" value="teacher" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👩‍🏫 教師
 								</label>
 								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
@@ -344,7 +347,6 @@
 								<span class="text-[10px] text-slate-400">▼</span>
 							</div>
 							<div id="ms-drop-year" class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
-								<!-- Populated by JS -->
 							</div>
 						</div>
 
@@ -355,7 +357,6 @@
 								<span class="text-[10px] text-slate-400">▼</span>
 							</div>
 							<div id="ms-drop-dept" class="absolute z-50 w-[200%] sm:w-[150%] md:w-full right-0 md:right-auto mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
-								<!-- Populated by JS -->
 							</div>
 						</div>
 
@@ -574,7 +575,7 @@
 					<select id="fbFilterRole" class="sort-select text-xs bg-white" onchange="renderFeedbackList()">
 						<option value="all">所有提交身分</option>
 						<option value="student">🎓 學生</option>
-						<option value="teacher">👩‍🏫 教師</option>
+						<option value="teacher">👩‍🏫 教師/導師</option>
 						<option value="admin">👑 管理員</option>
 					</select>
 				</div>
@@ -655,7 +656,7 @@
 			</div>
 			<div class="input-group">
 				<label>身份</label>
-				<select id="editUserRole" onchange="toggleAdminTutorField(this.value)"><option value="student">學生</option><option value="teacher">教師</option><option value="admin">管理員</option></select>
+				<select id="editUserRole" onchange="toggleAdminTutorField(this.value)"><option value="student">學生</option><option value="teacher">教師/導師</option><option value="admin">管理員</option></select>
 			</div>
 			<div id="editTutorSection" class="input-group">
 				<label id="editTutorLabel">導師</label>
@@ -723,7 +724,7 @@
 					<select id="auditFilterOperatorRole" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
 						<option value="all">所有操作身分</option>
 						<option value="admin">👑 管理員</option>
-						<option value="teacher">👩‍🏫 教師</option>
+						<option value="teacher">👩‍🏫 教師/導師</option>
 						<option value="student">🎓 學生</option>
 					</select>
 				</div>
@@ -925,7 +926,6 @@
 			</div>
 		</div>
 	</div>
-
 	<script>
 		const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
 			SB_KEY = "sb_publishable_ojrdIB0TeCnl8eZXbzWsdQ_2W3JB3xT",
@@ -1761,7 +1761,6 @@
 				else if (log.operator_role === 'teacher') roleBadgeColor = "bg-emerald-100 text-emerald-800";
 				else if (log.operator_role === 'student') roleBadgeColor = "bg-blue-100 text-blue-800";
 
-				// 多維度精準對照學生資料表
 				const matchedStudent = adminListData.find(s => 
 					(s.student_id && log.target_student_id && s.student_id.toLowerCase() === log.target_student_id.toLowerCase()) || 
 					(s.id && log.target_student_id && s.id === log.target_student_id) ||
@@ -1772,7 +1771,6 @@
 				let displayFullName = log.target_student_name;
 				let displaySid = log.target_student_id;
 
-				// 若紀錄中的姓名為空、無，或是舊的帳號數字，優先補回對應的真實姓名
 				if ((!displayFullName || displayFullName === '無' || displayFullName === displaySid) && matchedStudent && matchedStudent.full_name) {
 					displayFullName = matchedStudent.full_name;
 				}
@@ -1780,7 +1778,6 @@
 					displaySid = matchedStudent.student_id;
 				}
 
-				// 確保一律清晰呈現兩行：[姓名] 於上方，[帳號/學號] 於下方
 				let targetDisplayHtml = '-';
 				if (displayFullName && displayFullName !== '無' && displaySid && displaySid !== '無') {
 					targetDisplayHtml = `
@@ -1924,7 +1921,17 @@
 		window.handleHashRouting = function() {
 			if (!currentUser) return;
 			const hash = window.location.hash;
+			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+			const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
+			const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
+
 			if (hash === '#class-data') {
+				if (role === 'student' || (role === 'teacher' && (myYear === '未設定' || myDept === '未設定'))) {
+					isViewingClassList = false;
+					editingStudentId = null;
+					window.location.hash = '#dashboard';
+					return;
+				}
 				isViewingClassList = true;
 				editingStudentId = null;
 			} else if (hash === '#dashboard' || hash === '' || hash === '#') {
@@ -1933,6 +1940,12 @@
 			} else {
 				let tid = hash.replace('#', '');
 				if (tid) {
+					if (role === 'student' || (role === 'teacher' && (myYear === '未設定' || myDept === '未設定'))) {
+						editingStudentId = null;
+						isViewingClassList = false;
+						window.location.hash = '#dashboard';
+						return;
+					}
 					editingStudentId = tid;
 					isViewingClassList = false;
 				}
@@ -1989,9 +2002,21 @@
 			if (role === 'student') {
 				return { year: hasSetting ? ey : '113', dept: hasSetting ? ed : '普通科(理工生醫群)-1', locked: true };
 			} else if (role === 'teacher') {
-				return { year: hasSetting ? ey : (record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113'), dept: hasSetting ? ed : (record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1'), locked: hasSetting };
+				if (hasSetting) {
+					return { year: ey, dept: ed, locked: true };
+				} else {
+					return {
+						year: record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113',
+						dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1',
+						locked: false
+					};
+				}
 			} else {
-				return { year: record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113', dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1', locked: false };
+				return {
+					year: record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113',
+					dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1',
+					locked: false
+				};
 			}
 		};
 
@@ -2398,7 +2423,7 @@
 						}
 					}
 
-					const { error } = await dbClient.auth.signInWithPassword({ email, password: pwd });
+					const { data: authResult, error } = await dbClient.auth.signInWithPassword({ email, password: pwd });
 					if (error) {
 						let accountExists = false;
 						try {
@@ -2417,8 +2442,9 @@
 					}
 
 					let loginDisplayName = cleanSid;
-					if (currentUser?.user_metadata?.full_name) {
-						loginDisplayName = currentUser.user_metadata.full_name;
+					const loggedInUser = authResult?.user;
+					if (loggedInUser?.user_metadata?.full_name) {
+						loginDisplayName = loggedInUser.user_metadata.full_name;
 					}
 					try {
 						const { data: gcRecord } = await dbClient.from('grad_checks').select('full_name').eq('student_id', cleanSid).maybeSingle();
@@ -2433,19 +2459,6 @@
 					logAuditRecord("使用者登入", cleanSid, loginDisplayName, { status: "登入成功" });
 				}
 			} catch (e) { updateSyncStatusIndicator('offline'); showMsg(translateError(e.message), 'error'); }
-		};
-		window.refreshAuditLogs = async function() {
-			if (!dbClient) return;
-			const listBody = document.getElementById('auditLogListBody');
-			if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入稽核日誌...</td></tr>`;
-			let remoteLogs = [];
-			try {
-				const { data, error } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false });
-				if (!error) remoteLogs = data || [];
-			} catch (e) { console.warn(e); }
-
-			auditLogsData = remoteLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-			renderAuditLogList();
 		};
 
 		window.handleLogout = async function() { 
@@ -2471,9 +2484,16 @@
 			const displayName = userDBRecord?.full_name || m?.full_name;
 			const myYear = userDBRecord?.entry_year || m?.entry_year || '未設定';
 			const myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
-			const isTutor = (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定');
-			const roleTitle = isTutor ? '導師' : (mapping.role[role] || '使用者');
-			const displayClass = (myYear === '未設定' || myDept === '未設定') ? ` ｜ ${roleTitle}` : ` ｜ ${myYear}年 ${myDept} ${roleTitle}`;
+			
+			let roleTitle = mapping.role[role] || '使用者';
+			if (role === 'teacher') {
+				roleTitle = (myYear !== '未設定' && myDept !== '未設定') ? '導師' : '教師';
+			}
+			
+			const displayClass = (myYear === '未設定' || myDept === '未設定') 
+				? ` ｜ ${roleTitle}` 
+				: ` ｜ ${myYear}年 ${myDept} ${roleTitle}`;
+
 			userStatusDisplay.innerHTML = `
 				<div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 w-full text-xs sm:text-sm leading-tight">
 					<div class="font-extrabold text-slate-100 shrink-0">您好，${displayName}${displayClass}</div>
@@ -2525,8 +2545,14 @@
 					if (unsetBox) unsetBox.classList.add('hidden');
 				}
 
-				if (role === 'teacher' && (myYear === '未設定' || myDept === '未設定')) { 
+				// 一般教師（未設定年度班級）無班級資料按鈕
+				const isTeacherUnset = (role === 'teacher' && (myYear === '未設定' || myDept === '未設定'));
+				if (isTeacherUnset) { 
 					saveBtn.style.display = 'none'; 
+					if (isViewingClassList) {
+						isViewingClassList = false;
+						window.location.hash = '#dashboard';
+					}
 				} else {
 					saveBtn.innerText = role === 'admin' ? '管理後台' : (role === 'teacher' ? '班級資料' : '雲端存檔');
 					saveBtn.style.display = '';
@@ -2930,7 +2956,16 @@
 			if (searchText) {
 				filtered = filtered.filter(s => (s.full_name && s.full_name.toLowerCase().includes(searchText)) || (s.student_id && s.student_id.toLowerCase().includes(searchText)));
 			}
-			if (!filterRoles.includes('all')) filtered = filtered.filter(s => filterRoles.includes(s.role));
+			if (!filterRoles.includes('all')) {
+				filtered = filtered.filter(s => {
+					if (filterRoles.includes('student') && s.role === 'student') return true;
+					if (filterRoles.includes('admin') && s.role === 'admin') return true;
+					const isTutor = (s.role === 'teacher' && s.entry_year && s.entry_year !== '未設定' && s.entry_dept && s.entry_dept !== '未設定');
+					if (filterRoles.includes('tutor') && isTutor) return true;
+					if (filterRoles.includes('teacher') && s.role === 'teacher' && !isTutor) return true;
+					return false;
+				});
+			}
 			if (!filterYears.includes('all')) filtered = filtered.filter(s => filterYears.includes(s.entry_year));
 			if (!filterDepts.includes('all')) filtered = filtered.filter(s => filterDepts.includes(s.entry_dept));
 			
@@ -3439,7 +3474,7 @@
 			isViewingClassList = false;
 			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 			let myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定', myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
-			if (role === 'admin' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
+			if (role === 'admin' || (role === 'teacher' && (myYear === '未設定' || myDept === '未設定'))) {
 				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1';
 			}
 			selectCurriculum(myYear, myDept); 
@@ -3450,7 +3485,7 @@
 		window.openProfile = function() {
 			if (!currentUser) return;
 			const curData = userDBRecord || currentUser.user_metadata, role = curData.role || 'student';
-			initDropdowns(role === 'admin' || role === 'teacher');
+			initDropdowns(role === 'admin');
 			const accountInput = document.getElementById('profAccount'), yrSel = document.getElementById('profEntryYear'),
 				dtSel = document.getElementById('profEntryDept'), tipMsg = document.getElementById('profTipMessage'),
 				accountLabel = document.getElementById('profAccountLabel'), tutorArea = document.getElementById('profStudentTutorArea'),
@@ -3627,5 +3662,5 @@
 		initHelpModalScrollGuard();
 		initBackToTop();
 	</script>
-</body>
+	</body>
 </html>
