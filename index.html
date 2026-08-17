@@ -1114,7 +1114,7 @@
 				const updatedStr = a.updated_at ? new Date(a.updated_at).toLocaleString('zh-TW', { hour12: false }) : null;
 				const isEdited = updatedStr && Math.abs(new Date(a.updated_at) - new Date(a.created_at)) > 2000;
 
-				let timeHtml = `<span class="text-slate-400">📅 發布: ${createdStr}</span>`;
+				let timeHtml = `<span class="text-slate-400">📅 發布時間: ${createdStr}</span>`;
 				if (isEdited) {
 					timeHtml += `<span class="text-amber-600 font-bold ml-2"><br>✏️ 最後編輯: ${updatedStr}</span>`;
 				}
