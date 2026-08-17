@@ -1549,7 +1549,7 @@
 			if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入稽核日誌...</td></tr>`;
 			let remoteLogs = [];
 			try {
-				const { data, error } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(500);
+				const { data, error } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false });
 				if (!error) remoteLogs = data || [];
 			} catch (e) { console.warn(e); }
 
