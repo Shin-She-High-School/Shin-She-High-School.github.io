@@ -1765,17 +1765,27 @@
 					(s.id && log.target_student_id && s.id === log.target_student_id)
 				);
 
-				let finalName = log.target_student_name;
-				if ((!finalName || finalName === '無' || finalName === log.target_student_id) && matchedStudent) {
-					finalName = matchedStudent.full_name;
+				let rawName = log.target_student_name;
+				let rawSid = log.target_student_id;
+				
+				if ((!rawName || rawName === '無' || rawName === rawSid) && matchedStudent) {
+					rawName = matchedStudent.full_name;
 				}
-				if (!finalName || finalName === '無') finalName = '-';
+				if ((!rawSid || rawSid === '無') && matchedStudent) {
+					rawSid = matchedStudent.student_id;
+				}
 
-				let finalSid = log.target_student_id;
-				if ((!finalSid || finalSid === '無') && matchedStudent) {
-					finalSid = matchedStudent.student_id;
+				let targetDisplayHtml = '-';
+				if (rawName && rawName !== '無' && rawSid && rawSid !== '無' && rawName !== rawSid) {
+					targetDisplayHtml = `
+						<div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${rawName}</div>
+						<div class="text-slate-500 font-mono text-[11px] mt-0.5">${rawSid}</div>
+					`;
+				} else if (rawSid && rawSid !== '無') {
+					targetDisplayHtml = `<div class="text-slate-900 font-mono font-black text-xs sm:text-sm truncate max-w-[120px]">${rawSid}</div>`;
+				} else if (rawName && rawName !== '無') {
+					targetDisplayHtml = `<div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${rawName}</div>`;
 				}
-				if (!finalSid || finalSid === '無') finalSid = '-';
 
 				tr.innerHTML = `
 					<td class="p-3 text-slate-500 font-mono text-[11px] leading-tight">${timeStr}</td>
@@ -1786,10 +1796,7 @@
 						</div>
 						<div class="text-[10px] font-mono text-slate-400 mt-0.5">${log.ip_address || '未知 IP'}</div>
 					</td>
-					<td class="p-3">
-						<div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${finalName}</div>
-						<div class="text-slate-500 font-mono text-[11px] mt-0.5">${finalSid}</div>
-					</td>
+					<td class="p-3">${targetDisplayHtml}</td>
 					<td class="p-3">
 						<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] whitespace-nowrap font-black ${cfg.class}">
 							<span>${cfg.icon}</span>
