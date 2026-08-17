@@ -1760,31 +1760,36 @@
 				else if (log.operator_role === 'teacher') roleBadgeColor = "bg-emerald-100 text-emerald-800";
 				else if (log.operator_role === 'student') roleBadgeColor = "bg-blue-100 text-blue-800";
 
+				// 多維度精準對照學生資料表
 				const matchedStudent = adminListData.find(s => 
 					(s.student_id && log.target_student_id && s.student_id.toLowerCase() === log.target_student_id.toLowerCase()) || 
-					(s.id && log.target_student_id && s.id === log.target_student_id)
+					(s.id && log.target_student_id && s.id === log.target_student_id) ||
+					(s.student_id && log.target_student_name && s.student_id.toLowerCase() === log.target_student_name.toLowerCase()) ||
+					(s.id && log.target_student_name && s.id === log.target_student_name)
 				);
 
-				let rawName = log.target_student_name;
-				let rawSid = log.target_student_id;
-				
-				if ((!rawName || rawName === '無' || rawName === rawSid) && matchedStudent) {
-					rawName = matchedStudent.full_name;
+				let displayFullName = log.target_student_name;
+				let displaySid = log.target_student_id;
+
+				// 若紀錄中的姓名為空、無，或是舊的帳號數字，優先補回對應的真實姓名
+				if ((!displayFullName || displayFullName === '無' || displayFullName === displaySid) && matchedStudent && matchedStudent.full_name) {
+					displayFullName = matchedStudent.full_name;
 				}
-				if ((!rawSid || rawSid === '無') && matchedStudent) {
-					rawSid = matchedStudent.student_id;
+				if ((!displaySid || displaySid === '無') && matchedStudent && matchedStudent.student_id) {
+					displaySid = matchedStudent.student_id;
 				}
 
+				// 確保一律清晰呈現兩行：[姓名] 於上方，[帳號/學號] 於下方
 				let targetDisplayHtml = '-';
-				if (rawName && rawName !== '無' && rawSid && rawSid !== '無' && rawName !== rawSid) {
+				if (displayFullName && displayFullName !== '無' && displaySid && displaySid !== '無') {
 					targetDisplayHtml = `
-						<div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${rawName}</div>
-						<div class="text-slate-500 font-mono text-[11px] mt-0.5">${rawSid}</div>
+						<div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${displayFullName}</div>
+						<div class="text-slate-500 font-mono text-[11px] mt-0.5">${displaySid}</div>
 					`;
-				} else if (rawSid && rawSid !== '無') {
-					targetDisplayHtml = `<div class="text-slate-900 font-mono font-black text-xs sm:text-sm truncate max-w-[120px]">${rawSid}</div>`;
-				} else if (rawName && rawName !== '無') {
-					targetDisplayHtml = `<div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${rawName}</div>`;
+				} else if (displayFullName && displayFullName !== '無') {
+					targetDisplayHtml = `<div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${displayFullName}</div>`;
+				} else if (displaySid && displaySid !== '無') {
+					targetDisplayHtml = `<div class="text-slate-900 font-mono font-black text-xs sm:text-sm truncate max-w-[120px]">${displaySid}</div>`;
 				}
 
 				tr.innerHTML = `
@@ -2410,22 +2415,36 @@
 						throw error;
 					}
 
+					let loginDisplayName = cleanSid;
+					if (currentUser?.user_metadata?.full_name) {
+						loginDisplayName = currentUser.user_metadata.full_name;
+					}
+					try {
+						const { data: gcRecord } = await dbClient.from('grad_checks').select('full_name').eq('student_id', cleanSid).maybeSingle();
+						if (gcRecord && gcRecord.full_name) {
+							loginDisplayName = gcRecord.full_name;
+						}
+					} catch (e) {}
+
 					updateSyncStatusIndicator('success'); showMsg("登入成功！");
 					document.getElementById('authWorkspace').style.display = 'none'; document.getElementById('appWorkspace').style.display = 'flex';
 					hasLoadedInitialData = false; updateUI();
-					logAuditRecord("使用者登入", cleanSid, cleanSid, { status: "登入成功" });
+					logAuditRecord("使用者登入", cleanSid, loginDisplayName, { status: "登入成功" });
 				}
 			} catch (e) { updateSyncStatusIndicator('offline'); showMsg(translateError(e.message), 'error'); }
 		};
+		window.refreshAuditLogs = async function() {
+			if (!dbClient) return;
+			const listBody = document.getElementById('auditLogListBody');
+			if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入稽核日誌...</td></tr>`;
+			let remoteLogs = [];
+			try {
+				const { data, error } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false });
+				if (!error) remoteLogs = data || [];
+			} catch (e) { console.warn(e); }
 
-		window.switchAuthMode = function() {
-			const isReg = document.getElementById('regFields').style.display === 'none';
-			document.getElementById('regFields').style.display = isReg ? 'block' : 'none';
-			document.getElementById('authTitle').innerText = isReg ? '註冊新帳號' : '帳號登入';
-			const authBtn = document.querySelector(".auth-btn-primary");
-			if (authBtn) authBtn.innerText = isReg ? "確認註冊帳號" : "確認登入";
-			document.getElementById('authSwitchLink').innerText = isReg ? '已有帳號？請點此前往登入' : '尚未註冊帳號？請點此註冊';
-			initDropdowns(false);
+			auditLogsData = remoteLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+			renderAuditLogList();
 		};
 
 		window.handleLogout = async function() { 
