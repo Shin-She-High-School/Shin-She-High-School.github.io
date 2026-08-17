@@ -298,7 +298,10 @@
 				<div id="adminBackend" class="admin-backend">
 					<div class="admin-header">
 						<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-							<span id="backendTitle">資料管理</span>
+							<div class="flex items-center gap-2">
+								<span id="backendTitle">資料管理</span>
+								<span id="adminTotalCountText" class="text-xs sm:text-sm font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-lg shadow-sm" style="display:none;">共 0 筆帳號</span>
+							</div>
 							<button id="backToTrialBtn" class="btn-mini" style="background:#6c757d; display:none;" onclick="handleReturnToTrial()">返回檢核表試算</button>
 							<button id="auditLogHeaderBtn" class="btn-mini" style="background:#4f46e5; display:none;" onclick="openAuditLogModal()">📜 歷史異動紀錄</button>
 							<button id="feedbackListHeaderBtn" class="btn-mini" style="background:#8b5cf6; display:none;" onclick="openFeedbackListModal()">💡 檢視意見回饋</button>
@@ -3016,6 +3019,12 @@
 			tableBody.innerHTML = ""; cardsContainer.innerHTML = "";
 			const filtered = applyFilters(), role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 			
+			const countText = document.getElementById('adminTotalCountText');
+			if (countText) {
+				countText.style.display = 'inline-block';
+				countText.innerText = `共 ${filtered.length} 筆帳號`;
+			}
+
 			renderAdminStats(filtered);
 
 			filtered.forEach((s, i) => {
