@@ -412,42 +412,58 @@
 				<span class="close-modal-btn" onclick="toggleUIModal(false,'announceMgmtModal')">&times;</span>
 			</div>
 			<div class="modal-body space-y-4">
-				<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs font-semibold text-amber-900 space-y-3">
-					<div class="flex items-center justify-between">
-						<h4 class="font-black text-sm text-amber-950 flex items-center gap-1.5">
-							<span id="announceFormTitle">✨ 發布新公告</span>
+				<div id="announceFormCard" class="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-4 text-xs font-semibold text-amber-950 space-y-3 transition-all duration-300">
+					<div class="flex items-center justify-between border-b border-amber-200/60 pb-2">
+						<h4 class="font-black text-sm text-amber-950 flex items-center gap-2">
+							<span id="announceFormIcon" class="text-base">✨</span>
+							<span id="announceFormTitle">發布新公告</span>
 						</h4>
-						<button id="cancelAnnounceEditBtn" type="button" class="text-xs font-bold text-rose-600 hover:text-rose-800 transition" style="display:none;" onclick="cancelAnnounceEdit()">✕ 取消編輯</button>
+						<button id="cancelAnnounceEditBtn" type="button" class="text-xs font-black text-rose-600 hover:text-rose-800 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg transition" style="display:none;" onclick="cancelAnnounceEdit()">✕ 取消編輯</button>
 					</div>
 					<input type="hidden" id="editingAnnounceId" value="">
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-						<input type="text" id="newAnnounceTitle" placeholder="請輸入公告標題" class="admin-filter-input w-full bg-white text-xs">
-						<select id="newAnnounceCategory" class="sort-select w-full bg-white text-xs">
-							<option value="🎓 畢業檢核">🎓 畢業檢核</option>
-							<option value="📢 重要通知">📢 重要通知</option>
-							<option value="⚠️ 系統維護">⚠️ 系統維護</option>
-							<option value="💡 系統優化">💡 系統優化</option>
-						</select>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+						<div>
+							<label class="block text-[11px] font-black text-slate-700 mb-1">公告標題</label>
+							<input type="text" id="newAnnounceTitle" placeholder="請輸入公告標題" class="admin-filter-input w-full bg-white text-xs">
+						</div>
+						<div>
+							<label class="block text-[11px] font-black text-slate-700 mb-1">公告類別</label>
+							<select id="newAnnounceCategory" class="sort-select w-full bg-white text-xs">
+								<option value="🎓 畢業檢核">🎓 畢業檢核</option>
+								<option value="📢 重要通知">📢 重要通知</option>
+								<option value="⚠️ 系統維護">⚠️ 系統維護</option>
+								<option value="💡 系統優化">💡 系統優化</option>
+							</select>
+						</div>
 					</div>
-					<textarea id="newAnnounceContent" rows="3" placeholder="請輸入公告詳細內容..." class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white outline-none focus:border-amber-500"></textarea>
-					<div class="flex items-center justify-between">
+					<div>
+						<label class="block text-[11px] font-black text-slate-700 mb-1">公告內文詳細說明</label>
+						<textarea id="newAnnounceContent" rows="3" placeholder="請輸入公告詳細內容..." class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white outline-none focus:border-amber-500 font-semibold leading-relaxed"></textarea>
+					</div>
+					<div class="flex flex-wrap items-center justify-between gap-3 pt-1">
 						<div class="flex items-center gap-4">
-							<label class="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-700">
-								<input type="checkbox" id="newAnnounceMarquee" checked class="rounded text-amber-600 focus:ring-amber-500">
+							<label class="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-700 select-none">
+								<input type="checkbox" id="newAnnounceMarquee" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500">
 								同步至頂部跑馬燈
 							</label>
-							<label class="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-700">
-								<input type="checkbox" id="newAnnounceActive" checked class="rounded text-amber-600 focus:ring-amber-500">
+							<label class="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-700 select-none">
+								<input type="checkbox" id="newAnnounceActive" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500">
 								立即上架公開
 							</label>
 						</div>
-						<button id="submitAnnounceBtn" class="action-btn py-2 px-4 text-xs font-black" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="submitNewAnnouncement()">確認發布公告</button>
+						<button id="submitAnnounceBtn" class="action-btn py-2 px-5 text-xs font-black shrink-0" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="submitNewAnnouncement()">確認發布公告</button>
 					</div>
 				</div>
 
 				<div class="border-t border-slate-200 pt-3">
-					<h4 class="font-black text-sm text-slate-800 mb-2">已發布公告列表</h4>
-					<div id="adminAnnounceList" class="space-y-2 max-h-[35dvh] overflow-y-auto custom-scrollbar"></div>
+					<div class="flex items-center justify-between mb-2">
+						<h4 class="font-black text-sm text-slate-800 flex items-center gap-1.5">
+							<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+							已發布公告列表
+						</h4>
+						<span id="announceCountText" class="text-xs font-bold text-slate-400">共 0 筆紀錄</span>
+					</div>
+					<div id="adminAnnounceList" class="space-y-2.5 max-h-[35dvh] overflow-y-auto custom-scrollbar pr-1"></div>
 				</div>
 			</div>
 		</div>
@@ -1034,6 +1050,20 @@
 			toggleUIModal(true, 'announcementModal');
 		};
 
+		window.formatDateTime = function(isoStr) {
+			if (!isoStr) return '-';
+			try {
+				const d = new Date(isoStr);
+				return d.toLocaleString('zh-TW', {
+					year: 'numeric', month: '2-digit', day: '2-digit',
+					hour: '2-digit', minute: '2-digit', second: '2-digit',
+					hour12: false
+				});
+			} catch (e) {
+				return isoStr;
+			}
+		};
+
 		window.renderAnnouncementList = function() {
 			const container = document.getElementById('announcementList');
 			if (!container) return;
@@ -1042,17 +1072,26 @@
 				container.innerHTML = `<div class="p-8 text-center text-slate-400 font-bold">目前資料庫尚無公開公告事項</div>`;
 				return;
 			}
-			container.innerHTML = activeItems.map(a => `
-				<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
-					<div class="flex items-center justify-between">
-						<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-black text-xs">${a.category || '🎓 畢業檢核'}</span>
-						<span class="text-[11px] text-slate-400 font-mono">${a.created_at ? new Date(a.created_at).toLocaleString('zh-TW', { hour12: false }) : ''}</span>
+			container.innerHTML = activeItems.map(a => {
+				const createStr = formatDateTime(a.created_at);
+				const updateStr = formatDateTime(a.updated_at);
+				const isEdited = a.updated_at && a.created_at && (new Date(a.updated_at).getTime() - new Date(a.created_at).getTime() > 2000);
+
+				return `
+					<div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5 shadow-xs hover:border-amber-300 transition-all">
+						<div class="flex items-center justify-between flex-wrap gap-1.5">
+							<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-black text-xs border border-amber-200/80">${a.category || '🎓 畢業檢核'}</span>
+							<div class="text-[11px] text-slate-400 font-mono flex items-center gap-2 flex-wrap">
+								<span>📅 發布：${createStr}</span>
+								${isEdited ? `<span class="text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">✏️ 最後編輯：${updateStr}</span>` : ''}
+							</div>
+						</div>
+						<h4 class="font-black text-slate-900 text-sm sm:text-base leading-snug">${a.title}</h4>
+						<p class="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap">${a.content}</p>
+						<div class="text-[10px] text-slate-400 font-extrabold text-right pt-2 border-t border-slate-200/60">發布者：${a.created_by || '系統管理員'}</div>
 					</div>
-					<h4 class="font-black text-slate-800 text-sm md:text-base">${a.title}</h4>
-					<p class="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap">${a.content}</p>
-					<div class="text-[10px] text-slate-400 font-bold text-right pt-1 border-t border-slate-100">發布者：${a.created_by || '系統管理員'}</div>
-				</div>
-			`).join('');
+				`;
+			}).join('');
 		};
 
 		window.openAnnounceMgmtModal = function() {
@@ -1068,29 +1107,43 @@
 
 		window.renderAdminAnnounceList = function() {
 			const container = document.getElementById('adminAnnounceList');
+			const countText = document.getElementById('announceCountText');
 			if (!container) return;
+			if (countText) countText.innerText = `共 ${announcementsData.length} 筆紀錄`;
 			if (announcementsData.length === 0) {
-				container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs font-bold">目前資料庫尚無任何公告紀錄</div>`;
+				container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs font-bold">目前資料庫尚無任何公告紀錄</div>`;
 				return;
 			}
-			container.innerHTML = announcementsData.map(a => `
-				<div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-3 text-xs">
-					<div class="min-w-0 flex-1">
-						<div class="flex items-center gap-2 mb-1">
-							<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-extrabold text-[10px]">${a.category}</span>
-							<span class="font-black text-slate-800 truncate">${a.title}</span>
-							<span class="text-[9px] px-1.5 py-0.2 rounded font-black ${a.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${a.is_active ? '公開' : '下架'}</span>
-							${a.is_marquee ? '<span class="text-[9px] px-1.5 py-0.2 rounded font-black bg-amber-100 text-amber-800">跑馬燈</span>' : ''}
+			container.innerHTML = announcementsData.map(a => {
+				const createStr = formatDateTime(a.created_at);
+				const updateStr = formatDateTime(a.updated_at);
+				const isEdited = a.updated_at && a.created_at && (new Date(a.updated_at).getTime() - new Date(a.created_at).getTime() > 2000);
+
+				return `
+					<div class="bg-white border border-slate-200 rounded-xl p-3.5 space-y-2 hover:shadow-sm transition-all text-xs">
+						<div class="flex items-start justify-between gap-3">
+							<div class="min-w-0 flex-1 space-y-1">
+								<div class="flex items-center gap-1.5 flex-wrap">
+									<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-extrabold text-[10px] border border-slate-200">${a.category}</span>
+									<span class="font-black text-slate-900 text-sm truncate">${a.title}</span>
+									<span class="text-[10px] px-2 py-0.5 rounded-full font-black ${a.is_active ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}">${a.is_active ? '● 公開中' : '○ 已下架'}</span>
+									${a.is_marquee ? '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-amber-100 text-amber-800 border border-amber-200">📢 跑馬燈</span>' : ''}
+								</div>
+								<p class="text-slate-600 font-semibold line-clamp-2 leading-relaxed whitespace-pre-wrap">${a.content}</p>
+								<div class="text-[10px] text-slate-400 font-mono flex items-center gap-3 pt-1 flex-wrap">
+									<span>📅 發布：${createStr}</span>
+									${isEdited ? `<span class="text-indigo-600 font-bold">✏️ 最後編輯：${updateStr}</span>` : ''}
+								</div>
+							</div>
+							<div class="flex items-center gap-1.5 shrink-0 pt-0.5">
+								<button class="btn-mini" style="background:#3b82f6; height:30px; font-weight:800;" onclick="openEditAnnouncement('${a.id}')">✏️ 編輯</button>
+								<button class="btn-mini" style="background:${a.is_active ? '#64748b' : '#10b981'}; height:30px; font-weight:800;" onclick="toggleAnnounceStatus('${a.id}', ${!a.is_active})">${a.is_active ? '👁️ 下架' : '👁️ 公開'}</button>
+								<button class="btn-mini" style="background:#ef4444; height:30px; font-weight:800;" onclick="deleteAnnouncement('${a.id}', '${a.title}')">🗑️ 刪除</button>
+							</div>
 						</div>
-						<p class="text-slate-500 font-semibold truncate">${a.content}</p>
 					</div>
-					<div class="flex items-center gap-1.5 shrink-0">
-						<button class="btn-mini" style="background:#3b82f6; height:28px;" onclick="openEditAnnouncement('${a.id}')">編輯</button>
-						<button class="btn-mini" style="background:${a.is_active ? '#64748b' : '#10b981'}; height:28px;" onclick="toggleAnnounceStatus('${a.id}', ${!a.is_active})">${a.is_active ? '下架' : '公開'}</button>
-						<button class="btn-mini" style="background:#ef4444; height:28px;" onclick="deleteAnnouncement('${a.id}', '${a.title}')">刪除</button>
-					</div>
-				</div>
-			`).join('');
+				`;
+			}).join('');
 		};
 
 		window.openEditAnnouncement = function(id) {
@@ -1103,9 +1156,19 @@
 			document.getElementById('newAnnounceMarquee').checked = !!item.is_marquee;
 			document.getElementById('newAnnounceActive').checked = !!item.is_active;
 
-			document.getElementById('announceFormTitle').innerText = '✏️ 編輯公告內容';
+			const formCard = document.getElementById('announceFormCard');
+			if (formCard) {
+				formCard.classList.remove('bg-amber-50/90', 'border-amber-200/90');
+				formCard.classList.add('bg-amber-100/90', 'border-amber-400', 'ring-2', 'ring-amber-400/40');
+			}
+			document.getElementById('announceFormIcon').innerText = '✏️';
+			document.getElementById('announceFormTitle').innerText = '正在編輯公告內容';
 			document.getElementById('submitAnnounceBtn').innerText = '儲存修改公告';
+			document.getElementById('submitAnnounceBtn').style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
 			document.getElementById('cancelAnnounceEditBtn').style.display = 'inline-block';
+			
+			const mgmtModal = document.getElementById('announceMgmtModal');
+			if (mgmtModal) mgmtModal.scrollTop = 0;
 		};
 
 		window.cancelAnnounceEdit = function() {
@@ -1116,8 +1179,15 @@
 			document.getElementById('newAnnounceMarquee').checked = true;
 			document.getElementById('newAnnounceActive').checked = true;
 
-			document.getElementById('announceFormTitle').innerText = '✨ 發布新公告';
+			const formCard = document.getElementById('announceFormCard');
+			if (formCard) {
+				formCard.classList.remove('bg-amber-100/90', 'border-amber-400', 'ring-2', 'ring-amber-400/40');
+				formCard.classList.add('bg-amber-50/90', 'border-amber-200/90');
+			}
+			document.getElementById('announceFormIcon').innerText = '✨';
+			document.getElementById('announceFormTitle').innerText = '發布新公告';
 			document.getElementById('submitAnnounceBtn').innerText = '確認發布公告';
+			document.getElementById('submitAnnounceBtn').style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
 			document.getElementById('cancelAnnounceEditBtn').style.display = 'none';
 		};
 
@@ -1154,7 +1224,7 @@
 					logAuditRecord("編輯系統公告", title, creatorName, { category, isMarquee, isActive });
 				} else {
 					const payload = {
-						title, category, content, is_marquee: isMarquee, is_active: isActive, created_by: creatorName, created_at: new Date().toISOString()
+						title, category, content, is_marquee: isMarquee, is_active: isActive, created_by: creatorName, created_at: new Date().toISOString(), updated_at: new Date().toISOString()
 					};
 					const { error } = await dbClient.from('announcements').insert([payload]);
 					if (error) throw error;
@@ -1372,7 +1442,7 @@
 			}
 
 			filtered.forEach(item => {
-				const timeStr = item.created_at ? new Date(item.created_at).toLocaleString('zh-TW', { hour12: false }) : '-';
+				const timeStr = formatDateTime(item.created_at);
 				const tr = document.createElement('tr');
 				tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
 
@@ -1382,7 +1452,7 @@
 				else if (item.category === '學分資料疑義') catBadge = "bg-blue-50 text-blue-700 border-blue-200";
 
 				tr.innerHTML = `
-					<td class="p-2.5 text-slate-500 break-words leading-tight">${timeStr}</td>
+					<td class="p-2.5 text-slate-500 break-words leading-tight font-mono text-[11px]">${timeStr}</td>
 					<td class="p-2.5 font-bold break-words leading-tight">
 						<div class="text-slate-800">${item.full_name || '訪客'} <span class="text-[10px] text-slate-400 block sm:inline">(${mapping.role[item.role] || item.role})</span></div>
 						<div class="text-[10px] font-mono text-slate-400 mt-0.5 break-all">${item.student_id || ''}</div>
@@ -1523,7 +1593,7 @@
 			};
 
 			filtered.forEach(log => {
-				const timeStr = log.created_at ? new Date(log.created_at).toLocaleString('zh-TW', { hour12: false }) : '-';
+				const timeStr = formatDateTime(log.created_at);
 				const tr = document.createElement('tr');
 				tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
 				
