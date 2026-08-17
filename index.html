@@ -2610,7 +2610,8 @@
 			checks['_view_year'] = newViewYr;
 			checks['_view_dept'] = newViewDept;
 
-			const isVersionChanged = (oldViewYr !== '未設定' && newViewYr !== '未設定') && (oldViewYr !== newViewYr || oldViewDept !== newViewDept);
+			// 🚨 修正點：如果是被鎖定的版本(學生)，就不視為「切換版本」操作
+			const isVersionChanged = !version.locked && (oldViewYr !== '未設定' && newViewYr !== '未設定') && (oldViewYr !== newViewYr || oldViewDept !== newViewDept);
 
 			const res = calculateStats();
 			let matchedTutor = curRecord?.tutor || '未設定';
