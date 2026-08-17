@@ -310,25 +310,76 @@
 
 					<div class="admin-toolbar">
 						<input type="text" id="adminSearchInput" class="admin-filter-input" placeholder="搜尋姓名或帳號" oninput="fetchAdminList(true)">
-						<select id="adminFilterRole" class="sort-select" onchange="fetchAdminList(true)">
-							<option value="all">所有身份</option>
-							<option value="student">🎓 學生</option>
-							<option value="teacher">👩‍🏫 教師</option>
-							<option value="admin">👑 管理員</option>
-						</select>
-						<select id="adminFilterYear" class="sort-select" onchange="fetchAdminList(true)">
-							<option value="all">所有年度</option>
-						</select>
-						<select id="adminFilterDept" class="sort-select" onchange="fetchAdminList(true)">
-							<option value="all">所有科別</option>
-						</select>
-						<select id="adminFilterStatus" class="sort-select" onchange="fetchAdminList(true)">
-							<option value="all">所有畢業狀態</option>
-							<option value="pass">🎓 符合畢業門檻</option>
-							<option value="not_pass">⚠️ 未達畢業門檻 (非畢業)</option>
-							<option value="completion">📜 修業證明資格</option>
-							<option value="fail">⚠️ 需重補修/成績證明</option>
-						</select>
+						
+						<!-- 身份複選 -->
+						<div class="relative flex-1 min-w-[130px]" id="ms-wrap-role">
+							<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'role')">
+								<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-role">所有身份</span>
+								<span class="text-[10px] text-slate-400">▼</span>
+							</div>
+							<div id="ms-drop-role" class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="all" class="ms-all-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('role', this)" checked> (全選)
+								</label>
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="student" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 🎓 學生
+								</label>
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="teacher" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👩‍🏫 教師
+								</label>
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="admin" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👑 管理員
+								</label>
+							</div>
+						</div>
+
+						<!-- 年度複選 -->
+						<div class="relative flex-1 min-w-[130px]" id="ms-wrap-year">
+							<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'year')">
+								<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-year">所有年度</span>
+								<span class="text-[10px] text-slate-400">▼</span>
+							</div>
+							<div id="ms-drop-year" class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
+								<!-- Populated by JS -->
+							</div>
+						</div>
+
+						<!-- 科別複選 -->
+						<div class="relative flex-1 min-w-[130px]" id="ms-wrap-dept">
+							<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'dept')">
+								<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-dept">所有科別</span>
+								<span class="text-[10px] text-slate-400">▼</span>
+							</div>
+							<div id="ms-drop-dept" class="absolute z-50 w-[200%] sm:w-[150%] md:w-full right-0 md:right-auto mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
+								<!-- Populated by JS -->
+							</div>
+						</div>
+
+						<!-- 畢業狀態複選 -->
+						<div class="relative flex-1 min-w-[130px]" id="ms-wrap-status">
+							<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'status')">
+								<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-status">所有畢業狀態</span>
+								<span class="text-[10px] text-slate-400">▼</span>
+							</div>
+							<div id="ms-drop-status" class="absolute z-50 w-[150%] sm:w-full right-0 sm:right-auto mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="all" class="ms-all-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('status', this)" checked> (全選)
+								</label>
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="pass" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> 🎓 符合畢業門檻
+								</label>
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="not_pass" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> ⚠️ 未達畢業門檻
+								</label>
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="completion" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> 📜 修業證明資格
+								</label>
+								<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+									<input type="checkbox" value="fail" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> ⚠️ 需重補修/成績證明
+								</label>
+							</div>
+						</div>
+
 						<select id="adminSort" class="sort-select" onchange="fetchAdminList(true)">
 							<option value="class" selected>預設排序</option>
 							<option value="sid">帳號排序</option>
@@ -1018,20 +1069,6 @@
 			realtimeAnnouncementsChannel = null;
 		};
 
-		window.formatDateTime = function(isoStr) {
-			if (!isoStr) return '-';
-			try {
-				const d = new Date(isoStr);
-				return d.toLocaleString('zh-TW', {
-					year: 'numeric', month: '2-digit', day: '2-digit',
-					hour: '2-digit', minute: '2-digit', second: '2-digit',
-					hour12: false
-				});
-			} catch (e) {
-				return isoStr;
-			}
-		};
-
 		window.fetchAnnouncements = async function() {
 			if (!dbClient) return;
 			try {
@@ -1073,24 +1110,24 @@
 				return;
 			}
 			container.innerHTML = activeItems.map(a => {
-				const createStr = formatDateTime(a.created_at);
-				const updateStr = formatDateTime(a.updated_at);
-				const isEdited = a.updated_at && a.created_at && (new Date(a.updated_at).getTime() - new Date(a.created_at).getTime() > 2000);
+				const createdStr = a.created_at ? new Date(a.created_at).toLocaleString('zh-TW', { hour12: false }) : '';
+				const updatedStr = a.updated_at ? new Date(a.updated_at).toLocaleString('zh-TW', { hour12: false }) : null;
+				const isEdited = updatedStr && Math.abs(new Date(a.updated_at) - new Date(a.created_at)) > 2000;
 
+				let timeHtml = `<span class="text-slate-400">📅 發布: ${createdStr}</span>`;
+				if (isEdited) {
+					timeHtml += `<span class="text-amber-600 font-bold ml-2">✏️ 最後編輯: ${updatedStr}</span>`;
+				}
 				return `
-					<div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5 shadow-xs hover:border-amber-300 transition-all">
-						<div class="flex items-center justify-between flex-wrap gap-1.5">
-							<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-black text-xs border border-amber-200/80">${a.category || '🎓 畢業檢核'}</span>
-							<div class="text-[11px] text-slate-400 font-mono flex items-center gap-2 flex-wrap">
-								<span>📅 發布：${createStr}</span>
-								${isEdited ? `<span class="text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">✏️ 最後編輯：${updateStr}</span>` : ''}
-							</div>
-						</div>
-						<h4 class="font-black text-slate-900 text-sm sm:text-base leading-snug">${a.title}</h4>
-						<p class="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap">${a.content}</p>
-						<div class="text-[10px] text-slate-400 font-extrabold text-right pt-2 border-t border-slate-200/60">發布者：${a.created_by || '系統管理員'}</div>
+				<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+					<div class="flex items-center justify-between flex-wrap gap-2">
+						<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-black text-xs shrink-0">${a.category || '🎓 畢業檢核'}</span>
+						<span class="text-[11px] font-mono whitespace-nowrap">${timeHtml}</span>
 					</div>
-				`;
+					<h4 class="font-black text-slate-800 text-sm md:text-base">${a.title}</h4>
+					<p class="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap break-words">${a.content}</p>
+					<div class="text-[10px] text-slate-400 font-bold text-right pt-1 border-t border-slate-100">發布者：${a.created_by || '系統管理員'}</div>
+				</div>`;
 			}).join('');
 		};
 
@@ -1108,38 +1145,41 @@
 		window.renderAdminAnnounceList = function() {
 			const container = document.getElementById('adminAnnounceList');
 			const countText = document.getElementById('announceCountText');
-			if (!container) return;
 			if (countText) countText.innerText = `共 ${announcementsData.length} 筆紀錄`;
+			if (!container) return;
 			if (announcementsData.length === 0) {
-				container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs font-bold">目前資料庫尚無任何公告紀錄</div>`;
+				container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs font-bold">目前資料庫尚無任何公告紀錄</div>`;
 				return;
 			}
 			container.innerHTML = announcementsData.map(a => {
-				const createStr = formatDateTime(a.created_at);
-				const updateStr = formatDateTime(a.updated_at);
-				const isEdited = a.updated_at && a.created_at && (new Date(a.updated_at).getTime() - new Date(a.created_at).getTime() > 2000);
+				const createdStr = a.created_at ? new Date(a.created_at).toLocaleString('zh-TW', { hour12: false }) : '-';
+				const updatedStr = a.updated_at ? new Date(a.updated_at).toLocaleString('zh-TW', { hour12: false }) : null;
+				const isEdited = updatedStr && Math.abs(new Date(a.updated_at) - new Date(a.created_at)) > 2000;
+
+				let timeHtml = `<span class="text-slate-400">📅 發布: ${createdStr}</span>`;
+				if (isEdited) {
+					timeHtml += `<span class="text-amber-600 font-bold ml-2">✏️ 編輯: ${updatedStr}</span>`;
+				}
 
 				return `
-					<div class="bg-white border border-slate-200 rounded-xl p-3.5 space-y-2 hover:shadow-sm transition-all text-xs">
-						<div class="flex items-start justify-between gap-3">
-							<div class="min-w-0 flex-1 space-y-1">
-								<div class="flex items-center gap-1.5 flex-wrap">
-									<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-extrabold text-[10px] border border-slate-200">${a.category}</span>
-									<span class="font-black text-slate-900 text-sm break-words">${a.title}</span>
-									<span class="text-[10px] px-2 py-0.5 rounded-full font-black ${a.is_active ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}">${a.is_active ? '● 公開中' : '○ 已下架'}</span>
-									${a.is_marquee ? '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-amber-100 text-amber-800 border border-amber-200">📢 跑馬燈</span>' : ''}
-								</div>
-								<p class="text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap break-words">${a.content}</p>
-								<div class="text-[10px] text-slate-400 font-mono flex items-center gap-3 pt-1 flex-wrap">
-									<span>📅 發布：${createStr}</span>
-									${isEdited ? `<span class="text-indigo-600 font-bold">✏️ 最後編輯：${updateStr}</span>` : ''}
-								</div>
+					<div class="bg-white border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs shadow-sm hover:shadow-md transition">
+						<div class="flex items-center justify-between gap-2 flex-wrap">
+							<div class="flex items-center gap-1.5 flex-wrap">
+								<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-black text-[11px]">${a.category || '🎓 畢業檢核'}</span>
+								<span class="font-black text-slate-800 text-sm">${a.title}</span>
+								<span class="text-[10px] px-2 py-0.5 rounded-full font-black ${a.is_active ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}">${a.is_active ? '● 公開中' : '○ 已下架'}</span>
+								${a.is_marquee ? '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-amber-100 text-amber-800 border border-amber-200">📢 跑馬燈</span>' : ''}
 							</div>
-							<div class="flex items-center gap-1.5 shrink-0 pt-0.5">
-								<button class="btn-mini" style="background:#3b82f6; height:30px; font-weight:800;" onclick="openEditAnnouncement('${a.id}')">✏️ 編輯</button>
-								<button class="btn-mini" style="background:${a.is_active ? '#64748b' : '#10b981'}; height:30px; font-weight:800;" onclick="toggleAnnounceStatus('${a.id}', ${!a.is_active})">${a.is_active ? '👁️ 下架' : '👁️ 公開'}</button>
-								<button class="btn-mini" style="background:#ef4444; height:30px; font-weight:800;" onclick="deleteAnnouncement('${a.id}', '${a.title}')">🗑️ 刪除</button>
+							<div class="flex items-center gap-1.5 shrink-0">
+								<button type="button" class="btn-mini font-bold bg-blue-500 hover:bg-blue-600 text-white transition gap-1" style="height:28px; padding: 0 10px;" onclick="openEditAnnouncement('${a.id}')">✏️ 編輯</button>
+								<button type="button" class="btn-mini font-bold ${a.is_active ? 'bg-slate-500 hover:bg-slate-600' : 'bg-emerald-600 hover:bg-emerald-700'} text-white transition gap-1" style="height:28px; padding: 0 10px;" onclick="toggleAnnounceStatus('${a.id}', ${!a.is_active})">${a.is_active ? '👁️ 下架' : '👁️ 公開'}</button>
+								<button type="button" class="btn-mini font-bold bg-rose-500 hover:bg-rose-600 text-white transition gap-1" style="height:28px; padding: 0 10px;" onclick="deleteAnnouncement('${a.id}', '${a.title}')">🗑️ 刪除</button>
 							</div>
+						</div>
+						<p class="text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap break-words border-t border-slate-100 pt-2">${a.content}</p>
+						<div class="flex items-center justify-between text-[10px] font-mono border-t border-dashed border-slate-200 pt-1.5 flex-wrap gap-1">
+							<div>${timeHtml}</div>
+							<div class="text-slate-400 font-sans font-bold">發布者：${a.created_by || '系統管理員'}</div>
 						</div>
 					</div>
 				`;
@@ -1156,19 +1196,16 @@
 			document.getElementById('newAnnounceMarquee').checked = !!item.is_marquee;
 			document.getElementById('newAnnounceActive').checked = !!item.is_active;
 
-			const formCard = document.getElementById('announceFormCard');
-			if (formCard) {
-				formCard.classList.remove('bg-amber-50/90', 'border-amber-200/90');
-				formCard.classList.add('bg-amber-100/90', 'border-amber-400', 'ring-2', 'ring-amber-400/40');
-			}
-			document.getElementById('announceFormIcon').innerText = '✏️';
-			document.getElementById('announceFormTitle').innerText = '正在編輯公告內容';
+			const iconEl = document.getElementById('announceFormIcon');
+			const titleEl = document.getElementById('announceFormTitle');
+			if (iconEl) iconEl.innerText = '✏️';
+			if (titleEl) titleEl.innerHTML = '正在編輯公告：<span class="text-indigo-700 font-black">' + (item.title || '') + '</span>';
+
 			document.getElementById('submitAnnounceBtn').innerText = '儲存修改公告';
-			document.getElementById('submitAnnounceBtn').style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
 			document.getElementById('cancelAnnounceEditBtn').style.display = 'inline-block';
-			
-			const mgmtModal = document.getElementById('announceMgmtModal');
-			if (mgmtModal) mgmtModal.scrollTop = 0;
+
+			const formBox = document.getElementById('announceFormCard');
+			if (formBox) formBox.classList.add('ring-4', 'ring-amber-400/80', 'shadow-lg');
 		};
 
 		window.cancelAnnounceEdit = function() {
@@ -1179,16 +1216,16 @@
 			document.getElementById('newAnnounceMarquee').checked = true;
 			document.getElementById('newAnnounceActive').checked = true;
 
-			const formCard = document.getElementById('announceFormCard');
-			if (formCard) {
-				formCard.classList.remove('bg-amber-100/90', 'border-amber-400', 'ring-2', 'ring-amber-400/40');
-				formCard.classList.add('bg-amber-50/90', 'border-amber-200/90');
-			}
-			document.getElementById('announceFormIcon').innerText = '✨';
-			document.getElementById('announceFormTitle').innerText = '發布新公告';
+			const iconEl = document.getElementById('announceFormIcon');
+			const titleEl = document.getElementById('announceFormTitle');
+			if (iconEl) iconEl.innerText = '✨';
+			if (titleEl) titleEl.innerText = '發布新公告';
+
 			document.getElementById('submitAnnounceBtn').innerText = '確認發布公告';
-			document.getElementById('submitAnnounceBtn').style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
 			document.getElementById('cancelAnnounceEditBtn').style.display = 'none';
+
+			const formBox = document.getElementById('announceFormCard');
+			if (formBox) formBox.classList.remove('ring-4', 'ring-amber-400/80', 'shadow-lg');
 		};
 
 		window.submitNewAnnouncement = async function() {
@@ -1221,10 +1258,10 @@
 					showMsg("公告修改成功！");
 					cancelAnnounceEdit();
 					await fetchAnnouncements();
-					logAuditRecord("編輯系統公告", title, creatorName, { category, isMarquee: isMarquee, isActive: isActive });
+					logAuditRecord("編輯系統公告", title, creatorName, { category, isMarquee, isActive });
 				} else {
 					const payload = {
-						title, category, content, is_marquee: isMarquee, is_active: isActive, created_by: creatorName, created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+						title, category, content, is_marquee: isMarquee, is_active: isActive, created_by: creatorName, created_at: new Date().toISOString()
 					};
 					const { error } = await dbClient.from('announcements').insert([payload]);
 					if (error) throw error;
@@ -1232,7 +1269,7 @@
 					showMsg("公告發布成功！");
 					cancelAnnounceEdit();
 					await fetchAnnouncements();
-					logAuditRecord("發布系統公告", title, creatorName, { category, isMarquee: isMarquee, isActive: isActive });
+					logAuditRecord("發布系統公告", title, creatorName, { category, isMarquee, isActive });
 				}
 			} catch (err) {
 				updateSyncStatusIndicator('offline');
@@ -1442,7 +1479,7 @@
 			}
 
 			filtered.forEach(item => {
-				const timeStr = formatDateTime(item.created_at);
+				const timeStr = item.created_at ? new Date(item.created_at).toLocaleString('zh-TW', { hour12: false }) : '-';
 				const tr = document.createElement('tr');
 				tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
 
@@ -1452,7 +1489,7 @@
 				else if (item.category === '學分資料疑義') catBadge = "bg-blue-50 text-blue-700 border-blue-200";
 
 				tr.innerHTML = `
-					<td class="p-2.5 text-slate-500 break-words leading-tight font-mono text-[11px]">${timeStr}</td>
+					<td class="p-2.5 text-slate-500 break-words leading-tight">${timeStr}</td>
 					<td class="p-2.5 font-bold break-words leading-tight">
 						<div class="text-slate-800">${item.full_name || '訪客'} <span class="text-[10px] text-slate-400 block sm:inline">(${mapping.role[item.role] || item.role})</span></div>
 						<div class="text-[10px] font-mono text-slate-400 mt-0.5 break-all">${item.student_id || ''}</div>
@@ -1593,7 +1630,7 @@
 			};
 
 			filtered.forEach(log => {
-				const timeStr = formatDateTime(log.created_at);
+				const timeStr = log.created_at ? new Date(log.created_at).toLocaleString('zh-TW', { hour12: false }) : '-';
 				const tr = document.createElement('tr');
 				tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
 				
@@ -1654,54 +1691,58 @@
 					} else {
 						let chipItems = [];
 						for (const [k, v] of Object.entries(d)) {
-							if (['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode'].includes(k)) continue;
+							if (k !== 'old_total' && k !== 'new_total' && k !== 'changed_fields' && k !== 'old_version' && k !== 'new_version' && k !== 'semester' && k !== 'mode') {
+								let valStr = typeof v === 'object' ? JSON.stringify(v) : v;
+								let chipClass = "bg-slate-100 text-slate-700 border-slate-200";
+								let label = k;
+								
+								if (k === 'status') {
+									label = '狀態';
+									if (String(v).includes('成功') || String(v).includes('登入')) chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-xs";
+									else if (String(v).includes('登出')) chipClass = "bg-slate-100 text-slate-700 border-slate-300 font-black shadow-xs";
+									else chipClass = "bg-amber-50 text-amber-800 border-amber-300 font-black shadow-xs";
+								} else if (k === 'category') {
+									label = '🏷️ 公告類別';
+									chipClass = "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 font-black";
+								} else if (k === 'method') {
+									label = '重設方式';
+									chipClass = "bg-violet-50 text-violet-700 border-violet-200 font-black";
+								} else if (k === 'passwordChanged') {
+									label = '🔑 密碼變更';
+									chipClass = v ? "bg-amber-50 text-amber-800 border-amber-200 font-black" : "bg-slate-50 text-slate-500 border-slate-200";
+									valStr = v ? '✔ 已重設密碼' : '無變更';
+								} else if (k === 'dept') {
+									label = '🏫 科別班級';
+									chipClass = "bg-emerald-50 text-emerald-800 border-emerald-200 font-black";
+								} else if (k === 'year') {
+									label = '📅 入學年度';
+									chipClass = "bg-amber-50 text-amber-800 border-amber-200 font-black";
+									if (v && !String(v).includes('學年度')) valStr = `${v} 學年度`;
+								} else if (k === 'isActive') {
+									label = '👁️ 公開狀態';
+									if (v === true || v === 'true') {
+										chipClass = "bg-emerald-50 text-emerald-800 border-emerald-200 font-black";
+										valStr = "● 立即公開中";
+									} else {
+										chipClass = "bg-rose-50 text-rose-800 border-rose-200 font-black";
+										valStr = "○ 暫不上架";
+									}
+								} else if (k === 'isMarquee') {
+									label = '📢 頂部跑馬燈';
+									if (v === true || v === 'true') {
+										chipClass = "bg-amber-50 text-amber-800 border-amber-200 font-black";
+										valStr = "✔ 展示於跑馬燈";
+									} else {
+										chipClass = "bg-slate-50 text-slate-500 border-slate-200 font-black";
+										valStr = "✕ 僅選單展示";
+									}
+								}
 
-							let valStr = v;
-							let chipClass = "bg-slate-100 text-slate-700 border-slate-200";
-							let label = k;
-
-							if (k === 'dept') {
-								label = '🏫 科別班級';
-								valStr = v;
-								chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-extrabold shadow-xs";
-							} else if (k === 'year') {
-								label = '📅 入學年度';
-								valStr = `${v} 年`;
-								chipClass = "bg-amber-50 text-amber-800 border-amber-300 font-extrabold shadow-xs";
-							} else if (k === 'isActive') {
-								label = '👁️ 公開狀態';
-								valStr = v ? '● 立即公開中' : '○ 暫不上架';
-								chipClass = v ? "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-xs" : "bg-rose-50 text-rose-800 border-rose-300 font-black shadow-xs";
-							} else if (k === 'isMarquee') {
-								label = '📢 頂部跑馬燈';
-								valStr = v ? '✔ 展示於跑馬燈' : '✕ 僅選單展示';
-								chipClass = v ? "bg-amber-50 text-amber-900 border-amber-300 font-black shadow-xs" : "bg-slate-100 text-slate-600 border-slate-200 font-bold";
-							} else if (k === 'category') {
-								label = '🏷️ 公告類別';
-								valStr = v;
-								chipClass = "bg-purple-50 text-purple-800 border-purple-200 font-extrabold shadow-xs";
-							} else if (k === 'status') {
-								label = '⚡ 執行狀態';
-								if (String(v).includes('成功') || String(v).includes('登入')) chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-xs";
-								else if (String(v).includes('登出')) chipClass = "bg-slate-100 text-slate-700 border-slate-300 font-black shadow-xs";
-								else chipClass = "bg-amber-50 text-amber-800 border-amber-300 font-black shadow-xs";
-							} else if (k === 'method') {
-								label = '🛠️ 重設方式';
-								chipClass = "bg-violet-50 text-violet-700 border-violet-200 font-black";
-							} else if (k === 'passwordChanged') {
-								label = '🔑 密碼變更';
-								chipClass = v ? "bg-amber-50 text-amber-800 border-amber-200 font-black" : "bg-slate-50 text-slate-500 border-slate-200";
-								valStr = v ? '✔ 已重設密碼' : '無變更';
-							} else if (typeof v === 'boolean') {
-								valStr = v ? '是' : '否';
-							} else if (typeof v === 'object') {
-								valStr = JSON.stringify(v);
+								chipItems.push(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] ${chipClass}">
+									<span class="opacity-60 text-[10px] font-bold">${label}:</span>
+									<span class="font-extrabold">${valStr}</span>
+								</span>`);
 							}
-
-							chipItems.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[11px] ${chipClass}">
-								<span class="opacity-70 text-[10px] font-bold">${label}:</span>
-								<span class="font-black">${valStr}</span>
-							</span>`);
 						}
 						if (chipItems.length > 0) diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">${chipItems.join('')}</div>`;
 					}
@@ -1804,16 +1845,24 @@
 				else if (id === 'dashSelectDept') el.value = currentDept;
 			});
 
-			const fYear = document.getElementById('adminFilterYear');
+			const fYear = document.getElementById('ms-drop-year');
 			if (fYear) {
-				let h = '<option value="all">所有年度</option>';
-				YEAR_OPTIONS.forEach(y => h += `<option value="${y}">${y} 年</option>`);
+				let h = `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+							<input type="checkbox" value="all" class="ms-all-year text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('year', this)" checked> (全選)
+						</label>`;
+				YEAR_OPTIONS.forEach(y => h += `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+							<input type="checkbox" value="${y}" class="ms-opt-year text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('year')"> ${y} 學年度
+						</label>`);
 				fYear.innerHTML = h;
 			}
-			const fDept = document.getElementById('adminFilterDept');
+			const fDept = document.getElementById('ms-drop-dept');
 			if (fDept) {
-				let h = '<option value="all">所有科別</option>';
-				DEPT_OPTIONS.forEach(d => h += `<option value="${d}">${d}</option>`);
+				let h = `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+							<input type="checkbox" value="all" class="ms-all-dept text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('dept', this)" checked> (全選)
+						</label>`;
+				DEPT_OPTIONS.forEach(d => h += `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+							<input type="checkbox" value="${d}" class="ms-opt-dept text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('dept')"> ${d}
+						</label>`);
 				fDept.innerHTML = h;
 			}
 		};
@@ -2152,6 +2201,66 @@
 				if (!currentUser && event.target.id === 'authWorkspace') return;
 				event.target.style.display = 'none';
 			}
+			
+			if (!event.target.closest('[id^="ms-wrap-"]')) {
+				document.querySelectorAll('[id^="ms-drop-"]').forEach(d => { d.classList.add('hidden'); d.classList.remove('flex'); });
+			}
+		};
+
+		window.toggleMS = function(event, type) {
+			event.stopPropagation();
+			const drop = document.getElementById(`ms-drop-${type}`);
+			const isHidden = drop.classList.contains('hidden');
+			document.querySelectorAll('[id^="ms-drop-"]').forEach(d => { d.classList.add('hidden'); d.classList.remove('flex'); });
+			if (isHidden) {
+				drop.classList.remove('hidden');
+				drop.classList.add('flex');
+			}
+		};
+
+		window.handleMSAll = function(type, chk) {
+			const isChecked = chk.checked;
+			if (isChecked) {
+				document.querySelectorAll(`.ms-opt-${type}`).forEach(c => c.checked = false);
+			}
+			updateMSText(type);
+			fetchAdminList(true);
+		};
+
+		window.handleMSOpt = function(type) {
+			const opts = document.querySelectorAll(`.ms-opt-${type}:checked`);
+			const allChk = document.querySelector(`.ms-all-${type}`);
+			if (opts.length > 0) {
+				allChk.checked = false;
+			} else {
+				allChk.checked = true;
+			}
+			updateMSText(type);
+			fetchAdminList(true);
+		};
+
+		window.updateMSText = function(type) {
+			const opts = document.querySelectorAll(`.ms-opt-${type}:checked`);
+			const textEl = document.getElementById(`ms-text-${type}`);
+			const allText = { role: '所有身份', year: '所有年度', dept: '所有科別', status: '所有畢業狀態' };
+			
+			if (opts.length === 0) {
+				textEl.innerText = allText[type];
+				textEl.classList.remove('text-indigo-700');
+			} else if (opts.length === 1) {
+				textEl.innerText = opts[0].parentElement.innerText.replace('(全選)', '').trim();
+				textEl.classList.add('text-indigo-700');
+			} else {
+				textEl.innerText = `已選擇 (${opts.length})`;
+				textEl.classList.add('text-indigo-700');
+			}
+		};
+
+		window.getMSValues = function(type) {
+			const allChk = document.querySelector(`.ms-all-${type}`);
+			if (allChk && allChk.checked) return ['all'];
+			const opts = document.querySelectorAll(`.ms-opt-${type}:checked`);
+			return Array.from(opts).map(o => o.value);
 		};
 
 		window.showMsg = function(txt, type = 'info') {
@@ -2411,17 +2520,17 @@
 					const announceMgmtHeaderBtn = document.getElementById('announceMgmtHeaderBtn');
 					if (announceMgmtHeaderBtn) announceMgmtHeaderBtn.style.display = (role === 'admin') ? 'inline-flex' : 'none';
 
-					const fRole = document.getElementById('adminFilterRole'), fYear = document.getElementById('adminFilterYear'), fDept = document.getElementById('adminFilterDept');
-					if (fYear && fDept) {
+					const msWrapRole = document.getElementById('ms-wrap-role'), msWrapYear = document.getElementById('ms-wrap-year'), msWrapDept = document.getElementById('ms-wrap-dept');
+					if (msWrapYear && msWrapDept) {
 						if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') { 
-							if (fRole) fRole.style.display = 'none';
-							fYear.style.display = 'none'; 
-							fDept.style.display = 'none'; 
+							if (msWrapRole) msWrapRole.style.display = 'none';
+							msWrapYear.style.display = 'none'; 
+							msWrapDept.style.display = 'none'; 
 						}
 						else { 
-							if (fRole) fRole.style.display = '';
-							fYear.style.display = ''; 
-							fDept.style.display = ''; 
+							if (msWrapRole) msWrapRole.style.display = '';
+							msWrapYear.style.display = ''; 
+							msWrapDept.style.display = ''; 
 						}
 					}
 					fetchAdminList();
@@ -2774,10 +2883,10 @@
 
 		window.applyFilters = function() {
 			const searchText = document.getElementById('adminSearchInput').value.toLowerCase(), 
-				filterRole = document.getElementById('adminFilterRole')?.value || 'all',
-				filterYear = document.getElementById('adminFilterYear').value,
-				filterDept = document.getElementById('adminFilterDept').value,
-				filterStatus = document.getElementById('adminFilterStatus')?.value || 'all',
+				filterRoles = window.getMSValues ? window.getMSValues('role') : ['all'],
+				filterYears = window.getMSValues ? window.getMSValues('year') : ['all'],
+				filterDepts = window.getMSValues ? window.getMSValues('dept') : ['all'],
+				filterStatuses = window.getMSValues ? window.getMSValues('status') : ['all'],
 				sortType = document.getElementById('adminSort')?.value || 'role',
 				role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student', myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year,
 				myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept;
@@ -2788,16 +2897,16 @@
 			if (searchText) {
 				filtered = filtered.filter(s => (s.full_name && s.full_name.toLowerCase().includes(searchText)) || (s.student_id && s.student_id.toLowerCase().includes(searchText)));
 			}
-			if (filterRole !== 'all') filtered = filtered.filter(s => s.role === filterRole);
-			if (filterYear !== 'all') filtered = filtered.filter(s => s.entry_year === filterYear);
-			if (filterDept !== 'all') filtered = filtered.filter(s => s.entry_dept === filterDept);
+			if (!filterRoles.includes('all')) filtered = filtered.filter(s => filterRoles.includes(s.role));
+			if (!filterYears.includes('all')) filtered = filtered.filter(s => filterYears.includes(s.entry_year));
+			if (!filterDepts.includes('all')) filtered = filtered.filter(s => filterDepts.includes(s.entry_dept));
 			
-			if (filterStatus !== 'all') {
+			if (!filterStatuses.includes('all')) {
 				filtered = filtered.filter(s => {
 					if (s.role !== 'student') return false;
 					const st = window.evaluateStudentStatus(s);
-					if (filterStatus === 'not_pass') return st.status !== 'pass';
-					return st.status === filterStatus;
+					if (filterStatuses.includes('not_pass') && st.status !== 'pass') return true;
+					return filterStatuses.includes(st.status);
 				});
 			}
 
