@@ -175,6 +175,7 @@
 		.role-badge { padding: 4px 9px; border-radius: 6px; font-size: 0.78rem; color: white; font-weight: 800; }
 		.badge-student { background-color: #2563eb; }
 		.badge-teacher { background-color: #059669; }
+		.badge-tutor { background-color: #0d9488; }
 		.badge-admin { background-color: #4f46e5; }
 		#msgBox { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 14px 28px; border-radius: 50px; color: white; font-weight: 800; display: none; z-index: 100000 !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); font-size: 0.98rem; }
 		@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -2470,7 +2471,9 @@
 			const displayName = userDBRecord?.full_name || m?.full_name;
 			const myYear = userDBRecord?.entry_year || m?.entry_year || '未設定';
 			const myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
-			const displayClass = (myYear === '未設定' || myDept === '未設定') ? ` ｜ ${mapping.role[role] || '使用者'}` : ` ｜ ${myYear}年 ${myDept} ${mapping.role[role] || '使用者'}`;
+			const isTutor = (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定');
+			const roleTitle = isTutor ? '導師' : (mapping.role[role] || '使用者');
+			const displayClass = (myYear === '未設定' || myDept === '未設定') ? ` ｜ ${roleTitle}` : ` ｜ ${myYear}年 ${myDept} ${roleTitle}`;
 			userStatusDisplay.innerHTML = `
 				<div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 w-full text-xs sm:text-sm leading-tight">
 					<div class="font-extrabold text-slate-100 shrink-0">您好，${displayName}${displayClass}</div>
@@ -3054,7 +3057,9 @@
 			renderAdminStats(filtered);
 
 			filtered.forEach((s, i) => {
-				const roleClass = s.role === 'admin' ? 'badge-admin' : (s.role === 'teacher' ? 'badge-teacher' : 'badge-student'),
+				const isTutor = (s.role === 'teacher' && s.entry_year && s.entry_year !== '未設定' && s.entry_dept && s.entry_dept !== '未設定');
+				const roleClass = s.role === 'admin' ? 'badge-admin' : (isTutor ? 'badge-tutor' : (s.role === 'teacher' ? 'badge-teacher' : 'badge-student')),
+					roleDisplayName = s.role === 'admin' ? '管理員' : (isTutor ? '導師' : (mapping.role[s.role] || '使用者')),
 					classInfo = (s.entry_year === '未設定' || s.entry_dept === '未設定') ? '未設定' : `${s.entry_year}年/${s.entry_dept}`,
 					evalRes = s.role === 'student' ? window.evaluateStudentStatus(s) : null,
 					statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>',
@@ -3068,7 +3073,7 @@
 				btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
 								<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
 				btnsDesktop += '</div>';
-				tr.innerHTML = `<td><b>${s.full_name}</b></td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${mapping.role[s.role] || '使用者'}</span></td><td>${classInfo}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
+				tr.innerHTML = `<td><b>${s.full_name}</b></td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${roleDisplayName}</span></td><td>${classInfo}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
 				tableBody.appendChild(tr);
 
 				const card = document.createElement('div');
@@ -3087,7 +3092,7 @@
 							<div class="text-sm font-bold text-slate-800 truncate">${s.full_name}</div>
 							<div class="text-xs text-slate-500 mt-0.5">帳號: ${s.student_id || '-'}</div>
 						</div>
-						<span class="role-badge ${roleClass} text-xs py-1 px-2.5 rounded-full font-bold text-white shrink-0">${mapping.role[s.role] || '使用者'}</span>
+						<span class="role-badge ${roleClass} text-xs py-1 px-2.5 rounded-full font-bold text-white shrink-0">${roleDisplayName}</span>
 					</div>
 					<div class="text-xs text-slate-600 flex justify-between items-center"><span>入學年 / 科別:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
 					<div class="text-xs text-slate-600 flex justify-between items-center border-t border-dashed border-slate-200 pt-2"><span>畢業門檻資格:</span><div>${evalRes ? `<span class="text-[0.68rem] font-bold px-2 py-0.5 rounded-md ${evalRes.badgeClass}">${evalRes.statusText} (${evalRes.total}學分)</span>` : '<span class="text-slate-400 font-semibold">-</span>'}</div></div>
