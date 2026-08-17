@@ -1018,6 +1018,20 @@
 			realtimeAnnouncementsChannel = null;
 		};
 
+		window.formatDateTime = function(isoStr) {
+			if (!isoStr) return '-';
+			try {
+				const d = new Date(isoStr);
+				return d.toLocaleString('zh-TW', {
+					year: 'numeric', month: '2-digit', day: '2-digit',
+					hour: '2-digit', minute: '2-digit', second: '2-digit',
+					hour12: false
+				});
+			} catch (e) {
+				return isoStr;
+			}
+		};
+
 		window.fetchAnnouncements = async function() {
 			if (!dbClient) return;
 			try {
@@ -1048,20 +1062,6 @@
 		window.openAnnouncementModal = function() {
 			renderAnnouncementList();
 			toggleUIModal(true, 'announcementModal');
-		};
-
-		window.formatDateTime = function(isoStr) {
-			if (!isoStr) return '-';
-			try {
-				const d = new Date(isoStr);
-				return d.toLocaleString('zh-TW', {
-					year: 'numeric', month: '2-digit', day: '2-digit',
-					hour: '2-digit', minute: '2-digit', second: '2-digit',
-					hour12: false
-				});
-			} catch (e) {
-				return isoStr;
-			}
 		};
 
 		window.renderAnnouncementList = function() {
@@ -1125,11 +1125,11 @@
 							<div class="min-w-0 flex-1 space-y-1">
 								<div class="flex items-center gap-1.5 flex-wrap">
 									<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-extrabold text-[10px] border border-slate-200">${a.category}</span>
-									<span class="font-black text-slate-900 text-sm truncate">${a.title}</span>
+									<span class="font-black text-slate-900 text-sm break-words">${a.title}</span>
 									<span class="text-[10px] px-2 py-0.5 rounded-full font-black ${a.is_active ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}">${a.is_active ? '● 公開中' : '○ 已下架'}</span>
 									${a.is_marquee ? '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-amber-100 text-amber-800 border border-amber-200">📢 跑馬燈</span>' : ''}
 								</div>
-								<p class="text-slate-600 font-semibold line-clamp-2 leading-relaxed whitespace-pre-wrap">${a.content}</p>
+								<p class="text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap break-words">${a.content}</p>
 								<div class="text-[10px] text-slate-400 font-mono flex items-center gap-3 pt-1 flex-wrap">
 									<span>📅 發布：${createStr}</span>
 									${isEdited ? `<span class="text-indigo-600 font-bold">✏️ 最後編輯：${updateStr}</span>` : ''}
@@ -1221,7 +1221,7 @@
 					showMsg("公告修改成功！");
 					cancelAnnounceEdit();
 					await fetchAnnouncements();
-					logAuditRecord("編輯系統公告", title, creatorName, { category, isMarquee, isActive });
+					logAuditRecord("編輯系統公告", title, creatorName, { category, isMarquee: isMarquee, isActive: isActive });
 				} else {
 					const payload = {
 						title, category, content, is_marquee: isMarquee, is_active: isActive, created_by: creatorName, created_at: new Date().toISOString(), updated_at: new Date().toISOString()
@@ -1232,7 +1232,7 @@
 					showMsg("公告發布成功！");
 					cancelAnnounceEdit();
 					await fetchAnnouncements();
-					logAuditRecord("發布系統公告", title, creatorName, { category, isMarquee, isActive });
+					logAuditRecord("發布系統公告", title, creatorName, { category, isMarquee: isMarquee, isActive: isActive });
 				}
 			} catch (err) {
 				updateSyncStatusIndicator('offline');
@@ -1654,31 +1654,54 @@
 					} else {
 						let chipItems = [];
 						for (const [k, v] of Object.entries(d)) {
-							if (k !== 'old_total' && k !== 'new_total' && k !== 'changed_fields' && k !== 'old_version' && k !== 'new_version' && k !== 'semester' && k !== 'mode') {
-								let valStr = typeof v === 'object' ? JSON.stringify(v) : v;
-								let chipClass = "bg-slate-100 text-slate-700 border-slate-200";
-								let label = k;
-								if (k === 'status') {
-									label = '狀態';
-									if (String(v).includes('成功') || String(v).includes('登入')) chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-xs";
-									else if (String(v).includes('登出')) chipClass = "bg-slate-100 text-slate-700 border-slate-300 font-black shadow-xs";
-									else chipClass = "bg-amber-50 text-amber-800 border-amber-300 font-black shadow-xs";
-								} else if (k === 'category') {
-									label = '類別';
-									chipClass = "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 font-black";
-								} else if (k === 'method') {
-									label = '重設方式';
-									chipClass = "bg-violet-50 text-violet-700 border-violet-200 font-black";
-								} else if (k === 'passwordChanged') {
-									label = '修改密碼';
-									chipClass = v ? "bg-amber-50 text-amber-800 border-amber-200 font-black" : "bg-slate-50 text-slate-500 border-slate-200";
-									valStr = v ? '✔ 已重設' : '無變更';
-								}
-								chipItems.push(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] ${chipClass}">
-									<span class="opacity-60 text-[10px] font-bold">${label}:</span>
-									<span class="font-extrabold">${valStr}</span>
-								</span>`);
+							if (['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode'].includes(k)) continue;
+
+							let valStr = v;
+							let chipClass = "bg-slate-100 text-slate-700 border-slate-200";
+							let label = k;
+
+							if (k === 'dept') {
+								label = '🏫 科別班級';
+								valStr = v;
+								chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-extrabold shadow-xs";
+							} else if (k === 'year') {
+								label = '📅 入學年度';
+								valStr = `${v} 年`;
+								chipClass = "bg-amber-50 text-amber-800 border-amber-300 font-extrabold shadow-xs";
+							} else if (k === 'isActive') {
+								label = '👁️ 公開狀態';
+								valStr = v ? '● 立即公開中' : '○ 暫不上架';
+								chipClass = v ? "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-xs" : "bg-rose-50 text-rose-800 border-rose-300 font-black shadow-xs";
+							} else if (k === 'isMarquee') {
+								label = '📢 頂部跑馬燈';
+								valStr = v ? '✔ 展示於跑馬燈' : '✕ 僅選單展示';
+								chipClass = v ? "bg-amber-50 text-amber-900 border-amber-300 font-black shadow-xs" : "bg-slate-100 text-slate-600 border-slate-200 font-bold";
+							} else if (k === 'category') {
+								label = '🏷️ 公告類別';
+								valStr = v;
+								chipClass = "bg-purple-50 text-purple-800 border-purple-200 font-extrabold shadow-xs";
+							} else if (k === 'status') {
+								label = '⚡ 執行狀態';
+								if (String(v).includes('成功') || String(v).includes('登入')) chipClass = "bg-emerald-50 text-emerald-800 border-emerald-300 font-black shadow-xs";
+								else if (String(v).includes('登出')) chipClass = "bg-slate-100 text-slate-700 border-slate-300 font-black shadow-xs";
+								else chipClass = "bg-amber-50 text-amber-800 border-amber-300 font-black shadow-xs";
+							} else if (k === 'method') {
+								label = '🛠️ 重設方式';
+								chipClass = "bg-violet-50 text-violet-700 border-violet-200 font-black";
+							} else if (k === 'passwordChanged') {
+								label = '🔑 密碼變更';
+								chipClass = v ? "bg-amber-50 text-amber-800 border-amber-200 font-black" : "bg-slate-50 text-slate-500 border-slate-200";
+								valStr = v ? '✔ 已重設密碼' : '無變更';
+							} else if (typeof v === 'boolean') {
+								valStr = v ? '是' : '否';
+							} else if (typeof v === 'object') {
+								valStr = JSON.stringify(v);
 							}
+
+							chipItems.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[11px] ${chipClass}">
+								<span class="opacity-70 text-[10px] font-bold">${label}:</span>
+								<span class="font-black">${valStr}</span>
+							</span>`);
 						}
 						if (chipItems.length > 0) diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">${chipItems.join('')}</div>`;
 					}
