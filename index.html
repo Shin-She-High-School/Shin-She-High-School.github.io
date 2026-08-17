@@ -772,10 +772,10 @@
 			EMAIL_DOMAIN = "@sshs.tc.edu.tw",
 			YEAR_OPTIONS = ["113", "114"],
 			DEPT_OPTIONS = [
-				"普通科(文史法商群)-1",
-				"普通科(文史法商群)-2",
-				"普通科(理工生醫群)-3",
-				"普通科(理工生醫群)-4",
+				"普通科(理工生醫群)-1",
+				"普通科(理工生醫群)-2",
+				"普通科(文史法商群)-3",
+				"普通科(文史法商群)-4",
 				"體育班-5",
 				"體育班-6",
 				"農經科-7",
@@ -804,7 +804,7 @@
 		let currentUser = null, DEPT_THRESHOLD = 0, userDBRecord = null, activeStudentDBRecord = null,
 			hasLoadedInitialData = false, lastLoadedStudentId = null, adminListData = [], auditLogsData = [], userFeedbacksData = [], teacherNames = [],
 			isViewingClassList = false, editingStudentId = null, confirmAction = null,
-			currentYear = "113", currentDept = "普通科(文史法商群)-1", lastUserId = null, currentLayoutMode = "subject",
+			currentYear = "113", currentDept = "普通科(理工生醫群)-1", lastUserId = null, currentLayoutMode = "subject",
 			currentUncheckedCredits = [];
 
 		let realtimeGradChecksChannel = null, realtimeFeedbacksChannel = null, realtimeAuditLogsChannel = null;
@@ -1528,11 +1528,11 @@
 			const hasSetting = (ey !== '未設定' && ed !== '未設定');
 
 			if (role === 'student') {
-				return { year: hasSetting ? ey : '113', dept: hasSetting ? ed : '普通科(文史法商群)-1', locked: true };
+				return { year: hasSetting ? ey : '113', dept: hasSetting ? ed : '普通科(理工生醫群)-1', locked: true };
 			} else if (role === 'teacher') {
-				return { year: hasSetting ? ey : (record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113'), dept: hasSetting ? ed : (record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(文史法商群)-1'), locked: hasSetting };
+				return { year: hasSetting ? ey : (record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113'), dept: hasSetting ? ed : (record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1'), locked: hasSetting };
 			} else {
-				return { year: record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113', dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(文史法商群)-1', locked: false };
+				return { year: record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113', dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1', locked: false };
 			}
 		};
 
@@ -2225,7 +2225,7 @@
 
 		window.evaluateStudentStatus = function(s) {
 			const ey = (s.entry_year && s.entry_year !== '未設定') ? s.entry_year : '113';
-			const ed = (s.entry_dept && s.entry_dept !== '未設定') ? s.entry_dept : '普通科(文史法商群)-1';
+			const ed = (s.entry_dept && s.entry_dept !== '未設定') ? s.entry_dept : '普通科(理工生醫群)-1';
 			const key = `${ey}_${ed}`;
 			const curr = curriculums[key] || [];
 			if (!curr || curr.length === 0) return { status: 'unknown', total: 0, statusText: '資料未建置', badgeClass: 'bg-slate-100 text-slate-600' };
@@ -2872,7 +2872,7 @@
 			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 			let myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定', myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 			if (role === 'admin' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
-				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '普通科(文史法商群)-1';
+				myYear = sessionStorage.getItem('tempSelectedYear') || '113'; myDept = sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1';
 			}
 			selectCurriculum(myYear, myDept); 
 			scrollToTop();
