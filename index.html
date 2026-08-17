@@ -1837,7 +1837,7 @@
 				if (!el) return;
 				const currentVal = el.value;
 				let html = '';
-				if (id === 'authEntryYear') html += '<option value="">請選擇入學年</option>';
+				if (id === 'authEntryYear') html += '<option value="">請選擇入學年(高三113、高二114、高一115)</option>';
 				if (id === 'editUserEntryYear') html += '<option value="未設定">未設定</option>';
 				YEAR_OPTIONS.forEach(y => { html += `<option value="${y}">${y} 學年度</option>`; });
 				el.innerHTML = html;
@@ -1850,7 +1850,7 @@
 				if (!el) return;
 				const currentVal = el.value;
 				let html = '';
-				if (id === 'authEntryDept') html += '<option value="">請選擇科別</option>';
+				if (id === 'authEntryDept') html += '<option value="">請選擇科別(數字是現在的班級)</option>';
 				if (id === 'editUserEntryDept') html += '<option value="未設定">未設定</option>';
 				DEPT_OPTIONS.forEach(d => { html += `<option value="${d}">${d}</option>`; });
 				el.innerHTML = html;
@@ -2372,7 +2372,7 @@
 				if (isReg) {
 					const name = document.getElementById('authName').value.trim(), entryYear = document.getElementById('authEntryYear').value, entryDept = document.getElementById('authEntryDept').value;
 					if (!name) throw new Error("請輸入姓名");
-					if (!entryYear || !entryDept || entryYear === '請選擇入學年' || entryDept === '請選擇科別') throw new Error("請務必選擇正確的入學年與科別！");
+					if (!entryYear || !entryDept || entryYear === '請選擇入學年(高三113、高二114、高一115)' || entryDept === '請選擇科別(數字是現在的班級)') throw new Error("請務必選擇正確的入學年與科別！");
 					const matchedTutor = await findTutorByYearDept(entryYear, entryDept);
 					const { data: signUpData, error } = await dbClient.auth.signUp({
 						email, password: pwd, options: { data: { full_name: name, student_id: cleanSid, role: 'student', tutor: matchedTutor, entry_year: entryYear, entry_dept: entryDept } }
