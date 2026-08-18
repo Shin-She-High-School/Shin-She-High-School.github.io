@@ -172,11 +172,14 @@
 		.input-group select:disabled { background-color: #e2e8f0; cursor: not-allowed; color: #475569; font-weight: 700; }
 		.sort-select, .admin-filter-input { padding: 10px; border-radius: 8px; border: 1.5px solid #94a3b8; font-size: 0.92rem; outline: none; color: #0f172a; background-color: #fff; font-weight: 600; }
 		.sort-select:focus, .admin-filter-input:focus { border-color: #4f46e5; }
+		
+		/* 重新設計的 4 個角色醒目對比標籤 */
 		.role-badge { padding: 4px 9px; border-radius: 6px; font-size: 0.78rem; color: white; font-weight: 800; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-		.badge-admin { background-color: #1e293b; }
-		.badge-tutor { background-color: #e11d48; }
-		.badge-teacher { background-color: #0ea5e9; }
-		.badge-student { background-color: #10b981; }
+		.badge-admin { background-color: #1e293b; }   /* 管理員：深邃藏青 (最高權限) */
+		.badge-tutor { background-color: #e11d48; }   /* 導師：櫻桃紅 (高對比醒目) */
+		.badge-teacher { background-color: #0ea5e9; } /* 教師：天空藍 (清新專業) */
+		.badge-student { background-color: #10b981; } /* 學生：翡翠綠 (代表活力) */
+		
 		#msgBox { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 14px 28px; border-radius: 50px; color: white; font-weight: 800; display: none; z-index: 100000 !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); font-size: 0.98rem; }
 		@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 		@keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -926,8 +929,29 @@
 			</div>
 		</div>
 	</div>
+
 	<script>
-		const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
+		// 切換登入與註冊模式 (解決 switchAuthMode is not defined 錯誤)
+		window.switchAuthMode = function() {
+			const regFields = document.getElementById('regFields');
+			const authTitle = document.getElementById('authTitle');
+			const authSwitchLink = document.getElementById('authSwitchLink');
+			const authBtn = document.querySelector('#authWorkspace .auth-btn-primary');
+			
+			if (regFields.style.display === 'none') {
+				regFields.style.display = 'block';
+				authTitle.innerText = '學生帳號註冊';
+				authSwitchLink.innerText = '已有帳號？點此登入';
+				if (authBtn) authBtn.innerText = '確認註冊';
+				initDropdowns(false);
+			} else {
+				regFields.style.display = 'none';
+				authTitle.innerText = '帳號登入';
+				authSwitchLink.innerText = '尚未有帳號？點此註冊';
+				if (authBtn) authBtn.innerText = '確認登入';
+			}
+		};
+const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
 			SB_KEY = "sb_publishable_ojrdIB0TeCnl8eZXbzWsdQ_2W3JB3xT",
 			EMAIL_DOMAIN = "@sshs.tc.edu.tw",
 			YEAR_OPTIONS = ["113", "114"],
@@ -1549,6 +1573,7 @@
 			if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入稽核日誌...</td></tr>`;
 			let remoteLogs = [];
 			try {
+				// 已移除 500 筆限制，完整載入
 				const { data, error } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false });
 				if (!error) remoteLogs = data || [];
 			} catch (e) { console.warn(e); }
@@ -2668,8 +2693,8 @@
 			checks['_view_year'] = newViewYr;
 			checks['_view_dept'] = newViewDept;
 
-			// 🚨 修正點：如果是被鎖定的版本(學生)，就不視為「切換版本」操作
-			const isVersionChanged = !version.locked && (oldViewYr !== '未設定' && newViewYr !== '未設定') && (oldViewYr !== newViewYr || oldViewDept !== newViewDept);
+			// 修正點：如果是被鎖定的版本(學生/導師)，就不視為「切換版本」操作
+			const isVersionChanged = targetRole !== 'student' && !version.locked && (oldViewYr !== '未設定' && newViewYr !== '未設定') && (oldViewYr !== newViewYr || oldViewDept !== newViewDept);
 
 			const res = calculateStats();
 			let matchedTutor = curRecord?.tutor || '未設定';
@@ -3662,5 +3687,5 @@
 		initHelpModalScrollGuard();
 		initBackToTop();
 	</script>
-	</body>
+</body>
 </html>
