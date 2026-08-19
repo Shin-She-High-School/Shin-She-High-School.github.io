@@ -1567,18 +1567,43 @@ const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
 			await refreshAuditLogs();
 		};
 
-		window.refreshAuditLogs = async function() {
+window.refreshAuditLogs = async function() {
 			if (!dbClient) return;
 			const listBody = document.getElementById('auditLogListBody');
-			if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入稽核日誌...</td></tr>`;
-			let remoteLogs = [];
-			try {
-				// 已移除 500 筆限制，完整載入
-				const { data, error } = await dbClient.from('audit_logs').select('*').order('created_at', { ascending: false });
-				if (!error) remoteLogs = data || [];
-			} catch (e) { console.warn(e); }
+			if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入完整稽核日誌（分批讀取中）...</td></tr>`;
+			
+			let allLogs = [];
+			let from = 0;
+			const step = 1000;
+			let hasMore = true;
 
-			auditLogsData = remoteLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+			try {
+				// 自動分批撈取，完全不受 Supabase 單次 1000 筆上限影響
+				while (hasMore) {
+					const { data, error } = await dbClient
+						.from('audit_logs')
+						.select('*')
+						.order('created_at', { ascending: false })
+						.range(from, from + step - 1);
+
+					if (error) throw error;
+
+					if (data && data.length > 0) {
+						allLogs = allLogs.concat(data);
+						if (data.length < step) {
+							hasMore = false; // 已取完全部資料
+						} else {
+							from += step;    // 繼續下一批 1000 筆
+						}
+					} else {
+						hasMore = false;
+					}
+				}
+			} catch (e) {
+				console.warn("載入稽核日誌失敗:", e);
+			}
+
+			auditLogsData = allLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 			renderAuditLogList();
 		};
 
