@@ -98,9 +98,50 @@
 		.card-progress-bg { width: 100%; background-color: #cbd5e1; height: 7px; border-radius: 4px; margin-top: 8px; overflow: hidden; }
 		.card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 		
-		.btn-group { display: flex; gap: 8px; margin-top: 15px; width: 100%; box-sizing: border-box; flex-wrap: wrap; }
-		.action-btn { flex: 1 1 auto; min-width: 110px; padding: 12px 6px; border: none; border-radius: 12px; font-size: 0.88rem; font-weight: 800; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; text-align: center; text-overflow: ellipsis; overflow: hidden; box-sizing: border-box; }
-		@media (min-width: 768px) { .btn-group { gap: 12px; } .action-btn { padding: 12px 16px; font-size: 0.95rem; } }
+		.btn-group {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 8px;
+			margin-top: 15px;
+			width: 100%;
+			box-sizing: border-box;
+		}
+		@media (min-width: 640px) {
+			.btn-group {
+				grid-template-columns: repeat(4, 1fr);
+				gap: 10px;
+			}
+		}
+		@media (min-width: 1024px) {
+			.btn-group {
+				grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+				gap: 12px;
+			}
+		}
+
+		.action-btn {
+			width: 100%;
+			padding: 12px 6px;
+			border: none;
+			border-radius: 12px;
+			font-size: 0.88rem;
+			font-weight: 800;
+			cursor: pointer;
+			color: white;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+			transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+			white-space: nowrap;
+			text-align: center;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			box-sizing: border-box;
+		}
+		@media (min-width: 768px) {
+			.action-btn {
+				padding: 12px 14px;
+				font-size: 0.95rem;
+			}
+		}
 		.btn-pass-all { background: linear-gradient(135deg, #059669, #047857); }
 		.btn-fail-all { background: linear-gradient(135deg, #64748b, #475569); }
 		.btn-help { background: linear-gradient(135deg, #0891b2, #0e7490); }
@@ -173,12 +214,11 @@
 		.sort-select, .admin-filter-input { padding: 10px; border-radius: 8px; border: 1.5px solid #94a3b8; font-size: 0.92rem; outline: none; color: #0f172a; background-color: #fff; font-weight: 600; }
 		.sort-select:focus, .admin-filter-input:focus { border-color: #4f46e5; }
 		
-		/* 重新設計的 4 個角色醒目對比標籤 */
 		.role-badge { padding: 4px 9px; border-radius: 6px; font-size: 0.78rem; color: white; font-weight: 800; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-		.badge-admin { background-color: #1e293b; }   /* 管理員：深邃藏青 (最高權限) */
-		.badge-tutor { background-color: #e11d48; }   /* 導師：櫻桃紅 (高對比醒目) */
-		.badge-teacher { background-color: #0ea5e9; } /* 教師：天空藍 (清新專業) */
-		.badge-student { background-color: #10b981; } /* 學生：翡翠綠 (代表活力) */
+		.badge-admin { background-color: #1e293b; }
+		.badge-tutor { background-color: #e11d48; }
+		.badge-teacher { background-color: #0ea5e9; }
+		.badge-student { background-color: #10b981; }
 		
 		#msgBox { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 14px 28px; border-radius: 50px; color: white; font-weight: 800; display: none; z-index: 100000 !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); font-size: 0.98rem; }
 		@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -207,11 +247,11 @@
 					<input type="text" id="authName" placeholder="請輸入真實姓名">
 				</div>
 				<div class="auth-form-group">
-					<label>入學年</label>
+					<label>入學年 (高三113、高二114、高一115)</label>
 					<select id="authEntryYear" class="bg-white"></select>
 				</div>
 				<div class="auth-form-group">
-					<label>科別-班級</label>
+					<label>科別-班級 (數字代表目前班級)</label>
 					<select id="authEntryDept" class="bg-white"></select>
 				</div>
 			</div>
@@ -276,7 +316,7 @@
 						<button class="action-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="showMissingCreditsModal()">未得學分清單</button>
 						<button class="action-btn" style="background: linear-gradient(135deg, #eab308, #ca8a04);" onclick="openAnnouncementModal()">📢 系統公告</button>
 						<button class="action-btn btn-feedback" onclick="openFeedbackModal()">💡 意見回饋</button>
-						<button id="saveBtn" class="action-btn btn-cloud" onclick="handleMainAction()">班級資料</button>
+						<button id="saveBtn" class="action-btn btn-cloud" style="display: none;" onclick="handleMainAction()">班級資料</button>
 						<button class="action-btn btn-pass-all" onclick="confirmSetAllStatus(true)">全部及格</button>
 						<button class="action-btn btn-fail-all" onclick="confirmSetAllStatus(false)">學分歸零</button>
 						<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="action-btn flex items-center justify-center gap-1.5" style="background: linear-gradient(135deg, #06C755, #05b34c);">
@@ -318,7 +358,6 @@
 					<div class="admin-toolbar">
 						<input type="text" id="adminSearchInput" class="admin-filter-input" placeholder="搜尋姓名或帳號" oninput="fetchAdminList(true)">
 						
-						<!-- 身份複選 -->
 						<div class="relative flex-1 min-w-[130px]" id="ms-wrap-role">
 							<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'role')">
 								<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-role">所有身份</span>
@@ -343,7 +382,6 @@
 							</div>
 						</div>
 
-						<!-- 年度複選 -->
 						<div class="relative flex-1 min-w-[130px]" id="ms-wrap-year">
 							<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'year')">
 								<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-year">所有年度</span>
@@ -353,7 +391,6 @@
 							</div>
 						</div>
 
-						<!-- 科別複選 -->
 						<div class="relative flex-1 min-w-[130px]" id="ms-wrap-dept">
 							<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'dept')">
 								<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-dept">所有科別</span>
@@ -363,7 +400,6 @@
 							</div>
 						</div>
 
-						<!-- 畢業狀態複選 -->
 						<div class="relative flex-1 min-w-[130px]" id="ms-wrap-status">
 							<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'status')">
 								<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-status">所有畢業狀態</span>
@@ -650,11 +686,11 @@
 			<div class="input-group"><label>帳號</label><input type="text" id="editUserSid"></div>
 			<div class="input-group"><label>姓名</label><input type="text" id="editUserName"></div>
 			<div class="input-group">
-				<label>入學年</label>
+				<label>入學年 (高三113、高二114、高一115)</label>
 				<select id="editUserEntryYear"><option value="未設定">未設定</option></select>
 			</div>
 			<div class="input-group">
-				<label>科別-班級</label>
+				<label>科別-班級 (數字代表目前班級)</label>
 				<select id="editUserEntryDept"><option value="未設定">未設定</option></select>
 			</div>
 			<div class="input-group">
@@ -931,7 +967,6 @@
 	</div>
 
 	<script>
-		// 切換登入與註冊模式 (解決 switchAuthMode is not defined 錯誤)
 		window.switchAuthMode = function() {
 			const regFields = document.getElementById('regFields');
 			const authTitle = document.getElementById('authTitle');
@@ -951,7 +986,7 @@
 				if (authBtn) authBtn.innerText = '確認登入';
 			}
 		};
-const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
+		const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
 			SB_KEY = "sb_publishable_ojrdIB0TeCnl8eZXbzWsdQ_2W3JB3xT",
 			EMAIL_DOMAIN = "@sshs.tc.edu.tw",
 			YEAR_OPTIONS = ["113", "114"],
@@ -1567,7 +1602,7 @@ const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
 			await refreshAuditLogs();
 		};
 
-window.refreshAuditLogs = async function() {
+		window.refreshAuditLogs = async function() {
 			if (!dbClient) return;
 			const listBody = document.getElementById('auditLogListBody');
 			if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">🔄 正在載入完整稽核日誌（分批讀取中）...</td></tr>`;
@@ -1578,7 +1613,6 @@ window.refreshAuditLogs = async function() {
 			let hasMore = true;
 
 			try {
-				// 自動分批撈取，完全不受 Supabase 單次 1000 筆上限影響
 				while (hasMore) {
 					const { data, error } = await dbClient
 						.from('audit_logs')
@@ -1591,9 +1625,9 @@ window.refreshAuditLogs = async function() {
 					if (data && data.length > 0) {
 						allLogs = allLogs.concat(data);
 						if (data.length < step) {
-							hasMore = false; // 已取完全部資料
+							hasMore = false;
 						} else {
-							from += step;    // 繼續下一批 1000 筆
+							from += step;
 						}
 					} else {
 						hasMore = false;
@@ -1887,7 +1921,7 @@ window.refreshAuditLogs = async function() {
 				if (!el) return;
 				const currentVal = el.value;
 				let html = '';
-				if (id === 'authEntryYear') html += '<option value="">請選擇入學年(高三113、高二114、高一115)</option>';
+				if (id === 'authEntryYear') html += '<option value="">請選擇入學年</option>';
 				if (id === 'editUserEntryYear') html += '<option value="未設定">未設定</option>';
 				YEAR_OPTIONS.forEach(y => { html += `<option value="${y}">${y} 學年度</option>`; });
 				el.innerHTML = html;
@@ -1900,7 +1934,7 @@ window.refreshAuditLogs = async function() {
 				if (!el) return;
 				const currentVal = el.value;
 				let html = '';
-				if (id === 'authEntryDept') html += '<option value="">請選擇科別(數字是現在的班級)</option>';
+				if (id === 'authEntryDept') html += '<option value="">請選擇科別-班級</option>';
 				if (id === 'editUserEntryDept') html += '<option value="未設定">未設定</option>';
 				DEPT_OPTIONS.forEach(d => { html += `<option value="${d}">${d}</option>`; });
 				el.innerHTML = html;
@@ -2422,7 +2456,7 @@ window.refreshAuditLogs = async function() {
 				if (isReg) {
 					const name = document.getElementById('authName').value.trim(), entryYear = document.getElementById('authEntryYear').value, entryDept = document.getElementById('authEntryDept').value;
 					if (!name) throw new Error("請輸入姓名");
-					if (!entryYear || !entryDept || entryYear === '請選擇入學年(高三113、高二114、高一115)' || entryDept === '請選擇科別(數字是現在的班級)') throw new Error("請務必選擇正確的入學年與科別！");
+					if (!entryYear || !entryDept || entryYear.includes('請選擇') || entryDept.includes('請選擇')) throw new Error("請務必選擇正確的入學年與科別！");
 					const matchedTutor = await findTutorByYearDept(entryYear, entryDept);
 					const { data: signUpData, error } = await dbClient.auth.signUp({
 						email, password: pwd, options: { data: { full_name: name, student_id: cleanSid, role: 'student', tutor: matchedTutor, entry_year: entryYear, entry_dept: entryDept } }
@@ -2595,17 +2629,18 @@ window.refreshAuditLogs = async function() {
 					if (unsetBox) unsetBox.classList.add('hidden');
 				}
 
-				// 一般教師（未設定年度班級）無班級資料按鈕
-				const isTeacherUnset = (role === 'teacher' && (myYear === '未設定' || myDept === '未設定'));
-				if (isTeacherUnset) { 
-					saveBtn.style.display = 'none'; 
-					if (isViewingClassList) {
-						isViewingClassList = false;
-						window.location.hash = '#dashboard';
+				if (role === 'admin') {
+					saveBtn.innerText = '資料管理';
+					saveBtn.style.display = '';
+				} else if (role === 'teacher') {
+					if (myYear !== '未設定' && myDept !== '未設定') {
+						saveBtn.innerText = '班級資料';
+						saveBtn.style.display = '';
+					} else {
+						saveBtn.style.display = 'none';
 					}
 				} else {
-					saveBtn.innerText = role === 'admin' ? '管理後台' : (role === 'teacher' ? '班級資料' : '雲端存檔');
-					saveBtn.style.display = '';
+					saveBtn.style.display = 'none';
 				}
 
 				renderUserStatusDisplay();
@@ -2718,7 +2753,6 @@ window.refreshAuditLogs = async function() {
 			checks['_view_year'] = newViewYr;
 			checks['_view_dept'] = newViewDept;
 
-			// 修正點：如果是被鎖定的版本(學生/導師)，就不視為「切換版本」操作
 			const isVersionChanged = targetRole !== 'student' && !version.locked && (oldViewYr !== '未設定' && newViewYr !== '未設定') && (oldViewYr !== newViewYr || oldViewDept !== newViewDept);
 
 			const res = calculateStats();
@@ -3505,16 +3539,17 @@ window.refreshAuditLogs = async function() {
 
 		window.handleMainAction = function() {
 			const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
-			if (role === 'student') saveToCloud();
-			else {
+			if (role === 'admin' || role === 'teacher') {
 				if (role === 'teacher') {
 					const myYear = userDBRecord?.entry_year || currentUser.user_metadata?.entry_year || '未設定';
 					const myDept = userDBRecord?.entry_dept || currentUser.user_metadata?.entry_dept || '未設定';
 					if (myYear === '未設定' || myDept === '未設定') {
-						showMsg("您尚未設定負責的班級年度與科別，無法檢視班級資料！", "error"); return;
+						showMsg("您尚未設定負責的班級年度與科別，無法檢視班級資料！", "error");
+						return;
 					}
 				}
-				isViewingClassList = true; editingStudentId = null; 
+				isViewingClassList = true;
+				editingStudentId = null; 
 				scrollToTop();
 				updateUI();
 			}
