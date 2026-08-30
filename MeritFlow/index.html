@@ -214,7 +214,7 @@
       <div class="p-4 border-b flex justify-between items-center bg-slate-50">
         <div>
           <h3 class="text-base font-bold text-slate-900">👥 點選學生名單</h3>
-          <p class="text-xs text-slate-500">可依班級快速篩選，或直接搜尋姓名與學號</p>
+          <p class="text-xs text-slate-500">已全量載入全校學生名冊（共 <span id="totalStudentsCount" class="font-bold text-blue-600">0</span> 人）</p>
         </div>
         <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
@@ -442,10 +442,39 @@
       loadRecords();
     }
 
-    // ================= 學生名冊載入與選取彈窗模組 =================
+    // ================= 分頁抓取全量學生名冊 (突破 1000 筆限制) =================
     async function loadStudents() {
-      const { data } = await sb.from('students').select('*').order('class_name').order('seat_no');
-      allStudents = data || [];
+      let allData = [];
+      let from = 0;
+      const step = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await sb
+          .from('students')
+          .select('*')
+          .order('class_name')
+          .order('seat_no')
+          .range(from, from + step - 1);
+
+        if (error) {
+          console.error('載入學生失敗:', error);
+          break;
+        }
+
+        if (data && data.length > 0) {
+          allData = allData.concat(data);
+          from += step;
+          if (data.length < step) {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      allStudents = allData;
+      document.getElementById('totalStudentsCount').innerText = allStudents.length;
       populateClassFilter();
     }
 
@@ -576,7 +605,7 @@
       renderSelectedChips();
     }
 
-    // ================= 批次匯入模組 =================
+    // ================= 批次匯入模組 (分批 Upsert) =================
     async function importStudents() {
       const fileInput = document.getElementById('studentFileInput');
       if (!fileInput.files.length) return alert('請先選擇學生名冊檔案');
@@ -598,8 +627,13 @@
             return alert('未解析到有效學生名冊！請確認 Excel 包含「班級、座號、姓名、學號」等標題。');
           }
 
-          const { error } = await sb.from('students').upsert(list, { onConflict: 'student_no' });
-          if (error) throw error;
+          // 每次 500 筆分批寫入 Supabase，避免 payload 過大超時
+          const chunkSize = 500;
+          for (let i = 0; i < list.length; i += chunkSize) {
+            const chunk = list.slice(i, i + chunkSize);
+            const { error } = await sb.from('students').upsert(chunk, { onConflict: 'student_no' });
+            if (error) throw error;
+          }
 
           alert(`✅ 成功匯入/更新 ${list.length} 筆學生名冊！`);
           fileInput.value = '';
@@ -749,15 +783,36 @@
       }
     });
 
-    // ================= 審核清單模組 =================
+    // ================= 分頁抓取全量審核紀錄 =================
     async function loadRecords() {
-      const { data } = await sb
-        .from('merit_records')
-        .select(`*, merit_rules(level, points, description, legacy_code)`)
-        .order('created_at', { ascending: false });
+      let allRecords = [];
+      let from = 0;
+      const step = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await sb
+          .from('merit_records')
+          .select(`*, merit_rules(level, points, description, legacy_code)`)
+          .order('created_at', { ascending: false })
+          .range(from, from + step - 1);
+
+        if (error) {
+          console.error('載入紀錄失敗:', error);
+          break;
+        }
+
+        if (data && data.length > 0) {
+          allRecords = allRecords.concat(data);
+          from += step;
+          if (data.length < step) hasMore = false;
+        } else {
+          hasMore = false;
+        }
+      }
 
       const tbody = document.getElementById('recordsTableBody');
-      tbody.innerHTML = (data || []).map(r => `
+      tbody.innerHTML = allRecords.map(r => `
         <tr class="hover:bg-slate-50 transition">
           <td class="p-3 font-mono font-bold text-slate-800">${r.student_no}</td>
           <td class="p-3"><span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">${r.category}</span></td>
