@@ -40,15 +40,16 @@
         <button id="tabBtnMenu" onclick="switchTab('menu')" class="px-3 py-1.5 rounded-lg transition bg-white text-blue-700 shadow-sm">
           📑 獎懲提報
         </button>
-        <!-- 一般教師顯示「我的申請紀錄」，管理員顯示「案件追蹤與審核」 -->
         <button id="tabBtnRecords" onclick="switchTab('records')" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">
-          📋 我的申請紀錄
+          📋 案件追蹤
         </button>
+        <!-- 只有三位系統管理員 (admin, t119, t277) 才會顯示此按鈕 -->
         <button id="tabBtnAdmin" onclick="switchTab('admin')" class="hidden px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">
           ⚙️ 管理控制台
         </button>
       </nav>
 
+      <!-- 管理後台專屬入口按鈕 -->
       <button id="btnOpenAdminModal" onclick="openAdminModal()" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1 shadow-sm">
         🔒 管理後台登入
       </button>
@@ -95,7 +96,7 @@
       </form>
     </div>
 
-    <!-- ================= 分頁 1：獎懲提報模式 ================= -->
+    <!-- ================= 分頁 1：獎懲提報模式 (全體教職員) ================= -->
     <div id="tabContentMenu" class="tab-pane hidden space-y-4">
       
       <!-- 日期與申請人狀態列 -->
@@ -187,7 +188,7 @@
       </section>
     </div>
 
-    <!-- ================= 分頁 3：管理控制台 (僅 訓育組長、學務處幹事、管理員 可見) ================= -->
+    <!-- ================= 分頁 3：管理控制台 (只有三位系統管理員 admin, t119, t277 可見) ================= -->
     <div id="tabContentAdmin" class="tab-pane hidden space-y-5">
       
       <!-- 統計資訊卡片 -->
@@ -211,9 +212,9 @@
         <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3 gap-2">
           <div>
             <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">⚙️ 基礎名冊與法規代碼維護</h2>
-            <p class="text-xs text-slate-500 mt-0.5">支援 Excel / CSV 檔案快速覆蓋與更新</p>
+            <p class="text-xs text-slate-500 mt-0.5">三位系統管理員專屬權限：支援 Excel / CSV 檔案快速批次匯入</p>
           </div>
-          <span class="text-xs bg-purple-50 text-purple-700 font-medium px-2.5 py-1 rounded-md border border-purple-100">後台控制台</span>
+          <span class="text-xs bg-purple-50 text-purple-700 font-medium px-2.5 py-1 rounded-md border border-purple-100">管理端控制台</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
@@ -459,7 +460,7 @@
     let selectedStudentSet = new Set();
     let currentApplicationNo = '';
 
-    // 三者皆統一為最高「系統管理員」權限
+    // 只有這三位具備系統管理員與管理控制台權限
     const ADMIN_STAFF_NOS = ['admin', 't119', 't277'];
 
     const roleMap = {
@@ -488,6 +489,12 @@
 
     // ================= 分頁（Tab）切換控制器 =================
     function switchTab(tabKey) {
+      // 權限防護：非三位系統管理員無法開啟 admin 控制台
+      if (tabKey === 'admin' && currentStaff?.role !== 'ADMIN') {
+        alert('權限不足：管理控制台僅限系統管理員、學務處幹事與訓育組長存取！');
+        return;
+      }
+
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
 
       const btnMenu = document.getElementById('tabBtnMenu');
@@ -495,7 +502,7 @@
       const btnAdmin = document.getElementById('tabBtnAdmin');
 
       [btnMenu, btnRecords, btnAdmin].forEach(b => {
-        b.className = 'px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900';
+        if (b) b.className = 'px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900';
       });
 
       if (tabKey === 'menu') {
@@ -529,6 +536,7 @@
       document.getElementById('adminLoginForm').reset();
     }
 
+    // 管理員密碼驗證登入
     document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const account = document.getElementById('adminAccount').value.trim();
@@ -550,6 +558,7 @@
       }
     });
 
+    // 一般教職員免密碼登入
     document.getElementById('teacherLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('teacherLoginBtn');
@@ -579,6 +588,7 @@
         return;
       }
 
+      // 只有 admin, t119, t277 身分一律設為 ADMIN (系統管理員)
       const isAdminUser = ADMIN_STAFF_NOS.includes(data.staff_no);
 
       currentStaff = {
@@ -627,7 +637,7 @@
       const recordsSub = document.getElementById('recordsSectionSub');
 
       if (currentStaff.role === 'ADMIN') {
-        // 管理員：看全校、顯示管理控制台、顯示匯出按鈕
+        // 三位管理員：看全校、顯示管理控制台、顯示匯出按鈕
         btnRecords.innerText = '📋 全校案件追蹤與審核';
         btnRecords.classList.remove('hidden');
         btnAdmin.classList.remove('hidden');
@@ -735,7 +745,7 @@
         clearSelectedStudents();
         currentApplicationNo = '';
         loadRecords();
-        switchTab('records'); // 送出後自動切換至申請紀錄分頁
+        switchTab('records');
       }
     });
 
@@ -1015,7 +1025,7 @@
           .select(`*, merit_rules(level, points, description, legacy_code)`)
           .order('created_at', { ascending: false });
 
-        // 若不是系統管理員，強制只撈取該教師自己送出的資料
+        // 若非系統管理員，只撈取該教師自己送出的資料
         if (currentStaff.role !== 'ADMIN') {
           query = query.eq('proposer_name', currentStaff.name);
         }
