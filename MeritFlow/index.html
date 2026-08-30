@@ -78,10 +78,9 @@
       </form>
     </div>
 
-    <!-- 2. 主作業選單（還原 VBA 紅底青框與三種模式按鈕） -->
+    <!-- 2. 主作業選單（VBA 模式選擇） -->
     <section id="menuSection" class="hidden space-y-4">
       
-      <!-- 日期與申請人狀態列 -->
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-3">
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-slate-700">獎懲案件申請人：</span>
@@ -93,7 +92,7 @@
         </div>
       </div>
 
-      <!-- 三個作業模式卡片 (完全對齊圖片樣式與說明) -->
+      <!-- 三個作業模式卡片 -->
       <div class="space-y-4">
         
         <!-- 模式 1 -->
@@ -184,6 +183,7 @@
         <table class="w-full text-left text-sm">
           <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs">
             <tr>
+              <th class="p-3">申請單號</th>
               <th class="p-3">學號</th>
               <th class="p-3">類別</th>
               <th class="p-3">法規條款</th>
@@ -200,13 +200,15 @@
 
   </main>
 
-  <!-- 5. 【獎懲 Form】視窗（完全還原 UserForm1 視窗設計） -->
+  <!-- 5. 【獎懲 Form】視窗（UserForm1 視窗設計 + 自動生成申請單號） -->
   <div id="rewardFormModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-[#f0f0f0] rounded-lg shadow-2xl max-w-2xl w-full p-6 space-y-4 border border-slate-400">
       
-      <!-- 視窗標題列 -->
       <div class="flex justify-between items-center border-b border-slate-300 pb-2">
-        <h3 class="text-sm font-bold text-slate-900">獎懲 Form</h3>
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-bold text-slate-900">獎懲 Form</h3>
+          <span id="currentFormAppNo" class="text-xs font-mono bg-slate-200 text-slate-700 px-2 py-0.5 rounded border border-slate-300"></span>
+        </div>
         <button onclick="closeRewardFormModal()" class="text-slate-500 hover:text-slate-800 text-base font-bold">✕</button>
       </div>
 
@@ -260,17 +262,17 @@
           </div>
         </div>
 
-        <!-- 開始點選獎懲人員按鈕 (完全還原圖中按鈕文字) -->
+        <!-- 開始點選獎懲人員按鈕 -->
         <div class="pt-2">
           <button type="button" onclick="openStudentModal()" class="w-full bg-[#e1e1e1] hover:bg-slate-300 text-slate-900 py-2 border border-slate-400 text-xs md:text-sm font-bold transition shadow-sm">
-            開始點選獎懲人員，點錯可再點一次清除（已選 <span id="formSelectedCount" class="text-blue-700">0</span> 人）
+            開始點選獎懲人員，點錯可再點一次清除（已選 <span id="formSelectedCount" class="text-blue-700 font-bold">0</span> 人）
           </button>
         </div>
 
         <!-- 送出按鈕 -->
         <div class="pt-3 flex justify-end gap-2 border-t border-slate-300">
           <button type="button" onclick="closeRewardFormModal()" class="px-4 py-1.5 text-xs text-slate-700 hover:bg-slate-200 rounded border border-slate-300">取消</button>
-          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 text-xs font-bold rounded shadow-sm">確認送出獎懲提報</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 text-xs font-bold rounded shadow-sm">送出申請單（生成單號）</button>
         </div>
 
       </form>
@@ -361,6 +363,7 @@
     let allRules = [];
     let allStudents = [];
     let selectedStudentSet = new Set();
+    let currentApplicationNo = ''; // 當前申請單號
 
     const roleMap = {
       ADMIN: { label: '系統管理員', class: 'bg-purple-100 text-purple-700' },
@@ -369,9 +372,16 @@
       TEACHER: { label: '教職員 / 導師', class: 'bg-blue-100 text-blue-700' }
     };
 
+    // ================= 申請單號產生器 =================
+    function generateApplicationNo() {
+      const now = new Date();
+      const datePart = now.toISOString().slice(0,10).replace(/-/g, '');
+      const randomPart = Math.floor(1000 + Math.random() * 9000);
+      return `APP-${datePart}-${randomPart}`;
+    }
+
     // ================= 初始化 =================
     async function init() {
-      // 預設發生日期為今日 (對應 VBA Worksheet_Activate)
       document.getElementById('eventDate').valueAsDate = new Date();
 
       const savedUser = localStorage.getItem('meritflow_staff');
@@ -416,7 +426,7 @@
       }
     });
 
-    // 一般教職員免密碼輸入編號登入
+    // 一般教職員免密碼登入
     document.getElementById('teacherLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('teacherLoginBtn');
@@ -512,7 +522,7 @@
       loadRecords();
     }
 
-    // ================= VBA 點選模式判斷邏輯 (完全對齊 CommandButton1~3) =================
+    // ================= VBA 點選模式邏輯 =================
     function clickMode(modeNumber) {
       const d = document.getElementById('eventDate').value;
       if (!d) {
@@ -533,15 +543,13 @@
       }
 
       currentMode = modeNumber;
+      currentApplicationNo = generateApplicationNo(); // 生成本次申請單號
 
       if (modeNumber === 1) {
-        // 模式1：事由原因、獎懲種類均相同 -> 開啟 UserForm1
         openRewardFormModal();
       } else if (modeNumber === 2) {
-        // 模式2：同一事件，但獎懲種類不同 -> 開啟名單直接點選
         openStudentModal();
       } else if (modeNumber === 3) {
-        // 模式3：期末幹部／小老師獎懲
         openRewardFormModal();
         document.getElementById('formReason').value = '擔任班級幹部／學科小老師表現優良';
       }
@@ -549,6 +557,8 @@
 
     // ================= 獎懲 Form Modal 邏輯 =================
     function openRewardFormModal() {
+      if (!currentApplicationNo) currentApplicationNo = generateApplicationNo();
+      document.getElementById('currentFormAppNo').innerText = `申請單號：${currentApplicationNo}`;
       document.getElementById('rewardFormModal').classList.remove('hidden');
       renderFormSelectedChips();
     }
@@ -576,7 +586,7 @@
       }
     }
 
-    // 送出獎懲案件
+    // 表單送出（共用同一申請單號）
     document.getElementById('vbaRewardForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const location = document.getElementById('formLocation').value.trim();
@@ -592,7 +602,9 @@
       const articleNum = parseInt(ruleCode.split('-')[0]) || 6;
       const customReasonText = location ? `[地點:${location}] ${reason}` : reason;
 
+      // 所有同批送出的學生皆附帶相同 application_no
       const payload = studentList.map(no => ({
+        application_no: currentApplicationNo,
         student_no: no,
         rule_code: ruleCode,
         article_num: articleNum,
@@ -606,9 +618,10 @@
       if (error) {
         alert(`提報失敗：${error.message}`);
       } else {
-        alert(`✅ 成功提報 ${payload.length} 筆獎懲紀錄！已送交學務處幹事初審。`);
+        alert(`✅ 申請單送出成功！\n\n申請單號：${currentApplicationNo}\n共包含 ${payload.length} 位學生紀錄，已送交學務處幹事初審。`);
         closeRewardFormModal();
         clearSelectedStudents();
+        currentApplicationNo = '';
         loadRecords();
       }
     });
@@ -878,7 +891,7 @@
       select.innerHTML = optionsHtml;
     }
 
-    // ================= 分頁抓取全量審核紀錄 =================
+    // ================= 分頁抓取全量審核紀錄（含單號呈現） =================
     async function loadRecords() {
       let allRecords = [];
       let from = 0;
@@ -906,6 +919,7 @@
       const tbody = document.getElementById('recordsTableBody');
       tbody.innerHTML = allRecords.map(r => `
         <tr class="hover:bg-slate-50 transition">
+          <td class="p-3 font-mono text-xs text-blue-700 font-bold">${r.application_no || '-'}</td>
           <td class="p-3 font-mono font-bold text-slate-800">${r.student_no}</td>
           <td class="p-3"><span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">${r.category}</span></td>
           <td class="p-3 font-medium">[${r.rule_code}] ${r.merit_rules?.level || ''} (${r.merit_rules?.points || 1}次)</td>
@@ -947,12 +961,13 @@
       loadRecords();
     }
 
-    // ================= 匯出報表模組 =================
+    // ================= 匯出報表模組（包含單號） =================
     async function exportExcelForClerk() {
       const { data } = await sb.from('merit_records').select(`*, merit_rules(*)`).eq('status', 'APPROVED');
       if (!data || !data.length) return alert('尚無已核准之獎懲紀錄');
 
       const exportRows = data.map(r => ({
+        '申請單號': r.application_no || '',
         '學號': r.student_no,
         '條款代碼': r.rule_code,
         '巨耀代碼': r.merit_rules?.legacy_code || '',
@@ -973,6 +988,7 @@
       if (!data || !data.length) return alert('尚無已核准之幹部小老師名單');
 
       const exportRows = data.map(r => ({
+        '申請單號': r.application_no || '',
         '學號': r.student_no,
         '幹部類別': r.category === 'CADRE' ? '班級幹部' : '學科小老師',
         '擔任職務/事由': r.custom_reason || '',
