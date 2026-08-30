@@ -176,7 +176,7 @@
       </section>
     </div>
 
-    <!-- ================= 分頁 3：管理控制台 ================= -->
+    <!-- ================= 分頁 3：管理控制台 (只有三位系統管理員 admin, t119, t277 可見) ================= -->
     <div id="tabContentAdmin" class="tab-pane hidden space-y-6">
       
       <!-- 統計數據卡片 -->
@@ -190,7 +190,7 @@
           <div id="adminStatRules" class="text-2xl font-bold text-slate-900 mt-1">0 條</div>
         </div>
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-          <div class="text-xs font-semibold text-slate-400">全校教職員人數</div>
+          <div class="text-xs font-semibold text-slate-400">全校教師人數</div>
           <div id="adminStatStaffs" class="text-2xl font-bold text-slate-900 mt-1">0 人</div>
         </div>
       </div>
@@ -234,7 +234,7 @@
             <div class="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-bold gap-1 ml-2">
               <button id="adminDataTabStudents" onclick="switchAdminDataTab('students')" class="px-3 py-1 rounded-lg bg-white text-blue-700 shadow-sm transition">🧑‍🎓 學生名冊</button>
               <button id="adminDataTabRules" onclick="switchAdminDataTab('rules')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">📜 獎懲法規</button>
-              <button id="adminDataTabStaffs" onclick="switchAdminDataTab('staffs')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">👨‍🏫 教職員名冊</button>
+              <button id="adminDataTabStaffs" onclick="switchAdminDataTab('staffs')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">👨‍🏫 教師名冊</button>
             </div>
           </div>
 
@@ -523,11 +523,12 @@
     let currentAdminDataTab = 'students';
     let currentEditingItem = null;
 
+    // 系統中僅這三位具備系統管理員與管理控制台權限
     const ADMIN_STAFF_NOS = ['admin', 't119', 't277'];
 
     const roleMap = {
       ADMIN: { label: '系統管理員', class: 'bg-purple-100 text-purple-700' },
-      TEACHER: { label: '教職員 / 導師', class: 'bg-blue-100 text-blue-700' }
+      TEACHER: { label: '教師', class: 'bg-blue-100 text-blue-700' }
     };
 
     function generateApplicationNo() {
@@ -585,7 +586,6 @@
       }
     }
 
-    // 全面 Null-safe 更新統計數字
     function updateAdminStats() {
       const elStudents = document.getElementById('adminStatStudents');
       const elRules = document.getElementById('adminStatRules');
@@ -1123,6 +1123,7 @@
       updateAdminStats();
     }
 
+    // ================= 管理控制台：三大資料庫表格維護 =================
     function switchAdminDataTab(tabName) {
       currentAdminDataTab = tabName;
       ['students', 'rules', 'staffs'].forEach(t => {
@@ -1226,7 +1227,7 @@
       } else if (currentAdminDataTab === 'staffs') {
         thead.innerHTML = `
           <tr>
-            <th class="p-3">教職員編號</th>
+            <th class="p-3">教師編號</th>
             <th class="p-3">姓名</th>
             <th class="p-3">電子郵件</th>
             <th class="p-3">職務</th>
@@ -1244,7 +1245,7 @@
         }
 
         if (!list.length) {
-          tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無教職員資料</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無教師資料</td></tr>';
           return;
         }
 
@@ -1253,7 +1254,7 @@
             <td class="p-3 font-mono font-bold text-slate-800">${st.staff_no}</td>
             <td class="p-3 font-bold text-slate-900">${st.name}</td>
             <td class="p-3 font-mono text-slate-500">${st.email}</td>
-            <td class="p-3"><span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${st.job_title || '教師'}</span></td>
+            <td class="p-3"><span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium">教師</span></td>
             <td class="p-3 text-right space-x-1">
               <button onclick="openAdminEditModal('staffs', '${st.staff_no}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
               <button onclick="deleteAdminItem('staffs', '${st.staff_no}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
@@ -1267,7 +1268,7 @@
       currentEditingItem = null;
       const titleEl = document.getElementById('adminDataModalTitle');
       if (titleEl) {
-        titleEl.innerText = `➕ 新增 ${currentAdminDataTab === 'students' ? '學生' : currentAdminDataTab === 'rules' ? '條款法規' : '教職員'}`;
+        titleEl.innerText = `➕ 新增 ${currentAdminDataTab === 'students' ? '學生' : currentAdminDataTab === 'rules' ? '條款法規' : '教師'}`;
       }
       buildAdminFormFields({});
       document.getElementById('adminDataModal')?.classList.remove('hidden');
@@ -1283,7 +1284,7 @@
         if (titleEl) titleEl.innerText = `✏️ 編輯條款資料 (${keyId})`;
       } else if (type === 'staffs') {
         currentEditingItem = allStaffs.find(st => st.staff_no === keyId);
-        if (titleEl) titleEl.innerText = `✏️ 編輯教職員資料 (${keyId})`;
+        if (titleEl) titleEl.innerText = `✏️ 編輯教師資料 (${keyId})`;
       }
       buildAdminFormFields(currentEditingItem || {});
       document.getElementById('adminDataModal')?.classList.remove('hidden');
@@ -1357,7 +1358,7 @@
       } else if (currentAdminDataTab === 'staffs') {
         container.innerHTML = `
           <div>
-            <label class="block font-bold text-slate-700 mb-1">教職員編號 (帳號代碼)</label>
+            <label class="block font-bold text-slate-700 mb-1">教師編號 (帳號代碼)</label>
             <input type="text" id="field_staff_no" value="${data.staff_no || ''}" ${data.staff_no ? 'readonly class="bg-slate-100' : 'class="bg-white'} w-full border border-slate-300 rounded-lg p-2 font-mono outline-none" required>
           </div>
           <div>
@@ -1367,13 +1368,6 @@
           <div>
             <label class="block font-bold text-slate-700 mb-1">電子郵件</label>
             <input type="email" id="field_email" value="${data.email || ''}" class="w-full border border-slate-300 rounded-lg p-2 font-mono outline-none bg-white" required>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">職務類別</label>
-            <select id="field_job_title" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white">
-              <option value="教師" ${data.job_title === '教師' ? 'selected' : ''}>教師</option>
-              <option value="行政" ${data.job_title === '行政' ? 'selected' : ''}>行政</option>
-            </select>
           </div>
         `;
       }
@@ -1416,7 +1410,7 @@
             staff_no: document.getElementById('field_staff_no')?.value.trim(),
             name: document.getElementById('field_name')?.value.trim(),
             email: document.getElementById('field_email')?.value.trim(),
-            job_title: document.getElementById('field_job_title')?.value || '教師'
+            job_title: '教師' // 統一為教師
           };
           const { error } = await sb.from('staffs').upsert(payload, { onConflict: 'staff_no' });
           if (error) throw error;
@@ -1728,8 +1722,8 @@
 
     function renderStatusBadge(status) {
       switch (status) {
-        case 'PENDING_CLERK': return '<span class="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-medium">待幹事初審</span>';
-        case 'PENDING_CHIEF': return '<span class="text-xs bg-indigo-50 text-indigo-800 border border-indigo-200 px-2.5 py-0.5 rounded-full font-medium">待組長核定</span>';
+        case 'PENDING_CLERK': return '<span class="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-medium">待初審</span>';
+        case 'PENDING_CHIEF': return '<span class="text-xs bg-indigo-50 text-indigo-800 border border-indigo-200 px-2.5 py-0.5 rounded-full font-medium">待核定</span>';
         case 'APPROVED': return '<span class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full font-medium">已核准決行</span>';
         case 'REJECTED': return '<span class="text-xs bg-rose-50 text-rose-800 border border-rose-200 px-2.5 py-0.5 rounded-full font-medium">退回</span>';
         default: return status;
