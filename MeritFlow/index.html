@@ -8,6 +8,20 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    .vba-red-panel {
+      background-color: #800000;
+      border: 2px solid #00ffff;
+    }
+    .vba-btn {
+      background-color: #f0f0f0;
+      border: 2px outset #ffffff;
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+    }
+    .vba-btn:active {
+      border: 2px inset #ffffff;
+    }
+  </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
 
@@ -19,7 +33,6 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <!-- 管理後台專屬入口按鈕 -->
       <button onclick="openAdminModal()" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1 shadow-sm">
         🔒 管理後台登入
       </button>
@@ -31,13 +44,13 @@
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
+  <main class="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
 
     <!-- 1. 一般教職員快速登入 (免密碼) -->
     <div id="authCard" class="max-w-md mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-md space-y-5 border border-slate-100 mt-10">
       <div class="text-center space-y-1">
         <h2 class="text-xl font-bold text-slate-900">教職員快速進入</h2>
-        <p class="text-xs text-slate-500">教師／導師／幹事免密碼，輸入編號即可直接使用</p>
+        <p class="text-xs text-slate-500">免密碼模式：輸入編號即可直接使用系統</p>
       </div>
 
       <form id="teacherLoginForm" class="space-y-4">
@@ -65,7 +78,58 @@
       </form>
     </div>
 
-    <!-- 2. 管理後台專屬區塊 (僅 管理員 admin / 幹事 t119 / 組長 t277 可見) -->
+    <!-- 2. 主作業選單（還原 VBA 紅底青框與三種模式按鈕） -->
+    <section id="menuSection" class="hidden space-y-4">
+      
+      <!-- 日期與申請人狀態列 -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-700">獎懲案件申請人：</span>
+          <span id="displayProposer" class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded border border-blue-200"></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-slate-700">獎懲案件發生日期：</label>
+          <input type="date" id="eventDate" class="border border-slate-300 text-xs rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+        </div>
+      </div>
+
+      <!-- 三個作業模式卡片 (完全對齊圖片樣式與說明) -->
+      <div class="space-y-4">
+        
+        <!-- 模式 1 -->
+        <div class="vba-red-panel p-4 rounded-xl shadow-md cursor-pointer hover:opacity-95 transition" onclick="clickMode(1)">
+          <div class="vba-btn text-center py-2.5 px-4 rounded text-slate-900 font-bold text-base md:text-lg">
+            模式 1：事由原因、獎懲種類均相同
+          </div>
+          <div class="text-center text-lime-300 font-bold text-sm md:text-base mt-2 tracking-wide">
+            （受獎懲人員之事由、適用之獎懲條款均相同）
+          </div>
+        </div>
+
+        <!-- 模式 2 -->
+        <div class="vba-red-panel p-4 rounded-xl shadow-md cursor-pointer hover:opacity-95 transition" onclick="clickMode(2)">
+          <div class="vba-btn text-center py-2.5 px-4 rounded text-slate-900 font-bold text-base md:text-lg">
+            模式 2：同一事件，但獎懲種類不同
+          </div>
+          <div class="text-center text-lime-300 font-bold text-sm md:text-base mt-2 tracking-wide">
+            （雖為同一事件，但因程度差別，獎懲種類不同）
+          </div>
+        </div>
+
+        <!-- 模式 3 -->
+        <div class="vba-red-panel p-4 rounded-xl shadow-md cursor-pointer hover:opacity-95 transition" onclick="clickMode(3)">
+          <div class="vba-btn text-center py-2.5 px-4 rounded text-slate-900 font-bold text-base md:text-lg">
+            模式 3：期末 幹部／小老師 獎懲
+          </div>
+          <div class="text-center text-lime-300 font-bold text-sm md:text-base mt-2 tracking-wide">
+            （每學期期末導師使用）
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. 管理後台專屬區塊 (僅 管理員 / 幹事 / 組長 可見) -->
     <section id="importSection" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <div>
@@ -76,7 +140,6 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-        <!-- 學生名冊匯入 (班級、座號、姓名、學號) -->
         <div class="p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 space-y-2.5">
           <div class="flex justify-between items-center">
             <span class="text-sm font-semibold text-slate-800">1. 全校學生名冊匯入</span>
@@ -86,7 +149,6 @@
           <button onclick="importStudents()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-medium transition shadow-sm">解析並匯入學生名冊</button>
         </div>
 
-        <!-- 獎懲法規匯入 -->
         <div class="p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 space-y-2.5">
           <div class="flex justify-between items-center">
             <span class="text-sm font-semibold text-slate-800">2. 獎懲條款代碼匯入</span>
@@ -98,70 +160,6 @@
       </div>
     </section>
 
-    <!-- 3. 獎懲與幹部建議提報 (全體教職員) -->
-    <section id="proposeSection" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-5">
-      <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3 gap-2">
-        <div>
-          <h2 class="text-lg font-bold text-slate-900">📝 提報學生獎懲 / 幹部小老師建議</h2>
-          <p class="text-xs text-slate-500">提報後將自動送交學務處李明潔幹事 (t119) 進行初審</p>
-        </div>
-        <div>
-          <select id="proposalType" class="border border-slate-300 text-xs rounded-lg px-3 py-1.5 font-medium bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="GENERAL">一般獎懲建議</option>
-            <option value="CADRE">班級幹部獎勵建議</option>
-            <option value="ASSISTANT">學科小老師獎勵建議</option>
-          </select>
-        </div>
-      </div>
-
-      <form id="proposeForm" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- 條款代碼 (按條號與款號自然排序) -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">獎懲法規條款代碼</label>
-            <select id="ruleSelect" onchange="onRuleChanged()" required class="w-full border border-slate-300 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-              <option value="">載入法規中...</option>
-            </select>
-          </div>
-
-          <!-- 邊界判定事實預覽 (<=8 嘉獎/小功, >8 警告/小過) -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">系統判定獎懲事實（以第8條為界）</label>
-            <div id="ruleFactPreview" class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-500 min-h-[42px] flex items-center">
-              請先選擇條款代碼
-            </div>
-          </div>
-        </div>
-
-        <!-- 學生點選與已選標籤區塊 (支援多人選取) -->
-        <div class="space-y-2">
-          <div class="flex justify-between items-center">
-            <label class="block text-xs font-semibold text-slate-700">
-              對象學生名單（已選 <span id="selectedCount" class="text-blue-600 font-bold">0</span> 人）
-            </label>
-            <button type="button" onclick="openStudentModal()" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1">
-              👥 前往點選學生
-            </button>
-          </div>
-
-          <!-- 已選學生展示框 -->
-          <div id="selectedStudentChips" class="min-h-[52px] p-2 bg-slate-50 border border-slate-200 rounded-lg flex flex-wrap gap-1.5 items-center">
-            <span class="text-xs text-slate-400 italic">尚未選取任何學生，請點擊上方按鈕前往點選。</span>
-          </div>
-        </div>
-
-        <!-- 補充事由說明 -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">具體事由補充 / 職務備註</label>
-          <input type="text" id="customReason" placeholder="例：擔任 115-1 學期國文小老師認真負責 / 協助校慶公差表現優異" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-
-        <button type="submit" id="submitProposalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">
-          送出建議表
-        </button>
-      </form>
-    </section>
-
     <!-- 4. 獎懲審核與名冊匯出 -->
     <section id="recordsSection" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
       <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-3">
@@ -170,11 +168,9 @@
           <p class="text-xs text-slate-500">依據使用者身份顯示對應之審核與匯出按鈕</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <!-- 幹事專屬匯出 -->
           <button id="btnExportClerk" onclick="exportExcelForClerk()" class="hidden text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm">
             📥 匯出學務處獎懲清冊 (Excel)
           </button>
-          <!-- 組長專屬匯出 -->
           <button id="btnExportChief" onclick="exportPortfolioForChief()" class="hidden text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm">
             📥 匯出學檔系統班級幹部 (Excel)
           </button>
@@ -197,69 +193,137 @@
               <th class="p-3 text-right">操作</th>
             </tr>
           </thead>
-          <tbody id="recordsTableBody" class="divide-y divide-slate-100">
-            <!-- 動態渲染清單 -->
-          </tbody>
+          <tbody id="recordsTableBody" class="divide-y divide-slate-100"></tbody>
         </table>
       </div>
     </section>
 
   </main>
 
-  <!-- 5. 互動式學生選取器彈窗 (Student Selector Modal) -->
+  <!-- 5. 【獎懲 Form】視窗（完全還原 UserForm1 視窗設計） -->
+  <div id="rewardFormModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#f0f0f0] rounded-lg shadow-2xl max-w-2xl w-full p-6 space-y-4 border border-slate-400">
+      
+      <!-- 視窗標題列 -->
+      <div class="flex justify-between items-center border-b border-slate-300 pb-2">
+        <h3 class="text-sm font-bold text-slate-900">獎懲 Form</h3>
+        <button onclick="closeRewardFormModal()" class="text-slate-500 hover:text-slate-800 text-base font-bold">✕</button>
+      </div>
+
+      <form id="vbaRewardForm" class="space-y-3 text-xs md:text-sm">
+        
+        <!-- 地點 -->
+        <div class="flex items-center gap-3">
+          <label class="w-20 font-bold text-slate-800 text-right">地點</label>
+          <input type="text" id="formLocation" class="w-48 border border-slate-400 bg-white px-2 py-1 outline-none focus:border-blue-600">
+        </div>
+
+        <!-- 事由 -->
+        <div class="flex items-center gap-3">
+          <label class="w-20 font-bold text-slate-800 text-right">事由</label>
+          <input type="text" id="formReason" required class="flex-1 border border-slate-400 bg-white px-2 py-1 outline-none focus:border-blue-600">
+        </div>
+
+        <!-- 獎懲種類 與 次數 -->
+        <div class="flex items-center gap-3">
+          <label class="w-20 font-bold text-slate-800 text-right">獎懲種類</label>
+          <select id="formLevel" onchange="onFormLevelChanged()" class="w-32 border border-slate-400 bg-white px-2 py-1 outline-none font-medium">
+            <option value="嘉獎">嘉獎</option>
+            <option value="小功">小功</option>
+            <option value="大功">大功</option>
+            <option value="警告">警告</option>
+            <option value="小過">小過</option>
+            <option value="大過">大過</option>
+          </select>
+
+          <label class="font-bold text-slate-800 ml-2">次數</label>
+          <select id="formPoints" class="w-20 border border-slate-400 bg-white px-2 py-1 outline-none font-medium">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+
+        <!-- 獎懲條款 -->
+        <div class="flex items-center gap-3">
+          <label class="w-20 font-bold text-slate-800 text-right">獎懲條款</label>
+          <select id="formRuleSelect" onchange="onFormRuleChanged()" required class="flex-1 border border-slate-400 bg-white px-2 py-1 outline-none">
+            <option value="">請選擇條款...</option>
+          </select>
+        </div>
+
+        <!-- 已選學生預覽 -->
+        <div class="flex items-start gap-3 pt-1">
+          <label class="w-20 font-bold text-slate-800 text-right mt-1">對象名冊</label>
+          <div id="formStudentChips" class="flex-1 min-h-[40px] p-2 bg-white border border-slate-300 rounded flex flex-wrap gap-1 items-center">
+            <span class="text-slate-400 text-xs italic">尚未點選人員</span>
+          </div>
+        </div>
+
+        <!-- 開始點選獎懲人員按鈕 (完全還原圖中按鈕文字) -->
+        <div class="pt-2">
+          <button type="button" onclick="openStudentModal()" class="w-full bg-[#e1e1e1] hover:bg-slate-300 text-slate-900 py-2 border border-slate-400 text-xs md:text-sm font-bold transition shadow-sm">
+            開始點選獎懲人員，點錯可再點一次清除（已選 <span id="formSelectedCount" class="text-blue-700">0</span> 人）
+          </button>
+        </div>
+
+        <!-- 送出按鈕 -->
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-300">
+          <button type="button" onclick="closeRewardFormModal()" class="px-4 py-1.5 text-xs text-slate-700 hover:bg-slate-200 rounded border border-slate-300">取消</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 text-xs font-bold rounded shadow-sm">確認送出獎懲提報</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. 互動式學生選取器彈窗 (Student Selector Modal) -->
   <div id="studentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
       
-      <!-- 彈窗頂部 -->
       <div class="p-4 border-b flex justify-between items-center bg-slate-50">
         <div>
-          <h3 class="text-base font-bold text-slate-900">👥 點選學生名單</h3>
+          <h3 class="text-base font-bold text-slate-900">👥 點選學生名單（點錯可再點一次清除）</h3>
           <p class="text-xs text-slate-500">已全量載入全校學生名冊（共 <span id="totalStudentsCount" class="font-bold text-blue-600">0</span> 人）</p>
         </div>
         <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
 
-      <!-- 篩選與搜尋工具列 -->
       <div class="p-4 border-b grid grid-cols-1 md:grid-cols-3 gap-3 bg-white">
-        <!-- 班級下拉 -->
         <div>
           <select id="modalClassFilter" onchange="renderStudentGrid()" class="w-full border border-slate-300 text-xs rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500 font-medium">
             <option value="">所有班級</option>
           </select>
         </div>
 
-        <!-- 關鍵字搜尋 -->
         <div>
           <input type="text" id="modalStudentSearch" oninput="renderStudentGrid()" placeholder="搜尋姓名 / 學號 / 座號" class="w-full border border-slate-300 text-xs rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500">
         </div>
 
-        <!-- 全選控制 -->
         <div class="flex items-center justify-end gap-2">
           <button type="button" onclick="selectAllFiltered(true)" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium transition">全選當前</button>
           <button type="button" onclick="selectAllFiltered(false)" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium transition">取消當前</button>
         </div>
       </div>
 
-      <!-- 學生卡片選取區 -->
       <div id="studentGrid" class="p-4 overflow-y-auto flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 bg-slate-50">
         <div class="col-span-full text-center py-10 text-xs text-slate-400">載入學生名冊中...</div>
       </div>
 
-      <!-- 彈窗底部狀態列 -->
       <div class="p-4 border-t bg-white flex justify-between items-center">
         <span class="text-xs text-slate-600 font-medium">
           已選取 <span id="modalSelectedCount" class="text-blue-600 font-bold">0</span> 位學生
         </span>
         <div class="flex gap-2">
           <button type="button" onclick="clearSelectedStudents()" class="px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg transition font-medium">清空所有</button>
-          <button type="button" onclick="confirmStudentSelection()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-1.5 rounded-lg text-xs font-medium transition shadow-sm">確認完成</button>
+          <button type="button" onclick="confirmStudentSelection()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-1.5 rounded-lg text-xs font-medium transition shadow-sm">完成點選</button>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- 6. 管理後台帳號密碼驗證視窗 (Modal) -->
+  <!-- 7. 管理後台帳號密碼驗證視窗 (Modal) -->
   <div id="adminModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4 border border-slate-100">
       <div class="flex justify-between items-center">
@@ -293,9 +357,10 @@
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentStaff = null;
+    let currentMode = 1;
     let allRules = [];
     let allStudents = [];
-    let selectedStudentSet = new Set(); // 存放已選學號
+    let selectedStudentSet = new Set();
 
     const roleMap = {
       ADMIN: { label: '系統管理員', class: 'bg-purple-100 text-purple-700' },
@@ -306,6 +371,9 @@
 
     // ================= 初始化 =================
     async function init() {
+      // 預設發生日期為今日 (對應 VBA Worksheet_Activate)
+      document.getElementById('eventDate').valueAsDate = new Date();
+
       const savedUser = localStorage.getItem('meritflow_staff');
       if (savedUser) {
         currentStaff = JSON.parse(savedUser);
@@ -405,8 +473,8 @@
       document.getElementById('authCard').classList.remove('hidden');
       document.getElementById('userSection').classList.add('hidden');
       document.getElementById('roleBadge').classList.add('hidden');
+      document.getElementById('menuSection').classList.add('hidden');
       document.getElementById('importSection').classList.add('hidden');
-      document.getElementById('proposeSection').classList.add('hidden');
       document.getElementById('recordsSection').classList.add('hidden');
     }
 
@@ -414,12 +482,15 @@
       document.getElementById('authCard').classList.add('hidden');
       document.getElementById('userSection').classList.remove('hidden');
       document.getElementById('userName').innerText = `${currentStaff.name} (${currentStaff.staff_no})`;
+      document.getElementById('displayProposer').innerText = `${currentStaff.name} (${currentStaff.staff_no})`;
 
       const badge = document.getElementById('roleBadge');
       const roleConfig = roleMap[currentStaff.role] || roleMap.TEACHER;
       badge.innerText = roleConfig.label;
       badge.className = `text-xs font-semibold px-2.5 py-0.5 rounded-full inline-block ${roleConfig.class}`;
       badge.classList.remove('hidden');
+
+      document.getElementById('menuSection').classList.remove('hidden');
 
       if (['ADMIN', 'CHIEF', 'CLERK'].includes(currentStaff.role)) {
         document.getElementById('importSection').classList.remove('hidden');
@@ -434,7 +505,6 @@
         document.getElementById('btnExportChief').classList.remove('hidden');
       }
 
-      document.getElementById('proposeSection').classList.remove('hidden');
       document.getElementById('recordsSection').classList.remove('hidden');
 
       loadRules();
@@ -442,7 +512,108 @@
       loadRecords();
     }
 
-    // ================= 分頁抓取全量學生名冊 (突破 1000 筆限制) =================
+    // ================= VBA 點選模式判斷邏輯 (完全對齊 CommandButton1~3) =================
+    function clickMode(modeNumber) {
+      const d = document.getElementById('eventDate').value;
+      if (!d) {
+        alert("您尚未輸入獎懲案件發生日期，請在上方輸入獎懲案件的發生日期！");
+        return;
+      }
+
+      const confirmDate = confirm(`獎懲案件發生日期是 ${d}\n\n是否確認？`);
+      if (!confirmDate) {
+        alert("請重新確認獎懲案件發生日期後，再重新點選模式！");
+        return;
+      }
+
+      const confirmProposer = confirm(`本獎懲案件申請人是：${currentStaff.name}\n\n是否正確？`);
+      if (!confirmProposer) {
+        alert("請切換正確身分後再執行！");
+        return;
+      }
+
+      currentMode = modeNumber;
+
+      if (modeNumber === 1) {
+        // 模式1：事由原因、獎懲種類均相同 -> 開啟 UserForm1
+        openRewardFormModal();
+      } else if (modeNumber === 2) {
+        // 模式2：同一事件，但獎懲種類不同 -> 開啟名單直接點選
+        openStudentModal();
+      } else if (modeNumber === 3) {
+        // 模式3：期末幹部／小老師獎懲
+        openRewardFormModal();
+        document.getElementById('formReason').value = '擔任班級幹部／學科小老師表現優良';
+      }
+    }
+
+    // ================= 獎懲 Form Modal 邏輯 =================
+    function openRewardFormModal() {
+      document.getElementById('rewardFormModal').classList.remove('hidden');
+      renderFormSelectedChips();
+    }
+
+    function closeRewardFormModal() {
+      document.getElementById('rewardFormModal').classList.add('hidden');
+    }
+
+    function onFormRuleChanged() {
+      const code = document.getElementById('formRuleSelect').value;
+      const rule = allRules.find(r => r.code === code);
+      if (rule) {
+        document.getElementById('formLevel').value = rule.level;
+        document.getElementById('formPoints').value = rule.points || 1;
+        document.getElementById('formReason').value = rule.description;
+      }
+    }
+
+    function onFormLevelChanged() {
+      const level = document.getElementById('formLevel').value;
+      const filtered = allRules.filter(r => r.level === level);
+      if (filtered.length > 0) {
+        document.getElementById('formRuleSelect').value = filtered[0].code;
+        document.getElementById('formReason').value = filtered[0].description;
+      }
+    }
+
+    // 送出獎懲案件
+    document.getElementById('vbaRewardForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const location = document.getElementById('formLocation').value.trim();
+      const reason = document.getElementById('formReason').value.trim();
+      const ruleCode = document.getElementById('formRuleSelect').value;
+      const studentList = Array.from(selectedStudentSet);
+
+      if (!studentList.length) {
+        return alert('請點擊下方「開始點選獎懲人員」選取至少一位學生！');
+      }
+
+      const rule = allRules.find(r => r.code === ruleCode);
+      const articleNum = parseInt(ruleCode.split('-')[0]) || 6;
+      const customReasonText = location ? `[地點:${location}] ${reason}` : reason;
+
+      const payload = studentList.map(no => ({
+        student_no: no,
+        rule_code: ruleCode,
+        article_num: articleNum,
+        category: currentMode === 3 ? 'CADRE' : 'GENERAL',
+        custom_reason: customReasonText,
+        proposer_name: currentStaff.name,
+        status: 'PENDING_CLERK'
+      }));
+
+      const { error } = await sb.from('merit_records').insert(payload);
+      if (error) {
+        alert(`提報失敗：${error.message}`);
+      } else {
+        alert(`✅ 成功提報 ${payload.length} 筆獎懲紀錄！已送交學務處幹事初審。`);
+        closeRewardFormModal();
+        clearSelectedStudents();
+        loadRecords();
+      }
+    });
+
+    // ================= 學生名冊載入與選取彈窗模組 =================
     async function loadStudents() {
       let allData = [];
       let from = 0;
@@ -457,17 +628,12 @@
           .order('seat_no')
           .range(from, from + step - 1);
 
-        if (error) {
-          console.error('載入學生失敗:', error);
-          break;
-        }
+        if (error) break;
 
         if (data && data.length > 0) {
           allData = allData.concat(data);
           from += step;
-          if (data.length < step) {
-            hasMore = false;
-          }
+          if (data.length < step) hasMore = false;
         } else {
           hasMore = false;
         }
@@ -496,7 +662,7 @@
 
     function confirmStudentSelection() {
       closeStudentModal();
-      renderSelectedChips();
+      renderFormSelectedChips();
     }
 
     function renderStudentGrid() {
@@ -505,9 +671,7 @@
       const grid = document.getElementById('studentGrid');
 
       let filtered = allStudents;
-      if (classFilter) {
-        filtered = filtered.filter(s => s.class_name === classFilter);
-      }
+      if (classFilter) filtered = filtered.filter(s => s.class_name === classFilter);
       if (searchKey) {
         filtered = filtered.filter(s => 
           (s.name && s.name.toLowerCase().includes(searchKey)) ||
@@ -578,23 +742,24 @@
     function clearSelectedStudents() {
       selectedStudentSet.clear();
       renderStudentGrid();
+      renderFormSelectedChips();
     }
 
-    function renderSelectedChips() {
-      const container = document.getElementById('selectedStudentChips');
-      const countEl = document.getElementById('selectedCount');
-      countEl.innerText = selectedStudentSet.size;
+    function renderFormSelectedChips() {
+      const container = document.getElementById('formStudentChips');
+      const countEl = document.getElementById('formSelectedCount');
+      if (countEl) countEl.innerText = selectedStudentSet.size;
 
       if (selectedStudentSet.size === 0) {
-        container.innerHTML = '<span class="text-xs text-slate-400 italic">尚未選取任何學生，請點擊上方按鈕前往點選。</span>';
+        container.innerHTML = '<span class="text-slate-400 text-xs italic">尚未選取任何學生</span>';
         return;
       }
 
       const selectedList = allStudents.filter(s => selectedStudentSet.has(s.student_no));
       container.innerHTML = selectedList.map(s => `
-        <span class="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-blue-800 text-xs px-2.5 py-1 rounded-lg">
+        <span class="inline-flex items-center gap-1 bg-blue-50 border border-blue-200 text-blue-800 text-[11px] px-2 py-0.5 rounded">
           <span class="font-semibold">${s.name}</span>
-          <span class="text-[10px] text-blue-600">(${s.class_name ? `${s.class_name} ` : ''}${s.student_no})</span>
+          <span class="text-slate-400">(${s.student_no})</span>
           <button type="button" onclick="removeStudent('${s.student_no}')" class="text-blue-400 hover:text-blue-700 font-bold ml-0.5">✕</button>
         </span>
       `).join('');
@@ -602,10 +767,10 @@
 
     function removeStudent(studentNo) {
       selectedStudentSet.delete(studentNo);
-      renderSelectedChips();
+      renderFormSelectedChips();
     }
 
-    // ================= 批次匯入模組 (分批 Upsert) =================
+    // ================= 批次匯入模組 =================
     async function importStudents() {
       const fileInput = document.getElementById('studentFileInput');
       if (!fileInput.files.length) return alert('請先選擇學生名冊檔案');
@@ -623,11 +788,8 @@
             seat_no: parseInt(r['座號'] || r['seat_no'] || r['號碼'] || 0) || null
           })).filter(s => s.student_no && s.name);
 
-          if (!list.length) {
-            return alert('未解析到有效學生名冊！請確認 Excel 包含「班級、座號、姓名、學號」等標題。');
-          }
+          if (!list.length) return alert('未解析到有效學生名冊！');
 
-          // 每次 500 筆分批寫入 Supabase，避免 payload 過大超時
           const chunkSize = 500;
           for (let i = 0; i < list.length; i += chunkSize) {
             const chunk = list.slice(i, i + chunkSize);
@@ -683,20 +845,16 @@
     async function loadRules() {
       const { data, error } = await sb.from('merit_rules').select('*');
 
-      if (error || !data || data.length === 0) {
-        document.getElementById('ruleSelect').innerHTML = '<option value="">尚無法規資料，請管理端匯入</option>';
-        return;
-      }
+      if (error || !data || data.length === 0) return;
 
       allRules = data.sort((a, b) => {
         const [articleA, clauseA] = a.code.split('-').map(Number);
         const [articleB, clauseB] = b.code.split('-').map(Number);
-
         if (articleA !== articleB) return articleA - articleB;
         return clauseA - clauseB;
       });
 
-      const select = document.getElementById('ruleSelect');
+      const select = document.getElementById('formRuleSelect');
       const categories = {
         '第6條 (嘉獎)': allRules.filter(r => r.code.startsWith('6-')),
         '第7條 (小功)': allRules.filter(r => r.code.startsWith('7-')),
@@ -708,7 +866,6 @@
       };
 
       let optionsHtml = '<option value="">請選擇法規條款...</option>';
-
       for (const [groupLabel, rulesInGroup] of Object.entries(categories)) {
         if (rulesInGroup.length > 0) {
           optionsHtml += `<optgroup label="📋 ${groupLabel}">`;
@@ -718,70 +875,8 @@
           optionsHtml += `</optgroup>`;
         }
       }
-
       select.innerHTML = optionsHtml;
     }
-
-    function onRuleChanged() {
-      const code = document.getElementById('ruleSelect').value;
-      const rule = allRules.find(r => r.code === code);
-      const preview = document.getElementById('ruleFactPreview');
-
-      if (!rule) {
-        preview.innerText = '請先選擇條款代碼';
-        return;
-      }
-
-      const articleNum = parseInt(rule.code.split('-')[0]) || 6;
-      const isReward = articleNum <= 8;
-
-      preview.innerHTML = `
-        <div>
-          <span class="font-bold ${isReward ? 'text-emerald-600' : 'text-rose-600'}">
-            【${isReward ? '獎勵類 (嘉獎/小功/大功)' : '懲處類 (警告/小過/大過)'}】
-          </span>
-          第 ${articleNum} 條 / ${rule.level} (${rule.points}次)
-        </div>
-      `;
-    }
-
-    // ================= 提報表單送出 =================
-    document.getElementById('proposeForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const ruleCode = document.getElementById('ruleSelect').value;
-      const customReason = document.getElementById('customReason').value.trim();
-      const category = document.getElementById('proposalType').value;
-      const studentList = Array.from(selectedStudentSet);
-
-      if (!studentList.length) {
-        return alert('請先點擊「前往點選學生」選取對象學生！');
-      }
-
-      const rule = allRules.find(r => r.code === ruleCode);
-      const articleNum = parseInt(rule.code.split('-')[0]) || 6;
-
-      const payload = studentList.map(no => ({
-        student_no: no,
-        rule_code: ruleCode,
-        article_num: articleNum,
-        category: category,
-        custom_reason: customReason || null,
-        proposer_name: currentStaff.name,
-        status: 'PENDING_CLERK'
-      }));
-
-      const { error } = await sb.from('merit_records').insert(payload);
-      if (error) {
-        alert(`提報失敗：${error.message}`);
-      } else {
-        alert(`✅ 成功提報 ${payload.length} 筆紀錄！已送交學務處幹事初審。`);
-        document.getElementById('proposeForm').reset();
-        document.getElementById('ruleFactPreview').innerText = '請先選擇條款代碼';
-        clearSelectedStudents();
-        renderSelectedChips();
-        loadRecords();
-      }
-    });
 
     // ================= 分頁抓取全量審核紀錄 =================
     async function loadRecords() {
@@ -797,10 +892,7 @@
           .order('created_at', { ascending: false })
           .range(from, from + step - 1);
 
-        if (error) {
-          console.error('載入紀錄失敗:', error);
-          break;
-        }
+        if (error) break;
 
         if (data && data.length > 0) {
           allRecords = allRecords.concat(data);
