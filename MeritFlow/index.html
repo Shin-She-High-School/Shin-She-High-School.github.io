@@ -16,19 +16,21 @@
     .vba-btn {
       background-color: #f0f0f0;
       border: 2px outset #ffffff;
-      box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     }
     .vba-btn:active {
       border: 2px inset #ffffff;
     }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans flex flex-col">
 
-  <!-- 頂部導航列 -->
-  <header class="bg-white shadow px-6 py-4 flex justify-between items-center sticky top-0 z-40">
+  <!-- 頂部導航列 (滿版 RWD) -->
+  <header class="bg-white shadow-sm border-b border-slate-200 px-4 sm:px-8 py-3.5 flex flex-wrap justify-between items-center sticky top-0 z-40 gap-3">
     <div class="flex items-center gap-3">
-      <h1 class="text-xl font-bold text-slate-900 tracking-wide">🎓 MeritFlow 學生獎懲建議系統</h1>
+      <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-wide flex items-center gap-2">
+        <span>🎓</span> MeritFlow 學生獎懲建議系統
+      </h1>
       <span id="roleBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full hidden"></span>
     </div>
 
@@ -38,16 +40,17 @@
       </button>
 
       <div id="userSection" class="hidden flex items-center gap-3">
-        <span id="userName" class="text-sm font-medium text-slate-600"></span>
+        <span id="userName" class="text-xs sm:text-sm font-medium text-slate-600 hidden sm:inline"></span>
         <button onclick="handleLogout()" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 px-3 py-1.5 rounded-md transition font-medium">切換身分</button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
+  <!-- 主內容容器 (寬度改為 max-w-7xl 與流體響應式) -->
+  <main class="w-full max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6 flex-1">
 
     <!-- 1. 一般教職員快速登入 (免密碼) -->
-    <div id="authCard" class="max-w-md mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-md space-y-5 border border-slate-100 mt-10">
+    <div id="authCard" class="max-w-md mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md space-y-5 border border-slate-100 mt-10">
       <div class="text-center space-y-1">
         <h2 class="text-xl font-bold text-slate-900">教職員快速進入</h2>
         <p class="text-xs text-slate-500">免密碼模式：輸入編號即可直接使用系統</p>
@@ -78,49 +81,50 @@
       </form>
     </div>
 
-    <!-- 2. 主作業選單（VBA 模式選擇） -->
+    <!-- 2. 主作業選單（VBA 模式選擇寬度延伸） -->
     <section id="menuSection" class="hidden space-y-4">
       
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-3">
+      <!-- 日期與申請人狀態列 (RWD 自適應排列) -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div class="flex items-center gap-2">
-          <span class="text-xs font-bold text-slate-700">獎懲案件申請人：</span>
-          <span id="displayProposer" class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded border border-blue-200"></span>
+          <span class="text-xs sm:text-sm font-bold text-slate-700">獎懲案件申請人：</span>
+          <span id="displayProposer" class="text-xs sm:text-sm font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200"></span>
         </div>
-        <div class="flex items-center gap-2">
-          <label class="text-xs font-bold text-slate-700">獎懲案件發生日期：</label>
-          <input type="date" id="eventDate" class="border border-slate-300 text-xs rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+          <label class="text-xs sm:text-sm font-bold text-slate-700">獎懲案件發生日期：</label>
+          <input type="date" id="eventDate" class="border border-slate-300 text-xs sm:text-sm rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-slate-50">
         </div>
       </div>
 
-      <!-- 三個作業模式卡片 -->
+      <!-- 三個作業模式卡片 (寬度自適應延伸) -->
       <div class="space-y-4">
         
         <!-- 模式 1 -->
-        <div class="vba-red-panel p-4 rounded-xl shadow-md cursor-pointer hover:opacity-95 transition" onclick="clickMode(1)">
-          <div class="vba-btn text-center py-2.5 px-4 rounded text-slate-900 font-bold text-base md:text-lg">
+        <div class="vba-red-panel p-4 sm:p-5 rounded-2xl shadow-md cursor-pointer hover:brightness-105 transition" onclick="clickMode(1)">
+          <div class="vba-btn text-center py-3 px-4 rounded-xl text-slate-900 font-bold text-base sm:text-lg md:text-xl">
             模式 1：事由原因、獎懲種類均相同
           </div>
-          <div class="text-center text-lime-300 font-bold text-sm md:text-base mt-2 tracking-wide">
+          <div class="text-center text-lime-300 font-bold text-xs sm:text-sm md:text-base mt-2.5 tracking-wide">
             （受獎懲人員之事由、適用之獎懲條款均相同）
           </div>
         </div>
 
         <!-- 模式 2 -->
-        <div class="vba-red-panel p-4 rounded-xl shadow-md cursor-pointer hover:opacity-95 transition" onclick="clickMode(2)">
-          <div class="vba-btn text-center py-2.5 px-4 rounded text-slate-900 font-bold text-base md:text-lg">
+        <div class="vba-red-panel p-4 sm:p-5 rounded-2xl shadow-md cursor-pointer hover:brightness-105 transition" onclick="clickMode(2)">
+          <div class="vba-btn text-center py-3 px-4 rounded-xl text-slate-900 font-bold text-base sm:text-lg md:text-xl">
             模式 2：同一事件，但獎懲種類不同
           </div>
-          <div class="text-center text-lime-300 font-bold text-sm md:text-base mt-2 tracking-wide">
+          <div class="text-center text-lime-300 font-bold text-xs sm:text-sm md:text-base mt-2.5 tracking-wide">
             （雖為同一事件，但因程度差別，獎懲種類不同）
           </div>
         </div>
 
         <!-- 模式 3 -->
-        <div class="vba-red-panel p-4 rounded-xl shadow-md cursor-pointer hover:opacity-95 transition" onclick="clickMode(3)">
-          <div class="vba-btn text-center py-2.5 px-4 rounded text-slate-900 font-bold text-base md:text-lg">
+        <div class="vba-red-panel p-4 sm:p-5 rounded-2xl shadow-md cursor-pointer hover:brightness-105 transition" onclick="clickMode(3)">
+          <div class="vba-btn text-center py-3 px-4 rounded-xl text-slate-900 font-bold text-base sm:text-lg md:text-xl">
             模式 3：期末 幹部／小老師 獎懲
           </div>
-          <div class="text-center text-lime-300 font-bold text-sm md:text-base mt-2 tracking-wide">
+          <div class="text-center text-lime-300 font-bold text-xs sm:text-sm md:text-base mt-2.5 tracking-wide">
             （每學期期末導師使用）
           </div>
         </div>
@@ -129,10 +133,10 @@
     </section>
 
     <!-- 3. 管理後台專屬區塊 (僅 管理員 / 幹事 / 組長 可見) -->
-    <section id="importSection" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+    <section id="importSection" class="hidden bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+      <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3 gap-2">
         <div>
-          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">⚙️ 管理後台：名冊與法規維護</h2>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">⚙️ 管理後台：名冊與法規維護</h2>
           <p class="text-xs text-slate-500 mt-0.5">支援 .xlsx / .csv 批次匯入（管理員、組長與幹事專用）</p>
         </div>
         <span class="text-xs bg-purple-50 text-purple-700 font-medium px-2.5 py-1 rounded-md border border-purple-100">管理端控制台</span>
@@ -159,18 +163,18 @@
       </div>
     </section>
 
-    <!-- 4. 獎懲審核與名冊匯出（依申請單號彙總） -->
-    <section id="recordsSection" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+    <!-- 4. 獎懲審核與名冊匯出 (滿版表格 + 橫向滾動 RWD) -->
+    <section id="recordsSection" class="hidden bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
       <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-3">
         <div>
-          <h2 class="text-lg font-bold text-slate-900">📋 獎懲案件審核進度（依單號彙總）</h2>
-          <p class="text-xs text-slate-500">點擊「申請單號」即可檢視完整學生名單並進行整批審核</p>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">📋 獎懲案件審核進度（依單號彙總）</h2>
+          <p class="text-xs text-slate-500 mt-0.5">點擊「申請單號」即可檢視完整學生名單並進行整批審核</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button id="btnExportClerk" onclick="exportExcelForClerk()" class="hidden text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm">
+          <button id="btnExportClerk" onclick="exportExcelForClerk()" class="hidden text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm flex items-center gap-1">
             📥 匯出學務處獎懲清冊 (Excel)
           </button>
-          <button id="btnExportChief" onclick="exportPortfolioForChief()" class="hidden text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm">
+          <button id="btnExportChief" onclick="exportPortfolioForChief()" class="hidden text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm flex items-center gap-1">
             📥 匯出學檔系統班級幹部 (Excel)
           </button>
           <button onclick="loadRecords()" class="text-xs bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-2 rounded-lg transition font-medium">
@@ -179,50 +183,44 @@
         </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
+      <div class="overflow-x-auto rounded-xl border border-slate-100">
+        <table class="w-full text-left text-sm min-w-[850px]">
           <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs">
             <tr>
-              <th class="p-3">申請單號（點擊檢視）</th>
-              <th class="p-3">人數</th>
-              <th class="p-3">法規條款</th>
-              <th class="p-3">提報人員</th>
-              <th class="p-3">事由說明摘要</th>
-              <th class="p-3">審核進度</th>
-              <th class="p-3 text-right">操作</th>
+              <th class="p-3.5">申請單號（點擊檢視）</th>
+              <th class="p-3.5">人數</th>
+              <th class="p-3.5">法規條款</th>
+              <th class="p-3.5">提報人員</th>
+              <th class="p-3.5">事由說明摘要</th>
+              <th class="p-3.5">審核進度</th>
+              <th class="p-3.5 text-right">操作</th>
             </tr>
           </thead>
-          <tbody id="applicationGroupsTableBody" class="divide-y divide-slate-100">
-            <!-- 依申請單號彙總渲染 -->
-          </tbody>
+          <tbody id="applicationGroupsTableBody" class="divide-y divide-slate-100"></tbody>
         </table>
       </div>
     </section>
 
   </main>
 
-  <!-- 5. 【單筆申請單明細彈窗】（點單號後顯示完整案件與學生名冊） -->
-  <div id="appDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+  <!-- 5. 【單筆申請單明細彈窗】 -->
+  <div id="appDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
       
-      <!-- 彈窗標題 -->
-      <div class="p-4 border-b flex justify-between items-center bg-slate-50">
+      <div class="p-4 sm:p-5 border-b flex justify-between items-center bg-slate-50">
         <div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base font-bold text-slate-900">📄 獎懲案件詳細內容</h3>
-            <span id="modalDetailAppNo" class="text-xs font-mono font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded"></span>
+            <span id="modalDetailAppNo" class="text-xs font-mono font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded"></span>
           </div>
           <p id="modalDetailSub" class="text-xs text-slate-500 mt-1"></p>
         </div>
-        <button onclick="closeAppDetailModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+        <button onclick="closeAppDetailModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
       </div>
 
-      <!-- 案件內容與學生列表 -->
-      <div class="p-5 overflow-y-auto space-y-4 flex-1">
-        
-        <!-- 案件資訊摘要卡 -->
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 text-xs">
-          <div class="grid grid-cols-2 gap-2">
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs sm:text-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div><span class="text-slate-400">提報人員：</span><span id="detailProposer" class="font-bold text-slate-800"></span></div>
             <div><span class="text-slate-400">獎懲法規：</span><span id="detailRule" class="font-bold text-slate-800"></span></div>
           </div>
@@ -230,14 +228,13 @@
           <div><span class="text-slate-400">當前狀態：</span><span id="detailStatus"></span></div>
         </div>
 
-        <!-- 學生名冊清單 -->
         <div>
           <div class="flex justify-between items-center mb-2">
-            <span class="text-xs font-bold text-slate-700">受獎懲學生名單（共 <span id="detailStudentCount" class="text-blue-600 font-bold">0</span> 人）</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-700">受獎懲學生名單（共 <span id="detailStudentCount" class="text-blue-600 font-bold">0</span> 人）</span>
           </div>
           
-          <div class="border border-slate-200 rounded-xl overflow-hidden">
-            <table class="w-full text-left text-xs">
+          <div class="border border-slate-200 rounded-xl overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm min-w-[360px]">
               <thead class="bg-slate-100 text-slate-600">
                 <tr>
                   <th class="p-2.5">班級</th>
@@ -246,85 +243,83 @@
                   <th class="p-2.5 font-mono">學號</th>
                 </tr>
               </thead>
-              <tbody id="detailStudentTableBody" class="divide-y divide-slate-100">
-                <!-- 動態注入學生 -->
-              </tbody>
+              <tbody id="detailStudentTableBody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
         </div>
-
       </div>
 
-      <!-- 彈窗底部操作按鈕（整單審核） -->
-      <div class="p-4 border-t bg-slate-50 flex justify-between items-center">
+      <div class="p-4 border-t bg-slate-50 flex flex-wrap justify-between items-center gap-2">
         <button onclick="closeAppDetailModal()" class="text-xs text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-lg transition font-medium">關閉視窗</button>
-        <div id="detailActionButtons" class="flex gap-2">
-          <!-- 依權限與狀態動態生成整單審核按鈕 -->
-        </div>
+        <div id="detailActionButtons" class="flex gap-2"></div>
       </div>
 
     </div>
   </div>
 
-  <!-- 6. 【獎懲 Form】視窗（VBA UserForm1） -->
-  <div id="rewardFormModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#f0f0f0] rounded-lg shadow-2xl max-w-2xl w-full p-6 space-y-4 border border-slate-400">
+  <!-- 6. 【獎懲 Form】視窗 (VBA UserForm1 RWD) -->
+  <div id="rewardFormModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#f0f0f0] rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] flex flex-col overflow-hidden border border-slate-400">
       
-      <div class="flex justify-between items-center border-b border-slate-300 pb-2">
-        <div class="flex items-center gap-2">
-          <h3 class="text-sm font-bold text-slate-900">獎懲 Form</h3>
+      <div class="p-4 border-b border-slate-300 flex justify-between items-center bg-[#e8e8e8]">
+        <div class="flex items-center gap-2 flex-wrap">
+          <h3 class="text-sm sm:text-base font-bold text-slate-900">獎懲 Form</h3>
           <span id="currentFormAppNo" class="text-xs font-mono bg-slate-200 text-slate-700 px-2 py-0.5 rounded border border-slate-300"></span>
         </div>
-        <button onclick="closeRewardFormModal()" class="text-slate-500 hover:text-slate-800 text-base font-bold">✕</button>
+        <button onclick="closeRewardFormModal()" class="text-slate-500 hover:text-slate-800 text-lg font-bold">✕</button>
       </div>
 
-      <form id="vbaRewardForm" class="space-y-3 text-xs md:text-sm">
+      <form id="vbaRewardForm" class="p-4 sm:p-6 overflow-y-auto space-y-3.5 text-xs sm:text-sm flex-1">
         
-        <div class="flex items-center gap-3">
-          <label class="w-20 font-bold text-slate-800 text-right">地點</label>
-          <input type="text" id="formLocation" class="w-48 border border-slate-400 bg-white px-2 py-1 outline-none focus:border-blue-600">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+          <label class="sm:w-20 font-bold text-slate-800 sm:text-right">地點</label>
+          <input type="text" id="formLocation" placeholder="例如：教室 / 操場 / 校外" class="flex-1 sm:max-w-xs border border-slate-400 bg-white px-2.5 py-1.5 rounded outline-none focus:border-blue-600">
         </div>
 
-        <div class="flex items-center gap-3">
-          <label class="w-20 font-bold text-slate-800 text-right">事由</label>
-          <input type="text" id="formReason" required class="flex-1 border border-slate-400 bg-white px-2 py-1 outline-none focus:border-blue-600">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+          <label class="sm:w-20 font-bold text-slate-800 sm:text-right">事由</label>
+          <input type="text" id="formReason" required placeholder="請輸入具體獎懲事由" class="flex-1 border border-slate-400 bg-white px-2.5 py-1.5 rounded outline-none focus:border-blue-600">
         </div>
 
-        <div class="flex items-center gap-3">
-          <label class="w-20 font-bold text-slate-800 text-right">獎懲種類</label>
-          <select id="formLevel" onchange="onFormLevelChanged()" class="w-32 border border-slate-400 bg-white px-2 py-1 outline-none font-medium">
-            <option value="嘉獎">嘉獎</option>
-            <option value="小功">小功</option>
-            <option value="大功">大功</option>
-            <option value="警告">警告</option>
-            <option value="小過">小過</option>
-            <option value="大過">大過</option>
-          </select>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-2">
+            <label class="sm:w-20 font-bold text-slate-800 sm:text-right">獎懲種類</label>
+            <select id="formLevel" onchange="onFormLevelChanged()" class="w-28 sm:w-32 border border-slate-400 bg-white px-2 py-1.5 rounded outline-none font-medium">
+              <option value="嘉獎">嘉獎</option>
+              <option value="小功">小功</option>
+              <option value="大功">大功</option>
+              <option value="警告">警告</option>
+              <option value="小過">小過</option>
+              <option value="大過">大過</option>
+            </select>
+          </div>
 
-          <label class="font-bold text-slate-800 ml-2">次數</label>
-          <select id="formPoints" class="w-20 border border-slate-400 bg-white px-2 py-1 outline-none font-medium">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
+          <div class="flex items-center gap-2">
+            <label class="font-bold text-slate-800">次數</label>
+            <select id="formPoints" class="w-16 sm:w-20 border border-slate-400 bg-white px-2 py-1.5 rounded outline-none font-medium">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <label class="w-20 font-bold text-slate-800 text-right">獎懲條款</label>
-          <select id="formRuleSelect" onchange="onFormRuleChanged()" required class="flex-1 border border-slate-400 bg-white px-2 py-1 outline-none">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+          <label class="sm:w-20 font-bold text-slate-800 sm:text-right">獎懲條款</label>
+          <select id="formRuleSelect" onchange="onFormRuleChanged()" required class="flex-1 border border-slate-400 bg-white px-2.5 py-1.5 rounded outline-none">
             <option value="">請選擇條款...</option>
           </select>
         </div>
 
-        <div class="flex items-start gap-3 pt-1">
-          <label class="w-20 font-bold text-slate-800 text-right mt-1">對象名冊</label>
-          <div id="formStudentChips" class="flex-1 min-h-[40px] p-2 bg-white border border-slate-300 rounded flex flex-wrap gap-1 items-center">
+        <div class="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-3 pt-1">
+          <label class="sm:w-20 font-bold text-slate-800 sm:text-right sm:mt-1">對象名冊</label>
+          <div id="formStudentChips" class="flex-1 min-h-[44px] p-2 bg-white border border-slate-300 rounded-lg flex flex-wrap gap-1.5 items-center">
             <span class="text-slate-400 text-xs italic">尚未點選人員</span>
           </div>
         </div>
 
         <div class="pt-2">
-          <button type="button" onclick="openStudentModal()" class="w-full bg-[#e1e1e1] hover:bg-slate-300 text-slate-900 py-2 border border-slate-400 text-xs md:text-sm font-bold transition shadow-sm">
+          <button type="button" onclick="openStudentModal()" class="w-full bg-[#e1e1e1] hover:bg-slate-300 text-slate-900 py-2.5 border border-slate-400 rounded text-xs sm:text-sm font-bold transition shadow-sm">
             開始點選獎懲人員，點錯可再點一次清除（已選 <span id="formSelectedCount" class="text-blue-700 font-bold">0</span> 人）
           </button>
         </div>
@@ -338,19 +333,19 @@
     </div>
   </div>
 
-  <!-- 7. 互動式學生選取器彈窗 -->
-  <div id="studentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
+  <!-- 7. 互動式學生選取器彈窗 (RWD) -->
+  <div id="studentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
       
       <div class="p-4 border-b flex justify-between items-center bg-slate-50">
         <div>
-          <h3 class="text-base font-bold text-slate-900">👥 點選學生名單（點錯可再點一次清除）</h3>
-          <p class="text-xs text-slate-500">已全量載入全校學生名冊（共 <span id="totalStudentsCount" class="font-bold text-blue-600">0</span> 人）</p>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900">👥 點選學生名單（點錯可再點一次清除）</h3>
+          <p class="text-xs text-slate-500">已載入全校學生名冊（共 <span id="totalStudentsCount" class="font-bold text-blue-600">0</span> 人）</p>
         </div>
-        <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+        <button onclick="closeStudentModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
       </div>
 
-      <div class="p-4 border-b grid grid-cols-1 md:grid-cols-3 gap-3 bg-white">
+      <div class="p-3 sm:p-4 border-b grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 bg-white">
         <div>
           <select id="modalClassFilter" onchange="renderStudentGrid()" class="w-full border border-slate-300 text-xs rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500 font-medium">
             <option value="">所有班級</option>
@@ -362,17 +357,17 @@
         </div>
 
         <div class="flex items-center justify-end gap-2">
-          <button type="button" onclick="selectAllFiltered(true)" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium transition">全選當前</button>
-          <button type="button" onclick="selectAllFiltered(false)" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium transition">取消當前</button>
+          <button type="button" onclick="selectAllFiltered(true)" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium transition flex-1 sm:flex-none">全選當前</button>
+          <button type="button" onclick="selectAllFiltered(false)" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium transition flex-1 sm:flex-none">取消當前</button>
         </div>
       </div>
 
-      <div id="studentGrid" class="p-4 overflow-y-auto flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 bg-slate-50">
+      <div id="studentGrid" class="p-3 sm:p-4 overflow-y-auto flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 bg-slate-50">
         <div class="col-span-full text-center py-10 text-xs text-slate-400">載入學生名冊中...</div>
       </div>
 
-      <div class="p-4 border-t bg-white flex justify-between items-center">
-        <span class="text-xs text-slate-600 font-medium">
+      <div class="p-3 sm:p-4 border-t bg-white flex justify-between items-center">
+        <span class="text-xs sm:text-sm text-slate-600 font-medium">
           已選取 <span id="modalSelectedCount" class="text-blue-600 font-bold">0</span> 位學生
         </span>
         <div class="flex gap-2">
@@ -421,8 +416,8 @@
     let currentMode = 1;
     let allRules = [];
     let allStudents = [];
-    let allRecords = []; // 存放所有單一學生紀錄
-    let groupedApplications = {}; // 依申請單號分組之資料
+    let allRecords = [];
+    let groupedApplications = {};
     let selectedStudentSet = new Set();
     let currentApplicationNo = '';
 
@@ -818,7 +813,6 @@
       renderFormSelectedChips();
     }
 
-    // ================= 批次匯入模組 =================
     async function importStudents() {
       const fileInput = document.getElementById('studentFileInput');
       if (!fileInput.files.length) return alert('請先選擇學生名冊檔案');
@@ -924,7 +918,6 @@
       select.innerHTML = optionsHtml;
     }
 
-    // ================= 依「申請單號」彙總載入審核紀錄 =================
     async function loadRecords() {
       let records = [];
       let from = 0;
@@ -952,7 +945,6 @@
       allRecords = records;
       groupedApplications = {};
 
-      // 依 application_no 聚合分組
       allRecords.forEach(r => {
         const appNo = r.application_no || `INDIVIDUAL-${r.id}`;
         if (!groupedApplications[appNo]) {
@@ -971,7 +963,6 @@
         groupedApplications[appNo].records.push(r);
       });
 
-      // 渲染彙總清冊
       const tbody = document.getElementById('applicationGroupsTableBody');
       const groupList = Object.values(groupedApplications);
 
@@ -982,20 +973,20 @@
 
       tbody.innerHTML = groupList.map(g => `
         <tr class="hover:bg-slate-50 transition">
-          <td class="p-3">
+          <td class="p-3.5">
             <button onclick="openAppDetailModal('${g.appNo}')" class="text-xs font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
               📄 ${g.appNo}
             </button>
           </td>
-          <td class="p-3">
-            <span class="text-xs font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">${g.records.length} 人</span>
+          <td class="p-3.5">
+            <span class="text-xs font-bold bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full border border-blue-200">${g.records.length} 人</span>
           </td>
-          <td class="p-3 font-medium text-xs">[${g.rule_code}] ${g.level} (${g.points}次)</td>
-          <td class="p-3 text-xs">${g.proposer_name}</td>
-          <td class="p-3 text-xs text-slate-500 max-w-xs truncate">${g.custom_reason || '-'}</td>
-          <td class="p-3">${renderStatusBadge(g.status)}</td>
-          <td class="p-3 text-right">
-            <button onclick="openAppDetailModal('${g.appNo}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-medium transition">
+          <td class="p-3.5 font-medium text-xs">[${g.rule_code}] ${g.level} (${g.points}次)</td>
+          <td class="p-3.5 text-xs">${g.proposer_name}</td>
+          <td class="p-3.5 text-xs text-slate-500 max-w-xs truncate">${g.custom_reason || '-'}</td>
+          <td class="p-3.5">${renderStatusBadge(g.status)}</td>
+          <td class="p-3.5 text-right">
+            <button onclick="openAppDetailModal('${g.appNo}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition">
               🔍 查看整筆明細
             </button>
           </td>
@@ -1003,7 +994,6 @@
       `).join('');
     }
 
-    // ================= 點擊單號開啟整筆明細彈窗 =================
     function openAppDetailModal(appNo) {
       const group = groupedApplications[appNo];
       if (!group) return;
@@ -1016,7 +1006,6 @@
       document.getElementById('detailStatus').innerHTML = renderStatusBadge(group.status);
       document.getElementById('detailStudentCount').innerText = group.records.length;
 
-      // 填充學生列表（比對 students 表取得姓名與班級座號）
       const tbody = document.getElementById('detailStudentTableBody');
       tbody.innerHTML = group.records.map(r => {
         const studentInfo = allStudents.find(s => s.student_no === r.student_no) || {};
@@ -1030,9 +1019,7 @@
         `;
       }).join('');
 
-      // 渲染整單審核按鈕
       renderDetailActions(group);
-
       document.getElementById('appDetailModal').classList.remove('hidden');
     }
 
@@ -1057,7 +1044,6 @@
       container.innerHTML = actions || '<span class="text-slate-400 text-xs self-center">（目前無可執行之審核權限）</span>';
     }
 
-    // 整批更新該單號下所有紀錄狀態
     async function updateBatchStatus(appNo, newStatus) {
       const group = groupedApplications[appNo];
       if (!group) return;
@@ -1079,15 +1065,14 @@
 
     function renderStatusBadge(status) {
       switch (status) {
-        case 'PENDING_CLERK': return '<span class="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full font-medium">待幹事初審</span>';
-        case 'PENDING_CHIEF': return '<span class="text-xs bg-indigo-50 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full font-medium">待組長核定</span>';
-        case 'APPROVED': return '<span class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-medium">已核准決行</span>';
-        case 'REJECTED': return '<span class="text-xs bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 rounded-full font-medium">退回</span>';
+        case 'PENDING_CLERK': return '<span class="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-medium">待幹事初審</span>';
+        case 'PENDING_CHIEF': return '<span class="text-xs bg-indigo-50 text-indigo-800 border border-indigo-200 px-2.5 py-0.5 rounded-full font-medium">待組長核定</span>';
+        case 'APPROVED': return '<span class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full font-medium">已核准決行</span>';
+        case 'REJECTED': return '<span class="text-xs bg-rose-50 text-rose-800 border border-rose-200 px-2.5 py-0.5 rounded-full font-medium">退回</span>';
         default: return status;
       }
     }
 
-    // ================= 匯出報表模組 =================
     async function exportExcelForClerk() {
       const { data } = await sb.from('merit_records').select(`*, merit_rules(*)`).eq('status', 'APPROVED');
       if (!data || !data.length) return alert('尚無已核准之獎懲紀錄');
