@@ -36,21 +36,19 @@
 
     <!-- 右側功能與分頁控制按鈕 -->
     <div class="flex items-center gap-3">
-      <!-- 登入後的分頁切換按鈕區 -->
       <nav id="navTabs" class="hidden flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
         <button id="tabBtnMenu" onclick="switchTab('menu')" class="px-3 py-1.5 rounded-lg transition bg-white text-blue-700 shadow-sm">
           📑 獎懲提報
         </button>
-        <!-- 僅 訓育組長(t277)、學務處幹事(t119)、系統管理員(admin) 可見 -->
-        <button id="tabBtnRecords" onclick="switchTab('records')" class="hidden px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">
-          📋 案件追蹤與審核
+        <!-- 一般教師顯示「我的申請紀錄」，管理員顯示「案件追蹤與審核」 -->
+        <button id="tabBtnRecords" onclick="switchTab('records')" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">
+          📋 我的申請紀錄
         </button>
         <button id="tabBtnAdmin" onclick="switchTab('admin')" class="hidden px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">
           ⚙️ 管理控制台
         </button>
       </nav>
 
-      <!-- 管理後台專屬入口按鈕 -->
       <button id="btnOpenAdminModal" onclick="openAdminModal()" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1 shadow-sm">
         🔒 管理後台登入
       </button>
@@ -62,7 +60,7 @@
     </div>
   </header>
 
-  <!-- 主內容區塊 (RWD 自適應滿版寬度) -->
+  <!-- 主內容區塊 -->
   <main class="w-full max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6 flex-1">
 
     <!-- 0. 未登入教職員入口卡片 -->
@@ -97,7 +95,7 @@
       </form>
     </div>
 
-    <!-- ================= 分頁 1：獎懲提報模式 (所有教職員皆可使用) ================= -->
+    <!-- ================= 分頁 1：獎懲提報模式 ================= -->
     <div id="tabContentMenu" class="tab-pane hidden space-y-4">
       
       <!-- 日期與申請人狀態列 -->
@@ -148,19 +146,20 @@
       </div>
     </div>
 
-    <!-- ================= 分頁 2：審核案件追蹤 (僅 訓育組長、學務處幹事、管理員 可見) ================= -->
+    <!-- ================= 分頁 2：案件追蹤 (教師看個人 / 管理員看全校) ================= -->
     <div id="tabContentRecords" class="tab-pane hidden space-y-4">
       <section class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
         <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-3">
           <div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">📋 獎懲案件審核進度（依單號彙總）</h2>
-            <p class="text-xs text-slate-500 mt-0.5">點擊「申請單號」即可檢視完整學生名單並進行整批審核</p>
+            <h2 id="recordsSectionTitle" class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">📋 案件進度追蹤</h2>
+            <p id="recordsSectionSub" class="text-xs text-slate-500 mt-0.5">點擊「申請單號」即可檢視完整學生名單</p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button id="btnExportClerk" onclick="exportExcelForClerk()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm flex items-center gap-1">
+            <!-- 僅管理員可見匯出按鈕 -->
+            <button id="btnExportClerk" onclick="exportExcelForClerk()" class="hidden text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm flex items-center gap-1">
               📥 匯出學務處獎懲清冊 (Excel)
             </button>
-            <button id="btnExportChief" onclick="exportPortfolioForChief()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm flex items-center gap-1">
+            <button id="btnExportChief" onclick="exportPortfolioForChief()" class="hidden text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm flex items-center gap-1">
               📥 匯出學檔系統班級幹部 (Excel)
             </button>
             <button onclick="loadRecords()" class="text-xs bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-2 rounded-lg transition font-medium">
@@ -202,7 +201,7 @@
           <div id="adminStatRules" class="text-2xl font-bold text-slate-900 mt-1">0 條</div>
         </div>
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-          <div class="text-xs font-semibold text-slate-400">累積獎懲申請案</div>
+          <div class="text-xs font-semibold text-slate-400">全校獎懲申請案總數</div>
           <div id="adminStatApps" class="text-2xl font-bold text-slate-900 mt-1">0 案</div>
         </div>
       </div>
@@ -218,7 +217,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-          <!-- 1. 全校學生名冊匯入 -->
           <div class="p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 space-y-2.5">
             <div class="flex justify-between items-center">
               <span class="text-sm font-semibold text-slate-800">1. 全校學生名冊批次匯入</span>
@@ -228,7 +226,6 @@
             <button onclick="importStudents()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-medium transition shadow-sm">解析並匯入學生名冊</button>
           </div>
 
-          <!-- 2. 獎懲條款代碼匯入 -->
           <div class="p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 space-y-2.5">
             <div class="flex justify-between items-center">
               <span class="text-sm font-semibold text-slate-800">2. 獎懲條款代碼批次匯入</span>
@@ -507,6 +504,7 @@
       } else if (tabKey === 'records') {
         document.getElementById('tabContentRecords').classList.remove('hidden');
         btnRecords.className = 'px-3 py-1.5 rounded-lg transition bg-white text-blue-700 shadow-sm';
+        loadRecords();
       } else if (tabKey === 'admin') {
         document.getElementById('tabContentAdmin').classList.remove('hidden');
         btnAdmin.className = 'px-3 py-1.5 rounded-lg transition bg-purple-600 text-white shadow-sm';
@@ -531,7 +529,6 @@
       document.getElementById('adminLoginForm').reset();
     }
 
-    // 管理員密碼驗證登入
     document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const account = document.getElementById('adminAccount').value.trim();
@@ -553,7 +550,6 @@
       }
     });
 
-    // 一般教職員免密碼登入
     document.getElementById('teacherLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('teacherLoginBtn');
@@ -583,7 +579,6 @@
         return;
       }
 
-      // 只要是 admin, t119, t277 身分一律設為 ADMIN (系統管理員)
       const isAdminUser = ADMIN_STAFF_NOS.includes(data.staff_no);
 
       currentStaff = {
@@ -628,23 +623,33 @@
 
       const btnRecords = document.getElementById('tabBtnRecords');
       const btnAdmin = document.getElementById('tabBtnAdmin');
+      const recordsTitle = document.getElementById('recordsSectionTitle');
+      const recordsSub = document.getElementById('recordsSectionSub');
 
-      // 僅 訓育組長(t277)、學務處幹事(t119)、系統管理員(admin) 可看到案件追蹤與管理控制台
       if (currentStaff.role === 'ADMIN') {
+        // 管理員：看全校、顯示管理控制台、顯示匯出按鈕
+        btnRecords.innerText = '📋 全校案件追蹤與審核';
         btnRecords.classList.remove('hidden');
         btnAdmin.classList.remove('hidden');
+        recordsTitle.innerText = '📋 全校獎懲案件審核進度（依單號彙總）';
+        recordsSub.innerText = '點擊「申請單號」即可檢視完整學生名單並進行整批審核';
+        document.getElementById('btnExportClerk').classList.remove('hidden');
+        document.getElementById('btnExportChief').classList.remove('hidden');
       } else {
-        btnRecords.classList.add('hidden');
+        // 一般教師：只看自己送出的單子、無後台管理按鈕、無匯出按鈕
+        btnRecords.innerText = '📋 我的申請紀錄';
+        btnRecords.classList.remove('hidden');
         btnAdmin.classList.add('hidden');
+        recordsTitle.innerText = `📋 【${currentStaff.name}】的獎懲申請紀錄`;
+        recordsSub.innerText = '點擊「申請單號」可查看您送出的學生名單與即時審核進度';
+        document.getElementById('btnExportClerk').classList.add('hidden');
+        document.getElementById('btnExportChief').classList.add('hidden');
       }
 
       switchTab('menu');
-
       loadRules();
       loadStudents();
-      if (currentStaff.role === 'ADMIN') {
-        loadRecords();
-      }
+      loadRecords();
     }
 
     function clickMode(modeNumber) {
@@ -729,10 +734,8 @@
         closeRewardFormModal();
         clearSelectedStudents();
         currentApplicationNo = '';
-        if (currentStaff.role === 'ADMIN') {
-          loadRecords();
-          switchTab('records');
-        }
+        loadRecords();
+        switchTab('records'); // 送出後自動切換至申請紀錄分頁
       }
     });
 
@@ -997,19 +1000,27 @@
       updateAdminStats();
     }
 
-    // ================= 依「申請單號」彙總載入審核紀錄 =================
+    // ================= 載入審核紀錄（教師只看自己 / 管理員看全校） =================
     async function loadRecords() {
+      if (!currentStaff) return;
+
       let records = [];
       let from = 0;
       const step = 1000;
       let hasMore = true;
 
       while (hasMore) {
-        const { data, error } = await sb
+        let query = sb
           .from('merit_records')
           .select(`*, merit_rules(level, points, description, legacy_code)`)
-          .order('created_at', { ascending: false })
-          .range(from, from + step - 1);
+          .order('created_at', { ascending: false });
+
+        // 若不是系統管理員，強制只撈取該教師自己送出的資料
+        if (currentStaff.role !== 'ADMIN') {
+          query = query.eq('proposer_name', currentStaff.name);
+        }
+
+        const { data, error } = await query.range(from, from + step - 1);
 
         if (error) break;
 
@@ -1047,7 +1058,8 @@
       const groupList = Object.values(groupedApplications);
 
       if (!groupList.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-xs text-slate-400">目前尚無獎懲申請案件</td></tr>';
+        const emptyMsg = currentStaff.role === 'ADMIN' ? '目前全校尚無獎懲申請案件' : '您目前尚無送出的獎懲申請案件';
+        tbody.innerHTML = `<tr><td colspan="7" class="p-5 text-center text-xs text-slate-400 font-medium">${emptyMsg}</td></tr>`;
         return;
       }
 
@@ -1109,7 +1121,7 @@
       document.getElementById('appDetailModal').classList.add('hidden');
     }
 
-    // 統一管理員審核權限（支援初審轉呈、直接核准、退回）
+    // 審核按鈕渲染（僅管理員顯示審核操作，一般教師僅供檢視）
     function renderDetailActions(group) {
       const container = document.getElementById('detailActionButtons');
       let actions = '';
@@ -1125,6 +1137,8 @@
         } else {
           actions += `<span class="text-xs text-slate-400 self-center">（該案件已審核完畢）</span>`;
         }
+      } else {
+        actions = '<span class="text-xs text-slate-500 self-center">（唯讀檢視：您提交的案件正在審核中）</span>';
       }
 
       container.innerHTML = actions;
