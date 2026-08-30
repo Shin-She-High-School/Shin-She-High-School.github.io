@@ -116,7 +116,7 @@
 
       <form id="proposeForm" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- 條款代碼 -->
+          <!-- 條款代碼（支援自然排序與 OptGroup 分組） -->
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">獎懲法規條款代碼</label>
             <select id="ruleSelect" onchange="onRuleChanged()" required class="w-full border border-slate-300 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
@@ -293,7 +293,6 @@
       const rawAccount = document.getElementById('teacherAccount').value.trim().toLowerCase();
       const cleanAccount = rawAccount.split('@')[0];
 
-      // 若在教師入口輸入 admin 則引導使用管理後台
       if (cleanAccount === 'admin') {
         btn.disabled = false;
         btn.innerText = '直接進入系統';
@@ -436,17 +435,51 @@
       reader.readAsBinaryString(fileInput.files[0]);
     }
 
-    // ================= 條款與提報模組 =================
+    // ================= 條款排序與載入模組 (依條與款數值排序) =================
     async function loadRules() {
-      const { data } = await sb.from('merit_rules').select('*').order('code');
-      allRules = data || [];
-      const select = document.getElementById('ruleSelect');
-      if (allRules.length) {
-        select.innerHTML = '<option value="">請選擇法規條款...</option>' + 
-          allRules.map(r => `<option value="${r.code}">[${r.code}] ${r.level} (${r.points}次) - ${r.description}</option>`).join('');
-      } else {
-        select.innerHTML = '<option value="">尚無法規資料，請管理端匯入</option>';
+      const { data, error } = await sb.from('merit_rules').select('*');
+
+      if (error || !data || data.length === 0) {
+        document.getElementById('ruleSelect').innerHTML = '<option value="">尚無法規資料，請管理端匯入</option>';
+        return;
       }
+
+      // 自然數值排序：先排「條號 (6~12)」，再排「款號 (1~41)」
+      allRules = data.sort((a, b) => {
+        const [articleA, clauseA] = a.code.split('-').map(Number);
+        const [articleB, clauseB] = b.code.split('-').map(Number);
+
+        if (articleA !== articleB) {
+          return articleA - articleB;
+        }
+        return clauseA - clauseB;
+      });
+
+      // 依條號分組渲染 OptGroup
+      const select = document.getElementById('ruleSelect');
+      const categories = {
+        '第6條 (嘉獎)': allRules.filter(r => r.code.startsWith('6-')),
+        '第7條 (小功)': allRules.filter(r => r.code.startsWith('7-')),
+        '第8條 (大功)': allRules.filter(r => r.code.startsWith('8-')),
+        '第9條 (警告)': allRules.filter(r => r.code.startsWith('9-')),
+        '第10條 (小過)': allRules.filter(r => r.code.startsWith('10-')),
+        '第11條 (大過)': allRules.filter(r => r.code.startsWith('11-')),
+        '第12條 (輔導安置)': allRules.filter(r => r.code.startsWith('12-')),
+      };
+
+      let optionsHtml = '<option value="">請選擇法規條款...</option>';
+
+      for (const [groupLabel, rulesInGroup] of Object.entries(categories)) {
+        if (rulesInGroup.length > 0) {
+          optionsHtml += `<optgroup label="📋 ${groupLabel}">`;
+          optionsHtml += rulesInGroup.map(r => 
+            `<option value="${r.code}">[${r.code}] ${r.level} (${r.points}次) - ${r.description}</option>`
+          ).join('');
+          optionsHtml += `</optgroup>`;
+        }
+      }
+
+      select.innerHTML = optionsHtml;
     }
 
     function onRuleChanged() {
