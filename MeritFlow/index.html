@@ -176,7 +176,7 @@
       </section>
     </div>
 
-    <!-- ================= 分頁 3：管理控制台 (支援 查看、修改、刪除、批次匯入) ================= -->
+    <!-- ================= 分頁 3：管理控制台 ================= -->
     <div id="tabContentAdmin" class="tab-pane hidden space-y-6">
       
       <!-- 統計數據卡片 -->
@@ -226,7 +226,7 @@
         </div>
       </section>
 
-      <!-- 資料庫線上管理檢視區 (三大資料表切換：學生、條款、教職員) -->
+      <!-- 資料庫線上管理檢視區 -->
       <section class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
         <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3 gap-3">
           <div class="flex items-center gap-2">
@@ -244,7 +244,6 @@
           </div>
         </div>
 
-        <!-- 線上資料展示表格 (支援 修改 / 刪除) -->
         <div class="overflow-x-auto rounded-xl border border-slate-100 min-h-[300px]">
           <table class="w-full text-left text-xs sm:text-sm">
             <thead id="adminTableHeader" class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs"></thead>
@@ -521,9 +520,8 @@
     let currentApplicationNo = '';
     let currentViewingAppNo = null;
 
-    // 後台資料庫子分頁狀態
-    let currentAdminDataTab = 'students'; // 'students' | 'rules' | 'staffs'
-    let currentEditingItem = null; // 當前在後台修改的項目
+    let currentAdminDataTab = 'students';
+    let currentEditingItem = null;
 
     const ADMIN_STAFF_NOS = ['admin', 't119', 't277'];
 
@@ -540,7 +538,9 @@
     }
 
     async function init() {
-      document.getElementById('eventDate').valueAsDate = new Date();
+      const dateEl = document.getElementById('eventDate');
+      if (dateEl) dateEl.valueAsDate = new Date();
+
       const savedUser = localStorage.getItem('meritflow_staff');
       if (savedUser) {
         currentStaff = JSON.parse(savedUser);
@@ -567,43 +567,55 @@
       });
 
       if (tabKey === 'menu') {
-        document.getElementById('tabContentMenu').classList.remove('hidden');
-        btnMenu.className = 'px-3 py-1.5 rounded-lg transition bg-white text-blue-700 shadow-sm';
+        const pane = document.getElementById('tabContentMenu');
+        if (pane) pane.classList.remove('hidden');
+        if (btnMenu) btnMenu.className = 'px-3 py-1.5 rounded-lg transition bg-white text-blue-700 shadow-sm';
       } else if (tabKey === 'records') {
-        document.getElementById('tabContentRecords').classList.remove('hidden');
-        btnRecords.className = 'px-3 py-1.5 rounded-lg transition bg-white text-blue-700 shadow-sm';
+        const pane = document.getElementById('tabContentRecords');
+        if (pane) pane.classList.remove('hidden');
+        if (btnRecords) btnRecords.className = 'px-3 py-1.5 rounded-lg transition bg-white text-blue-700 shadow-sm';
         loadRecords();
       } else if (tabKey === 'admin') {
-        document.getElementById('tabContentAdmin').classList.remove('hidden');
-        btnAdmin.className = 'px-3 py-1.5 rounded-lg transition bg-purple-600 text-white shadow-sm';
+        const pane = document.getElementById('tabContentAdmin');
+        if (pane) pane.classList.remove('hidden');
+        if (btnAdmin) btnAdmin.className = 'px-3 py-1.5 rounded-lg transition bg-purple-600 text-white shadow-sm';
         loadStaffs();
         renderAdminTable();
         updateAdminStats();
       }
     }
 
+    // 全面 Null-safe 更新統計數字
     function updateAdminStats() {
-      document.getElementById('adminStatStudents').innerText = `${allStudents.length} 人`;
-      document.getElementById('adminStatRules').innerText = `${allRules.length} 條`;
-      document.getElementById('adminStatStaffs').innerText = `${allStaffs.length} 人`;
-      document.getElementById('adminStatApps').innerText = `${Object.keys(groupedApplications).length} 案`;
+      const elStudents = document.getElementById('adminStatStudents');
+      const elRules = document.getElementById('adminStatRules');
+      const elStaffs = document.getElementById('adminStatStaffs');
+
+      if (elStudents) elStudents.innerText = `${allStudents.length} 人`;
+      if (elRules) elRules.innerText = `${allRules.length} 條`;
+      if (elStaffs) elStaffs.innerText = `${allStaffs.length} 人`;
     }
 
     function openAdminModal() {
-      document.getElementById('adminModal').classList.remove('hidden');
-      document.getElementById('adminAccount').value = 'admin';
-      document.getElementById('adminPassword').focus();
+      const modal = document.getElementById('adminModal');
+      if (modal) modal.classList.remove('hidden');
+      const acc = document.getElementById('adminAccount');
+      if (acc) acc.value = 'admin';
+      const pwd = document.getElementById('adminPassword');
+      if (pwd) pwd.focus();
     }
 
     function closeAdminModal() {
-      document.getElementById('adminModal').classList.add('hidden');
-      document.getElementById('adminLoginForm').reset();
+      const modal = document.getElementById('adminModal');
+      if (modal) modal.classList.add('hidden');
+      const form = document.getElementById('adminLoginForm');
+      if (form) form.reset();
     }
 
-    document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+    document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
       e.preventDefault();
-      const account = document.getElementById('adminAccount').value.trim();
-      const password = document.getElementById('adminPassword').value;
+      const account = document.getElementById('adminAccount')?.value.trim();
+      const password = document.getElementById('adminPassword')?.value;
 
       if (account === 'admin' && password === 'Ap960523') {
         currentStaff = {
@@ -621,18 +633,22 @@
       }
     });
 
-    document.getElementById('teacherLoginForm').addEventListener('submit', async (e) => {
+    document.getElementById('teacherLoginForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('teacherLoginBtn');
-      btn.disabled = true;
-      btn.innerText = '查詢中...';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '查詢中...';
+      }
 
-      const rawAccount = document.getElementById('teacherAccount').value.trim().toLowerCase();
+      const rawAccount = document.getElementById('teacherAccount')?.value.trim().toLowerCase() || '';
       const cleanAccount = rawAccount.split('@')[0];
 
       if (cleanAccount === 'admin') {
-        btn.disabled = false;
-        btn.innerText = '直接進入系統';
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = '直接進入系統';
+        }
         openAdminModal();
         return;
       }
@@ -645,8 +661,10 @@
 
       if (error || !data) {
         alert(`找不到編號為「${cleanAccount}」的教職員！請確認輸入是否正確。`);
-        btn.disabled = false;
-        btn.innerText = '直接進入系統';
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = '直接進入系統';
+        }
         return;
       }
 
@@ -661,8 +679,10 @@
 
       localStorage.setItem('meritflow_staff', JSON.stringify(currentStaff));
       renderDashboard();
-      btn.disabled = false;
-      btn.innerText = '直接進入系統';
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = '直接進入系統';
+      }
     });
 
     function handleLogout() {
@@ -672,25 +692,31 @@
     }
 
     function showAuth() {
-      document.getElementById('authCard').classList.remove('hidden');
-      document.getElementById('userSection').classList.add('hidden');
-      document.getElementById('roleBadge').classList.add('hidden');
-      document.getElementById('navTabs').classList.add('hidden');
+      document.getElementById('authCard')?.classList.remove('hidden');
+      document.getElementById('userSection')?.classList.add('hidden');
+      document.getElementById('roleBadge')?.classList.add('hidden');
+      document.getElementById('navTabs')?.classList.add('hidden');
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
     }
 
     function renderDashboard() {
-      document.getElementById('authCard').classList.add('hidden');
-      document.getElementById('userSection').classList.remove('hidden');
-      document.getElementById('navTabs').classList.remove('hidden');
-      document.getElementById('userName').innerText = `${currentStaff.name} (${currentStaff.staff_no})`;
-      document.getElementById('displayProposer').innerText = `${currentStaff.name} (${currentStaff.staff_no})`;
+      document.getElementById('authCard')?.classList.add('hidden');
+      document.getElementById('userSection')?.classList.remove('hidden');
+      document.getElementById('navTabs')?.classList.remove('hidden');
+
+      const userNameEl = document.getElementById('userName');
+      if (userNameEl) userNameEl.innerText = `${currentStaff.name} (${currentStaff.staff_no})`;
+
+      const displayPropEl = document.getElementById('displayProposer');
+      if (displayPropEl) displayPropEl.innerText = `${currentStaff.name} (${currentStaff.staff_no})`;
 
       const badge = document.getElementById('roleBadge');
-      const roleConfig = roleMap[currentStaff.role] || roleMap.TEACHER;
-      badge.innerText = roleConfig.label;
-      badge.className = `text-xs font-semibold px-2.5 py-0.5 rounded-full inline-block ${roleConfig.class}`;
-      badge.classList.remove('hidden');
+      if (badge) {
+        const roleConfig = roleMap[currentStaff.role] || roleMap.TEACHER;
+        badge.innerText = roleConfig.label;
+        badge.className = `text-xs font-semibold px-2.5 py-0.5 rounded-full inline-block ${roleConfig.class}`;
+        badge.classList.remove('hidden');
+      }
 
       const btnRecords = document.getElementById('tabBtnRecords');
       const btnAdmin = document.getElementById('tabBtnAdmin');
@@ -698,21 +724,25 @@
       const recordsSub = document.getElementById('recordsSectionSub');
 
       if (currentStaff.role === 'ADMIN') {
-        btnRecords.innerText = '📋 全校案件追蹤與審核';
-        btnRecords.classList.remove('hidden');
-        btnAdmin.classList.remove('hidden');
-        recordsTitle.innerText = '📋 全校獎懲案件審核進度（依單號彙總）';
-        recordsSub.innerText = '點擊「申請單號」即可檢視完整學生名單、整批審核、修改或刪除案件';
-        document.getElementById('btnExportClerk').classList.remove('hidden');
-        document.getElementById('btnExportChief').classList.remove('hidden');
+        if (btnRecords) {
+          btnRecords.innerText = '📋 全校案件追蹤與審核';
+          btnRecords.classList.remove('hidden');
+        }
+        if (btnAdmin) btnAdmin.classList.remove('hidden');
+        if (recordsTitle) recordsTitle.innerText = '📋 全校獎懲案件審核進度（依單號彙總）';
+        if (recordsSub) recordsSub.innerText = '點擊「申請單號」即可檢視完整學生名單、整批審核、修改或刪除案件';
+        document.getElementById('btnExportClerk')?.classList.remove('hidden');
+        document.getElementById('btnExportChief')?.classList.remove('hidden');
       } else {
-        btnRecords.innerText = '📋 我的申請紀錄';
-        btnRecords.classList.remove('hidden');
-        btnAdmin.classList.add('hidden');
-        recordsTitle.innerText = `📋 【${currentStaff.name}】的獎懲申請紀錄`;
-        recordsSub.innerText = '點擊「申請單號」可查看您送出的學生名單與即時審核進度';
-        document.getElementById('btnExportClerk').classList.add('hidden');
-        document.getElementById('btnExportChief').classList.add('hidden');
+        if (btnRecords) {
+          btnRecords.innerText = '📋 我的申請紀錄';
+          btnRecords.classList.remove('hidden');
+        }
+        if (btnAdmin) btnAdmin.classList.add('hidden');
+        if (recordsTitle) recordsTitle.innerText = `📋 【${currentStaff.name}】的獎懲申請紀錄`;
+        if (recordsSub) recordsSub.innerText = '點擊「申請單號」可查看您送出的學生名單與即時審核進度';
+        document.getElementById('btnExportClerk')?.classList.add('hidden');
+        document.getElementById('btnExportChief')?.classList.add('hidden');
       }
 
       switchTab('menu');
@@ -723,7 +753,7 @@
     }
 
     function clickMode(modeNumber) {
-      const d = document.getElementById('eventDate').value;
+      const d = document.getElementById('eventDate')?.value;
       if (!d) return alert("您尚未輸入獎懲案件發生日期，請在上方輸入獎懲案件的發生日期！");
 
       if (!confirm(`獎懲案件發生日期是 ${d}\n\n是否確認？`)) return;
@@ -738,51 +768,58 @@
         openStudentModal();
       } else if (modeNumber === 3) {
         openRewardFormModal();
-        document.getElementById('formReason').value = '擔任班級幹部／學科小老師表現優良';
+        const reasonInput = document.getElementById('formReason');
+        if (reasonInput) reasonInput.value = '擔任班級幹部／學科小老師表現優良';
       }
     }
 
     function openRewardFormModal() {
       if (!currentApplicationNo) currentApplicationNo = generateApplicationNo();
-      document.getElementById('currentFormAppNo').innerText = `申請單號：${currentApplicationNo}`;
-      document.getElementById('rewardFormModal').classList.remove('hidden');
+      const formAppNoEl = document.getElementById('currentFormAppNo');
+      if (formAppNoEl) formAppNoEl.innerText = `申請單號：${currentApplicationNo}`;
+      document.getElementById('rewardFormModal')?.classList.remove('hidden');
       renderFormSelectedChips();
     }
 
     function closeRewardFormModal() {
-      document.getElementById('rewardFormModal').classList.add('hidden');
+      document.getElementById('rewardFormModal')?.classList.add('hidden');
     }
 
     function onFormRuleChanged() {
-      const code = document.getElementById('formRuleSelect').value;
+      const code = document.getElementById('formRuleSelect')?.value;
       const rule = allRules.find(r => r.code === code);
       if (rule) {
-        document.getElementById('formLevel').value = rule.level;
-        document.getElementById('formPoints').value = rule.points || 1;
-        document.getElementById('formReason').value = rule.description;
+        const lvl = document.getElementById('formLevel');
+        if (lvl) lvl.value = rule.level;
+        const pts = document.getElementById('formPoints');
+        if (pts) pts.value = rule.points || 1;
+        const rsn = document.getElementById('formReason');
+        if (rsn) rsn.value = rule.description;
       }
     }
 
     function onFormLevelChanged() {
-      const level = document.getElementById('formLevel').value;
+      const level = document.getElementById('formLevel')?.value;
       const filtered = allRules.filter(r => r.level === level);
       if (filtered.length > 0) {
-        document.getElementById('formRuleSelect').value = filtered[0].code;
-        document.getElementById('formReason').value = filtered[0].description;
+        const ruleSel = document.getElementById('formRuleSelect');
+        if (ruleSel) ruleSel.value = filtered[0].code;
+        const rsn = document.getElementById('formReason');
+        if (rsn) rsn.value = filtered[0].description;
       }
     }
 
-    document.getElementById('vbaRewardForm').addEventListener('submit', async (e) => {
+    document.getElementById('vbaRewardForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const location = document.getElementById('formLocation').value.trim();
-      const reason = document.getElementById('formReason').value.trim();
-      const ruleCode = document.getElementById('formRuleSelect').value;
+      const location = document.getElementById('formLocation')?.value.trim() || '';
+      const reason = document.getElementById('formReason')?.value.trim() || '';
+      const ruleCode = document.getElementById('formRuleSelect')?.value;
       const studentList = Array.from(selectedStudentSet);
 
       if (!studentList.length) return alert('請點擊下方「開始點選獎懲人員」選取至少一位學生！');
 
       const rule = allRules.find(r => r.code === ruleCode);
-      const articleNum = parseInt(ruleCode.split('-')[0]) || 6;
+      const articleNum = parseInt((ruleCode || '6').split('-')[0]) || 6;
       const customReasonText = location ? `[地點:${location}] ${reason}` : reason;
 
       const payload = studentList.map(no => ({
@@ -809,14 +846,12 @@
       }
     });
 
-    // ================= 載入教職員清冊 =================
     async function loadStaffs() {
       const { data } = await sb.from('staffs').select('*').order('staff_no');
       allStaffs = data || [];
       updateAdminStats();
     }
 
-    // ================= 載入學生全量名冊 =================
     async function loadStudents() {
       let allData = [];
       let from = 0;
@@ -843,25 +878,27 @@
       }
 
       allStudents = allData;
-      document.getElementById('totalStudentsCount').innerText = allStudents.length;
+      const totalCountEl = document.getElementById('totalStudentsCount');
+      if (totalCountEl) totalCountEl.innerText = allStudents.length;
       populateClassFilter();
       updateAdminStats();
     }
 
     function populateClassFilter() {
       const select = document.getElementById('modalClassFilter');
+      if (!select) return;
       const classList = [...new Set(allStudents.map(s => s.class_name).filter(Boolean))].sort();
       select.innerHTML = '<option value="">所有班級</option>' + 
         classList.map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
     function openStudentModal() {
-      document.getElementById('studentModal').classList.remove('hidden');
+      document.getElementById('studentModal')?.classList.remove('hidden');
       renderStudentGrid();
     }
 
     function closeStudentModal() {
-      document.getElementById('studentModal').classList.add('hidden');
+      document.getElementById('studentModal')?.classList.add('hidden');
     }
 
     function confirmStudentSelection() {
@@ -870,9 +907,10 @@
     }
 
     function renderStudentGrid() {
-      const classFilter = document.getElementById('modalClassFilter').value;
-      const searchKey = document.getElementById('modalStudentSearch').value.trim().toLowerCase();
+      const classFilter = document.getElementById('modalClassFilter')?.value;
+      const searchKey = document.getElementById('modalStudentSearch')?.value.trim().toLowerCase() || '';
       const grid = document.getElementById('studentGrid');
+      if (!grid) return;
 
       let filtered = allStudents;
       if (classFilter) filtered = filtered.filter(s => s.class_name === classFilter);
@@ -910,7 +948,8 @@
         `;
       }).join('');
 
-      document.getElementById('modalSelectedCount').innerText = selectedStudentSet.size;
+      const selCountEl = document.getElementById('modalSelectedCount');
+      if (selCountEl) selCountEl.innerText = selectedStudentSet.size;
     }
 
     function toggleStudentSelection(studentNo) {
@@ -920,8 +959,8 @@
     }
 
     function selectAllFiltered(isSelectAll) {
-      const classFilter = document.getElementById('modalClassFilter').value;
-      const searchKey = document.getElementById('modalStudentSearch').value.trim().toLowerCase();
+      const classFilter = document.getElementById('modalClassFilter')?.value;
+      const searchKey = document.getElementById('modalStudentSearch')?.value.trim().toLowerCase() || '';
 
       let filtered = allStudents;
       if (classFilter) filtered = filtered.filter(s => s.class_name === classFilter);
@@ -952,6 +991,8 @@
       const countEl = document.getElementById('formSelectedCount');
       if (countEl) countEl.innerText = selectedStudentSet.size;
 
+      if (!container) return;
+
       if (selectedStudentSet.size === 0) {
         container.innerHTML = '<span class="text-slate-400 text-xs italic">尚未選取任何學生</span>';
         return;
@@ -972,10 +1013,9 @@
       renderFormSelectedChips();
     }
 
-    // ================= 批次匯入模組 =================
     async function importStudents() {
       const fileInput = document.getElementById('studentFileInput');
-      if (!fileInput.files.length) return alert('請先選擇學生名冊檔案');
+      if (!fileInput || !fileInput.files.length) return alert('請先選擇學生名冊檔案');
       const reader = new FileReader();
 
       reader.onload = async (e) => {
@@ -1012,7 +1052,7 @@
 
     async function importRules() {
       const fileInput = document.getElementById('ruleFileInput');
-      if (!fileInput.files.length) return alert('請先選擇法規條款檔案');
+      if (!fileInput || !fileInput.files.length) return alert('請先選擇法規條款檔案');
       const reader = new FileReader();
 
       reader.onload = async (e) => {
@@ -1078,30 +1118,33 @@
           optionsHtml += `</optgroup>`;
         }
       }
-      select.innerHTML = optionsHtml;
+      if (select) select.innerHTML = optionsHtml;
       if (editSelect) editSelect.innerHTML = optionsHtml;
       updateAdminStats();
     }
 
-    // ================= 管理控制台：三大資料庫表格切換與渲染 =================
     function switchAdminDataTab(tabName) {
       currentAdminDataTab = tabName;
       ['students', 'rules', 'staffs'].forEach(t => {
         const btn = document.getElementById(`adminDataTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
-        if (t === tabName) {
-          btn.className = 'px-3 py-1 rounded-lg bg-white text-blue-700 shadow-sm transition';
-        } else {
-          btn.className = 'px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition';
+        if (btn) {
+          if (t === tabName) {
+            btn.className = 'px-3 py-1 rounded-lg bg-white text-blue-700 shadow-sm transition';
+          } else {
+            btn.className = 'px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition';
+          }
         }
       });
-      document.getElementById('adminSearchInput').value = '';
+      const searchInput = document.getElementById('adminSearchInput');
+      if (searchInput) searchInput.value = '';
       renderAdminTable();
     }
 
     function renderAdminTable() {
-      const searchKey = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+      const searchKey = document.getElementById('adminSearchInput')?.value.trim().toLowerCase() || '';
       const thead = document.getElementById('adminTableHeader');
       const tbody = document.getElementById('adminTableBody');
+      if (!thead || !tbody) return;
 
       if (currentAdminDataTab === 'students') {
         thead.innerHTML = `
@@ -1220,36 +1263,41 @@
       }
     }
 
-    // ================= 線上新增/編輯資料彈窗邏輯 =================
     function openAdminCreateModal() {
       currentEditingItem = null;
-      document.getElementById('adminDataModalTitle').innerText = `➕ 新增 ${currentAdminDataTab === 'students' ? '學生' : currentAdminDataTab === 'rules' ? '條款法規' : '教職員'}`;
+      const titleEl = document.getElementById('adminDataModalTitle');
+      if (titleEl) {
+        titleEl.innerText = `➕ 新增 ${currentAdminDataTab === 'students' ? '學生' : currentAdminDataTab === 'rules' ? '條款法規' : '教職員'}`;
+      }
       buildAdminFormFields({});
-      document.getElementById('adminDataModal').classList.remove('hidden');
+      document.getElementById('adminDataModal')?.classList.remove('hidden');
     }
 
     function openAdminEditModal(type, keyId) {
+      const titleEl = document.getElementById('adminDataModalTitle');
       if (type === 'students') {
         currentEditingItem = allStudents.find(s => s.student_no === keyId);
-        document.getElementById('adminDataModalTitle').innerText = `✏️ 編輯學生資料 (${keyId})`;
+        if (titleEl) titleEl.innerText = `✏️ 編輯學生資料 (${keyId})`;
       } else if (type === 'rules') {
         currentEditingItem = allRules.find(r => r.code === keyId);
-        document.getElementById('adminDataModalTitle').innerText = `✏️ 編輯條款資料 (${keyId})`;
+        if (titleEl) titleEl.innerText = `✏️ 編輯條款資料 (${keyId})`;
       } else if (type === 'staffs') {
         currentEditingItem = allStaffs.find(st => st.staff_no === keyId);
-        document.getElementById('adminDataModalTitle').innerText = `✏️ 編輯教職員資料 (${keyId})`;
+        if (titleEl) titleEl.innerText = `✏️ 編輯教職員資料 (${keyId})`;
       }
       buildAdminFormFields(currentEditingItem || {});
-      document.getElementById('adminDataModal').classList.remove('hidden');
+      document.getElementById('adminDataModal')?.classList.remove('hidden');
     }
 
     function closeAdminDataModal() {
-      document.getElementById('adminDataModal').classList.add('hidden');
+      document.getElementById('adminDataModal')?.classList.add('hidden');
       currentEditingItem = null;
     }
 
     function buildAdminFormFields(data) {
       const container = document.getElementById('adminDataFormFields');
+      if (!container) return;
+
       if (currentAdminDataTab === 'students') {
         container.innerHTML = `
           <div>
@@ -1258,16 +1306,16 @@
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">姓名</label>
-            <input type="text" id="field_name" value="${data.name || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>
+            <input type="text" id="field_name" value="${data.name || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white" required>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-700 mb-1">班級</label>
-              <input type="text" id="field_class_name" value="${data.class_name || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>
+              <input type="text" id="field_class_name" value="${data.class_name || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white" required>
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">座號</label>
-              <input type="number" id="field_seat_no" value="${data.seat_no || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none">
+              <input type="number" id="field_seat_no" value="${data.seat_no || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white">
             </div>
           </div>
         `;
@@ -1280,7 +1328,7 @@
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">巨耀系統代碼</label>
-              <input type="text" id="field_legacy_code" value="${data.legacy_code || ''}" class="w-full border border-slate-300 rounded-lg p-2 font-mono outline-none">
+              <input type="text" id="field_legacy_code" value="${data.legacy_code || ''}" class="w-full border border-slate-300 rounded-lg p-2 font-mono outline-none bg-white">
             </div>
           </div>
           <div class="grid grid-cols-2 gap-2">
@@ -1298,12 +1346,12 @@
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">額度/次數</label>
-              <input type="number" id="field_points" value="${data.points || 1}" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>
+              <input type="number" id="field_points" value="${data.points || 1}" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white" required>
             </div>
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">事由內文說明</label>
-            <textarea id="field_description" rows="3" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>${data.description || ''}</textarea>
+            <textarea id="field_description" rows="3" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white" required>${data.description || ''}</textarea>
           </div>
         `;
       } else if (currentAdminDataTab === 'staffs') {
@@ -1314,11 +1362,11 @@
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">姓名</label>
-            <input type="text" id="field_name" value="${data.name || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>
+            <input type="text" id="field_name" value="${data.name || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white" required>
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">電子郵件</label>
-            <input type="email" id="field_email" value="${data.email || ''}" class="w-full border border-slate-300 rounded-lg p-2 font-mono outline-none" required>
+            <input type="email" id="field_email" value="${data.email || ''}" class="w-full border border-slate-300 rounded-lg p-2 font-mono outline-none bg-white" required>
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">職務類別</label>
@@ -1331,31 +1379,30 @@
       }
     }
 
-    // 儲存送出
-    document.getElementById('adminDataForm').addEventListener('submit', async (e) => {
+    document.getElementById('adminDataForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (currentStaff?.role !== 'ADMIN') return alert('權限不足！');
 
       try {
         if (currentAdminDataTab === 'students') {
           const payload = {
-            student_no: document.getElementById('field_student_no').value.trim(),
-            name: document.getElementById('field_name').value.trim(),
-            class_name: document.getElementById('field_class_name').value.trim(),
-            seat_no: parseInt(document.getElementById('field_seat_no').value) || null
+            student_no: document.getElementById('field_student_no')?.value.trim(),
+            name: document.getElementById('field_name')?.value.trim(),
+            class_name: document.getElementById('field_class_name')?.value.trim(),
+            seat_no: parseInt(document.getElementById('field_seat_no')?.value) || null
           };
           const { error } = await sb.from('students').upsert(payload, { onConflict: 'student_no' });
           if (error) throw error;
           await loadStudents();
 
         } else if (currentAdminDataTab === 'rules') {
-          const code = document.getElementById('field_code').value.trim();
+          const code = document.getElementById('field_code')?.value.trim() || '';
           const payload = {
             code: code,
-            legacy_code: document.getElementById('field_legacy_code').value.trim() || null,
-            level: document.getElementById('field_level').value,
-            points: parseInt(document.getElementById('field_points').value) || 1,
-            description: document.getElementById('field_description').value.trim(),
+            legacy_code: document.getElementById('field_legacy_code')?.value.trim() || null,
+            level: document.getElementById('field_level')?.value || '嘉獎',
+            points: parseInt(document.getElementById('field_points')?.value) || 1,
+            description: document.getElementById('field_description')?.value.trim() || '',
             type: (parseInt(code.split('-')[0]) <= 8) ? 'MERIT' : 'DEMERIT',
             article: `第${code.split('-')[0]}條`,
             clause: `第${code.split('-')[1] || '01'}款`
@@ -1366,10 +1413,10 @@
 
         } else if (currentAdminDataTab === 'staffs') {
           const payload = {
-            staff_no: document.getElementById('field_staff_no').value.trim(),
-            name: document.getElementById('field_name').value.trim(),
-            email: document.getElementById('field_email').value.trim(),
-            job_title: document.getElementById('field_job_title').value
+            staff_no: document.getElementById('field_staff_no')?.value.trim(),
+            name: document.getElementById('field_name')?.value.trim(),
+            email: document.getElementById('field_email')?.value.trim(),
+            job_title: document.getElementById('field_job_title')?.value || '教師'
           };
           const { error } = await sb.from('staffs').upsert(payload, { onConflict: 'staff_no' });
           if (error) throw error;
@@ -1384,7 +1431,6 @@
       }
     });
 
-    // 刪除資料
     async function deleteAdminItem(type, keyId) {
       if (currentStaff?.role !== 'ADMIN') return alert('權限不足！');
       const confirmDel = confirm(`⚠️ 確定要徹底刪除此筆資料【${keyId}】嗎？此操作無法復原！`);
@@ -1412,7 +1458,6 @@
       }
     }
 
-    // ================= 載入審核紀錄 =================
     async function loadRecords() {
       if (!currentStaff) return;
 
@@ -1465,6 +1510,8 @@
       });
 
       const tbody = document.getElementById('applicationGroupsTableBody');
+      if (!tbody) return;
+
       const groupList = Object.values(groupedApplications);
 
       if (!groupList.length) {
@@ -1505,46 +1552,64 @@
       currentViewingAppNo = appNo;
       toggleEditMode(false);
 
-      document.getElementById('modalDetailAppNo').innerText = group.appNo;
-      document.getElementById('modalDetailSub').innerText = `申請時間：${new Date(group.created_at).toLocaleString('zh-TW')}`;
-      document.getElementById('detailProposer').innerText = group.proposer_name;
-      document.getElementById('detailRule').innerText = `[${group.rule_code}] ${group.level} (${group.points}次)`;
-      document.getElementById('detailReason').innerText = group.custom_reason || '-';
-      document.getElementById('detailStatus').innerHTML = renderStatusBadge(group.status);
-      document.getElementById('detailStudentCount').innerText = group.records.length;
+      const modalAppNo = document.getElementById('modalDetailAppNo');
+      if (modalAppNo) modalAppNo.innerText = group.appNo;
 
-      document.getElementById('editRuleSelect').value = group.rule_code;
-      document.getElementById('editReasonInput').value = group.custom_reason || '';
+      const modalSub = document.getElementById('modalDetailSub');
+      if (modalSub) modalSub.innerText = `申請時間：${new Date(group.created_at).toLocaleString('zh-TW')}`;
+
+      const detProp = document.getElementById('detailProposer');
+      if (detProp) detProp.innerText = group.proposer_name;
+
+      const detRule = document.getElementById('detailRule');
+      if (detRule) detRule.innerText = `[${group.rule_code}] ${group.level} (${group.points}次)`;
+
+      const detReason = document.getElementById('detailReason');
+      if (detReason) detReason.innerText = group.custom_reason || '-';
+
+      const detStatus = document.getElementById('detailStatus');
+      if (detStatus) detStatus.innerHTML = renderStatusBadge(group.status);
+
+      const detCount = document.getElementById('detailStudentCount');
+      if (detCount) detCount.innerText = group.records.length;
+
+      const editRule = document.getElementById('editRuleSelect');
+      if (editRule) editRule.value = group.rule_code;
+
+      const editRsn = document.getElementById('editReasonInput');
+      if (editRsn) editRsn.value = group.custom_reason || '';
 
       const tbody = document.getElementById('detailStudentTableBody');
-      tbody.innerHTML = group.records.map(r => {
-        const studentInfo = allStudents.find(s => s.student_no === r.student_no) || {};
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="p-2.5 font-medium">${studentInfo.class_name || '-'}</td>
-            <td class="p-2.5 font-mono">${studentInfo.seat_no ? `${studentInfo.seat_no}號` : '-'}</td>
-            <td class="p-2.5 font-bold text-slate-900">${studentInfo.name || '-'}</td>
-            <td class="p-2.5 font-mono text-slate-600">${r.student_no}</td>
-          </tr>
-        `;
-      }).join('');
+      if (tbody) {
+        tbody.innerHTML = group.records.map(r => {
+          const studentInfo = allStudents.find(s => s.student_no === r.student_no) || {};
+          return `
+            <tr class="hover:bg-slate-50">
+              <td class="p-2.5 font-medium">${studentInfo.class_name || '-'}</td>
+              <td class="p-2.5 font-mono">${studentInfo.seat_no ? `${studentInfo.seat_no}號` : '-'}</td>
+              <td class="p-2.5 font-bold text-slate-900">${studentInfo.name || '-'}</td>
+              <td class="p-2.5 font-mono text-slate-600">${r.student_no}</td>
+            </tr>
+          `;
+        }).join('');
+      }
 
       const btnToggleEdit = document.getElementById('btnToggleEdit');
       const btnDeleteApp = document.getElementById('btnDeleteApp');
       if (currentStaff?.role === 'ADMIN') {
-        btnToggleEdit.classList.remove('hidden');
-        btnDeleteApp.classList.remove('hidden');
+        btnToggleEdit?.classList.remove('hidden');
+        btnDeleteApp?.classList.remove('hidden');
       } else {
-        btnToggleEdit.classList.add('hidden');
-        btnDeleteApp.classList.add('hidden');
+        btnToggleEdit?.classList.add('hidden');
+        btnDeleteApp?.classList.add('hidden');
       }
 
       renderDetailActions(group);
-      document.getElementById('appDetailModal').classList.remove('hidden');
+      document.getElementById('appDetailModal')?.classList.remove('hidden');
     }
 
     function closeAppDetailModal() {
-      document.getElementById('appDetailModal').classList.add('hidden');
+      document.getElementById('appDetailModal')?.classList.add('hidden');
       currentViewingAppNo = null;
     }
 
@@ -1552,11 +1617,11 @@
       const viewCard = document.getElementById('detailViewCard');
       const editCard = document.getElementById('detailEditCard');
       if (isEdit) {
-        viewCard.classList.add('hidden');
-        editCard.classList.remove('hidden');
+        viewCard?.classList.add('hidden');
+        editCard?.classList.remove('hidden');
       } else {
-        viewCard.classList.remove('hidden');
-        editCard.classList.add('hidden');
+        viewCard?.classList.remove('hidden');
+        editCard?.classList.add('hidden');
       }
     }
 
@@ -1567,8 +1632,8 @@
       const group = groupedApplications[currentViewingAppNo];
       if (!group) return;
 
-      const newRuleCode = document.getElementById('editRuleSelect').value;
-      const newReason = document.getElementById('editReasonInput').value.trim();
+      const newRuleCode = document.getElementById('editRuleSelect')?.value;
+      const newReason = document.getElementById('editReasonInput')?.value.trim();
 
       if (!newRuleCode) return alert('請選擇有效的法規條款！');
 
@@ -1621,6 +1686,7 @@
 
     function renderDetailActions(group) {
       const container = document.getElementById('detailActionButtons');
+      if (!container) return;
       let actions = '';
 
       if (currentStaff?.role === 'ADMIN') {
