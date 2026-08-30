@@ -34,7 +34,6 @@
       <span id="roleBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full hidden"></span>
     </div>
 
-    <!-- 右側功能與分頁控制按鈕 -->
     <div class="flex items-center gap-3">
       <nav id="navTabs" class="hidden flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
         <button id="tabBtnMenu" onclick="switchTab('menu')" class="px-3 py-1.5 rounded-lg transition bg-white text-blue-700 shadow-sm">
@@ -94,10 +93,8 @@
       </form>
     </div>
 
-    <!-- ================= 分頁 1：獎懲提報模式 (全體教職員) ================= -->
+    <!-- ================= 分頁 1：獎懲提報模式 ================= -->
     <div id="tabContentMenu" class="tab-pane hidden space-y-4">
-      
-      <!-- 日期與申請人狀態列 -->
       <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div class="flex items-center gap-2">
           <span class="text-xs sm:text-sm font-bold text-slate-700">獎懲案件申請人：</span>
@@ -109,10 +106,7 @@
         </div>
       </div>
 
-      <!-- 三個作業模式卡片 -->
       <div class="space-y-4">
-        
-        <!-- 模式 1 -->
         <div class="vba-red-panel p-4 sm:p-5 rounded-2xl shadow-md cursor-pointer hover:brightness-105 transition" onclick="clickMode(1)">
           <div class="vba-btn text-center py-3 px-4 rounded-xl text-slate-900 font-bold text-base sm:text-lg md:text-xl">
             模式 1：事由原因、獎懲種類均相同
@@ -122,7 +116,6 @@
           </div>
         </div>
 
-        <!-- 模式 2 -->
         <div class="vba-red-panel p-4 sm:p-5 rounded-2xl shadow-md cursor-pointer hover:brightness-105 transition" onclick="clickMode(2)">
           <div class="vba-btn text-center py-3 px-4 rounded-xl text-slate-900 font-bold text-base sm:text-lg md:text-xl">
             模式 2：同一事件，但獎懲種類不同
@@ -132,7 +125,6 @@
           </div>
         </div>
 
-        <!-- 模式 3 -->
         <div class="vba-red-panel p-4 sm:p-5 rounded-2xl shadow-md cursor-pointer hover:brightness-105 transition" onclick="clickMode(3)">
           <div class="vba-btn text-center py-3 px-4 rounded-xl text-slate-900 font-bold text-base sm:text-lg md:text-xl">
             模式 3：期末 幹部／小老師 獎懲
@@ -141,17 +133,16 @@
             （每學期期末導師使用）
           </div>
         </div>
-
       </div>
     </div>
 
-    <!-- ================= 分頁 2：案件追蹤 (教師看個人 / 管理員看全校) ================= -->
+    <!-- ================= 分頁 2：案件追蹤與審核 ================= -->
     <div id="tabContentRecords" class="tab-pane hidden space-y-4">
       <section class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
         <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-3">
           <div>
             <h2 id="recordsSectionTitle" class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">📋 案件進度追蹤</h2>
-            <p id="recordsSectionSub" class="text-xs text-slate-500 mt-0.5">點擊「申請單號」即可檢視完整學生名單</p>
+            <p id="recordsSectionSub" class="text-xs text-slate-500 mt-0.5">點擊「申請單號」即可檢視完整學生名單並進行整批審核</p>
           </div>
           <div class="flex flex-wrap gap-2">
             <button id="btnExportClerk" onclick="exportExcelForClerk()" class="hidden text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm flex items-center gap-1">
@@ -185,10 +176,10 @@
       </section>
     </div>
 
-    <!-- ================= 分頁 3：管理控制台 (只有三位系統管理員 admin, t119, t277 可見) ================= -->
-    <div id="tabContentAdmin" class="tab-pane hidden space-y-5">
+    <!-- ================= 分頁 3：管理控制台 (支援 查看、修改、刪除、批次匯入) ================= -->
+    <div id="tabContentAdmin" class="tab-pane hidden space-y-6">
       
-      <!-- 統計資訊卡片 -->
+      <!-- 統計數據卡片 -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
           <div class="text-xs font-semibold text-slate-400">已建檔學生總數</div>
@@ -199,19 +190,19 @@
           <div id="adminStatRules" class="text-2xl font-bold text-slate-900 mt-1">0 條</div>
         </div>
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-          <div class="text-xs font-semibold text-slate-400">全校獎懲申請案總數</div>
-          <div id="adminStatApps" class="text-2xl font-bold text-slate-900 mt-1">0 案</div>
+          <div class="text-xs font-semibold text-slate-400">全校教職員人數</div>
+          <div id="adminStatStaffs" class="text-2xl font-bold text-slate-900 mt-1">0 人</div>
         </div>
       </div>
 
-      <!-- 資料維護與匯入區塊 -->
+      <!-- 批次匯入區塊 -->
       <section class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-        <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3 gap-2">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
           <div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">⚙️ 基礎名冊與法規代碼維護</h2>
-            <p class="text-xs text-slate-500 mt-0.5">三位系統管理員專屬權限：支援 Excel / CSV 檔案快速批次匯入</p>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">📥 Excel / CSV 批次匯入與更新</h2>
+            <p class="text-xs text-slate-500 mt-0.5">匯入新學期學生名冊或法規條款（依唯一代碼自動覆蓋更新）</p>
           </div>
-          <span class="text-xs bg-purple-50 text-purple-700 font-medium px-2.5 py-1 rounded-md border border-purple-100">管理端控制台</span>
+          <span class="text-xs bg-purple-50 text-purple-700 font-bold px-3 py-1 rounded-full border border-purple-200">管理專用</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
@@ -235,14 +226,40 @@
         </div>
       </section>
 
+      <!-- 資料庫線上管理檢視區 (三大資料表切換：學生、條款、教職員) -->
+      <section class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+        <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3 gap-3">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">🗄️ 基礎資料庫線上維護</h2>
+            <div class="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-bold gap-1 ml-2">
+              <button id="adminDataTabStudents" onclick="switchAdminDataTab('students')" class="px-3 py-1 rounded-lg bg-white text-blue-700 shadow-sm transition">🧑‍🎓 學生名冊</button>
+              <button id="adminDataTabRules" onclick="switchAdminDataTab('rules')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">📜 獎懲法規</button>
+              <button id="adminDataTabStaffs" onclick="switchAdminDataTab('staffs')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">👨‍🏫 教職員名冊</button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="即時搜尋資料..." class="border border-slate-300 text-xs px-3 py-1.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-44 sm:w-56">
+            <button onclick="openAdminCreateModal()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-sm">➕ 單筆新增</button>
+          </div>
+        </div>
+
+        <!-- 線上資料展示表格 (支援 修改 / 刪除) -->
+        <div class="overflow-x-auto rounded-xl border border-slate-100 min-h-[300px]">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead id="adminTableHeader" class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs"></thead>
+            <tbody id="adminTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </section>
+
     </div>
 
   </main>
 
-  <!-- 4. 【單筆申請單明細彈窗】（含管理員 修改 / 刪除 介面） -->
+  <!-- ================= 彈窗 1：案件明細彈窗 ================= -->
   <div id="appDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
-      
       <div class="p-4 sm:p-5 border-b flex justify-between items-center bg-slate-50">
         <div>
           <div class="flex items-center gap-2 flex-wrap">
@@ -255,8 +272,6 @@
       </div>
 
       <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
-        
-        <!-- 一般檢視模式 -->
         <div id="detailViewCard" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs sm:text-sm">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div><span class="text-slate-400">提報人員：</span><span id="detailProposer" class="font-bold text-slate-800"></span></div>
@@ -265,17 +280,15 @@
           <div><span class="text-slate-400">具體事由：</span><span id="detailReason" class="font-medium text-slate-700"></span></div>
           <div class="flex justify-between items-center pt-1">
             <div><span class="text-slate-400">當前狀態：</span><span id="detailStatus"></span></div>
-            <!-- 管理員專屬：編輯按鈕 -->
             <button id="btnToggleEdit" onclick="toggleEditMode(true)" class="hidden text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-sm">
               ✏️ 編輯案件內容
             </button>
           </div>
         </div>
 
-        <!-- 管理員編輯模式區塊 (預設隱藏) -->
         <div id="detailEditCard" class="hidden bg-amber-50/70 p-4 rounded-xl border border-amber-200 space-y-3 text-xs sm:text-sm">
           <div class="font-bold text-amber-900 flex justify-between items-center border-b border-amber-200 pb-1.5">
-            <span>✏️ 正在修改申請案內容（將同步套用至全體學生）</span>
+            <span>✏️ 正在修改申請案內容（同步套用至全體受獎懲學生）</span>
             <button onclick="toggleEditMode(false)" class="text-xs text-slate-500 hover:text-slate-800">取消編輯</button>
           </div>
           
@@ -297,7 +310,6 @@
           </div>
         </div>
 
-        <!-- 學生列表 -->
         <div>
           <div class="flex justify-between items-center mb-2">
             <span class="text-xs sm:text-sm font-bold text-slate-700">受獎懲學生名單（共 <span id="detailStudentCount" class="text-blue-600 font-bold">0</span> 人）</span>
@@ -319,25 +331,21 @@
         </div>
       </div>
 
-      <!-- 彈窗底部操作列 (含管理員刪除按鈕) -->
       <div class="p-4 border-t bg-slate-50 flex flex-wrap justify-between items-center gap-2">
         <div class="flex items-center gap-2">
           <button onclick="closeAppDetailModal()" class="text-xs text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-lg transition font-medium">關閉視窗</button>
-          <!-- 管理員專屬：整單刪除按鈕 -->
           <button id="btnDeleteApp" onclick="deleteApplication()" class="hidden text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-2 rounded-lg transition font-bold shadow-sm">
             🗑️ 刪除此申請案
           </button>
         </div>
         <div id="detailActionButtons" class="flex gap-2"></div>
       </div>
-
     </div>
   </div>
 
-  <!-- 5. 【獎懲 Form】視窗 (VBA UserForm1) -->
+  <!-- ================= 彈窗 2：獎懲 Form (VBA UserForm1) ================= -->
   <div id="rewardFormModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-[#f0f0f0] rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] flex flex-col overflow-hidden border border-slate-400">
-      
       <div class="p-4 border-b border-slate-300 flex justify-between items-center bg-[#e8e8e8]">
         <div class="flex items-center gap-2 flex-wrap">
           <h3 class="text-sm sm:text-base font-bold text-slate-900">獎懲 Form</h3>
@@ -347,7 +355,6 @@
       </div>
 
       <form id="vbaRewardForm" class="p-4 sm:p-6 overflow-y-auto space-y-3.5 text-xs sm:text-sm flex-1">
-        
         <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
           <label class="sm:w-20 font-bold text-slate-800 sm:text-right">地點</label>
           <input type="text" id="formLocation" placeholder="例如：教室 / 操場 / 校外" class="flex-1 sm:max-w-xs border border-slate-400 bg-white px-2.5 py-1.5 rounded outline-none focus:border-blue-600">
@@ -405,15 +412,13 @@
           <button type="button" onclick="closeRewardFormModal()" class="px-4 py-1.5 text-xs text-slate-700 hover:bg-slate-200 rounded border border-slate-300">取消</button>
           <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 text-xs font-bold rounded shadow-sm">送出申請單（生成單號）</button>
         </div>
-
       </form>
     </div>
   </div>
 
-  <!-- 6. 互動式學生選取器彈窗 -->
+  <!-- ================= 彈窗 3：學生選取器彈窗 ================= -->
   <div id="studentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
-      
       <div class="p-4 border-b flex justify-between items-center bg-slate-50">
         <div>
           <h3 class="text-sm sm:text-base font-bold text-slate-900">👥 點選學生名單（點錯可再點一次清除）</h3>
@@ -428,11 +433,9 @@
             <option value="">所有班級</option>
           </select>
         </div>
-
         <div>
           <input type="text" id="modalStudentSearch" oninput="renderStudentGrid()" placeholder="搜尋姓名 / 學號 / 座號" class="w-full border border-slate-300 text-xs rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500">
         </div>
-
         <div class="flex items-center justify-end gap-2">
           <button type="button" onclick="selectAllFiltered(true)" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium transition flex-1 sm:flex-none">全選當前</button>
           <button type="button" onclick="selectAllFiltered(false)" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium transition flex-1 sm:flex-none">取消當前</button>
@@ -452,11 +455,29 @@
           <button type="button" onclick="confirmStudentSelection()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-1.5 rounded-lg text-xs font-medium transition shadow-sm">完成點選</button>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- 7. 管理後台帳號密碼驗證視窗 (Modal) -->
+  <!-- ================= 彈窗 4：管理控制台「線上新增/修改資料」彈窗 ================= -->
+  <div id="adminDataModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+        <h3 id="adminDataModalTitle" class="text-base font-bold text-slate-900">✏️ 編輯資料</h3>
+        <button onclick="closeAdminDataModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+      </div>
+
+      <form id="adminDataForm" class="space-y-3.5 text-xs sm:text-sm">
+        <div id="adminDataFormFields" class="space-y-3"></div>
+
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeAdminDataModal()" class="px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg font-medium">取消</button>
+          <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm">💾 儲存送出</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= 彈窗 5：管理員登入密碼驗證視窗 ================= -->
   <div id="adminModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4 border border-slate-100">
       <div class="flex justify-between items-center">
@@ -493,13 +514,17 @@
     let currentMode = 1;
     let allRules = [];
     let allStudents = [];
+    let allStaffs = [];
     let allRecords = [];
     let groupedApplications = {};
     let selectedStudentSet = new Set();
     let currentApplicationNo = '';
-    let currentViewingAppNo = null; // 當前在彈窗檢視的單號
+    let currentViewingAppNo = null;
 
-    // 只有這三位具備系統管理員與查看/修改/刪除權限
+    // 後台資料庫子分頁狀態
+    let currentAdminDataTab = 'students'; // 'students' | 'rules' | 'staffs'
+    let currentEditingItem = null; // 當前在後台修改的項目
+
     const ADMIN_STAFF_NOS = ['admin', 't119', 't277'];
 
     const roleMap = {
@@ -516,7 +541,6 @@
 
     async function init() {
       document.getElementById('eventDate').valueAsDate = new Date();
-
       const savedUser = localStorage.getItem('meritflow_staff');
       if (savedUser) {
         currentStaff = JSON.parse(savedUser);
@@ -528,7 +552,7 @@
 
     function switchTab(tabKey) {
       if (tabKey === 'admin' && currentStaff?.role !== 'ADMIN') {
-        alert('權限不足：管理控制台僅限系統管理員、學務處幹事與訓育組長存取！');
+        alert('權限不足：管理控制台僅限三位系統管理員存取！');
         return;
       }
 
@@ -552,6 +576,8 @@
       } else if (tabKey === 'admin') {
         document.getElementById('tabContentAdmin').classList.remove('hidden');
         btnAdmin.className = 'px-3 py-1.5 rounded-lg transition bg-purple-600 text-white shadow-sm';
+        loadStaffs();
+        renderAdminTable();
         updateAdminStats();
       }
     }
@@ -559,6 +585,7 @@
     function updateAdminStats() {
       document.getElementById('adminStatStudents').innerText = `${allStudents.length} 人`;
       document.getElementById('adminStatRules').innerText = `${allRules.length} 條`;
+      document.getElementById('adminStatStaffs').innerText = `${allStaffs.length} 人`;
       document.getElementById('adminStatApps').innerText = `${Object.keys(groupedApplications).length} 案`;
     }
 
@@ -573,7 +600,6 @@
       document.getElementById('adminLoginForm').reset();
     }
 
-    // 管理員密碼驗證登入
     document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const account = document.getElementById('adminAccount').value.trim();
@@ -595,7 +621,6 @@
       }
     });
 
-    // 一般教職員免密碼登入
     document.getElementById('teacherLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('teacherLoginBtn');
@@ -693,6 +718,7 @@
       switchTab('menu');
       loadRules();
       loadStudents();
+      loadStaffs();
       loadRecords();
     }
 
@@ -783,6 +809,14 @@
       }
     });
 
+    // ================= 載入教職員清冊 =================
+    async function loadStaffs() {
+      const { data } = await sb.from('staffs').select('*').order('staff_no');
+      allStaffs = data || [];
+      updateAdminStats();
+    }
+
+    // ================= 載入學生全量名冊 =================
     async function loadStudents() {
       let allData = [];
       let from = 0;
@@ -938,6 +972,7 @@
       renderFormSelectedChips();
     }
 
+    // ================= 批次匯入模組 =================
     async function importStudents() {
       const fileInput = document.getElementById('studentFileInput');
       if (!fileInput.files.length) return alert('請先選擇學生名冊檔案');
@@ -966,7 +1001,8 @@
 
           alert(`✅ 成功匯入/更新 ${list.length} 筆學生名冊！`);
           fileInput.value = '';
-          loadStudents();
+          await loadStudents();
+          renderAdminTable();
         } catch (err) {
           alert(`匯入失敗：${err.message}`);
         }
@@ -1000,7 +1036,8 @@
 
           alert(`✅ 成功匯入/更新 ${list.length} 筆獎懲法規條款！`);
           fileInput.value = '';
-          loadRules();
+          await loadRules();
+          renderAdminTable();
         } catch (err) {
           alert(`匯入失敗：${err.message}`);
         }
@@ -1046,6 +1083,335 @@
       updateAdminStats();
     }
 
+    // ================= 管理控制台：三大資料庫表格切換與渲染 =================
+    function switchAdminDataTab(tabName) {
+      currentAdminDataTab = tabName;
+      ['students', 'rules', 'staffs'].forEach(t => {
+        const btn = document.getElementById(`adminDataTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (t === tabName) {
+          btn.className = 'px-3 py-1 rounded-lg bg-white text-blue-700 shadow-sm transition';
+        } else {
+          btn.className = 'px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition';
+        }
+      });
+      document.getElementById('adminSearchInput').value = '';
+      renderAdminTable();
+    }
+
+    function renderAdminTable() {
+      const searchKey = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+      const thead = document.getElementById('adminTableHeader');
+      const tbody = document.getElementById('adminTableBody');
+
+      if (currentAdminDataTab === 'students') {
+        thead.innerHTML = `
+          <tr>
+            <th class="p-3">班級</th>
+            <th class="p-3">座號</th>
+            <th class="p-3">姓名</th>
+            <th class="p-3 font-mono">學號</th>
+            <th class="p-3 text-right">操作</th>
+          </tr>
+        `;
+
+        let list = allStudents;
+        if (searchKey) {
+          list = list.filter(s => 
+            (s.name && s.name.toLowerCase().includes(searchKey)) ||
+            (s.student_no && s.student_no.toLowerCase().includes(searchKey)) ||
+            (s.class_name && s.class_name.toLowerCase().includes(searchKey))
+          );
+        }
+
+        if (!list.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無學生資料</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = list.slice(0, 100).map(s => `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3 font-medium text-slate-800">${s.class_name || '-'}</td>
+            <td class="p-3 font-mono text-slate-600">${s.seat_no ? `${s.seat_no}號` : '-'}</td>
+            <td class="p-3 font-bold text-slate-900">${s.name}</td>
+            <td class="p-3 font-mono text-blue-700 font-semibold">${s.student_no}</td>
+            <td class="p-3 text-right space-x-1">
+              <button onclick="openAdminEditModal('students', '${s.student_no}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
+              <button onclick="deleteAdminItem('students', '${s.student_no}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
+            </td>
+          </tr>
+        `).join('');
+
+      } else if (currentAdminDataTab === 'rules') {
+        thead.innerHTML = `
+          <tr>
+            <th class="p-3">條款代碼</th>
+            <th class="p-3">巨耀代碼</th>
+            <th class="p-3">獎懲額度</th>
+            <th class="p-3">事由說明</th>
+            <th class="p-3 text-right">操作</th>
+          </tr>
+        `;
+
+        let list = allRules;
+        if (searchKey) {
+          list = list.filter(r => 
+            (r.code && r.code.toLowerCase().includes(searchKey)) ||
+            (r.description && r.description.toLowerCase().includes(searchKey)) ||
+            (r.level && r.level.toLowerCase().includes(searchKey)) ||
+            (r.legacy_code && r.legacy_code.toLowerCase().includes(searchKey))
+          );
+        }
+
+        if (!list.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無法規條款</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = list.map(r => `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3 font-mono font-bold text-blue-700">${r.code}</td>
+            <td class="p-3 font-mono text-slate-500">${r.legacy_code || '-'}</td>
+            <td class="p-3 font-medium">${r.level} (${r.points || 1}次)</td>
+            <td class="p-3 text-slate-700 max-w-md truncate">${r.description}</td>
+            <td class="p-3 text-right space-x-1">
+              <button onclick="openAdminEditModal('rules', '${r.code}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
+              <button onclick="deleteAdminItem('rules', '${r.code}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
+            </td>
+          </tr>
+        `).join('');
+
+      } else if (currentAdminDataTab === 'staffs') {
+        thead.innerHTML = `
+          <tr>
+            <th class="p-3">教職員編號</th>
+            <th class="p-3">姓名</th>
+            <th class="p-3">電子郵件</th>
+            <th class="p-3">職務</th>
+            <th class="p-3 text-right">操作</th>
+          </tr>
+        `;
+
+        let list = allStaffs;
+        if (searchKey) {
+          list = list.filter(st => 
+            (st.name && st.name.toLowerCase().includes(searchKey)) ||
+            (st.staff_no && st.staff_no.toLowerCase().includes(searchKey)) ||
+            (st.email && st.email.toLowerCase().includes(searchKey))
+          );
+        }
+
+        if (!list.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無教職員資料</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = list.map(st => `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3 font-mono font-bold text-slate-800">${st.staff_no}</td>
+            <td class="p-3 font-bold text-slate-900">${st.name}</td>
+            <td class="p-3 font-mono text-slate-500">${st.email}</td>
+            <td class="p-3"><span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${st.job_title || '教師'}</span></td>
+            <td class="p-3 text-right space-x-1">
+              <button onclick="openAdminEditModal('staffs', '${st.staff_no}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
+              <button onclick="deleteAdminItem('staffs', '${st.staff_no}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // ================= 線上新增/編輯資料彈窗邏輯 =================
+    function openAdminCreateModal() {
+      currentEditingItem = null;
+      document.getElementById('adminDataModalTitle').innerText = `➕ 新增 ${currentAdminDataTab === 'students' ? '學生' : currentAdminDataTab === 'rules' ? '條款法規' : '教職員'}`;
+      buildAdminFormFields({});
+      document.getElementById('adminDataModal').classList.remove('hidden');
+    }
+
+    function openAdminEditModal(type, keyId) {
+      if (type === 'students') {
+        currentEditingItem = allStudents.find(s => s.student_no === keyId);
+        document.getElementById('adminDataModalTitle').innerText = `✏️ 編輯學生資料 (${keyId})`;
+      } else if (type === 'rules') {
+        currentEditingItem = allRules.find(r => r.code === keyId);
+        document.getElementById('adminDataModalTitle').innerText = `✏️ 編輯條款資料 (${keyId})`;
+      } else if (type === 'staffs') {
+        currentEditingItem = allStaffs.find(st => st.staff_no === keyId);
+        document.getElementById('adminDataModalTitle').innerText = `✏️ 編輯教職員資料 (${keyId})`;
+      }
+      buildAdminFormFields(currentEditingItem || {});
+      document.getElementById('adminDataModal').classList.remove('hidden');
+    }
+
+    function closeAdminDataModal() {
+      document.getElementById('adminDataModal').classList.add('hidden');
+      currentEditingItem = null;
+    }
+
+    function buildAdminFormFields(data) {
+      const container = document.getElementById('adminDataFormFields');
+      if (currentAdminDataTab === 'students') {
+        container.innerHTML = `
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">學號 (不可重複)</label>
+            <input type="text" id="field_student_no" value="${data.student_no || ''}" ${data.student_no ? 'readonly class="bg-slate-100' : 'class="bg-white'} w-full border border-slate-300 rounded-lg p-2 font-mono outline-none" required>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">姓名</label>
+            <input type="text" id="field_name" value="${data.name || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">班級</label>
+              <input type="text" id="field_class_name" value="${data.class_name || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">座號</label>
+              <input type="number" id="field_seat_no" value="${data.seat_no || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none">
+            </div>
+          </div>
+        `;
+      } else if (currentAdminDataTab === 'rules') {
+        container.innerHTML = `
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">條款代碼 (例: 6-1)</label>
+              <input type="text" id="field_code" value="${data.code || ''}" ${data.code ? 'readonly class="bg-slate-100' : 'class="bg-white'} w-full border border-slate-300 rounded-lg p-2 font-mono outline-none" required>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">巨耀系統代碼</label>
+              <input type="text" id="field_legacy_code" value="${data.legacy_code || ''}" class="w-full border border-slate-300 rounded-lg p-2 font-mono outline-none">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">獎懲種類</label>
+              <select id="field_level" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white">
+                <option value="嘉獎" ${data.level === '嘉獎' ? 'selected' : ''}>嘉獎</option>
+                <option value="小功" ${data.level === '小功' ? 'selected' : ''}>小功</option>
+                <option value="大功" ${data.level === '大功' ? 'selected' : ''}>大功</option>
+                <option value="警告" ${data.level === '警告' ? 'selected' : ''}>警告</option>
+                <option value="小過" ${data.level === '小過' ? 'selected' : ''}>小過</option>
+                <option value="大過" ${data.level === '大過' ? 'selected' : ''}>大過</option>
+                <option value="輔導與安置" ${data.level === '輔導與安置' ? 'selected' : ''}>輔導與安置</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">額度/次數</label>
+              <input type="number" id="field_points" value="${data.points || 1}" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">事由內文說明</label>
+            <textarea id="field_description" rows="3" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>${data.description || ''}</textarea>
+          </div>
+        `;
+      } else if (currentAdminDataTab === 'staffs') {
+        container.innerHTML = `
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">教職員編號 (帳號代碼)</label>
+            <input type="text" id="field_staff_no" value="${data.staff_no || ''}" ${data.staff_no ? 'readonly class="bg-slate-100' : 'class="bg-white'} w-full border border-slate-300 rounded-lg p-2 font-mono outline-none" required>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">姓名</label>
+            <input type="text" id="field_name" value="${data.name || ''}" class="w-full border border-slate-300 rounded-lg p-2 outline-none" required>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">電子郵件</label>
+            <input type="email" id="field_email" value="${data.email || ''}" class="w-full border border-slate-300 rounded-lg p-2 font-mono outline-none" required>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">職務類別</label>
+            <select id="field_job_title" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white">
+              <option value="教師" ${data.job_title === '教師' ? 'selected' : ''}>教師</option>
+              <option value="行政" ${data.job_title === '行政' ? 'selected' : ''}>行政</option>
+            </select>
+          </div>
+        `;
+      }
+    }
+
+    // 儲存送出
+    document.getElementById('adminDataForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (currentStaff?.role !== 'ADMIN') return alert('權限不足！');
+
+      try {
+        if (currentAdminDataTab === 'students') {
+          const payload = {
+            student_no: document.getElementById('field_student_no').value.trim(),
+            name: document.getElementById('field_name').value.trim(),
+            class_name: document.getElementById('field_class_name').value.trim(),
+            seat_no: parseInt(document.getElementById('field_seat_no').value) || null
+          };
+          const { error } = await sb.from('students').upsert(payload, { onConflict: 'student_no' });
+          if (error) throw error;
+          await loadStudents();
+
+        } else if (currentAdminDataTab === 'rules') {
+          const code = document.getElementById('field_code').value.trim();
+          const payload = {
+            code: code,
+            legacy_code: document.getElementById('field_legacy_code').value.trim() || null,
+            level: document.getElementById('field_level').value,
+            points: parseInt(document.getElementById('field_points').value) || 1,
+            description: document.getElementById('field_description').value.trim(),
+            type: (parseInt(code.split('-')[0]) <= 8) ? 'MERIT' : 'DEMERIT',
+            article: `第${code.split('-')[0]}條`,
+            clause: `第${code.split('-')[1] || '01'}款`
+          };
+          const { error } = await sb.from('merit_rules').upsert(payload, { onConflict: 'code' });
+          if (error) throw error;
+          await loadRules();
+
+        } else if (currentAdminDataTab === 'staffs') {
+          const payload = {
+            staff_no: document.getElementById('field_staff_no').value.trim(),
+            name: document.getElementById('field_name').value.trim(),
+            email: document.getElementById('field_email').value.trim(),
+            job_title: document.getElementById('field_job_title').value
+          };
+          const { error } = await sb.from('staffs').upsert(payload, { onConflict: 'staff_no' });
+          if (error) throw error;
+          await loadStaffs();
+        }
+
+        alert('✅ 資料儲存成功！');
+        closeAdminDataModal();
+        renderAdminTable();
+      } catch (err) {
+        alert(`儲存失敗：${err.message}`);
+      }
+    });
+
+    // 刪除資料
+    async function deleteAdminItem(type, keyId) {
+      if (currentStaff?.role !== 'ADMIN') return alert('權限不足！');
+      const confirmDel = confirm(`⚠️ 確定要徹底刪除此筆資料【${keyId}】嗎？此操作無法復原！`);
+      if (!confirmDel) return;
+
+      try {
+        if (type === 'students') {
+          const { error } = await sb.from('students').delete().eq('student_no', keyId);
+          if (error) throw error;
+          await loadStudents();
+        } else if (type === 'rules') {
+          const { error } = await sb.from('merit_rules').delete().eq('code', keyId);
+          if (error) throw error;
+          await loadRules();
+        } else if (type === 'staffs') {
+          const { error } = await sb.from('staffs').delete().eq('staff_no', keyId);
+          if (error) throw error;
+          await loadStaffs();
+        }
+
+        alert('✅ 資料已成功刪除！');
+        renderAdminTable();
+      } catch (err) {
+        alert(`刪除失敗：${err.message}`);
+      }
+    }
+
     // ================= 載入審核紀錄 =================
     async function loadRecords() {
       if (!currentStaff) return;
@@ -1066,7 +1432,6 @@
         }
 
         const { data, error } = await query.range(from, from + step - 1);
-
         if (error) break;
 
         if (data && data.length > 0) {
@@ -1133,13 +1498,12 @@
       updateAdminStats();
     }
 
-    // ================= 查看明細彈窗 =================
     function openAppDetailModal(appNo) {
       const group = groupedApplications[appNo];
       if (!group) return;
 
       currentViewingAppNo = appNo;
-      toggleEditMode(false); // 預設進入唯讀檢視模式
+      toggleEditMode(false);
 
       document.getElementById('modalDetailAppNo').innerText = group.appNo;
       document.getElementById('modalDetailSub').innerText = `申請時間：${new Date(group.created_at).toLocaleString('zh-TW')}`;
@@ -1149,7 +1513,6 @@
       document.getElementById('detailStatus').innerHTML = renderStatusBadge(group.status);
       document.getElementById('detailStudentCount').innerText = group.records.length;
 
-      // 預設填入編輯欄位
       document.getElementById('editRuleSelect').value = group.rule_code;
       document.getElementById('editReasonInput').value = group.custom_reason || '';
 
@@ -1166,7 +1529,6 @@
         `;
       }).join('');
 
-      // 控制管理員專屬按鈕顯示 (修改 / 刪除)
       const btnToggleEdit = document.getElementById('btnToggleEdit');
       const btnDeleteApp = document.getElementById('btnDeleteApp');
       if (currentStaff?.role === 'ADMIN') {
@@ -1186,7 +1548,6 @@
       currentViewingAppNo = null;
     }
 
-    // 切換編輯模式與檢視模式
     function toggleEditMode(isEdit) {
       const viewCard = document.getElementById('detailViewCard');
       const editCard = document.getElementById('detailEditCard');
@@ -1199,7 +1560,6 @@
       }
     }
 
-    // ================= 管理員：儲存修改案件 =================
     async function saveEditApplication() {
       if (currentStaff?.role !== 'ADMIN') return alert('權限不足！');
       if (!currentViewingAppNo) return;
@@ -1212,7 +1572,6 @@
 
       if (!newRuleCode) return alert('請選擇有效的法規條款！');
 
-      const rule = allRules.find(r => r.code === newRuleCode);
       const articleNum = parseInt(newRuleCode.split('-')[0]) || 6;
       const ids = group.records.map(r => r.id);
 
@@ -1231,11 +1590,10 @@
         alert(`✅ 申請單【${currentViewingAppNo}】已成功更新！`);
         toggleEditMode(false);
         await loadRecords();
-        openAppDetailModal(currentViewingAppNo); // 重新整理彈窗畫面
+        openAppDetailModal(currentViewingAppNo);
       }
     }
 
-    // ================= 管理員：整單刪除案件 =================
     async function deleteApplication() {
       if (currentStaff?.role !== 'ADMIN') return alert('權限不足！');
       if (!currentViewingAppNo) return;
@@ -1261,7 +1619,6 @@
       }
     }
 
-    // 審核按鈕渲染
     function renderDetailActions(group) {
       const container = document.getElementById('detailActionButtons');
       let actions = '';
