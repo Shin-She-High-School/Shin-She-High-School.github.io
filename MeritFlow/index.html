@@ -3,109 +3,198 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MeritFlow - 學生獎懲建議系統</title>
+  <title>MeritFlow - 學生獎懲與幹部建議系統</title>
+  <!-- Tailwind CSS + Supabase JS + SheetJS (Excel解析與匯出) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800">
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
 
-  <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
-    <div>
-      <h1 class="text-xl font-bold text-slate-900">🎓 MeritFlow 學生獎懲建議系統</h1>
-      <p id="roleBadge" class="text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 hidden"></p>
+  <!-- 頂部導航列 -->
+  <header class="bg-white shadow px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <h1 class="text-xl font-bold text-slate-900 tracking-wide">🎓 MeritFlow 學生獎懲建議系統</h1>
+      <span id="roleBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full hidden"></span>
     </div>
     <div id="userSection" class="hidden flex items-center gap-4">
       <span id="userName" class="text-sm font-medium text-slate-600"></span>
-      <button onclick="handleLogout()" class="text-sm bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-md transition">登出</button>
+      <button onclick="handleLogout()" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 px-3 py-1.5 rounded-md transition font-medium">登出</button>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto p-6 space-y-6">
+  <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
 
-    <!-- 登入區塊 -->
-    <div id="authCard" class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md space-y-4">
-      <h2 class="text-lg font-bold text-center">系統登入</h2>
-      <form id="loginForm" class="space-y-3">
-        <input type="email" id="loginEmail" placeholder="電子信箱" required class="w-full border p-2 rounded text-sm outline-none focus:border-blue-500">
-        <input type="password" id="loginPassword" placeholder="密碼" required class="w-full border p-2 rounded text-sm outline-none focus:border-blue-500">
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded text-sm transition">登入</button>
+    <!-- 1. 登入卡片 (僅需輸入 @ 前代碼) -->
+    <div id="authCard" class="max-w-md mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-md space-y-5 border border-slate-100 mt-10">
+      <div class="text-center space-y-1">
+        <h2 class="text-xl font-bold text-slate-900">系統登入</h2>
+        <p class="text-xs text-slate-500">一律僅需輸入學校 Email 前方之代碼即可</p>
+      </div>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">教職員編號 / 帳號</label>
+          <div class="flex rounded-lg border border-slate-300 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 overflow-hidden">
+            <input 
+              type="text" 
+              id="loginAccount" 
+              placeholder="例如: admin 或 t119, t277, r1106" 
+              required 
+              autocomplete="username"
+              class="w-full px-3 py-2 text-sm outline-none font-mono"
+            >
+            <span class="bg-slate-100 text-slate-400 text-xs flex items-center px-3 border-l border-slate-200 font-mono select-none">@sshs.tc.edu.tw</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">密碼</label>
+          <input 
+            type="password" 
+            id="loginPassword" 
+            placeholder="請輸入密碼" 
+            required 
+            autocomplete="current-password"
+            class="w-full border border-slate-300 px-3 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+        </div>
+
+        <button 
+          type="submit" 
+          id="loginBtn" 
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition shadow-sm"
+        >
+          登入系統
+        </button>
       </form>
     </div>
 
-    <!-- 名冊與法規匯入 (管理員 / 組長 / 幹事) -->
-    <section id="importSection" class="hidden bg-white p-6 rounded-xl shadow-md border-l-4 border-indigo-500 space-y-4">
-      <div class="flex justify-between items-center">
+    <!-- 2. 基礎資料匯入專區 (僅 管理員 admin / 幹事 t119 / 組長 t277 可見) -->
+    <section id="importSection" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <div>
-          <h2 class="text-lg font-bold">📂 名冊與條款匯入</h2>
-          <p class="text-xs text-slate-500">支援 .xlsx 與 .csv 檔案批次解析更新</p>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">📂 基礎名冊與法規維護</h2>
+          <p class="text-xs text-slate-500 mt-0.5">支援 .xlsx / .csv 批次匯入（管理員、組長與幹事專屬功能）</p>
         </div>
-        <span class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-1 rounded">管理權限專屬</span>
+        <span class="text-xs bg-indigo-50 text-indigo-700 font-medium px-2.5 py-1 rounded-md border border-indigo-100">管理端權限</span>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-        <div class="p-4 border border-dashed rounded-lg bg-slate-50 space-y-2">
-          <label class="block text-sm font-semibold">1. 學生名冊匯入</label>
-          <p class="text-xs text-slate-500">欄位需包含：<code>學號</code>、<code>姓名</code>、<code>班級</code></p>
-          <input type="file" id="studentFileInput" accept=".xlsx, .xls, .csv" class="text-xs block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700">
-          <button onclick="importStudents()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 rounded text-xs font-medium transition">解析並匯入學生名冊</button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+        <!-- 學生名冊匯入 -->
+        <div class="p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 space-y-2.5">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-semibold text-slate-800">1. 學生全校名冊匯入</span>
+            <span class="text-[11px] text-slate-400">欄位: 學號、姓名、班級</span>
+          </div>
+          <input type="file" id="studentFileInput" accept=".xlsx, .xls, .csv" class="text-xs block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+          <button onclick="importStudents()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-medium transition">解析並匯入名冊</button>
         </div>
 
-        <div class="p-4 border border-dashed rounded-lg bg-slate-50 space-y-2">
-          <label class="block text-sm font-semibold">2. 獎懲條款匯入</label>
-          <p class="text-xs text-slate-500">欄位需包含：<code>代碼</code>、<code>獎懲類別</code>、<code>額度</code>、<code>事由</code></p>
-          <input type="file" id="ruleFileInput" accept=".xlsx, .xls, .csv" class="text-xs block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700">
-          <button onclick="importRules()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 rounded text-xs font-medium transition">解析並匯入條款代碼</button>
+        <!-- 獎懲法規匯入 -->
+        <div class="p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 space-y-2.5">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-semibold text-slate-800">2. 獎懲條款匯入</span>
+            <span class="text-[11px] text-slate-400">欄位: 代碼、類別、事由</span>
+          </div>
+          <input type="file" id="ruleFileInput" accept=".xlsx, .xls, .csv" class="text-xs block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+          <button onclick="importRules()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-medium transition">解析並匯入條款</button>
         </div>
       </div>
     </section>
 
-    <!-- 獎懲建議提報 (教師使用) -->
-    <section id="proposeSection" class="hidden bg-white p-6 rounded-xl shadow-md space-y-4">
-      <h2 class="text-lg font-bold">📝 提報學生獎懲建議</h2>
-      <form id="proposeForm" class="space-y-4">
+    <!-- 3. 獎懲與幹部建議提報 (全體教職員) -->
+    <section id="proposeSection" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-5">
+      <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3 gap-2">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">獎懲條款</label>
-          <select id="ruleSelect" required class="w-full border p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="">載入法規中...</option>
+          <h2 class="text-lg font-bold text-slate-900">📝 提報學生獎懲 / 幹部小老師建議</h2>
+          <p class="text-xs text-slate-500">提報後將自動送交學務處李明潔幹事進行初審</p>
+        </div>
+        <div>
+          <select id="proposalType" class="border border-slate-300 text-xs rounded-lg px-3 py-1.5 font-medium bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="GENERAL">一般獎懲建議</option>
+            <option value="CADRE">班級幹部獎勵建議</option>
+            <option value="ASSISTANT">學科小老師獎勵建議</option>
           </select>
         </div>
+      </div>
 
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">對象學號（多筆可用逗號、空格或換行分隔）</label>
-          <textarea id="studentNos" rows="2" required placeholder="例：112001, 112002" class="w-full border p-2 rounded text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-          <p class="text-xs text-slate-400 mt-1">系統將自動校驗學號是否已在全校名冊中。</p>
+      <form id="proposeForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 條款代碼 -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">獎懲法規條款代碼</label>
+            <select id="ruleSelect" onchange="onRuleChanged()" required class="w-full border border-slate-300 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="">載入法規中...</option>
+            </select>
+          </div>
+
+          <!-- 條款事實與類別自動判定 -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">系統判定事實與類別（以第8條為界）</label>
+            <div id="ruleFactPreview" class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-500 min-h-[42px] flex items-center">
+              請先選擇條款代碼
+            </div>
+          </div>
         </div>
 
+        <!-- 學號輸入與防呆提示 -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">具體事由補充 / 備註</label>
-          <input type="text" id="customReason" placeholder="例：公差服務表現優良" class="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">對象學號（多筆可用逗號、空格或換行分隔）</label>
+          <textarea id="studentNos" rows="2" required placeholder="例：112001, 112002" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+          <p class="text-[11px] text-slate-400 mt-1">⚠️ 系統將自動比對全校學生名冊，未建檔之學號將無法送出。</p>
         </div>
 
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded text-sm font-medium transition">送出提報</button>
+        <!-- 補充事由說明 -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">具體事由補充 / 職務備註</label>
+          <input type="text" id="customReason" placeholder="例：擔任 115-1 學期國文小老師認真負責 / 協助校慶公差表現優異" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <button type="submit" id="submitProposalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">
+          送出建議表
+        </button>
       </form>
     </section>
 
-    <!-- 紀錄與審核清單 -->
-    <section id="recordsSection" class="hidden bg-white p-6 rounded-xl shadow-md space-y-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold">📋 獎懲進度追蹤與審核</h2>
-        <button onclick="loadRecords()" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded transition">重新整理</button>
+    <!-- 4. 獎懲審核與名冊匯出 -->
+    <section id="recordsSection" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+      <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-3">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">📋 獎懲進度追蹤與審核管理</h2>
+          <p class="text-xs text-slate-500">依據使用者身份顯示對應之審核與匯出權限</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <!-- 幹事專屬匯出 -->
+          <button id="btnExportClerk" onclick="exportExcelForClerk()" class="hidden text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm">
+            📥 匯出學務處獎懲清冊 (Excel)
+          </button>
+          <!-- 組長專屬匯出 -->
+          <button id="btnExportChief" onclick="exportPortfolioForChief()" class="hidden text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm">
+            📥 匯出學檔系統班級幹部 (Excel)
+          </button>
+          <button onclick="loadRecords()" class="text-xs bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-2 rounded-lg transition font-medium">
+            🔄 重新整理
+          </button>
+        </div>
       </div>
 
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm">
-          <thead class="bg-slate-50 border-b">
+          <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs">
             <tr>
               <th class="p-3">學號</th>
-              <th class="p-3">獎懲條款</th>
-              <th class="p-3">提報人</th>
-              <th class="p-3">具體事由</th>
-              <th class="p-3">狀態</th>
-              <th class="p-3 text-right">審核操作</th>
+              <th class="p-3">類別</th>
+              <th class="p-3">法規條款</th>
+              <th class="p-3">提報人員</th>
+              <th class="p-3">具體事實說明</th>
+              <th class="p-3">審核進度</th>
+              <th class="p-3 text-right">操作</th>
             </tr>
           </thead>
-          <tbody id="recordsTableBody" class="divide-y"></tbody>
+          <tbody id="recordsTableBody" class="divide-y divide-slate-100">
+            <!-- 動態渲染清單 -->
+          </tbody>
         </table>
       </div>
     </section>
@@ -113,20 +202,23 @@
   </main>
 
   <script>
+    // ================= Supabase 設定 =================
     const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
     const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentUser = null;
     let currentProfile = null;
+    let allRules = [];
 
     const roleMap = {
       ADMIN: { label: '系統管理員', class: 'bg-purple-100 text-purple-700' },
-      CHIEF: { label: '訓育組組長', class: 'bg-red-100 text-red-700' },
-      CLERK: { label: '學務處幹事', class: 'bg-yellow-100 text-yellow-800' },
-      TEACHER: { label: '教師', class: 'bg-blue-100 text-blue-700' }
+      CHIEF: { label: '訓育組組長 (柳冠賢)', class: 'bg-red-100 text-red-700' },
+      CLERK: { label: '學務處幹事 (李明潔)', class: 'bg-amber-100 text-amber-800' },
+      TEACHER: { label: '教職員 / 導師', class: 'bg-blue-100 text-blue-700' }
     };
 
+    // ================= 初始化與驗證 =================
     async function init() {
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
@@ -140,19 +232,45 @@
 
     async function fetchProfile() {
       const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-      if (data) currentProfile = data;
+      if (data) {
+        currentProfile = data;
+        // 指定帳號自動對應角色
+        if (currentUser.email === 'admin@sshs.tc.edu.tw') currentProfile.role = 'ADMIN';
+        if (currentUser.email === 't119@sshs.tc.edu.tw') currentProfile.role = 'CLERK';
+        if (currentUser.email === 't277@sshs.tc.edu.tw') currentProfile.role = 'CHIEF';
+      }
     }
 
+    // 登入事件處理：自動將輸入轉為完整 Email
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.innerText = '驗證中...';
+
+      const rawAccount = document.getElementById('loginAccount').value.trim();
       const password = document.getElementById('loginPassword').value;
 
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) return alert(`登入失敗：${error.message}`);
+      const cleanAccount = rawAccount.split('@')[0];
+      const fullEmail = `${cleanAccount}@sshs.tc.edu.tw`;
+
+      const { data, error } = await sb.auth.signInWithPassword({
+        email: fullEmail,
+        password: password
+      });
+
+      if (error) {
+        alert(`登入失敗：帳號或密碼錯誤 (帳號: ${cleanAccount})`);
+        btn.disabled = false;
+        btn.innerText = '登入系統';
+        return;
+      }
+
       currentUser = data.user;
       await fetchProfile();
       renderDashboard();
+      btn.disabled = false;
+      btn.innerText = '登入系統';
     });
 
     async function handleLogout() {
@@ -174,18 +292,26 @@
     function renderDashboard() {
       document.getElementById('authCard').classList.add('hidden');
       document.getElementById('userSection').classList.remove('hidden');
-      document.getElementById('userName').innerText = currentProfile.name;
+      document.getElementById('userName').innerText = `${currentProfile.name} (${currentUser.email.split('@')[0]})`;
 
       const badge = document.getElementById('roleBadge');
       const roleConfig = roleMap[currentProfile.role] || roleMap.TEACHER;
       badge.innerText = roleConfig.label;
-      badge.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${roleConfig.class}`;
+      badge.className = `text-xs font-semibold px-2.5 py-0.5 rounded-full inline-block ${roleConfig.class}`;
       badge.classList.remove('hidden');
 
+      // 權限分流顯示
       if (['ADMIN', 'CHIEF', 'CLERK'].includes(currentProfile.role)) {
         document.getElementById('importSection').classList.remove('hidden');
       } else {
         document.getElementById('importSection').classList.add('hidden');
+      }
+
+      if (currentProfile.role === 'CLERK' || currentProfile.role === 'ADMIN') {
+        document.getElementById('btnExportClerk').classList.remove('hidden');
+      }
+      if (currentProfile.role === 'CHIEF' || currentProfile.role === 'ADMIN') {
+        document.getElementById('btnExportChief').classList.remove('hidden');
       }
 
       document.getElementById('proposeSection').classList.remove('hidden');
@@ -195,6 +321,7 @@
       loadRecords();
     }
 
+    // ================= 批次匯入模組 =================
     async function importStudents() {
       const fileInput = document.getElementById('studentFileInput');
       if (!fileInput.files.length) return alert('請選擇檔案');
@@ -211,7 +338,7 @@
 
           const { error } = await sb.from('students').upsert(list, { onConflict: 'student_no' });
           if (error) throw error;
-          alert(`✅ 成功匯入 ${list.length} 筆學生資料！`);
+          alert(`✅ 成功匯入/更新 ${list.length} 筆學生資料！`);
           fileInput.value = '';
         } catch (err) {
           alert(`匯入失敗：${err.message}`);
@@ -232,12 +359,16 @@
             code: String(r['代碼'] || r['code']).trim(),
             level: String(r['獎懲類別'] || r['level'] || '嘉獎').trim(),
             points: parseInt(r['額度'] || r['points'] || 1),
-            description: String(r['事由'] || r['description']).trim()
+            description: String(r['事由'] || r['description']).trim(),
+            article: String(r['條'] || '').trim(),
+            clause: String(r['款'] || '').trim(),
+            legacy_code: String(r['巨耀系統上的條款代碼'] || r['legacy_code'] || '').trim(),
+            type: (parseInt(String(r['代碼']).split('-')[0]) <= 8) ? 'MERIT' : 'DEMERIT'
           })).filter(r => r.code && r.description);
 
           const { error } = await sb.from('merit_rules').upsert(list, { onConflict: 'code' });
           if (error) throw error;
-          alert(`✅ 成功匯入 ${list.length} 筆獎懲法規！`);
+          alert(`✅ 成功匯入/更新 ${list.length} 筆獎懲法規條款！`);
           fileInput.value = '';
           loadRules();
         } catch (err) {
@@ -247,15 +378,40 @@
       reader.readAsBinaryString(fileInput.files[0]);
     }
 
+    // ================= 條款與提報模組 =================
     async function loadRules() {
       const { data } = await sb.from('merit_rules').select('*').order('code');
+      allRules = data || [];
       const select = document.getElementById('ruleSelect');
-      if (data && data.length) {
+      if (allRules.length) {
         select.innerHTML = '<option value="">請選擇法規條款...</option>' + 
-          data.map(r => `<option value="${r.code}">[${r.code}] ${r.level}(${r.points}次) - ${r.description}</option>`).join('');
+          allRules.map(r => `<option value="${r.code}">[${r.code}] ${r.level} (${r.points}次) - ${r.description}</option>`).join('');
       } else {
         select.innerHTML = '<option value="">尚無法規資料，請管理端匯入</option>';
       }
+    }
+
+    function onRuleChanged() {
+      const code = document.getElementById('ruleSelect').value;
+      const rule = allRules.find(r => r.code === code);
+      const preview = document.getElementById('ruleFactPreview');
+
+      if (!rule) {
+        preview.innerText = '請先選擇條款代碼';
+        return;
+      }
+
+      const articleNum = parseInt(rule.code.split('-')[0]) || 6;
+      const isReward = articleNum <= 8;
+
+      preview.innerHTML = `
+        <div>
+          <span class="font-bold ${isReward ? 'text-emerald-600' : 'text-rose-600'}">
+            【${isReward ? '獎勵類 (嘉獎/小功/大功)' : '懲處類 (警告/小過/大過)'}】
+          </span>
+          第 ${articleNum} 條 / ${rule.level} (${rule.points}次)
+        </div>
+      `;
     }
 
     document.getElementById('proposeForm').addEventListener('submit', async (e) => {
@@ -263,10 +419,12 @@
       const ruleCode = document.getElementById('ruleSelect').value;
       const customReason = document.getElementById('customReason').value.trim();
       const rawStudentNos = document.getElementById('studentNos').value;
+      const category = document.getElementById('proposalType').value;
       const studentList = [...new Set(rawStudentNos.split(/[,\s\n]+/).filter(Boolean))];
 
       if (!studentList.length) return alert('請輸入學號');
 
+      // 名冊校驗防呆
       const { data: validStudents } = await sb
         .from('students')
         .select('student_no')
@@ -276,12 +434,17 @@
       const invalidNos = studentList.filter(no => !existingNos.includes(no));
 
       if (invalidNos.length > 0) {
-        return alert(`提報終止！以下學號未在名冊中：\n${invalidNos.join(', ')}`);
+        return alert(`提報終止！以下學號未在名冊中：\n${invalidNos.join(', ')}\n請聯繫學務處建立名單。`);
       }
+
+      const rule = allRules.find(r => r.code === ruleCode);
+      const articleNum = parseInt(rule.code.split('-')[0]) || 6;
 
       const payload = validStudents.map(stu => ({
         student_no: stu.student_no,
         rule_code: ruleCode,
+        article_num: articleNum,
+        category: category,
         custom_reason: customReason || null,
         proposer_id: currentUser.id,
         proposer_name: currentProfile.name,
@@ -289,27 +452,31 @@
       }));
 
       const { error } = await sb.from('merit_records').insert(payload);
-      if (error) alert(`提報失敗：${error.message}`);
-      else {
-        alert(`✅ 成功提報 ${payload.length} 筆紀錄！`);
+      if (error) {
+        alert(`提報失敗：${error.message}`);
+      } else {
+        alert(`✅ 成功提報 ${payload.length} 筆紀錄！已進入學務處幹事初審階段。`);
         document.getElementById('proposeForm').reset();
+        document.getElementById('ruleFactPreview').innerText = '請先選擇條款代碼';
         loadRecords();
       }
     });
 
+    // ================= 審核清單模組 =================
     async function loadRecords() {
       const { data } = await sb
         .from('merit_records')
-        .select(`*, merit_rules(level, points, description)`)
+        .select(`*, merit_rules(level, points, description, legacy_code)`)
         .order('created_at', { ascending: false });
 
       const tbody = document.getElementById('recordsTableBody');
       tbody.innerHTML = (data || []).map(r => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3 font-mono font-bold">${r.student_no}</td>
-          <td class="p-3">[${r.rule_code}] ${r.merit_rules?.level || ''} (${r.merit_rules?.points || 0}次)</td>
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3 font-mono font-bold text-slate-800">${r.student_no}</td>
+          <td class="p-3"><span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">${r.category}</span></td>
+          <td class="p-3 font-medium">[${r.rule_code}] ${r.merit_rules?.level || ''} (${r.merit_rules?.points || 1}次)</td>
           <td class="p-3">${r.proposer_name}</td>
-          <td class="p-3 text-slate-500">${r.custom_reason || '-'}</td>
+          <td class="p-3 text-slate-500 max-w-xs truncate">${r.custom_reason || r.merit_rules?.description || '-'}</td>
           <td class="p-3">${renderStatusBadge(r.status)}</td>
           <td class="p-3 text-right">${renderActions(r)}</td>
         </tr>
@@ -318,10 +485,10 @@
 
     function renderStatusBadge(status) {
       switch (status) {
-        case 'PENDING_CLERK': return '<span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded">待幹事初審</span>';
-        case 'PENDING_CHIEF': return '<span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">待組長核定</span>';
-        case 'APPROVED': return '<span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">已核准</span>';
-        case 'REJECTED': return '<span class="text-xs bg-rose-100 text-rose-800 px-2 py-0.5 rounded">退回</span>';
+        case 'PENDING_CLERK': return '<span class="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full font-medium">待幹事初審</span>';
+        case 'PENDING_CHIEF': return '<span class="text-xs bg-indigo-50 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full font-medium">待組長核定</span>';
+        case 'APPROVED': return '<span class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-medium">已核准決行</span>';
+        case 'REJECTED': return '<span class="text-xs bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 rounded-full font-medium">退回</span>';
         default: return status;
       }
     }
@@ -330,20 +497,58 @@
       const role = currentProfile?.role;
       let actions = '';
       if ((role === 'CLERK' || role === 'ADMIN') && record.status === 'PENDING_CLERK') {
-        actions += `<button onclick="updateStatus('${record.id}', 'PENDING_CHIEF')" class="text-xs bg-indigo-600 text-white px-2 py-1 rounded mr-1">轉呈組長</button>`;
-        actions += `<button onclick="updateStatus('${record.id}', 'REJECTED')" class="text-xs bg-rose-500 text-white px-2 py-1 rounded">退回</button>`;
+        actions += `<button onclick="updateStatus('${record.id}', 'PENDING_CHIEF')" class="text-xs bg-indigo-600 text-white px-2 py-1 rounded mr-1 hover:bg-indigo-700">轉呈組長</button>`;
+        actions += `<button onclick="updateStatus('${record.id}', 'REJECTED')" class="text-xs bg-rose-500 text-white px-2 py-1 rounded hover:bg-rose-600">退回</button>`;
       }
       if ((role === 'CHIEF' || role === 'ADMIN') && record.status === 'PENDING_CHIEF') {
-        actions += `<button onclick="updateStatus('${record.id}', 'APPROVED')" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded mr-1">核准決行</button>`;
-        actions += `<button onclick="updateStatus('${record.id}', 'REJECTED')" class="text-xs bg-rose-500 text-white px-2 py-1 rounded">退回</button>`;
+        actions += `<button onclick="updateStatus('${record.id}', 'APPROVED')" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded mr-1 hover:bg-emerald-700">核准決行</button>`;
+        actions += `<button onclick="updateStatus('${record.id}', 'REJECTED')" class="text-xs bg-rose-500 text-white px-2 py-1 rounded hover:bg-rose-600">退回</button>`;
       }
-      return actions || '<span class="text-slate-400 text-xs">-</span>';
+      return actions || '<span class="text-slate-300 text-xs">-</span>';
     }
 
     async function updateStatus(id, newStatus) {
       const { error } = await sb.from('merit_records').update({ status: newStatus }).eq('id', id);
       if (error) alert(`操作失敗：${error.message}`);
       loadRecords();
+    }
+
+    // ================= 報表匯出模組 =================
+    async function exportExcelForClerk() {
+      const { data } = await sb.from('merit_records').select(`*, merit_rules(*)`).eq('status', 'APPROVED');
+      if (!data || !data.length) return alert('尚無已核准之獎懲紀錄');
+
+      const exportRows = data.map(r => ({
+        '學號': r.student_no,
+        '條款代碼': r.rule_code,
+        '巨耀代碼': r.merit_rules?.legacy_code || '',
+        '獎懲類別': r.merit_rules?.level || '',
+        '次數': r.merit_rules?.points || 1,
+        '事由說明': r.custom_reason || r.merit_rules?.description || '',
+        '提報人': r.proposer_name
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "獎懲清冊");
+      XLSX.writeFile(wb, "學務處學生獎懲建議清冊.xlsx");
+    }
+
+    async function exportPortfolioForChief() {
+      const { data } = await sb.from('merit_records').select(`*, merit_rules(*)`).in('category', ['CADRE', 'ASSISTANT']).eq('status', 'APPROVED');
+      if (!data || !data.length) return alert('尚無已核准之幹部小老師名單');
+
+      const exportRows = data.map(r => ({
+        '學號': r.student_no,
+        '幹部類別': r.category === 'CADRE' ? '班級幹部' : '學科小老師',
+        '擔任職務/事由': r.custom_reason || '',
+        '提報教師': r.proposer_name
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "學檔班級幹部");
+      XLSX.writeFile(wb, "學生學習歷程檔案_班級幹部名單.xlsx");
     }
 
     init();
