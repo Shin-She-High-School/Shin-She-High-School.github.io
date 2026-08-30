@@ -43,13 +43,11 @@
         <button id="tabBtnRecords" onclick="switchTab('records')" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">
           📋 案件追蹤
         </button>
-        <!-- 只有三位系統管理員 (admin, t119, t277) 才會顯示此按鈕 -->
         <button id="tabBtnAdmin" onclick="switchTab('admin')" class="hidden px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">
           ⚙️ 管理控制台
         </button>
       </nav>
 
-      <!-- 管理後台專屬入口按鈕 -->
       <button id="btnOpenAdminModal" onclick="openAdminModal()" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1 shadow-sm">
         🔒 管理後台登入
       </button>
@@ -156,7 +154,6 @@
             <p id="recordsSectionSub" class="text-xs text-slate-500 mt-0.5">點擊「申請單號」即可檢視完整學生名單</p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <!-- 僅管理員可見匯出按鈕 -->
             <button id="btnExportClerk" onclick="exportExcelForClerk()" class="hidden text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm flex items-center gap-1">
               📥 匯出學務處獎懲清冊 (Excel)
             </button>
@@ -242,7 +239,7 @@
 
   </main>
 
-  <!-- 4. 【單筆申請單明細彈窗】 -->
+  <!-- 4. 【單筆申請單明細彈窗】（含管理員 修改 / 刪除 介面） -->
   <div id="appDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
       
@@ -258,15 +255,49 @@
       </div>
 
       <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs sm:text-sm">
+        
+        <!-- 一般檢視模式 -->
+        <div id="detailViewCard" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs sm:text-sm">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div><span class="text-slate-400">提報人員：</span><span id="detailProposer" class="font-bold text-slate-800"></span></div>
             <div><span class="text-slate-400">獎懲法規：</span><span id="detailRule" class="font-bold text-slate-800"></span></div>
           </div>
           <div><span class="text-slate-400">具體事由：</span><span id="detailReason" class="font-medium text-slate-700"></span></div>
-          <div><span class="text-slate-400">當前狀態：</span><span id="detailStatus"></span></div>
+          <div class="flex justify-between items-center pt-1">
+            <div><span class="text-slate-400">當前狀態：</span><span id="detailStatus"></span></div>
+            <!-- 管理員專屬：編輯按鈕 -->
+            <button id="btnToggleEdit" onclick="toggleEditMode(true)" class="hidden text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-sm">
+              ✏️ 編輯案件內容
+            </button>
+          </div>
         </div>
 
+        <!-- 管理員編輯模式區塊 (預設隱藏) -->
+        <div id="detailEditCard" class="hidden bg-amber-50/70 p-4 rounded-xl border border-amber-200 space-y-3 text-xs sm:text-sm">
+          <div class="font-bold text-amber-900 flex justify-between items-center border-b border-amber-200 pb-1.5">
+            <span>✏️ 正在修改申請案內容（將同步套用至全體學生）</span>
+            <button onclick="toggleEditMode(false)" class="text-xs text-slate-500 hover:text-slate-800">取消編輯</button>
+          </div>
+          
+          <div class="space-y-2.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">獎懲法規條款代碼</label>
+              <select id="editRuleSelect" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">具體事由說明</label>
+              <input type="text" id="editReasonInput" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="flex justify-end gap-2 pt-1">
+              <button onclick="toggleEditMode(false)" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg text-xs font-medium">取消</button>
+              <button onclick="saveEditApplication()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm">💾 儲存修改</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 學生列表 -->
         <div>
           <div class="flex justify-between items-center mb-2">
             <span class="text-xs sm:text-sm font-bold text-slate-700">受獎懲學生名單（共 <span id="detailStudentCount" class="text-blue-600 font-bold">0</span> 人）</span>
@@ -288,8 +319,15 @@
         </div>
       </div>
 
+      <!-- 彈窗底部操作列 (含管理員刪除按鈕) -->
       <div class="p-4 border-t bg-slate-50 flex flex-wrap justify-between items-center gap-2">
-        <button onclick="closeAppDetailModal()" class="text-xs text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-lg transition font-medium">關閉視窗</button>
+        <div class="flex items-center gap-2">
+          <button onclick="closeAppDetailModal()" class="text-xs text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-lg transition font-medium">關閉視窗</button>
+          <!-- 管理員專屬：整單刪除按鈕 -->
+          <button id="btnDeleteApp" onclick="deleteApplication()" class="hidden text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-2 rounded-lg transition font-bold shadow-sm">
+            🗑️ 刪除此申請案
+          </button>
+        </div>
         <div id="detailActionButtons" class="flex gap-2"></div>
       </div>
 
@@ -459,8 +497,9 @@
     let groupedApplications = {};
     let selectedStudentSet = new Set();
     let currentApplicationNo = '';
+    let currentViewingAppNo = null; // 當前在彈窗檢視的單號
 
-    // 只有這三位具備系統管理員與管理控制台權限
+    // 只有這三位具備系統管理員與查看/修改/刪除權限
     const ADMIN_STAFF_NOS = ['admin', 't119', 't277'];
 
     const roleMap = {
@@ -487,9 +526,7 @@
       }
     }
 
-    // ================= 分頁（Tab）切換控制器 =================
     function switchTab(tabKey) {
-      // 權限防護：非三位系統管理員無法開啟 admin 控制台
       if (tabKey === 'admin' && currentStaff?.role !== 'ADMIN') {
         alert('權限不足：管理控制台僅限系統管理員、學務處幹事與訓育組長存取！');
         return;
@@ -588,7 +625,6 @@
         return;
       }
 
-      // 只有 admin, t119, t277 身分一律設為 ADMIN (系統管理員)
       const isAdminUser = ADMIN_STAFF_NOS.includes(data.staff_no);
 
       currentStaff = {
@@ -637,16 +673,14 @@
       const recordsSub = document.getElementById('recordsSectionSub');
 
       if (currentStaff.role === 'ADMIN') {
-        // 三位管理員：看全校、顯示管理控制台、顯示匯出按鈕
         btnRecords.innerText = '📋 全校案件追蹤與審核';
         btnRecords.classList.remove('hidden');
         btnAdmin.classList.remove('hidden');
         recordsTitle.innerText = '📋 全校獎懲案件審核進度（依單號彙總）';
-        recordsSub.innerText = '點擊「申請單號」即可檢視完整學生名單並進行整批審核';
+        recordsSub.innerText = '點擊「申請單號」即可檢視完整學生名單、整批審核、修改或刪除案件';
         document.getElementById('btnExportClerk').classList.remove('hidden');
         document.getElementById('btnExportChief').classList.remove('hidden');
       } else {
-        // 一般教師：只看自己送出的單子、無後台管理按鈕、無匯出按鈕
         btnRecords.innerText = '📋 我的申請紀錄';
         btnRecords.classList.remove('hidden');
         btnAdmin.classList.add('hidden');
@@ -986,6 +1020,7 @@
       });
 
       const select = document.getElementById('formRuleSelect');
+      const editSelect = document.getElementById('editRuleSelect');
       const categories = {
         '第6條 (嘉獎)': allRules.filter(r => r.code.startsWith('6-')),
         '第7條 (小功)': allRules.filter(r => r.code.startsWith('7-')),
@@ -1007,10 +1042,11 @@
         }
       }
       select.innerHTML = optionsHtml;
+      if (editSelect) editSelect.innerHTML = optionsHtml;
       updateAdminStats();
     }
 
-    // ================= 載入審核紀錄（教師只看自己 / 管理員看全校） =================
+    // ================= 載入審核紀錄 =================
     async function loadRecords() {
       if (!currentStaff) return;
 
@@ -1025,7 +1061,6 @@
           .select(`*, merit_rules(level, points, description, legacy_code)`)
           .order('created_at', { ascending: false });
 
-        // 若非系統管理員，只撈取該教師自己送出的資料
         if (currentStaff.role !== 'ADMIN') {
           query = query.eq('proposer_name', currentStaff.name);
         }
@@ -1098,9 +1133,13 @@
       updateAdminStats();
     }
 
+    // ================= 查看明細彈窗 =================
     function openAppDetailModal(appNo) {
       const group = groupedApplications[appNo];
       if (!group) return;
+
+      currentViewingAppNo = appNo;
+      toggleEditMode(false); // 預設進入唯讀檢視模式
 
       document.getElementById('modalDetailAppNo').innerText = group.appNo;
       document.getElementById('modalDetailSub').innerText = `申請時間：${new Date(group.created_at).toLocaleString('zh-TW')}`;
@@ -1109,6 +1148,10 @@
       document.getElementById('detailReason').innerText = group.custom_reason || '-';
       document.getElementById('detailStatus').innerHTML = renderStatusBadge(group.status);
       document.getElementById('detailStudentCount').innerText = group.records.length;
+
+      // 預設填入編輯欄位
+      document.getElementById('editRuleSelect').value = group.rule_code;
+      document.getElementById('editReasonInput').value = group.custom_reason || '';
 
       const tbody = document.getElementById('detailStudentTableBody');
       tbody.innerHTML = group.records.map(r => {
@@ -1123,15 +1166,102 @@
         `;
       }).join('');
 
+      // 控制管理員專屬按鈕顯示 (修改 / 刪除)
+      const btnToggleEdit = document.getElementById('btnToggleEdit');
+      const btnDeleteApp = document.getElementById('btnDeleteApp');
+      if (currentStaff?.role === 'ADMIN') {
+        btnToggleEdit.classList.remove('hidden');
+        btnDeleteApp.classList.remove('hidden');
+      } else {
+        btnToggleEdit.classList.add('hidden');
+        btnDeleteApp.classList.add('hidden');
+      }
+
       renderDetailActions(group);
       document.getElementById('appDetailModal').classList.remove('hidden');
     }
 
     function closeAppDetailModal() {
       document.getElementById('appDetailModal').classList.add('hidden');
+      currentViewingAppNo = null;
     }
 
-    // 審核按鈕渲染（僅管理員顯示審核操作，一般教師僅供檢視）
+    // 切換編輯模式與檢視模式
+    function toggleEditMode(isEdit) {
+      const viewCard = document.getElementById('detailViewCard');
+      const editCard = document.getElementById('detailEditCard');
+      if (isEdit) {
+        viewCard.classList.add('hidden');
+        editCard.classList.remove('hidden');
+      } else {
+        viewCard.classList.remove('hidden');
+        editCard.classList.add('hidden');
+      }
+    }
+
+    // ================= 管理員：儲存修改案件 =================
+    async function saveEditApplication() {
+      if (currentStaff?.role !== 'ADMIN') return alert('權限不足！');
+      if (!currentViewingAppNo) return;
+
+      const group = groupedApplications[currentViewingAppNo];
+      if (!group) return;
+
+      const newRuleCode = document.getElementById('editRuleSelect').value;
+      const newReason = document.getElementById('editReasonInput').value.trim();
+
+      if (!newRuleCode) return alert('請選擇有效的法規條款！');
+
+      const rule = allRules.find(r => r.code === newRuleCode);
+      const articleNum = parseInt(newRuleCode.split('-')[0]) || 6;
+      const ids = group.records.map(r => r.id);
+
+      const { error } = await sb
+        .from('merit_records')
+        .update({
+          rule_code: newRuleCode,
+          article_num: articleNum,
+          custom_reason: newReason || null
+        })
+        .in('id', ids);
+
+      if (error) {
+        alert(`修改失敗：${error.message}`);
+      } else {
+        alert(`✅ 申請單【${currentViewingAppNo}】已成功更新！`);
+        toggleEditMode(false);
+        await loadRecords();
+        openAppDetailModal(currentViewingAppNo); // 重新整理彈窗畫面
+      }
+    }
+
+    // ================= 管理員：整單刪除案件 =================
+    async function deleteApplication() {
+      if (currentStaff?.role !== 'ADMIN') return alert('權限不足！');
+      if (!currentViewingAppNo) return;
+
+      const group = groupedApplications[currentViewingAppNo];
+      if (!group) return;
+
+      const confirmDelete = confirm(`⚠️ 警告：確定要徹底刪除申請單【${currentViewingAppNo}】嗎？\n\n此操作將一併移除該案下所有 ${group.records.length} 位學生的獎懲紀錄，且無法復原！`);
+      if (!confirmDelete) return;
+
+      const ids = group.records.map(r => r.id);
+      const { error } = await sb
+        .from('merit_records')
+        .delete()
+        .in('id', ids);
+
+      if (error) {
+        alert(`刪除失敗：${error.message}`);
+      } else {
+        alert(`✅ 申請單【${currentViewingAppNo}】已成功刪除！`);
+        closeAppDetailModal();
+        loadRecords();
+      }
+    }
+
+    // 審核按鈕渲染
     function renderDetailActions(group) {
       const container = document.getElementById('detailActionButtons');
       let actions = '';
