@@ -176,7 +176,7 @@
       </section>
     </div>
 
-    <!-- ================= 分頁 3：管理控制台 (只有三位系統管理員 admin, t119, t277 可見) ================= -->
+    <!-- ================= 分頁 3：管理控制台 (僅三位管理員可見) ================= -->
     <div id="tabContentAdmin" class="tab-pane hidden space-y-6">
       
       <!-- 統計數據卡片 -->
@@ -226,7 +226,7 @@
         </div>
       </section>
 
-      <!-- 資料庫線上管理檢視區 -->
+      <!-- 資料庫線上管理檢視區 (無職務欄位) -->
       <section class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
         <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3 gap-3">
           <div class="flex items-center gap-2">
@@ -457,7 +457,7 @@
     </div>
   </div>
 
-  <!-- ================= 彈窗 4：管理控制台「線上新增/修改資料」彈窗 ================= -->
+  <!-- ================= 彈窗 4：管理控制台「線上新增/修改資料」彈窗 (無職務欄位) ================= -->
   <div id="adminDataModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
@@ -1230,7 +1230,6 @@
             <th class="p-3">教師編號</th>
             <th class="p-3">姓名</th>
             <th class="p-3">電子郵件</th>
-            <th class="p-3">職務</th>
             <th class="p-3 text-right">操作</th>
           </tr>
         `;
@@ -1245,7 +1244,7 @@
         }
 
         if (!list.length) {
-          tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無教師資料</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-400">查無教師資料</td></tr>';
           return;
         }
 
@@ -1254,7 +1253,6 @@
             <td class="p-3 font-mono font-bold text-slate-800">${st.staff_no}</td>
             <td class="p-3 font-bold text-slate-900">${st.name}</td>
             <td class="p-3 font-mono text-slate-500">${st.email}</td>
-            <td class="p-3"><span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium">教師</span></td>
             <td class="p-3 text-right space-x-1">
               <button onclick="openAdminEditModal('staffs', '${st.staff_no}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
               <button onclick="deleteAdminItem('staffs', '${st.staff_no}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
@@ -1409,8 +1407,7 @@
           const payload = {
             staff_no: document.getElementById('field_staff_no')?.value.trim(),
             name: document.getElementById('field_name')?.value.trim(),
-            email: document.getElementById('field_email')?.value.trim(),
-            job_title: '教師' // 統一為教師
+            email: document.getElementById('field_email')?.value.trim()
           };
           const { error } = await sb.from('staffs').upsert(payload, { onConflict: 'staff_no' });
           if (error) throw error;
