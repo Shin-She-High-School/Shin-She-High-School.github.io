@@ -150,7 +150,7 @@
             模式 1：事由原因、獎懲種類均相同
           </div>
           <div class="text-center text-lime-300 font-bold text-xs sm:text-sm md:text-base mt-2.5 tracking-wide">
-            （受獎懲人員之事由、適用之獎懲條款均相同，送出後可列印 PDF 簽核表 1 與匯出國中系統 1 Excel）
+            （受獎懲人員之事由、適用之獎懲條款均相同，送出後產生單號並自動跳出 PDF 簽核表）
           </div>
         </div>
 
@@ -160,7 +160,7 @@
             模式 2：同一事件，但獎懲種類不同
           </div>
           <div class="text-center text-lime-300 font-bold text-xs sm:text-sm md:text-base mt-2.5 tracking-wide">
-            （雖為同一事件，但因程度差別個別設定獎懲，送出後可列印 PDF 簽核表 2 與匯出國中系統 2 Excel）
+            （雖為同一事件，但因程度差別個別設定獎懲，送出後產生單號並自動跳出 PDF 簽核表）
           </div>
         </div>
 
@@ -182,7 +182,7 @@
         <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-3">
           <div>
             <h2 id="recordsSectionTitle" class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">📋 案件進度追蹤</h2>
-            <p id="recordsSectionSub" class="text-xs text-slate-500 mt-0.5">點擊「申請單號」即可檢視完整學生名單、列印 PDF 簽核單與匯出國中 Excel</p>
+            <p id="recordsSectionSub" class="text-xs text-slate-500 mt-0.5">點擊「申請單號」即可檢視完整學生名單、補印 PDF 簽核單與匯出國中 Excel</p>
           </div>
           <div class="flex flex-wrap gap-2">
             <button id="btnExportClerk" onclick="exportExcelForClerk()" class="hidden text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition font-medium shadow-sm flex items-center gap-1">
@@ -201,7 +201,7 @@
           <table class="w-full text-left text-sm min-w-[850px]">
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs">
               <tr>
-                <th class="p-3.5">申請單號（點擊檢視）</th>
+                <th class="p-3.5">申請單號 (MMDDhhmmss)</th>
                 <th class="p-3.5">人數</th>
                 <th class="p-3.5">法規條款 / 模式</th>
                 <th class="p-3.5">提報人員</th>
@@ -366,7 +366,7 @@
         </div>
       </div>
 
-      <!-- 彈窗底部操作列 (支援模式 1 與模式 2 的 PDF 列印與國中 Excel 匯出) -->
+      <!-- 彈窗底部操作列 -->
       <div class="p-4 border-t bg-slate-50 flex flex-wrap justify-between items-center gap-2">
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="printPdfAdvice(currentViewingAppNo)" class="text-xs bg-slate-800 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm flex items-center gap-1">
@@ -384,13 +384,13 @@
     </div>
   </div>
 
-  <!-- ================= 彈窗 2：獎懲 Form (VBA UserForm1 模式1/模式3專用) ================= -->
+  <!-- ================= 彈窗 2：獎懲 Form (模式1/模式3) ================= -->
   <div id="rewardFormModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 print:hidden">
     <div class="bg-[#f0f0f0] rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] flex flex-col overflow-hidden border border-slate-400">
       <div class="p-4 border-b border-slate-300 flex justify-between items-center bg-[#e8e8e8]">
         <div class="flex items-center gap-2 flex-wrap">
-          <h3 class="text-sm sm:text-base font-bold text-slate-900">獎懲 Form (模式1 / 模式3)</h3>
-          <span id="currentFormAppNo" class="text-xs font-mono bg-slate-200 text-slate-700 px-2 py-0.5 rounded border border-slate-300"></span>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900">獎懲 Form</h3>
+          <span id="currentFormAppNo" class="text-xs text-slate-500 italic">（送出時自動產生單號）</span>
         </div>
         <button onclick="closeRewardFormModal()" class="text-slate-500 hover:text-slate-800 text-lg font-bold">✕</button>
       </div>
@@ -451,7 +451,7 @@
 
         <div class="pt-3 flex justify-end gap-2 border-t border-slate-300">
           <button type="button" onclick="closeRewardFormModal()" class="px-4 py-1.5 text-xs text-slate-700 hover:bg-slate-200 rounded border border-slate-300">取消</button>
-          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 text-xs font-bold rounded shadow-sm">送出申請單（生成單號）</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 text-xs font-bold rounded shadow-sm">送出申請單並列印 PDF</button>
         </div>
       </form>
     </div>
@@ -464,7 +464,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h3 class="text-base font-bold text-slate-900">👥 模式 2：個別設定學生獎懲條款與事由</h3>
-            <span id="mode2AppNoBadge" class="text-xs font-mono font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded"></span>
+            <span id="mode2AppNoBadge" class="text-xs text-slate-500 italic">（送出時自動產生單號）</span>
           </div>
           <p class="text-xs text-slate-500 mt-0.5">同一事件中，可為每位學生分別指派不同之條款代碼、額度與事由</p>
         </div>
@@ -477,14 +477,12 @@
           <button type="button" onclick="openStudentModal()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-3 py-1.5 rounded-lg transition">👥 增減點選學生</button>
         </div>
 
-        <div id="mode2StudentListContainer" class="space-y-3">
-          <!-- 動態生成每位學生的條款與事由輸入卡片 -->
-        </div>
+        <div id="mode2StudentListContainer" class="space-y-3"></div>
       </div>
 
       <div class="p-4 border-t bg-slate-50 flex justify-end gap-2">
         <button type="button" onclick="closeMode2FormModal()" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-200 rounded-lg font-medium">取消</button>
-        <button type="button" onclick="submitMode2Application()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-xs font-bold shadow-sm">確認送出模式 2 申請單</button>
+        <button type="button" onclick="submitMode2Application()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-xs font-bold shadow-sm">送出模式 2 並列印 PDF</button>
       </div>
     </div>
   </div>
@@ -577,7 +575,7 @@
     </div>
   </div>
 
-  <!-- ================= 專屬列印容器 (PDF 簽核表生成區) ================= -->
+  <!-- ================= 專屬列印容器 ================= -->
   <div id="printContainer" class="hidden"></div>
 
   <script>
@@ -594,13 +592,10 @@
     let allRecords = [];
     let groupedApplications = {};
     let selectedStudentSet = new Set();
-    let currentApplicationNo = '';
     let currentViewingAppNo = null;
 
     let currentAdminDataTab = 'students';
     let currentEditingItem = null;
-
-    // 模式 2 學生個別資料物件快取 { student_no: { rule_code, custom_reason, points } }
     let mode2StudentMap = {};
 
     const ADMIN_STAFF_NOS = ['admin', 't119', 't277'];
@@ -610,6 +605,7 @@
       TEACHER: { label: '教師', class: 'bg-blue-100 text-blue-700' }
     };
 
+    // ================= MMDDhhmmss 單號產生器 =================
     function generateApplicationNo() {
       const now = new Date();
       const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -842,12 +838,10 @@
       if (!confirm(`本獎懲案件申請人是：${currentStaff.name}\n\n是否正確？`)) return;
 
       currentMode = modeNumber;
-      currentApplicationNo = generateApplicationNo();
 
       if (modeNumber === 1) {
         openRewardFormModal();
       } else if (modeNumber === 2) {
-        // 模式 2：先點選學生名單，再進入個別條款設定
         openStudentModal();
       } else if (modeNumber === 3) {
         openRewardFormModal();
@@ -858,9 +852,6 @@
 
     // ================= 模式 1 與 3 專用表單 =================
     function openRewardFormModal() {
-      if (!currentApplicationNo) currentApplicationNo = generateApplicationNo();
-      const formAppNoEl = document.getElementById('currentFormAppNo');
-      if (formAppNoEl) formAppNoEl.innerText = `單號：${currentApplicationNo}`;
       document.getElementById('rewardFormModal')?.classList.remove('hidden');
       renderFormSelectedChips();
     }
@@ -893,6 +884,7 @@
       }
     }
 
+    // 模式 1 送出：生成單號 -> 寫入資料庫 -> 自動跳出 PDF 列印
     document.getElementById('vbaRewardForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const location = document.getElementById('formLocation')?.value.trim() || '';
@@ -902,12 +894,15 @@
 
       if (!studentList.length) return alert('請點擊下方「開始點選獎懲人員」選取至少一位學生！');
 
+      // 送出時才正式生成單號 (MMDDhhmmss)
+      const newAppNo = generateApplicationNo();
+
       const rule = allRules.find(r => r.code === ruleCode);
       const articleNum = parseInt((ruleCode || '6').split('-')[0]) || 6;
       const customReasonText = location ? `[地點:${location}] ${reason}` : reason;
 
       const payload = studentList.map(no => ({
-        application_no: currentApplicationNo,
+        application_no: newAppNo,
         student_no: no,
         rule_code: ruleCode,
         article_num: articleNum,
@@ -921,24 +916,19 @@
       if (error) {
         alert(`提報失敗：${error.message}`);
       } else {
-        const targetAppNo = currentApplicationNo;
-        alert(`✅ 申請單送出成功！\n\n申請單號：${targetAppNo}\n共包含 ${payload.length} 位學生，已送交學務處。`);
         closeRewardFormModal();
         clearSelectedStudents();
-        currentApplicationNo = '';
         await loadRecords();
         switchTab('records');
-        openAppDetailModal(targetAppNo);
+
+        // 自動跳出 PDF 列印簽核單
+        printPdfAdvice(newAppNo);
       }
     });
 
     // ================= 模式 2：個別設定學生獎懲與事由 =================
     function openMode2FormModal() {
       if (!selectedStudentSet.size) return alert('請先選取學生！');
-      if (!currentApplicationNo) currentApplicationNo = generateApplicationNo();
-
-      const badge = document.getElementById('mode2AppNoBadge');
-      if (badge) badge.innerText = `單號：${currentApplicationNo}`;
 
       const countEl = document.getElementById('mode2StudentCount');
       if (countEl) countEl.innerText = selectedStudentSet.size;
@@ -983,9 +973,13 @@
       document.getElementById('mode2FormModal')?.classList.add('hidden');
     }
 
+    // 模式 2 送出：生成單號 -> 寫入資料庫 -> 自動跳出 PDF 列印
     async function submitMode2Application() {
       const selectedList = allStudents.filter(s => selectedStudentSet.has(s.student_no));
       if (!selectedList.length) return alert('尚未選取任何學生！');
+
+      // 送出時才正式生成單號 (MMDDhhmmss)
+      const newAppNo = generateApplicationNo();
 
       const payload = selectedList.map(s => {
         const ruleCode = document.getElementById(`mode2_rule_${s.student_no}`)?.value || '6-1';
@@ -993,7 +987,7 @@
         const articleNum = parseInt(ruleCode.split('-')[0]) || 6;
 
         return {
-          application_no: currentApplicationNo,
+          application_no: newAppNo,
           student_no: s.student_no,
           rule_code: ruleCode,
           article_num: articleNum,
@@ -1008,14 +1002,13 @@
       if (error) {
         alert(`模式 2 送出失敗：${error.message}`);
       } else {
-        const targetAppNo = currentApplicationNo;
-        alert(`✅ 模式 2 申請單送出成功！\n\n申請單號：${targetAppNo}\n共包含 ${payload.length} 位學生個別獎懲紀錄。`);
         closeMode2FormModal();
         clearSelectedStudents();
-        currentApplicationNo = '';
         await loadRecords();
         switchTab('records');
-        openAppDetailModal(targetAppNo);
+
+        // 自動跳出 PDF 列印簽核單
+        printPdfAdvice(newAppNo);
       }
     }
 
@@ -1917,7 +1910,7 @@
       }
     }
 
-    // ================= 智慧列印 PDF 簽核表 (模式 1 為 1.pdf 樣式、模式 2 為 2.pdf 樣式) =================
+    // ================= 智慧列印 PDF 簽核表 =================
     function printPdfAdvice(appNo) {
       const group = groupedApplications[appNo];
       if (!group) return alert('找不到該單號資料');
@@ -1949,7 +1942,7 @@
       let html = '';
 
       if (!isMode2) {
-        // ================= 模式 1：每頁 20 筆 (1.pdf 格式) =================
+        // 模式 1：每頁 20 筆 (1.pdf 格式)[cite: 1]
         const pageSize = 20;
         const totalPages = Math.ceil(Math.max(studentsList.length, 1) / pageSize);
         const [art, cls] = (group.rule_code || '6-1').split('-');
@@ -2046,7 +2039,7 @@
         }
 
       } else {
-        // ================= 模式 2：每頁 10 筆 (完全符合 2.pdf 格式) =================
+        // 模式 2：每頁 10 筆 (完全符合 2.pdf 格式)[cite: 2]
         const pageSize = 10;
         const totalPages = Math.ceil(Math.max(studentsList.length, 1) / pageSize);
 
@@ -2151,7 +2144,7 @@
       printContainer.classList.add('hidden');
     }
 
-    // ================= 匯出國中線上核對專用 Excel (支援模式 1 與模式 2) =================
+    // ================= 匯出國中線上核對專用 Excel =================
     function exportJuniorExcel(appNo) {
       const group = groupedApplications[appNo];
       if (!group) return alert('找不到該單號資料');
@@ -2185,7 +2178,6 @@
         const [art, cls] = (r.rule_code || '6-1').split('-');
 
         if (!isMode2) {
-          // 模式 1 格式
           return {
             '學期': '1151',
             '年級': grade,
@@ -2199,7 +2191,6 @@
             '獎懲日期': rocDate
           };
         } else {
-          // 模式 2 格式 (依據為: 學生獎懲實施要點第X條第Y款)
           return {
             '學期': '1151',
             '年級': grade,
