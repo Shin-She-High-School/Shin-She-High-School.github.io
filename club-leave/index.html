@@ -322,7 +322,6 @@
       }
     }
 
-    // 頁面載入時：直接即時向試算表取得真實資料
     window.addEventListener('DOMContentLoaded', async () => {
       try {
         const res = await callApi({ action: 'getAllActivities', onlyActive: true });
@@ -347,7 +346,7 @@
           alert('載入失敗：' + res.message);
         }
       } catch (err) {
-        document.getElementById('loading').innerText = '試算表連線失敗：' + err.message;
+        document.getElementById('loading').innerText = '資料載入失敗：' + err.message;
       }
     });
 
