@@ -14,7 +14,7 @@
       color: #1e293b;
     }
     .container {
-      max-width: 820px;
+      max-width: 860px;
       margin: 0 auto;
       background: #ffffff;
       padding: 24px;
@@ -54,6 +54,8 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
     .act-title {
       font-size: 16px;
@@ -70,20 +72,43 @@
     .badge-open { background: #dcfce7; color: #166534; }
     .badge-closed { background: #fee2e2; color: #991b1b; }
     .badge-wait { background: #e0f2fe; color: #075985; }
-    .editor-modal {
+    .card-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-action {
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      gap: 4px;
+    }
+    .btn-open-sheet { background: #dbeafe; color: #1d4ed8; }
+    .btn-open-sheet:hover { background: #bfdbfe; }
+    .btn-edit { background: #e2e8f0; color: #334155; }
+    .btn-edit:hover { background: #cbd5e1; }
+    .btn-del { background: #fee2e2; color: #991b1b; }
+    .btn-del:hover { background: #fecaca; }
+
+    .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.5);
       justify-content: center;
       align-items: center;
       padding: 16px;
       z-index: 99;
     }
-    .editor-content {
+    .modal-content {
       background: white;
       border-radius: 12px;
-      max-width: 700px;
+      max-width: 720px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
@@ -98,17 +123,10 @@
       border-radius: 6px;
       font-size: 14px;
     }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     textarea { height: 140px; resize: vertical; }
+
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -129,9 +147,8 @@
       font-weight: 500;
     }
     .btn-tool:hover { background: #e2e8f0; }
-    .textarea-with-toolbar {
-      border-radius: 0 0 6px 6px !important;
-    }
+    .textarea-with-toolbar { border-radius: 0 0 6px 6px !important; }
+
     .btn-save {
       background: #d97706;
       color: white;
@@ -149,33 +166,40 @@
       border-radius: 6px;
       cursor: pointer;
     }
+    @media (max-width: 600px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>⚙️ 公假登記系統 - 多活動後台</h2>
+    <h2>⚙️ 公假登記系統 - 多活動管理後台</h2>
 
     <div class="top-actions">
-      <span style="font-size: 14px; color: #64748b;">可設定各活動之填寫起訖時間與格式化公告。</span>
+      <span style="font-size: 14px; color: #64748b;">可直接點擊「開啟工作表」跳轉至試算表分頁、修改活動名稱或刪除活動。</span>
       <button class="btn-new" onclick="openEditor()">➕ 新增活動</button>
     </div>
 
     <div id="actList">載入中...</div>
   </div>
 
-  <div id="editorModal" class="editor-modal">
-    <div class="editor-content">
+  <div id="editorModal" class="modal-overlay">
+    <div class="modal-content">
       <h3 id="modalTitle" style="margin-top:0; color:#92400e;">新增活動</h3>
+      <input type="hidden" id="actOriginalName" value="">
       
       <div class="form-group">
-        <label>活動名稱（將作為獨立資料分頁名稱）</label>
+        <label>
+          活動名稱（同步對應試算表之工作表名稱）
+          <span style="font-size:12px; color:#d97706; font-weight:normal;">✏️ 修改後將自動連動更新工作表名稱</span>
+        </label>
         <input type="text" id="actName" placeholder="例如：115學年度社團招生公假" required>
       </div>
 
       <div class="form-group">
         <label style="display:flex; align-items:center; cursor:pointer;">
           <input type="checkbox" id="actIsEnabled" style="margin-right:8px; width:16px; height:16px;" checked>
-          總開關（勾選啟用）
+          總開關（勾選啟用開放前台）
         </label>
       </div>
 
@@ -191,7 +215,7 @@
       </div>
 
       <div class="form-group">
-        <label>公告說明事項（選取文字後點下方按鈕套用格式）</label>
+        <label>公告說明事項（選取文字後點按鈕套用格式）</label>
         <div class="toolbar">
           <button type="button" class="btn-tool" onclick="applyFormat('bold')"><b>B</b> 粗體</button>
           <button type="button" class="btn-tool" onclick="applyFormat('red')" style="color:#dc2626;">🔴 紅字警告</button>
@@ -204,7 +228,7 @@
       <div class="grid-3">
         <div class="form-group">
           <label>社團清單（一行一個）</label>
-          <textarea id="actClubs" placeholder="籃球社&#10;熱音社"></textarea>
+          <textarea id="actClubs" placeholder="學生會&#10;籃球訓練社&#10;熱音社"></textarea>
         </div>
         <div class="form-group">
           <label>班級清單（一行一個）</label>
@@ -218,7 +242,7 @@
 
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
         <button type="button" class="btn-cancel" onclick="closeEditor()">取消</button>
-        <button type="button" class="btn-save" id="saveActBtn" onclick="saveActData()">儲存活動</button>
+        <button type="button" class="btn-save" id="saveActBtn" onclick="saveActData()">儲存活動與工作表</button>
       </div>
     </div>
   </div>
@@ -283,7 +307,7 @@
     }
 
     async function loadList() {
-      document.getElementById('actList').innerHTML = '載入中...';
+      document.getElementById('actList').innerHTML = '載入活動中...';
       try {
         const res = await callApi({ action: 'getAllActivities', onlyActive: false });
         if (res.success) {
@@ -321,7 +345,11 @@
                 <span class="act-title">${act.name}</span>
                 <span class="badge ${badgeClass}">${act.statusText}</span>
               </div>
-              <button class="btn-cancel" onclick="editAct(${idx})">✏️ 編輯</button>
+              <div class="card-btns">
+                <a class="btn-action btn-open-sheet" href="${act.sheetUrl || '#'}" target="_blank">📊 開啟工作表</a>
+                <button class="btn-action btn-edit" onclick="editAct(${idx})">✏️ 編輯 / 改名</button>
+                <button class="btn-action btn-del" onclick="deleteAct('${encodeURIComponent(act.name)}')">🗑️ 刪除</button>
+              </div>
             </div>
             <div style="font-size: 13px; color: #64748b; line-height: 1.6;">
               <div>${timeStr}</div>
@@ -335,8 +363,8 @@
 
     function openEditor() {
       document.getElementById('modalTitle').innerText = '新增活動';
+      document.getElementById('actOriginalName').value = '';
       document.getElementById('actName').value = '';
-      document.getElementById('actName').disabled = false;
       document.getElementById('actIsEnabled').checked = true;
       document.getElementById('actStartTime').value = '';
       document.getElementById('actEndTime').value = '';
@@ -349,9 +377,9 @@
 
     function editAct(idx) {
       const act = allActivities[idx];
-      document.getElementById('modalTitle').innerText = '編輯活動：' + act.name;
+      document.getElementById('modalTitle').innerText = '編輯活動與工作表設定';
+      document.getElementById('actOriginalName').value = act.name;
       document.getElementById('actName').value = act.name;
-      document.getElementById('actName').disabled = true;
       document.getElementById('actIsEnabled').checked = act.isEnabled;
       document.getElementById('actStartTime').value = formatToInputDate(act.startTime);
       document.getElementById('actEndTime').value = formatToInputDate(act.endTime);
@@ -368,16 +396,24 @@
 
     async function saveActData() {
       const actName = document.getElementById('actName').value.trim();
+      const oldName = document.getElementById('actOriginalName').value.trim();
+
       if (!actName) {
         alert('活動名稱不能為空！');
         return;
       }
 
+      if (oldName && oldName !== actName) {
+        const confirmRename = confirm(`確定要將活動「${oldName}」更名為「${actName}」嗎？\n這將同步更新 Google 試算表中對應的工作表分頁名稱。`);
+        if (!confirmRename) return;
+      }
+
       const saveBtn = document.getElementById('saveActBtn');
       saveBtn.disabled = true;
-      saveBtn.innerText = '儲存中...';
+      saveBtn.innerText = '儲存與同步工作表中...';
 
       const data = {
+        originalName: oldName,
         name: actName,
         isEnabled: document.getElementById('actIsEnabled').checked,
         startTime: formatFromInputDate(document.getElementById('actStartTime').value),
@@ -400,7 +436,32 @@
         alert('連線失敗：' + err.message);
       } finally {
         saveBtn.disabled = false;
-        saveBtn.innerText = '儲存活動';
+        saveBtn.innerText = '儲存活動與工作表';
+      }
+    }
+
+    async function deleteAct(encodedActName) {
+      const actName = decodeURIComponent(encodedActName);
+      const confirm1 = confirm(`確定要刪除活動「${actName}」嗎？`);
+      if (!confirm1) return;
+
+      const deleteSheet = confirm(`是否同時刪除 Google 試算表內名稱為「${actName}」的工作表分頁與既有紀錄？\n\n【確定】：連同分頁一併刪除。\n【取消】：僅從系統中移除活動，保留試算表分頁。`);
+
+      try {
+        const res = await callApi({
+          action: 'deleteActivity',
+          activityName: actName,
+          deleteDataSheet: deleteSheet
+        });
+
+        if (res.success) {
+          alert('活動已成功刪除！');
+          loadList();
+        } else {
+          alert('刪除失敗：' + res.message);
+        }
+      } catch (err) {
+        alert('連線失敗：' + err.message);
       }
     }
 
