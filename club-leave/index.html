@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>公假登記系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 16px;
+      color: #1e293b;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      text-align: center;
+      color: #0f172a;
+    }
+    .section-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .time-badge {
+      font-size: 13px;
+      color: #0369a1;
+      background: #e0f2fe;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-top: 6px;
+      display: inline-block;
+      font-weight: 500;
+    }
+    .notice-box {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #1e40af;
+    }
+    .notice-box strong { color: #1e3a8a; }
+    .status-hint {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .student-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #3b82f6;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: bold;
+      color: #3b82f6;
+    }
+    .del-btn {
+      background: #fee2e2;
+      color: #ef4444;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .del-btn:hover { background: #fecaca; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1.2fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #475569;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: #fff;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .periods-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #475569;
+    }
+    .checkbox-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .checkbox-item input { margin-right: 6px; }
+    .btn-add {
+      width: 100%;
+      background: #f8fafc;
+      color: #2563eb;
+      border: 2px dashed #93c5fd;
+      border-radius: 8px;
+      padding: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .btn-add:hover { background: #eff6ff; }
+    .btn-submit {
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-submit:hover { background: #1d4ed8; }
+    .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+    #msg {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    #loading {
+      text-align: center;
+      padding: 40px;
+      font-weight: bold;
+      color: #64748b;
+    }
+    @media (max-width: 480px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📋 公假登記系統</h2>
+    
+    <div id="loading">載入活動清單中...</div>
+
+    <div id="appBody" style="display: none;">
+      <div class="section-box">
+        <label for="actSelect">📌 請選擇填寫的活動項目</label>
+        <select id="actSelect" required>
+          <option value="">-- 請選擇活動 --</option>
+        </select>
+        <div id="timeInfo" class="time-badge" style="display: none;"></div>
+      </div>
+
+      <div id="noticeBox" class="notice-box" style="display: none;"></div>
+
+      <form id="leaveForm" style="display: none;">
+        <div class="section-box">
+          <label for="clubSelect">所屬社團 / 單位</label>
+          <select id="clubSelect" required>
+            <option value="">-- 請選擇社團 --</option>
+          </select>
+          <div id="clubStatus" class="status-hint"></div>
+        </div>
+
+        <div id="studentList"></div>
+
+        <button type="button" class="btn-add" id="addStudentBtn">➕ 新增一位學生</button>
+        <button type="submit" class="btn-submit" id="submitBtn">確認送出 / 覆蓋更新名單</button>
+        <div id="msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ⚠️ 請填入你的 Apps Script 部署網址
+    const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+
+    let activeActivities = [];
+    let currentAct = null;
+
+    // 通用呼叫後端函式
+    async function callApi(payload) {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // 避開複雜 CORS preflight
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    }
+
+    function parseNoticeFormat(text) {
+      if (!text) return '';
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<span style="color:#dc2626; font-weight:bold;">$1</span>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color:#2563eb; text-decoration:underline;">$1</a>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function generateClassOptions(selectedClass) {
+      let options = '<option value="">請選擇班級</option>';
+      if (currentAct && currentAct.classes) {
+        currentAct.classes.forEach(c => {
+          const isSelected = c === String(selectedClass) ? 'selected' : '';
+          options += `<option value="${c}" ${isSelected}>${c}</option>`;
+        });
+      }
+      return options;
+    }
+
+    function generatePeriodCheckboxes(selectedPeriods = []) {
+      let html = '';
+      if (currentAct && currentAct.periods) {
+        currentAct.periods.forEach(p => {
+          const isChecked = selectedPeriods.includes(p) ? 'checked' : '';
+          html += `
+            <label class="checkbox-item">
+              <input type="checkbox" value="${p}" class="cb-period" ${isChecked}>${p}
+            </label>
+          `;
+        });
+      }
+      return html;
+    }
+
+    function reindexCards() {
+      const cards = document.querySelectorAll('.student-card');
+      cards.forEach((card, idx) => {
+        const titleSpan = card.querySelector('.card-index-title');
+        if (titleSpan) {
+          titleSpan.innerText = `編號：${idx + 1}`;
+        }
+      });
+    }
+
+    function addStudentCard(data = {}) {
+      const list = document.getElementById('studentList');
+      const div = document.createElement('div');
+      div.className = 'student-card';
+      
+      div.innerHTML = `
+        <div class="card-header">
+          <span class="card-index-title">編號：1</span>
+          <button type="button" class="del-btn" onclick="removeCard(this)">刪除</button>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>班級</label>
+            <select class="inp-class" required>
+              ${generateClassOptions(data.className || '')}
+            </select>
+          </div>
+          <div>
+            <label>座號</label>
+            <input type="number" class="inp-seat" value="${data.seatNumber || ''}" placeholder="座號" min="1" max="60" required>
+          </div>
+          <div>
+            <label>姓名</label>
+            <input type="text" class="inp-name" value="${data.name || ''}" placeholder="請輸入姓名" required>
+          </div>
+        </div>
+        <div>
+          <div class="periods-title">請公假時段（可複選）</div>
+          <div class="checkbox-wrap">
+            ${generatePeriodCheckboxes(data.periods || [])}
+          </div>
+        </div>
+      `;
+      list.appendChild(div);
+      reindexCards();
+    }
+
+    function removeCard(btn) {
+      const card = btn.closest('.student-card');
+      if (card) {
+        card.remove();
+        if (document.querySelectorAll('.student-card').length === 0) {
+          addStudentCard();
+        } else {
+          reindexCards();
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await callApi({ action: 'getAllActivities', onlyActive: true });
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('appBody').style.display = 'block';
+
+        if (res.success) {
+          activeActivities = res.activities;
+          const actSelect = document.getElementById('actSelect');
+          if (activeActivities.length === 0) {
+            actSelect.innerHTML = '<option value="">目前暫無開放中的活動</option>';
+            return;
+          }
+          activeActivities.forEach(act => {
+            const opt = document.createElement('option');
+            opt.value = act.name;
+            opt.textContent = act.name;
+            actSelect.appendChild(opt);
+          });
+        } else {
+          alert('載入失敗：' + res.message);
+        }
+      } catch (err) {
+        document.getElementById('loading').innerText = '無法連線至試算表 API：' + err.message;
+      }
+    });
+
+    document.getElementById('actSelect').addEventListener('change', function() {
+      const actName = this.value;
+      const noticeBox = document.getElementById('noticeBox');
+      const timeInfo = document.getElementById('timeInfo');
+      const leaveForm = document.getElementById('leaveForm');
+      const clubSelect = document.getElementById('clubSelect');
+      const msgDiv = document.getElementById('msg');
+      const statusDiv = document.getElementById('clubStatus');
+
+      msgDiv.innerText = '';
+      statusDiv.innerText = '';
+
+      if (!actName) {
+        noticeBox.style.display = 'none';
+        timeInfo.style.display = 'none';
+        leaveForm.style.display = 'none';
+        currentAct = null;
+        return;
+      }
+
+      currentAct = activeActivities.find(a => a.name === actName);
+      if (!currentAct) return;
+
+      let timeText = '🕒 填寫期限：';
+      if (currentAct.startTime && currentAct.endTime) {
+        timeText += `${currentAct.startTime} ~${currentAct.endTime}`;
+      } else if (currentAct.endTime) {
+        timeText += `即日起至 ${currentAct.endTime}`;
+      } else {
+        timeText += `進行中（無特定截止限制）`;
+      }
+      timeInfo.innerText = timeText;
+      timeInfo.style.display = 'inline-block';
+
+      if (currentAct.notice) {
+        noticeBox.innerHTML = parseNoticeFormat(currentAct.notice);
+        noticeBox.style.display = 'block';
+      } else {
+        noticeBox.style.display = 'none';
+      }
+
+      clubSelect.innerHTML = '<option value="">-- 請選擇社團 --</option>';
+      currentAct.clubs.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        clubSelect.appendChild(opt);
+      });
+
+      document.getElementById('studentList').innerHTML = '';
+      addStudentCard();
+      leaveForm.style.display = 'block';
+    });
+
+    document.getElementById('clubSelect').addEventListener('change', async function() {
+      const clubName = this.value;
+      const statusDiv = document.getElementById('clubStatus');
+      const msgDiv = document.getElementById('msg');
+      msgDiv.innerText = '';
+
+      if (!clubName || !currentAct) {
+        statusDiv.innerText = '';
+        document.getElementById('studentList').innerHTML = '';
+        addStudentCard();
+        return;
+      }
+
+      statusDiv.style.color = '#3b82f6';
+      statusDiv.innerText = `⏳ 查詢「${clubName}」現有名單中...`;
+
+      try {
+        const res = await callApi({
+          action: 'getClubData',
+          activityName: currentAct.name,
+          clubName: clubName,
+          periods: currentAct.periods
+        });
+
+        if (res.success) {
+          document.getElementById('studentList').innerHTML = '';
+          if (res.students && res.students.length > 0) {
+            res.students.forEach(s => addStudentCard(s));
+            statusDiv.style.color = '#10b981';
+            statusDiv.innerText = `✅ 共 ${res.students.length} 位。`;
+          } else {
+            addStudentCard();
+            statusDiv.style.color = '#64748b';
+            statusDiv.innerText = `📝 目前尚無登記資料，請直接新增。`;
+          }
+        }
+      } catch (err) {
+        statusDiv.style.color = '#ef4444';
+        statusDiv.innerText = '連線錯誤：' + err.message;
+      }
+    });
+
+    document.getElementById('leaveForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const msgDiv = document.getElementById('msg');
+      const statusDiv = document.getElementById('clubStatus');
+      const clubName = document.getElementById('clubSelect').value;
+      
+      const studentCards = document.querySelectorAll('.student-card');
+      const students = [];
+      let missingPeriod = false;
+
+      studentCards.forEach(card => {
+        const checkedPeriods = [];
+        card.querySelectorAll('.cb-period:checked').forEach(cb => {
+          checkedPeriods.push(cb.value);
+        });
+
+        if (checkedPeriods.length === 0) missingPeriod = true;
+
+        students.push({
+          className: card.querySelector('.inp-class').value,
+          seatNumber: card.querySelector('.inp-seat').value.trim(),
+          name: card.querySelector('.inp-name').value.trim(),
+          periods: checkedPeriods
+        });
+      });
+
+      if (missingPeriod) {
+        msgDiv.style.color = '#ef4444';
+        msgDiv.innerText = '請確保每位學生至少勾選了一個公假時段！';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = '名單更新中...';
+      msgDiv.innerText = '';
+
+      try {
+        const res = await callApi({
+          action: 'updateBatchLeaveData',
+          activityName: currentAct.name,
+          club: clubName,
+          students: students,
+          periods: currentAct.periods
+        });
+
+        if (res.success) {
+          msgDiv.style.color = '#10b981';
+          msgDiv.innerText = `✅ 登記成功！共 ${res.count} 位。`;
+          statusDiv.style.color = '#10b981';
+          statusDiv.innerText = `✅ 共 ${res.count} 位。`;
+        } else {
+          msgDiv.style.color = '#ef4444';
+          msgDiv.innerText = '❌ ' + res.message;
+        }
+      } catch (err) {
+        msgDiv.style.color = '#ef4444';
+        msgDiv.innerText = '連線錯誤：' + err.message;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = '確認送出 / 覆蓋更新名單';
+      }
+    });
+
+    document.getElementById('addStudentBtn').addEventListener('click', () => addStudentCard());
+  </script>
+</body>
+</html>
