@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>公假系統 - 多活動管理後台</title>
+  <title>新社高中公假系統-管理後台</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * { box-sizing: border-box; }
@@ -173,14 +173,14 @@
 </head>
 <body>
   <div class="container">
-    <h2>⚙️ 公假登記系統 - 多活動管理後台</h2>
+    <h2>⚙️ 新社高中公假登記系統-管理後台</h2>
 
     <div class="top-actions">
-      <span style="font-size: 14px; color: #64748b;">可直接點擊「開啟工作表」跳轉至試算表分頁、修改活動名稱或刪除活動。</span>
+      <span style="font-size: 14px; color: #64748b;">點擊「開啟工作表」跳轉至工作表頁面。</span>
       <button class="btn-new" onclick="openEditor()">➕ 新增活動</button>
     </div>
 
-    <div id="actList">載入中...</div>
+    <div id="actList">讀取資料中...</div>
   </div>
 
   <div id="editorModal" class="modal-overlay">
@@ -190,8 +190,8 @@
       
       <div class="form-group">
         <label>
-          活動名稱（同步對應試算表之工作表名稱）
-          <span style="font-size:12px; color:#d97706; font-weight:normal;">✏️ 修改後將自動連動更新工作表名稱</span>
+          活動名稱
+          <span style="font-size:12px; color:#d97706; font-weight:normal;">✏️ 同步修改工作表名稱</span>
         </label>
         <input type="text" id="actName" placeholder="例如：115學年度社團招生公假" required>
       </div>
@@ -199,7 +199,7 @@
       <div class="form-group">
         <label style="display:flex; align-items:center; cursor:pointer;">
           <input type="checkbox" id="actIsEnabled" style="margin-right:8px; width:16px; height:16px;" checked>
-          總開關（勾選啟用開放前台）
+          活動總開關
         </label>
       </div>
 
@@ -235,14 +235,14 @@
           <textarea id="actClasses" placeholder="101&#10;102"></textarea>
         </div>
         <div class="form-group">
-          <label>請假時段清單（一行一個）</label>
+          <label>公假時段清單（一行一個）</label>
           <textarea id="actPeriods" placeholder="9/8午休&#10;9/9第五節"></textarea>
         </div>
       </div>
 
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
         <button type="button" class="btn-cancel" onclick="closeEditor()">取消</button>
-        <button type="button" class="btn-save" id="saveActBtn" onclick="saveActData()">儲存活動與工作表</button>
+        <button type="button" class="btn-save" id="saveActBtn" onclick="saveActData()">儲存</button>
       </div>
     </div>
   </div>
@@ -307,7 +307,7 @@
     }
 
     async function loadList() {
-      document.getElementById('actList').innerHTML = '載入活動中...';
+      document.getElementById('actList').innerHTML = '資料讀取中...';
       try {
         const res = await callApi({ action: 'getAllActivities', onlyActive: false });
         if (res.success) {
@@ -317,7 +317,7 @@
           document.getElementById('actList').innerText = '載入失敗：' + res.message;
         }
       } catch (err) {
-        document.getElementById('actList').innerText = '無法連線至 API：' + err.message;
+        document.getElementById('actList').innerText = '無法連線至試算表：' + err.message;
       }
     }
 
@@ -347,7 +347,7 @@
               </div>
               <div class="card-btns">
                 <a class="btn-action btn-open-sheet" href="${act.sheetUrl || '#'}" target="_blank">📊 開啟工作表</a>
-                <button class="btn-action btn-edit" onclick="editAct(${idx})">✏️ 編輯 / 改名</button>
+                <button class="btn-action btn-edit" onclick="editAct(${idx})">✏️ 編輯</button>
                 <button class="btn-action btn-del" onclick="deleteAct('${encodeURIComponent(act.name)}')">🗑️ 刪除</button>
               </div>
             </div>
@@ -362,7 +362,7 @@
     }
 
     function openEditor() {
-      document.getElementById('modalTitle').innerText = '新增活動';
+      document.getElementById('modalTitle').innerText = '新增';
       document.getElementById('actOriginalName').value = '';
       document.getElementById('actName').value = '';
       document.getElementById('actIsEnabled').checked = true;
@@ -377,7 +377,7 @@
 
     function editAct(idx) {
       const act = allActivities[idx];
-      document.getElementById('modalTitle').innerText = '編輯活動與工作表設定';
+      document.getElementById('modalTitle').innerText = '編輯';
       document.getElementById('actOriginalName').value = act.name;
       document.getElementById('actName').value = act.name;
       document.getElementById('actIsEnabled').checked = act.isEnabled;
@@ -404,13 +404,13 @@
       }
 
       if (oldName && oldName !== actName) {
-        const confirmRename = confirm(`確定要將活動「${oldName}」更名為「${actName}」嗎？\n這將同步更新 Google 試算表中對應的工作表分頁名稱。`);
+        const confirmRename = confirm(`確定要將活動「${oldName}」更名為「${actName}」嗎？\n這將同步更新工作表名稱。`);
         if (!confirmRename) return;
       }
 
       const saveBtn = document.getElementById('saveActBtn');
       saveBtn.disabled = true;
-      saveBtn.innerText = '儲存與同步工作表中...';
+      saveBtn.innerText = '儲存中...';
 
       const data = {
         originalName: oldName,
@@ -436,7 +436,7 @@
         alert('連線失敗：' + err.message);
       } finally {
         saveBtn.disabled = false;
-        saveBtn.innerText = '儲存活動與工作表';
+        saveBtn.innerText = '儲存成功';
       }
     }
 
@@ -445,7 +445,7 @@
       const confirm1 = confirm(`確定要刪除活動「${actName}」嗎？`);
       if (!confirm1) return;
 
-      const deleteSheet = confirm(`是否同時刪除 Google 試算表內名稱為「${actName}」的工作表分頁與既有紀錄？\n\n【確定】：連同分頁一併刪除。\n【取消】：僅從系統中移除活動，保留試算表分頁。`);
+      const deleteSheet = confirm(`是否刪除試算表為「${actName}」的紀錄？\n\n【確定】：一併刪除。\n【取消】：僅從系統中移除活動，保留試算表分頁。`);
 
       try {
         const res = await callApi({
@@ -455,7 +455,7 @@
         });
 
         if (res.success) {
-          alert('活動已成功刪除！');
+          alert('刪除成功！');
           loadList();
         } else {
           alert('刪除失敗：' + res.message);
