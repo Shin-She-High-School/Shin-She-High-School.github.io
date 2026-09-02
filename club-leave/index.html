@@ -217,7 +217,6 @@
     let activeActivities = [];
     let currentAct = null;
 
-    // 避開 CORS 阻擋的專用傳輸函式
     async function callApi(payload) {
       const params = new URLSearchParams();
       params.append('data', JSON.stringify(payload));
@@ -264,7 +263,6 @@
       return html;
     }
 
-    // 自動重排編號：永遠從 1 開始連續排列
     function reindexCards() {
       const cards = document.querySelectorAll('.student-card');
       cards.forEach((card, idx) => {
