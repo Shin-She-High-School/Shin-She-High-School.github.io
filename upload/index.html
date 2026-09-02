@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>新社高中活動照片上傳系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap');
+    * { max-width: 100%; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    }
+    .drop-zone {
+      border: 2px dashed rgba(245, 158, 11, 0.4);
+      transition: all 0.2s ease-in-out;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.08);
+      transform: scale(1.01);
+    }
+    .btn-touch { min-height: 48px; }
+    
+    /* 點我看照片 - 微光呼吸動畫效果 */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(245, 158, 11, 0.6); }
+    }
+    .btn-view-drive {
+      animation: pulseGlow 3s infinite;
+    }
+  </style>
+</head>
+<body class="flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950 min-h-screen p-3 sm:p-6">
+
+  <!-- Toast 通知容器 -->
+  <div id="toastContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col items-center gap-2 pointer-events-none w-[92%] max-w-md"></div>
+
+  <div class="max-w-3xl mx-auto w-full space-y-5 my-auto">
+    
+    <!-- 頂部 Header -->
+    <header class="text-center space-y-3">
+      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-2xl sm:text-3xl mx-auto shadow-xl shadow-amber-500/20">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-3xl font-black text-white tracking-tight">新社高中活動照片上傳系統</h1>
+        <p class="text-xs sm:text-sm text-slate-400 font-medium mt-1">免登入 • 自動分資料夾存入 Google Drive</p>
+      </div>
+
+      <!-- 置中放大版「點我看照片」按鈕 -->
+      <div class="pt-1 pb-1 flex justify-center w-full">
+        <a href="https://drive.google.com/drive/folders/17fPjR4mX-YNIunJCszMMnP0o0B9eJG8z?usp=drive_link" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="btn-view-drive group relative inline-flex items-center justify-center gap-3 w-full max-w-md px-6 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-amber-500/25 hover:from-amber-500/40 hover:to-amber-500/40 border-2 border-amber-400 text-amber-300 hover:text-white text-base sm:text-lg font-black transition-all duration-300 active:scale-95 shadow-2xl">
+          
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+
+          <i class="fa-solid fa-folder-open text-amber-400 text-xl group-hover:rotate-6 transition-transform"></i>
+          
+          <span>點我看照片 (Google Drive 雲端硬碟)</span>
+          
+          <i class="fa-solid fa-arrow-up-right-from-square text-sm opacity-75 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- 相簿快速切換頁籤區 -->
+    <div class="glass-card p-3.5 sm:p-4 rounded-3xl space-y-3 border border-slate-700">
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs sm:text-sm font-extrabold text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-images"></i> 點選切換相簿視窗 (或查看全部)：
+        </span>
+        <span id="activeAlbumBadge" class="text-[11px] font-black text-slate-200 bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 rounded-full">
+          當前：所有已選擇照片
+        </span>
+      </div>
+
+      <!-- 相簿快速按鈕列表 -->
+      <div id="albumTabsGrid" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1 text-xs">
+        <!-- 由 JavaScript 動態繪製頁籤 -->
+      </div>
+    </div>
+
+    <!-- 全域一鍵上傳控制區 -->
+    <div class="glass-card p-4 rounded-3xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-slate-900 to-amber-500/10 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl">
+      <div class="text-left space-y-0.5">
+        <div class="text-xs sm:text-sm font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-layer-group text-amber-400"></i>
+          <span>跨相簿照片總彙整：</span>
+        </div>
+        <p class="text-[11px] text-slate-300 font-bold">
+          全系統共有 <span id="globalTotalFilesCount" class="text-amber-400 font-black text-sm">0</span> 張待處理照片 
+          <span id="globalAlbumCountText" class="text-slate-400 font-medium"></span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button id="btnUploadAll" onclick="startUploadAllAlbums()" disabled class="btn-touch flex-1 sm:flex-none px-5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 active:scale-95 disabled:opacity-40 text-slate-950 font-black text-xs sm:text-sm rounded-2xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+          <i class="fa-solid fa-bolt"></i>
+          <span>⚡ 一鍵上傳所有相簿的照片</span>
+        </button>
+
+        <button id="btnPauseUpload" onclick="togglePauseUpload()" class="btn-touch px-4 bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-300 font-black text-xs rounded-2xl border border-amber-500/40 shadow-lg transition hidden items-center justify-center gap-1.5 cursor-pointer">
+          <i id="pauseBtnIcon" class="fa-solid fa-pause"></i>
+          <span id="pauseBtnText">暫停上傳</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 各相簿進度條列表容器 -->
+    <div id="allAlbumsProgressContainer" class="hidden glass-card p-4 rounded-3xl border border-slate-700 space-y-3">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-700">
+        <span class="text-xs font-black text-amber-400 flex items-center gap-1.5">
+          <i class="fa-solid fa-gauge-high"></i> 即時傳輸速率與總進度
+        </span>
+        <span id="globalProgressSummary" class="text-[11px] font-mono font-bold text-slate-300">已完成 0 / 0</span>
+      </div>
+
+      <!-- 實時速度與剩餘時間預估 -->
+      <div id="speedMetricsBox" class="p-3 bg-slate-900/90 rounded-2xl border border-slate-800 flex justify-between items-center text-xs font-mono text-amber-300">
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-bolt text-amber-400"></i> 上傳速率: <span id="metricSpeedText" class="font-black text-white">0.0 MB/s</span></span>
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-hourglass-half text-amber-400"></i> 預估剩餘: <span id="metricTimeText" class="font-black text-white">計算中...</span></span>
+      </div>
+
+      <div id="albumsProgressList" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+        <!-- 動態渲染每個相簿的獨立進度條卡片 -->
+      </div>
+    </div>
+
+    <!-- 當前相簿專屬上傳卡片視窗 -->
+    <div class="glass-card p-4 sm:p-7 rounded-3xl space-y-4 sm:space-y-5 border-2 border-amber-500/50 relative">
+      
+      <!-- 上傳視窗標頭 -->
+      <div class="flex justify-between items-center pb-3 border-b border-slate-700">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black text-sm flex items-center justify-center shadow">
+            <i class="fa-solid fa-layer-group" id="albumHeaderIcon"></i>
+          </span>
+          <div>
+            <h2 id="albumWindowTitle" class="text-base sm:text-lg font-black text-white">所有已選擇照片 (跨相簿總彙整視窗)</h2>
+            <p id="albumWindowDesc" class="text-[11px] sm:text-xs text-slate-400 font-medium">即時列出全系統跨相簿所有選取的照片清單</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 相片選擇拖曳區 -->
+      <div class="space-y-1.5" id="dropZoneContainer">
+        <div id="dropZone" onclick="document.getElementById('fileInput').click()" class="drop-zone p-5 sm:p-8 rounded-2xl text-center cursor-pointer space-y-2.5 bg-slate-900/50">
+          <i class="fa-solid fa-cloud-arrow-up text-3xl sm:text-5xl text-amber-500/80"></i>
+          <div>
+            <p id="dropZoneText" class="text-xs sm:text-base font-extrabold text-slate-100">點擊直接加入預設 ❓ 未分類相簿 照片，或先選擇上方具體班級頁籤</p>
+            <p id="dropZoneSubText" class="text-[11px] sm:text-xs text-slate-300 mt-1">⚠️ 照片單張極大 (超過10MB) 時，<strong class="text-rose-400">強烈建議單次選擇 20~30 張分批上傳體驗更佳</strong></p>
+          </div>
+          <span class="inline-block px-3.5 py-1.5 bg-amber-500/20 text-amber-300 font-black text-xs rounded-full border border-amber-500/40 shadow-sm">
+            <i class="fa-solid fa-square-plus mr-1"></i> 選擇照片
+          </span>
+          <input type="file" id="fileInput" accept="image/*" multiple class="hidden" onchange="handleFileChange(event)">
+        </div>
+      </div>
+
+      <!-- 照片預覽區與狀態追蹤 -->
+      <div id="previewContainer" class="hidden space-y-2">
+        <div class="flex justify-between items-center text-xs font-bold text-slate-300">
+          <span class="flex items-center gap-1.5">
+            <i class="fa-solid fa-photo-film text-amber-400"></i>
+            [<span id="previewAlbumName" class="text-amber-400 font-black">所有已選擇照片</span>] 待處理 
+            <span id="fileCountText" class="text-amber-400 font-black text-sm">0</span> 張照片
+            <span id="statusSummaryText" class="text-[11px] text-slate-400 ml-1"></span>
+          </span>
+          <button onclick="clearCurrentViewFiles()" class="text-rose-400 hover:text-rose-300 transition text-xs font-extrabold flex items-center gap-1 cursor-pointer">
+            <i class="fa-solid fa-trash-can"></i> 清空此視窗預覽
+          </button>
+        </div>
+        
+        <!-- 縮圖網格 -->
+        <div id="thumbnailGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-80 overflow-y-auto p-2.5 bg-slate-900/90 rounded-2xl border border-slate-800"></div>
+      </div>
+
+      <!-- 單一視窗按鈕控制區 -->
+      <div class="space-y-2">
+        <button id="btnUpload" onclick="startSingleAlbumUpload()" disabled class="btn-touch w-full bg-slate-800 hover:bg-slate-700 active:scale-95 disabled:opacity-40 border border-slate-600 text-amber-300 font-black text-xs sm:text-sm rounded-2xl shadow-xl transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span id="btnText">⚡ 一鍵上傳全系統所有照片</span>
+        </button>
+
+        <button id="btnRetryFailed" onclick="retryFailedUploads()" class="btn-touch w-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-black text-xs sm:text-sm rounded-2xl shadow-xl transition hidden items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>重新上傳失敗的照片 (<span id="failedRetryCount">0</span> 張)</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 📸 活動照片原檔直傳系統 — 完整注意事項與指南 (內嵌版) -->
+    <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4 border border-slate-700 text-slate-200 shadow-xl">
+      <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+        <h3 class="font-black text-sm sm:text-base text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-amber-400 text-lg"></i>
+          <span>📸 活動照片原檔直傳指南</span>
+        </h3>
+        <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-2.5 py-0.5 rounded-full border border-amber-500/30">必讀說明</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        
+        <!-- 1. 保留照片原檔畫質 -->
+        <div class="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-1.5">
+          <h4 class="font-extrabold text-amber-300 flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-black flex items-center justify-center">1</span>
+            <span>📷 保留照片原檔畫質</span>
+          </h4>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            請直接開啟手機相簿選擇照片。<strong class="text-rose-400 block mt-0.5">⚠️ 切勿先傳至 LINE 再下載！</strong>以免嚴重壓縮畫質並抹除時間紀錄。
+          </p>
+        </div>
+
+        <!-- 2. 分批上傳防封鎖 (重點) -->
+        <div class="p-3.5 bg-rose-950/30 rounded-2xl border border-rose-500/40 space-y-1.5">
+          <h4 class="font-extrabold text-rose-300 flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-rose-600 text-white text-[11px] font-black flex items-center justify-center">2</span>
+            <span>⚡ 分批數量與上傳建議</span>
+          </h4>
+          <p class="text-rose-200 text-[11px] leading-relaxed">
+            若您的單張照片體積過大 (如 15MB 級別的高清原檔)，為避免觸發伺服器超載阻擋，<strong class="text-white bg-rose-600/50 px-1 rounded">強烈建議單次選擇 20 ~ 30 張分批上傳</strong>。
+          </p>
+        </div>
+
+        <!-- 3. 班級與相簿歸屬確認 -->
+        <div class="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-1.5">
+          <h4 class="font-extrabold text-amber-300 flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-black flex items-center justify-center">3</span>
+            <span>📂 相簿切換與命名歸屬</span>
+          </h4>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            在「所有已選擇照片」直接加入會預設放入 <strong class="text-amber-300">「未分類」</strong>。寫入檔名格式會自動標示為：<strong class="text-amber-300">相簿名稱_原檔名</strong>。
+          </p>
+        </div>
+
+        <!-- 4. ⏳ 傳送機制 -->
+        <div class="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-1.5">
+          <h4 class="font-extrabold text-amber-300 flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-black flex items-center justify-center">4</span>
+            <span>🛡️ 失敗自動重試防護</span>
+          </h4>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            系統內建智慧上傳緩衝，遇到網路異常或超載時，系統會自動等待並<strong>自動重試 2 次</strong>。若仍失敗，請按重試按鈕補傳。
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="text-center text-slate-600 text-xs py-3">
+    <p>115學年度新生卓越成長營 &copy; 2026</p>
+  </footer>
+
+  <script>
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxl_Fhy-SKff55gYd4o8o9-T_-SI05lR2On0VhGJ5hi-el3OpiIGx1t3mqU-4KJY26tXQ/exec";
+
+    const ALBUMS = [
+      { id: 'ALL', name: '📂 所有已選擇照片', group: '全域' },
+      { id: '101', name: '101 班', group: '高一' },
+      { id: '102', name: '102 班', group: '高一' },
+      { id: '103', name: '103 班', group: '高一' },
+      { id: '104', name: '104 班', group: '高一' },
+      { id: '105', name: '105 班', group: '高一' },
+      { id: '401', name: '401 班', group: '高二/三' },
+      { id: '402', name: '402 班', group: '高二/三' },
+      { id: '403', name: '403 班', group: '高二/三' },
+      { id: '404', name: '404 班', group: '高二/三' },
+      { id: '405', name: '405 班', group: '高二/三' },
+      { id: '406', name: '406 班', group: '高二/三' },
+      { id: '407', name: '407 班', group: '高二/三' },
+      { id: '408', name: '408 班', group: '高二/三' },
+      { id: '409', name: '409 班', group: '高二/三' },
+      { id: '410', name: '410 班', group: '高二/三' },
+      { id: '工作人員', name: '📸 工作人員相簿', group: '其他' },
+      { id: '未分類', name: '❓ 未分類相簿', group: '其他' }
+    ];
+
+    let currentAlbumId = ALBUMS[0].id;
+    let isUploading = false;
+    let isPaused = false;
+
+    let albumFilesMap = {};
+    ALBUMS.filter(a => a.id !== 'ALL').forEach(a => { albumFilesMap[a.id] = []; });
+
+    function getClassLabel(id) {
+      const target = ALBUMS.find(a => a.id === id);
+      return target ? target.name : id;
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      let bgClass = 'bg-slate-800 text-white border-slate-700 shadow-xl';
+      if (type === 'success') bgClass = 'bg-emerald-600 text-white border-emerald-500 shadow-xl';
+      else if (type === 'error') bgClass = 'bg-rose-600 text-white border-rose-500 shadow-xl';
+
+      toast.className = `px-4 py-2.5 rounded-2xl border text-xs font-semibold pointer-events-auto flex items-center justify-between gap-3 transition-all duration-300 transform translate-y-2 opacity-0 w-full ${bgClass}`;
+      toast.innerHTML = `<span>${msg}</span><button onclick="this.parentElement.remove()" class="text-xs opacity-60 hover:opacity-100"><i class="fa-solid fa-xmark"></i></button>`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => { toast.classList.remove('translate-y-2', 'opacity-0'); });
+      setTimeout(() => { toast.remove(); }, 3500);
+    }
+
+    function renderAlbumTabs() {
+      const container = document.getElementById('albumTabsGrid');
+      if (!container) return;
+
+      let globalTotal = 0;
+      let activeAlbumsCount = 0;
+
+      Object.keys(albumFilesMap).forEach(key => {
+        const len = (albumFilesMap[key] || []).length;
+        if (len > 0) {
+          globalTotal += len;
+          activeAlbumsCount++;
+        }
+      });
+
+      container.innerHTML = ALBUMS.map(a => {
+        const isActive = a.id === currentAlbumId;
+        let count = (a.id === 'ALL') ? globalTotal : (albumFilesMap[a.id] || []).length;
+
+        let btnClass = isActive 
+          ? 'bg-amber-500 text-slate-950 font-black shadow-lg scale-105 border-amber-400' 
+          : (a.id === 'ALL' ? 'bg-amber-500/20 text-amber-300 font-bold border-amber-500/40 hover:bg-amber-500/30' : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold border-slate-700');
+
+        return `
+          <button onclick="switchAlbumTab('${a.id}')" 
+                  class="px-3 py-1.5 rounded-xl border text-xs transition flex items-center gap-1.5 cursor-pointer ${btnClass}">
+            <span>${a.name}</span>
+            ${count > 0 ? `<span class="px-1.5 py-0.2 rounded-full text-[10px] ${isActive ? 'bg-slate-950 text-amber-400' : 'bg-amber-500 text-slate-950'} font-black">${count}</span>` : ''}
+          </button>
+        `;
+      }).join('');
+
+      const btnUploadAll = document.getElementById('btnUploadAll');
+      document.getElementById('globalTotalFilesCount').innerText = globalTotal;
+      document.getElementById('globalAlbumCountText').innerText = activeAlbumsCount > 0 ? `(涵蓋 ${activeAlbumsCount} 個相簿)` : '';
+      
+      if (btnUploadAll && !isUploading) {
+        btnUploadAll.disabled = (globalTotal === 0);
+      }
+    }
+
+    function switchAlbumTab(id) {
+      currentAlbumId = id;
+      const label = getClassLabel(id);
+
+      document.getElementById('activeAlbumBadge').innerText = `當前：${label}`;
+
+      if (id === 'ALL') {
+        document.getElementById('albumWindowTitle').innerText = `所有已選擇照片 (跨相簿總彙整視窗)`;
+        document.getElementById('albumWindowDesc').innerText = `即時列出全系統跨相簿所有選取的照片清單`;
+        document.getElementById('dropZoneText').innerText = `點擊直接加入預設 ❓ 未分類相簿 照片，或先選擇上方具體班級頁籤`;
+        document.getElementById('btnText').innerText = `⚡ 一鍵上傳全系統所有照片`;
+        document.getElementById('previewAlbumName').innerText = "所有已選擇照片";
+      } else {
+        document.getElementById('albumWindowTitle').innerText = `${label} 專屬相簿上傳視窗`;
+        document.getElementById('albumWindowDesc').innerText = `照片將直接精準寫入 Google 雲端硬碟「${id}」資料夾`;
+        document.getElementById('dropZoneText').innerText = `點擊選擇 [${label}] 照片，或將照片拖曳至此`;
+        document.getElementById('btnText').innerText = `僅上傳 [${label}] 相簿的照片`;
+        document.getElementById('previewAlbumName').innerText = label;
+      }
+
+      renderAlbumTabs();
+      updatePreviewGrid();
+    }
+
+    const dropZone = document.getElementById('dropZone');
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+      dropZone.addEventListener(evt, preventDefaults, false);
+    });
+    function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+    ['dragenter', 'dragover'].forEach(evt => {
+      dropZone.addEventListener(evt, () => dropZone.classList.add('dragover'), false);
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      dropZone.addEventListener(evt, () => dropZone.classList.remove('dragover'), false);
+    });
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      if (dt.files && dt.files.length > 0) {
+        addFiles(Array.from(dt.files));
+      }
+    });
+
+    function handleFileChange(event) {
+      if (event.target.files && event.target.files.length > 0) {
+        addFiles(Array.from(event.target.files));
+      }
+    }
+
+    function addFiles(files) {
+      const imageFiles = files.filter(f => f.type.startsWith('image/'));
+      if (imageFiles.length === 0) {
+        showToast('請選擇有效的圖片檔案！', 'error');
+        return;
+      }
+
+      const targetId = currentAlbumId === 'ALL' ? '未分類' : currentAlbumId;
+      let currentFiles = albumFilesMap[targetId] || [];
+
+      const successItems = currentFiles.filter(f => f.status === 'success');
+      if (successItems.length > 0) {
+        successItems.forEach(item => {
+          if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+        });
+        currentFiles = currentFiles.filter(f => f.status !== 'success');
+      }
+
+      const newItems = imageFiles.map(f => ({
+        id: 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        file: f,
+        albumId: targetId,
+        status: 'pending',
+        errorMsg: '',
+        previewUrl: ''
+      }));
+
+      albumFilesMap[targetId] = currentFiles.concat(newItems);
+      renderAlbumTabs();
+      updatePreviewGrid();
+      showToast(`已新增 ${newItems.length} 張照片至 [${getClassLabel(targetId)}]`, 'info');
+    }
+
+    function clearCurrentViewFiles() {
+      if (currentAlbumId === 'ALL') {
+        Object.keys(albumFilesMap).forEach(key => {
+          (albumFilesMap[key] || []).forEach(item => {
+            if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+          });
+          albumFilesMap[key] = [];
+        });
+      } else {
+        const currentFiles = albumFilesMap[currentAlbumId] || [];
+        currentFiles.forEach(item => {
+          if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+        });
+        albumFilesMap[currentAlbumId] = [];
+      }
+
+      document.getElementById('fileInput').value = '';
+      renderAlbumTabs();
+      updatePreviewGrid();
+      document.getElementById('btnRetryFailed').classList.add('hidden');
+    }
+
+    function removeSingleFile(id, albumId) {
+      const targetId = albumId || currentAlbumId;
+      const currentFiles = albumFilesMap[targetId] || [];
+      const idx = currentFiles.findIndex(item => item.id === id);
+      if (idx !== -1) {
+        if (currentFiles[idx].previewUrl) URL.revokeObjectURL(currentFiles[idx].previewUrl);
+        currentFiles.splice(idx, 1);
+        renderAlbumTabs();
+        updatePreviewGrid();
+      }
+    }
+
+    function updatePreviewGrid() {
+      const container = document.getElementById('previewContainer');
+      const grid = document.getElementById('thumbnailGrid');
+      const countText = document.getElementById('fileCountText');
+      const summaryText = document.getElementById('statusSummaryText');
+      const btnUpload = document.getElementById('btnUpload');
+
+      let viewFiles = [];
+
+      if (currentAlbumId === 'ALL') {
+        Object.keys(albumFilesMap).forEach(key => {
+          viewFiles = viewFiles.concat(albumFilesMap[key] || []);
+        });
+      } else {
+        viewFiles = albumFilesMap[currentAlbumId] || [];
+      }
+
+      if (viewFiles.length === 0) {
+        container.classList.add('hidden');
+        btnUpload.disabled = true;
+        return;
+      }
+
+      container.classList.remove('hidden');
+      countText.innerText = viewFiles.length;
+
+      const successCount = viewFiles.filter(f => f.status === 'success').length;
+      const errorCount = viewFiles.filter(f => f.status === 'error').length;
+      const pendingCount = viewFiles.filter(f => f.status === 'pending').length;
+
+      if (successCount > 0 || errorCount > 0) {
+        summaryText.innerText = `(成功 ${successCount} / 失敗 ${errorCount} / 等候 ${pendingCount})`;
+      } else {
+        summaryText.innerText = '';
+      }
+
+      btnUpload.disabled = (pendingCount === 0 && errorCount === 0) || isUploading;
+
+      grid.innerHTML = '';
+
+      // 記憶體防護：只為前 16 張照片生成圖片 Blob，避免一次加載幾百張大圖擠爆手機 RAM 造成 Safari 閃退
+      const MAX_PREVIEW_BLOBS = 16;
+
+      viewFiles.forEach((item, index) => {
+        if (index < MAX_PREVIEW_BLOBS && !item.previewUrl) {
+          try { item.previewUrl = URL.createObjectURL(item.file); } catch(e){}
+        }
+
+        let badgeHtml = '';
+        let borderStyle = 'border-slate-700';
+
+        if (item.status === 'uploading') {
+          borderStyle = 'border-amber-400 ring-2 ring-amber-400/50';
+          badgeHtml = `<span class="bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded text-[10px] font-black animate-pulse flex items-center gap-1 shadow"><i class="fa-solid fa-spinner animate-spin"></i> 上傳中</span>`;
+        } else if (item.status === 'success') {
+          borderStyle = 'border-emerald-500 ring-2 ring-emerald-500/30';
+          badgeHtml = `<span class="bg-emerald-600 text-white px-1.5 py-0.5 rounded text-[10px] font-black flex items-center gap-1 shadow"><i class="fa-solid fa-check"></i> 成功</span>`;
+        } else if (item.status === 'error') {
+          borderStyle = 'border-rose-500 ring-2 ring-rose-500/50';
+          badgeHtml = `<span class="bg-rose-600 text-white px-1.5 py-0.5 rounded text-[10px] font-black flex items-center gap-1 shadow" title="${item.errorMsg}"><i class="fa-solid fa-xmark"></i> 失敗</span>`;
+        } else {
+          const albName = getClassLabel(item.albumId);
+          badgeHtml = `<span class="bg-slate-900/90 text-amber-300 px-1.5 py-0.5 rounded text-[10px] font-black border border-amber-500/40 shadow truncate max-w-[85px]"><i class="fa-solid fa-folder text-[9px] mr-0.5"></i>${albName}</span>`;
+        }
+
+        const sizeMB = (item.file.size / 1024 / 1024).toFixed(1);
+
+        const div = document.createElement('div');
+        div.className = `relative w-full h-28 sm:h-32 rounded-2xl overflow-hidden border ${borderStyle} bg-slate-800 shadow-md flex flex-col justify-between p-1.5`;
+        
+        const hasImgPreview = index < MAX_PREVIEW_BLOBS && item.previewUrl;
+        
+        div.innerHTML = `
+          ${hasImgPreview ? `<img src="${item.previewUrl}" class="absolute inset-0 w-full h-full object-cover z-0">` : `<div class="absolute inset-0 flex flex-col items-center justify-center p-2 text-center bg-slate-900/90 z-0"><i class="fa-solid fa-file-image text-amber-400 text-xl mb-1"></i><span class="text-[10px] text-slate-300 font-bold truncate max-w-full">${item.file.name}</span></div>`}
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/40 z-10"></div>
+          
+          <div class="relative z-20 flex justify-between items-center w-full">
+            <div>${badgeHtml}</div>
+            ${item.status !== 'uploading' ? `
+              <button onclick="removeSingleFile('${item.id}', '${item.albumId}')" class="w-5 h-5 bg-rose-600 hover:bg-rose-500 text-white rounded-full text-[10px] flex items-center justify-center transition shadow cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            ` : ''}
+          </div>
+
+          <div class="relative z-20 text-[9px] font-mono text-slate-200 font-extrabold truncate px-0.5">
+            ${sizeMB} MB
+            ${item.errorMsg ? `<p class="text-rose-300 font-extrabold truncate text-[9px]" title="${item.errorMsg}">${item.errorMsg}</p>` : ''}
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = err => reject(err);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function togglePauseUpload() {
+      isPaused = !isPaused;
+      const btnIcon = document.getElementById('pauseBtnIcon');
+      const btnText = document.getElementById('pauseBtnText');
+
+      if (isPaused) {
+        btnIcon.className = "fa-solid fa-play";
+        btnText.innerText = "繼續上傳";
+        showToast('已要求暫停，將於當前照片傳送完畢後暫停', 'info');
+      } else {
+        btnIcon.className = "fa-solid fa-pause";
+        btnText.innerText = "暫停上傳";
+        showToast('已恢復繼續上傳照片', 'success');
+      }
+    }
+
+    async function startSingleAlbumUpload() {
+      if (currentAlbumId === 'ALL') {
+        await startUploadAllAlbums();
+      } else {
+        await executeMasterUploadProcess([currentAlbumId]);
+      }
+    }
+
+    async function startUploadAllAlbums() {
+      const targetAlbums = ALBUMS.filter(a => a.id !== 'ALL').filter(a => {
+        const files = albumFilesMap[a.id] || [];
+        return files.some(f => f.status === 'pending' || f.status === 'error');
+      }).map(a => a.id);
+
+      if (targetAlbums.length === 0) {
+        showToast('目前全系統沒有可上傳的照片！', 'info');
+        return;
+      }
+
+      switchAlbumTab('ALL');
+      await executeMasterUploadProcess(targetAlbums);
+    }
+
+    async function retryFailedUploads() {
+      document.getElementById('btnRetryFailed').classList.add('hidden');
+      await startSingleAlbumUpload();
+    }
+
+    async function executeMasterUploadProcess(albumIdsList) {
+      isUploading = true;
+      isPaused = false;
+
+      const btnUploadAll = document.getElementById('btnUploadAll');
+      const btnUpload = document.getElementById('btnUpload');
+      const btnPause = document.getElementById('btnPauseUpload');
+      const progressContainer = document.getElementById('allAlbumsProgressContainer');
+      const progressList = document.getElementById('albumsProgressList');
+      const globalSummary = document.getElementById('globalProgressSummary');
+
+      const metricSpeedText = document.getElementById('metricSpeedText');
+      const metricTimeText = document.getElementById('metricTimeText');
+
+      btnUploadAll.disabled = true;
+      btnUpload.disabled = true;
+      btnPause.classList.remove('hidden');
+      btnPause.classList.add('flex');
+      progressContainer.classList.remove('hidden');
+
+      let grandTotalFiles = 0;
+      let grandTotalBytes = 0;
+      let grandSuccessCount = 0;
+      let grandFailedCount = 0;
+      let uploadedBytesSoFar = 0;
+
+      const uploadStartTime = Date.now();
+
+      albumIdsList.forEach(id => {
+        const pendingFiles = (albumFilesMap[id] || []).filter(f => f.status === 'pending' || f.status === 'error');
+        grandTotalFiles += pendingFiles.length;
+        pendingFiles.forEach(f => { grandTotalBytes += f.file.size; });
+      });
+
+      progressList.innerHTML = albumIdsList.map(id => {
+        const label = getClassLabel(id);
+        const files = (albumFilesMap[id] || []).filter(f => f.status === 'pending' || f.status === 'error');
+        return `
+          <div id="progCard_${id}" class="p-2.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+            <div class="flex justify-between items-center text-xs font-bold">
+              <span class="text-slate-200 font-extrabold flex items-center gap-1.5">
+                <i class="fa-solid fa-folder text-amber-400"></i> ${label}
+              </span>
+              <span id="progCount_${id}" class="text-amber-400 font-mono">0 / ${files.length} 張</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden border border-slate-700">
+              <div id="progBar_${id}" class="bg-gradient-to-r from-amber-500 to-amber-400 h-2.5 rounded-full transition-all duration-300 w-0"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      for (const id of albumIdsList) {
+        if (isPaused) {
+          showToast('系統已暫停傳送，等待使用者點擊繼續', 'info');
+          while (isPaused) {
+            await new Promise(r => setTimeout(r, 500));
+          }
+        }
+
+        const albumLabel = getClassLabel(id);
+        const targetFiles = (albumFilesMap[id] || []).filter(f => f.status === 'pending' || f.status === 'error');
+        const totalInAlbum = targetFiles.length;
+
+        const progCard = document.getElementById(`progCard_${id}`);
+        const progCount = document.getElementById(`progCount_${id}`);
+        const progBar = document.getElementById(`progBar_${id}`);
+
+        if (progCard) progCard.className = "p-2.5 rounded-2xl bg-slate-900 border-2 border-amber-500/60 shadow-md space-y-1";
+
+        for (let i = 0; i < totalInAlbum; i++) {
+          if (isPaused) {
+            showToast('系統已暫停傳送，等待使用者點擊繼續', 'info');
+            while (isPaused) {
+              await new Promise(r => setTimeout(r, 500));
+            }
+          }
+
+          const item = targetFiles[i];
+          item.status = 'uploading';
+          item.errorMsg = '';
+          updatePreviewGrid();
+
+          let attempt = 0;
+          let maxRetries = 2;
+          let uploadSuccess = false;
+
+          const fileStartTime = Date.now();
+
+          while (attempt <= maxRetries && !uploadSuccess) {
+            try {
+              const base64Data = await fileToBase64(item.file);
+              if (!base64Data) throw new Error('檔案讀取失敗');
+
+              const cleanFileName = item.file.name.replace(/[\\/:*?"<>|\r\n\t]/g, '_').trim();
+              const newFileName = `${id}_${cleanFileName}`;
+
+              const payload = {
+                className: id,
+                fileName: newFileName,
+                mimeType: item.file.type || 'image/jpeg',
+                fileData: base64Data.split(',')[1]
+              };
+
+              const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+              });
+
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+              }
+
+              const resText = await response.text();
+              let resJson = {};
+              try { resJson = JSON.parse(resText); } catch(e){}
+
+              if (resJson.result === 'success') {
+                uploadSuccess = true;
+                item.status = 'success';
+                item.errorMsg = '';
+                grandSuccessCount++;
+                uploadedBytesSoFar += item.file.size;
+              } else {
+                throw new Error(resJson.message || '寫入失敗/容量過大');
+              }
+
+            } catch (err) {
+              attempt++;
+              if (attempt <= maxRetries) {
+                console.warn(`[重試 ${attempt}/${maxRetries}] 照片 ${item.file.name} 傳送失敗，等待後重試:`, err);
+                await new Promise(r => setTimeout(r, 2000));
+              } else {
+                console.error(`相簿 [${id}] 照片 ${item.file.name} 最終傳送失敗:`, err);
+                item.status = 'error';
+                item.errorMsg = err.message || '傳送失敗/伺服器超載';
+                grandFailedCount++;
+              }
+            }
+          }
+
+          // 計算實時速度與剩餘時間
+          const elapsedSec = (Date.now() - uploadStartTime) / 1000;
+          if (elapsedSec > 0 && uploadedBytesSoFar > 0) {
+            const speedMBps = (uploadedBytesSoFar / 1024 / 1024) / elapsedSec;
+            const remainingBytes = grandTotalBytes - uploadedBytesSoFar;
+            const remainingSec = Math.round(remainingBytes / (uploadedBytesSoFar / elapsedSec));
+
+            if (metricSpeedText) metricSpeedText.innerText = `${speedMBps.toFixed(2)} MB/s`;
+            if (metricTimeText) {
+              if (remainingSec < 60) {
+                metricTimeText.innerText = `約 ${remainingSec} 秒`;
+              } else {
+                const mins = Math.floor(remainingSec / 60);
+                const secs = remainingSec % 60;
+                metricTimeText.innerText = `約 ${mins} 分 ${secs} 秒`;
+              }
+            }
+          }
+
+          const currentProgressPercent = Math.round(((i + 1) / totalInAlbum) * 100);
+          if (progCount) progCount.innerText = `${i + 1} / ${totalInAlbum} 張 (${currentProgressPercent}%)`;
+          if (progBar) progBar.style.width = `${currentProgressPercent}%`;
+          if (globalSummary) globalSummary.innerText = `已完成 ${grandSuccessCount} / ${grandTotalFiles} 張`;
+
+          renderAlbumTabs();
+          updatePreviewGrid();
+
+          // 優化：間隔調整為 0.8 秒提升傳送速度
+          await new Promise(r => setTimeout(r, 800));
+        }
+
+        if (progCard) progCard.className = "p-2.5 rounded-2xl bg-slate-900/60 border border-emerald-500/40 space-y-1";
+      }
+
+      isUploading = false;
+      isPaused = false;
+
+      btnPause.classList.add('hidden');
+      btnPause.classList.remove('flex');
+
+      if (metricSpeedText) metricSpeedText.innerText = "傳送完成";
+      if (metricTimeText) metricTimeText.innerText = "0 秒";
+
+      if (grandFailedCount > 0) {
+        showToast(`⚠️ 批次傳送完畢：${grandSuccessCount} 張成功，${grandFailedCount} 張失敗`, 'error');
+        const retryBtn = document.getElementById('btnRetryFailed');
+        document.getElementById('failedRetryCount').innerText = grandFailedCount;
+        retryBtn.classList.remove('hidden');
+        retryBtn.classList.add('flex');
+      } else {
+        showToast(`🎉 全部 ${grandSuccessCount} 張照片已成功寫入 Google 雲端硬碟！`, 'success');
+        document.getElementById('btnRetryFailed').classList.add('hidden');
+      }
+
+      renderAlbumTabs();
+      updatePreviewGrid();
+    }
+
+    window.onload = function() {
+      switchAlbumTab(ALBUMS[0].id);
+    };
+  </script>
+</body>
+</html>
