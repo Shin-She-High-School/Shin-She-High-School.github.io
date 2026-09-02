@@ -253,14 +253,14 @@
     let allActivities = [];
 
     async function callApi(payload) {
-      const params = new URLSearchParams();
-      params.append('data', JSON.stringify(payload));
-
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        body: params
-      });
-      return await res.json();
+    const params = new URLSearchParams();
+    params.append('data', JSON.stringify(payload));
+  
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: params
+    });
+    return await res.json();
     }
 
     function applyFormat(type) {
