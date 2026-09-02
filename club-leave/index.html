@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>公假登記系統</title>
+  <title>新社高中公假登記系統</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * { box-sizing: border-box; }
@@ -178,9 +178,9 @@
 </head>
 <body>
   <div class="container">
-    <h2>📋 公假登記系統</h2>
+    <h2>📋 新社高中公假登記系統</h2>
     
-    <div id="loading">即時連線試算表載入活動中...</div>
+    <div id="loading">資料載入中...</div>
 
     <div id="appBody" style="display: none;">
       <div class="section-box">
@@ -205,7 +205,7 @@
         <div id="studentList"></div>
 
         <button type="button" class="btn-add" id="addStudentBtn">➕ 新增一位學生</button>
-        <button type="submit" class="btn-submit" id="submitBtn">確認送出 / 覆蓋更新名單</button>
+        <button type="submit" class="btn-submit" id="submitBtn">確認送出</button>
         <div id="msg"></div>
       </form>
     </div>
@@ -347,7 +347,7 @@
           alert('載入失敗：' + res.message);
         }
       } catch (err) {
-        document.getElementById('loading').innerText = '連線試算表 API 失敗：' + err.message;
+        document.getElementById('loading').innerText = '試算表連線失敗：' + err.message;
       }
     });
 
@@ -419,7 +419,7 @@
       }
 
       statusDiv.style.color = '#3b82f6';
-      statusDiv.innerText = `⏳ 查詢「${clubName}」現有名單中...`;
+      statusDiv.innerText = `⏳ 查詢「${clubName}」資料中...`;
 
       try {
         const res = await callApi({
@@ -438,7 +438,7 @@
           } else {
             addStudentCard();
             statusDiv.style.color = '#64748b';
-            statusDiv.innerText = `📝 目前尚無登記資料，請直接新增。`;
+            statusDiv.innerText = `📝 目前尚無資料。`;
           }
         }
       } catch (err) {
@@ -482,7 +482,7 @@
       }
 
       submitBtn.disabled = true;
-      submitBtn.innerText = '名單更新中...';
+      submitBtn.innerText = '資料更新中...';
       msgDiv.innerText = '';
 
       try {
@@ -508,7 +508,7 @@
         msgDiv.innerText = '連線錯誤：' + err.message;
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerText = '確認送出 / 覆蓋更新名單';
+        submitBtn.innerText = '確認送出';
       }
     });
 
