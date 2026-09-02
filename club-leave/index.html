@@ -180,7 +180,7 @@
   <div class="container">
     <h2>📋 公假登記系統</h2>
     
-    <div id="loading">載入活動清單中...</div>
+    <div id="loading">即時連線試算表載入活動中...</div>
 
     <div id="appBody" style="display: none;">
       <div class="section-box">
@@ -322,6 +322,7 @@
       }
     }
 
+    // 頁面載入時：直接即時向試算表取得真實資料
     window.addEventListener('DOMContentLoaded', async () => {
       try {
         const res = await callApi({ action: 'getAllActivities', onlyActive: true });
@@ -331,6 +332,7 @@
         if (res.success) {
           activeActivities = res.activities;
           const actSelect = document.getElementById('actSelect');
+          actSelect.innerHTML = '<option value="">-- 請選擇活動 --</option>';
           if (activeActivities.length === 0) {
             actSelect.innerHTML = '<option value="">目前暫無開放中的活動</option>';
             return;
@@ -345,7 +347,7 @@
           alert('載入失敗：' + res.message);
         }
       } catch (err) {
-        document.getElementById('loading').innerText = '無法連線至試算表 API：' + err.message;
+        document.getElementById('loading').innerText = '連線試算表 API 失敗：' + err.message;
       }
     });
 
