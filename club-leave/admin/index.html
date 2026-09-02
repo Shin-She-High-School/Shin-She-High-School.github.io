@@ -224,16 +224,17 @@
   </div>
 
   <script>
-    // ⚠️ 請填入你的 Apps Script 部署網址
-    const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxcZ3ArmfZTfA5qX7VON9dMhH_cwm8RU16ySNtmFWq1CzGjNkpdyJSEp4-kJuLNFW2Ecg/exec';
 
     let allActivities = [];
 
     async function callApi(payload) {
+      const params = new URLSearchParams();
+      params.append('data', JSON.stringify(payload));
+
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
+        body: params
       });
       return await res.json();
     }
@@ -254,7 +255,7 @@
           break;
         case 'link':
           const url = prompt('請輸入超連結網址：', 'https://');
-          if (url) replacement = `[${selectedText \vert{}\vert{} '連結文字'}](${url})`;
+          if (url) replacement = `[${selectedText || '連結文字'}](${url})`;
           else return;
           break;
         case 'bullet':
@@ -310,7 +311,7 @@
         else if (act.statusText === '尚未開始') badgeClass = 'badge-wait';
 
         const timeStr = (act.startTime || act.endTime) 
-          ? `🕒 期限：${act.startTime \vert{}\vert{} '即日起'} 至 ${act.endTime || '無限期'}`
+          ? `🕒 期限：${act.startTime || '即日起'} 至 ${act.endTime || '無限期'}`
           : '🕒 期限：無限期';
 
         html += `
@@ -324,7 +325,7 @@
             </div>
             <div style="font-size: 13px; color: #64748b; line-height: 1.6;">
               <div>${timeStr}</div>
-              <div><strong>時段數：</strong>${act.periods.length} 個 | <strong>社團數：</strong>${act.clubs.length} 個 \vert{} <strong>班級數：</strong>${act.classes.length} 班</div>
+              <div><strong>時段數：</strong>${act.periods.length} 個 | <strong>社團數：</strong>${act.clubs.length} 個 | <strong>班級數：</strong>${act.classes.length} 班</div>
             </div>
           </div>
         `;
