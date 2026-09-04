@@ -52,7 +52,7 @@ window.checkAuthIdRoleHint = function() {
         const cleanSid = sidInput.split('@')[0].toLowerCase().trim();
         const isTeacher = await checkIsTeacherAccount(cleanSid);
         if (isTeacher) {
-            if (hintEl) hintEl.innerHTML = '<span class="text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-black">👨‍🏫 教師帳號</span>';
+            if (hintEl) hintEl.innerHTML = '👨‍🏫 教師帳號';
             if (isReg) {
                 if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'block';
                 handleTeacherTypeChange();
