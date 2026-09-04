@@ -1,5 +1,6 @@
 let currentIndependentPage = null;
 const teacherCache = new Map();
+let teacherWhitelistData = [];
 window.checkIsTeacherAccount = async function(cleanSid) {
     if (!cleanSid) return false;
     const lowerSid = cleanSid.toLowerCase().trim();
@@ -83,16 +84,21 @@ window.formatDateTime = function(isoStr) {
 window.openIndependentPage = function(pageType) {
     currentIndependentPage = pageType;
     const mainDashboard = document.getElementById('mainDashboardView');
+    const teacherMgmtPage = document.getElementById('pageTeacherMgmtView');
     const announcePage = document.getElementById('pageAnnounceView');
     const auditPage = document.getElementById('pageAuditLogView');
     const feedbackPage = document.getElementById('pageFeedbackListView');
     const announceMgmtPage = document.getElementById('pageAnnounceMgmtView');
     if (mainDashboard) mainDashboard.classList.add('hidden');
+    if (teacherMgmtPage) teacherMgmtPage.classList.add('hidden');
     if (announcePage) announcePage.classList.add('hidden');
     if (auditPage) auditPage.classList.add('hidden');
     if (feedbackPage) feedbackPage.classList.add('hidden');
     if (announceMgmtPage) announceMgmtPage.classList.add('hidden');
-    if (pageType === 'announceView') {
+    if (pageType === 'teacherMgmtView') {
+        if (teacherMgmtPage) teacherMgmtPage.classList.remove('hidden');
+        fetchTeacherWhitelist();
+    } else if (pageType === 'announceView') {
         if (announcePage) announcePage.classList.remove('hidden');
         renderIndependentAnnouncements();
     } else if (pageType === 'auditLogView') {
@@ -111,10 +117,12 @@ window.openIndependentPage = function(pageType) {
 };
 window.closeIndependentPage = function() {
     const mainDashboard = document.getElementById('mainDashboardView');
+    const teacherMgmtPage = document.getElementById('pageTeacherMgmtView');
     const announcePage = document.getElementById('pageAnnounceView');
     const auditPage = document.getElementById('pageAuditLogView');
     const feedbackPage = document.getElementById('pageFeedbackListView');
     const announceMgmtPage = document.getElementById('pageAnnounceMgmtView');
+    if (teacherMgmtPage) teacherMgmtPage.classList.add('hidden');
     if (announcePage) announcePage.classList.add('hidden');
     if (auditPage) auditPage.classList.add('hidden');
     if (feedbackPage) feedbackPage.classList.add('hidden');
@@ -123,6 +131,119 @@ window.closeIndependentPage = function() {
     currentIndependentPage = null;
     updateHash();
     scrollToTop();
+};
+window.fetchTeacherWhitelist = async function() {
+    if (!dbClient) return;
+    const body = document.getElementById('teacherWhitelistBody');
+    if (body) body.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500 font-bold">🔄 正在載入教師名單...</td></tr>`;
+    try {
+        const { data, error } = await dbClient.from('teacher_whitelist').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        teacherWhitelistData = data || [];
+        teacherCache.clear();
+        teacherWhitelistData.forEach(item => {
+            if (item.teacher_id) teacherCache.set(item.teacher_id.toLowerCase().trim(), true);
+        });
+        renderTeacherWhitelistTable();
+    } catch (e) {
+        if (body) body.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-rose-500 font-bold">⚠️ 載入失敗！</td></tr>`;
+    }
+};
+window.renderTeacherWhitelistTable = function() {
+    const body = document.getElementById('teacherWhitelistBody');
+    const countText = document.getElementById('teacherWhitelistCountText');
+    const searchTxt = (document.getElementById('searchTeacherWhitelistInput')?.value || '').toLowerCase().trim();
+    if (!body) return;
+    let filtered = [...teacherWhitelistData];
+    if (searchTxt) {
+        filtered = filtered.filter(t => t.teacher_id && t.teacher_id.toLowerCase().includes(searchTxt));
+    }
+    if (countText) countText.innerText = `共 ${filtered.length} 筆教師名單`;
+    body.innerHTML = '';
+    if (filtered.length === 0) {
+        body.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 font-bold">查無符合條件的教師名單</td></tr>`;
+        return;
+    }
+    filtered.forEach(t => {
+        const timeStr = formatDateTime(t.created_at);
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
+        tr.innerHTML = `
+            <td class="p-2.5 font-mono font-bold text-slate-800">${t.teacher_id}</td>
+            <td class="p-2.5 text-slate-500 font-mono text-[11px]">${timeStr}</td>
+            <td class="p-2.5 text-center">
+                <button type="button" class="btn-mini bg-rose-500 hover:bg-rose-600 px-2 py-0.5 text-xs" onclick="deleteTeacherWhitelist('${t.teacher_id}')">刪除</button>
+            </td>
+        `;
+        body.appendChild(tr);
+    });
+};
+window.addSingleTeacherWhitelist = async function() {
+    if (!dbClient) return;
+    const input = document.getElementById('addSingleTeacherId');
+    const rawId = input?.value.trim();
+    if (!rawId) { showMsg("請輸入教職員帳號！", "error"); return; }
+    const cleanId = rawId.split('@')[0].toLowerCase().trim();
+    try {
+        updateSyncStatusIndicator('saving');
+        const { error } = await dbClient.from('teacher_whitelist').insert([{ teacher_id: cleanId, created_at: new Date().toISOString() }]);
+        if (error) throw error;
+        updateSyncStatusIndicator('success');
+        showMsg(`已成功將帳號「${cleanId}」加入教師名單！`);
+        input.value = '';
+        logAuditRecord("新增教師名單", cleanId, "教師白名單", { teacher_id: cleanId });
+        await fetchTeacherWhitelist();
+    } catch (err) {
+        updateSyncStatusIndicator('offline');
+        showMsg("新增失敗：" + translateError(err.message), "error");
+    }
+};
+window.addBatchTeacherWhitelist = async function() {
+    if (!dbClient) return;
+    const textarea = document.getElementById('addBatchTeacherIds');
+    const val = textarea?.value.trim();
+    if (!val) { showMsg("請貼上欲批次匯入的教職員帳號！", "error"); return; }
+    const ids = Array.from(new Set(
+        val.split(/[\n,;\s]+/)
+            .map(s => s.split('@')[0].toLowerCase().trim())
+            .filter(s => s.length > 0)
+    ));
+    if (ids.length === 0) { showMsg("未解析出有效帳號！", "error"); return; }
+    const nowIso = new Date().toISOString();
+    const rows = ids.map(id => ({ teacher_id: id, created_at: nowIso }));
+    try {
+        updateSyncStatusIndicator('saving');
+        const { error } = await dbClient.from('teacher_whitelist').upsert(rows, { onConflict: 'teacher_id' });
+        if (error) throw error;
+        updateSyncStatusIndicator('success');
+        showMsg(`已成功匯入 ${ids.length} 筆教師名單！`);
+        textarea.value = '';
+        logAuditRecord("批次新增教師名單", "多筆帳號", "教師白名單", { count: ids.length, ids });
+        await fetchTeacherWhitelist();
+    } catch (err) {
+        updateSyncStatusIndicator('offline');
+        showMsg("批次匯入失敗：" + translateError(err.message), "error");
+    }
+};
+window.deleteTeacherWhitelist = function(teacherId) {
+    if (!dbClient) return;
+    showConfirmModal(`確定要將「${teacherId}」從教師白名單中移除嗎？移除後該帳號註冊將不再視為教職員。`, "移除教師名單", async () => {
+        try {
+            updateSyncStatusIndicator('saving');
+            const { error } = await dbClient.from('teacher_whitelist').delete().eq('teacher_id', teacherId);
+            if (error) throw error;
+            teacherCache.delete(teacherId.toLowerCase().trim());
+            updateSyncStatusIndicator('success');
+            showMsg(`已成功將「${teacherId}」移出教師名單！`);
+            logAuditRecord("刪除教師名單", teacherId, "教師白名單", { teacher_id: teacherId });
+            toggleUIModal(false, 'confirmModal');
+            await fetchTeacherWhitelist();
+        } catch (err) {
+            updateSyncStatusIndicator('offline');
+            showMsg("刪除失敗：" + translateError(err.message), "error");
+            toggleUIModal(false, 'confirmModal');
+        }
+    }, "確認移除", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
 window.switchAuthMode = function() {
     const regFields = document.getElementById('regFields');
@@ -180,7 +301,7 @@ let currentUser = null, DEPT_THRESHOLD = 0, userDBRecord = null, activeStudentDB
     isViewingClassList = false, editingStudentId = null, confirmAction = null,
     currentYear = "113", currentDept = "普通科(理工生醫群)-1", lastUserId = null, currentLayoutMode = "subject",
     currentUncheckedCredits = [];
-let realtimeGradChecksChannel = null, realtimeFeedbacksChannel = null, realtimeAuditLogsChannel = null, realtimeAnnouncementsChannel = null;
+let realtimeGradChecksChannel = null, realtimeFeedbacksChannel = null, realtimeAuditLogsChannel = null, realtimeAnnouncementsChannel = null, realtimeTeacherWhitelistChannel = null;
 window.isWebSocketAllowed = function() {
     if (typeof WebSocket === 'undefined') return false;
     try {
@@ -252,6 +373,12 @@ window.setupRealtimeSubscriptions = function() {
                 fetchAnnouncements();
             })
             .subscribe();
+        realtimeTeacherWhitelistChannel = dbClient
+            .channel('realtime_teacher_whitelist')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'teacher_whitelist' }, () => {
+                if (currentIndependentPage === 'teacherMgmtView') fetchTeacherWhitelist();
+            })
+            .subscribe();
     } catch (e) {}
 };
 window.cleanupRealtimeSubscriptions = function() {
@@ -261,11 +388,13 @@ window.cleanupRealtimeSubscriptions = function() {
         if (realtimeFeedbacksChannel) dbClient.removeChannel(realtimeFeedbacksChannel);
         if (realtimeAuditLogsChannel) dbClient.removeChannel(realtimeAuditLogsChannel);
         if (realtimeAnnouncementsChannel) dbClient.removeChannel(realtimeAnnouncementsChannel);
+        if (realtimeTeacherWhitelistChannel) dbClient.removeChannel(realtimeTeacherWhitelistChannel);
     } catch (e) {}
     realtimeGradChecksChannel = null;
     realtimeFeedbacksChannel = null;
     realtimeAuditLogsChannel = null;
     realtimeAnnouncementsChannel = null;
+    realtimeTeacherWhitelistChannel = null;
 };
 window.isAnnouncementVisibleNow = function(a) {
     if (!a.is_active) return false;
@@ -818,6 +947,9 @@ window.renderAuditLogList = function() {
         '單學期學分歸零': { icon: '⚠️', class: 'bg-gradient-to-r from-orange-500 to-red-500 text-white font-black' },
         '更改帳號資料': { icon: '📝', class: 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black' },
         '重設帳號密碼': { icon: '⚡', class: 'bg-gradient-to-r from-violet-600 to-indigo-700 text-white font-black' },
+        '新增教師名單': { icon: '➕', class: 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-black' },
+        '批次新增教師名單': { icon: '📥', class: 'bg-gradient-to-r from-indigo-600 to-blue-700 text-white font-black' },
+        '刪除教師名單': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-500 to-red-600 text-white font-black' },
         '刪除帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white font-black' },
         '刪除學生帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white font-black' },
         '更新個人資料': { icon: '👤', class: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-black' },
@@ -832,7 +964,7 @@ window.renderAuditLogList = function() {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
         let diffHtml = '';
-        if (log.action_type.includes('刪除')) {
+        if (log.action_type.includes('刪除') && !log.action_type.includes('教師名單')) {
             const d = log.details || {};
             diffHtml = `<div class="inline-flex flex-wrap items-center gap-2 p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 font-bold text-xs shadow-xs">
                 <span class="px-2 py-0.5 rounded-md bg-rose-600 text-white font-black text-[11px]">🗑️ 被刪除帳號資料</span>
@@ -1010,7 +1142,7 @@ window.handleHashRouting = function() {
     const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
     if (hash.startsWith('#page-')) {
         const pType = hash.replace('#page-', '');
-        if (pType === 'announceView' || (role === 'admin' && ['auditLogView', 'feedbackListView', 'announceMgmtView'].includes(pType))) {
+        if (pType === 'announceView' || (role === 'admin' && ['teacherMgmtView', 'auditLogView', 'feedbackListView', 'announceMgmtView'].includes(pType))) {
             openIndependentPage(pType); return;
         }
     }
@@ -1521,6 +1653,7 @@ window.updateUI = function() {
             adminBackend.style.display = 'block';
             document.getElementById('backendTitle').innerText = (role === 'admin') ? '資料管理' : '班級資料';
             if (backToTrialAdminBtn) backToTrialAdminBtn.style.display = 'inline-block';
+            document.getElementById('teacherMgmtHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
             document.getElementById('auditLogHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
             document.getElementById('feedbackListHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
             document.getElementById('announceMgmtHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
