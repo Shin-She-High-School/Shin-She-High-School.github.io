@@ -153,6 +153,7 @@
 									<span id="adminTotalCountText" class="text-xs sm:text-sm font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-lg shadow-sm" style="display:none;">共 0 筆帳號</span>
 								</div>
 								<button id="backToTrialBtn" class="btn-mini" style="background:#6c757d; display:none;" onclick="handleReturnToTrial()">返回檢核表試算</button>
+								<button id="teacherMgmtHeaderBtn" class="btn-mini" style="background:#059669; display:none;" onclick="openIndependentPage('teacherMgmtView')">👨‍🏫 教師名單管理</button>
 								<button id="auditLogHeaderBtn" class="btn-mini" style="background:#4f46e5; display:none;" onclick="openIndependentPage('auditLogView')">📜 歷史異動紀錄</button>
 								<button id="feedbackListHeaderBtn" class="btn-mini" style="background:#8b5cf6; display:none;" onclick="openIndependentPage('feedbackListView')">💡 檢視意見回饋</button>
 								<button id="announceMgmtHeaderBtn" class="btn-mini" style="background:#f59e0b; display:none;" onclick="openIndependentPage('announceMgmtView')">📢 公告管理</button>
@@ -271,6 +272,54 @@
 					<div id="mobileCardsContainer" class="mobile-cards-grid"></div>
 				</div>
 			</div>
+			<div id="pageTeacherMgmtView" class="app-container mt-4 hidden">
+				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+						<span class="font-black text-slate-800 text-xl flex items-center gap-2">
+							<span class="w-2.5 h-5 rounded-full bg-emerald-600"></span>
+							👨‍🏫 教師名單管理 (白名單維護)
+						</span>
+						<button type="button" class="btn-mini bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-3" onclick="closeIndependentPage()">← 返回管理後台</button>
+					</div>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+						<div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+							<span class="font-black text-xs text-slate-700 block">➕ 單筆新增教職員帳號</span>
+							<div class="flex gap-2">
+								<input type="text" id="addSingleTeacherId" placeholder="例如：t999" class="admin-filter-input text-xs flex-1 bg-white">
+								<button type="button" class="btn-mini bg-emerald-600 hover:bg-emerald-700 px-3 shrink-0" onclick="addSingleTeacherWhitelist()">新增</button>
+							</div>
+						</div>
+						<div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+							<span class="font-black text-xs text-slate-700 block">📥 批次匯入帳號 (以逗號、換行或空白分隔)</span>
+							<div class="flex gap-2">
+								<textarea id="addBatchTeacherIds" rows="2" placeholder="例如：t101, t102, t103" class="admin-filter-input text-xs flex-1 bg-white p-2 rounded-lg resize-none"></textarea>
+								<button type="button" class="btn-mini bg-indigo-600 hover:bg-indigo-700 px-3 shrink-0 self-end" onclick="addBatchTeacherWhitelist()">批次匯入</button>
+							</div>
+						</div>
+					</div>
+					<div class="mb-3 flex items-center justify-between gap-3">
+						<input type="text" id="searchTeacherWhitelistInput" class="admin-filter-input text-xs max-w-xs bg-white" placeholder="🔍 搜尋教職員帳號..." oninput="renderTeacherWhitelistTable()">
+						<span id="teacherWhitelistCountText" class="text-xs font-bold text-slate-500">共 0 筆教師名單</span>
+					</div>
+					<div class="overflow-x-hidden w-full custom-scrollbar max-h-[55dvh] border border-slate-200 rounded-xl">
+						<table class="w-full border-collapse text-left text-xs">
+							<colgroup>
+								<col style="width: 40%;">
+								<col style="width: 40%;">
+								<col style="width: 20%;">
+							</colgroup>
+							<thead>
+								<tr class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
+									<th class="p-2.5 font-mono">教職員帳號 (ID)</th>
+									<th class="p-2.5">加入時間</th>
+									<th class="p-2.5 text-center">操作</th>
+								</tr>
+							</thead>
+							<tbody id="teacherWhitelistBody" class="divide-y divide-slate-100 font-semibold text-slate-800"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
 			<div id="pageAnnounceView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
@@ -310,6 +359,11 @@
 									<option value="重設帳號密碼">⚡ 重設帳號密碼</option>
 									<option value="更新個人資料">👤 更新個人資料</option>
 									<option value="送出系統回饋">💡 送出系統回饋</option>
+								</optgroup>
+								<optgroup label="👨‍🏫 教師名單管理">
+									<option value="新增教師名單">➕ 新增教師名單</option>
+									<option value="批次新增教師名單">📥 批次新增教師名單</option>
+									<option value="刪除教師名單">🗑️ 刪除教師名單</option>
 								</optgroup>
 								<optgroup label="📢 系統公告">
 									<option value="發布系統公告">📢 發布系統公告</option>
@@ -739,14 +793,14 @@
 							<details id="helpDetailsSports" class="group bg-slate-50 rounded-xl border border-slate-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
 								<summary class="flex justify-between items-center p-3.5 font-bold text-slate-800 cursor-pointer hover:bg-slate-100 transition-colors duration-150">
 									<span class="flex items-center gap-2 text-sm md:text-base">
-										<span class="w-5 h-5 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-xs font-black">體</span>
+										<span class="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-black">體</span>
 										(三) 體育班畢業條件
 									</span>
 									<span class="text-xs text-slate-400 group-open:rotate-180 transition-transform duration-200">▼</span>
 								</summary>
 								<div class="p-4 border-t border-slate-200/60 text-sm text-slate-600 space-y-2 leading-relaxed bg-white">
 									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">1.</span><p><b>應修習總學分</b>：182 學分。</p></div>
-									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">2.</span><p><b>畢業之最低學分數</b>：150 學分成績及格。</p></div>
+									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">2.</span><p><b>畢業之最低學分數</b>：150 學分成績及格。</p></div>
 									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">3.</span><p><b>部定必修一般科目要求</b>：至少須 <b>80% 及格</b>。</p></div>
 									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">4.</span><p><b>部定必修體育專業科目要求</b>：至少須 <b>85% 及格</b>。</p></div>
 									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">5.</span><p><b>選修科目學分要求</b>：至少須 <b>70% 及格</b>。</p></div>
