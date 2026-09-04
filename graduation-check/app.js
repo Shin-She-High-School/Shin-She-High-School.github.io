@@ -1,10 +1,10 @@
 // app.js
 let currentIndependentPage = null;
 
-// 教師身分快取 (避免每次按鍵重複打資料庫)
+// 教師身分快取 (避免每次按鍵輸入重複打向資料庫)
 const teacherCache = new Map();
 
-// 核心函式：直接向 Supabase teacher_whitelist 資料表比對帳號
+// 核心函式：動態向 Supabase teacher_whitelist 資料表比對帳號
 window.checkIsTeacherAccount = async function(cleanSid) {
     if (!cleanSid) return false;
     const lowerSid = cleanSid.toLowerCase().trim();
@@ -31,19 +31,38 @@ window.checkIsTeacherAccount = async function(cleanSid) {
     }
 };
 
-// 帳號輸入框即時比對資料庫並動態切換表單
+// 切換教職員職務類型（教師 / 導師）
+window.handleTeacherTypeChange = function() {
+    const teacherType = document.getElementById('authTeacherType')?.value;
+    const regYearGroup = document.getElementById('regYearGroup');
+    const regDeptGroup = document.getElementById('regDeptGroup');
+    
+    if (teacherType === 'tutor') {
+        // 導師：展開入學年與科別選單
+        if (regYearGroup) regYearGroup.style.display = 'block';
+        if (regDeptGroup) regDeptGroup.style.display = 'block';
+    } else {
+        // 教師：隱藏入學年與科別選單
+        if (regYearGroup) regYearGroup.style.display = 'none';
+        if (regDeptGroup) regDeptGroup.style.display = 'none';
+    }
+};
+
+// 帳號輸入框即時比對（學生完全不顯示身分標籤，教職員顯示綠色提示）
 let checkHintDebounceTimer = null;
 window.checkAuthIdRoleHint = function() {
     clearTimeout(checkHintDebounceTimer);
     checkHintDebounceTimer = setTimeout(async () => {
         const sidInput = document.getElementById('authID')?.value.trim();
         const hintEl = document.getElementById('authRoleHint');
+        const regTeacherRoleGroup = document.getElementById('regTeacherRoleGroup');
         const regYearGroup = document.getElementById('regYearGroup');
         const regDeptGroup = document.getElementById('regDeptGroup');
         const isReg = document.getElementById('regFields')?.style.display === 'block';
 
         if (!sidInput) {
             if (hintEl) hintEl.innerHTML = '';
+            if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'none';
             if (regYearGroup) regYearGroup.style.display = 'block';
             if (regDeptGroup) regDeptGroup.style.display = 'block';
             return;
@@ -53,14 +72,17 @@ window.checkAuthIdRoleHint = function() {
         const isTeacher = await checkIsTeacherAccount(cleanSid);
 
         if (isTeacher) {
+            // 是教職員才顯示提示
             if (hintEl) hintEl.innerHTML = '<span class="text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-black">👨‍🏫 識別身分：教職員帳號</span>';
             if (isReg) {
-                if (regYearGroup) regYearGroup.style.display = 'none';
-                if (regDeptGroup) regDeptGroup.style.display = 'none';
+                if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'block';
+                handleTeacherTypeChange();
             }
         } else {
-            if (hintEl) hintEl.innerHTML = '<span class="text-sky-600 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded font-black">🎓 識別身分：學生帳號</span>';
+            // 學生帳號不顯示任何提示
+            if (hintEl) hintEl.innerHTML = '';
             if (isReg) {
+                if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'none';
                 if (regYearGroup) regYearGroup.style.display = 'block';
                 if (regDeptGroup) regDeptGroup.style.display = 'block';
             }
@@ -1479,17 +1501,43 @@ window.handleAuth = async function() {
         if (isReg) {
             const name = document.getElementById('authName').value.trim();
             if (!name) throw new Error("請輸入姓名！");
-            const role = isTeacher ? 'teacher' : 'student';
-            const entryYear = isTeacher ? '未設定' : document.getElementById('authEntryYear').value;
-            const entryDept = isTeacher ? '未設定' : document.getElementById('authEntryDept').value;
 
-            if (!isTeacher && (!entryYear || !entryDept || entryYear.includes('請選擇') || entryDept.includes('請選擇'))) {
-                throw new Error("學生註冊請務必選擇正確的入學年與科別！");
+            let role = isTeacher ? 'teacher' : 'student';
+            let entryYear = '未設定';
+            let entryDept = '未設定';
+            let matchedTutor = '教師帳號免設定';
+
+            if (isTeacher) {
+                const teacherType = document.getElementById('authTeacherType')?.value;
+                if (teacherType === 'tutor') {
+                    // 擔任導師需填寫負責班級
+                    entryYear = document.getElementById('authEntryYear').value;
+                    entryDept = document.getElementById('authEntryDept').value;
+                    if (!entryYear || !entryDept || entryYear.includes('請選擇') || entryDept.includes('請選擇')) {
+                        throw new Error("擔任導師請務必選擇負責的入學年與科別班級！");
+                    }
+                }
+            } else {
+                // 學生註冊流程
+                entryYear = document.getElementById('authEntryYear').value;
+                entryDept = document.getElementById('authEntryDept').value;
+                if (!entryYear || !entryDept || entryYear.includes('請選擇') || entryDept.includes('請選擇')) {
+                    throw new Error("學生註冊請務必選擇正確的入學年與科別！");
+                }
+                matchedTutor = await findTutorByYearDept(entryYear, entryDept);
             }
 
-            const matchedTutor = isTeacher ? '教師帳號免設定' : await findTutorByYearDept(entryYear, entryDept);
             const { data: signUpData, error } = await dbClient.auth.signUp({
-                email, password: pwd, options: { data: { full_name: name, student_id: cleanSid, role: role, tutor: matchedTutor, entry_year: entryYear, entry_dept: entryDept } }
+                email, password: pwd, options: { 
+                    data: { 
+                        full_name: name, 
+                        student_id: cleanSid, 
+                        role: role, 
+                        tutor: matchedTutor, 
+                        entry_year: entryYear, 
+                        entry_dept: entryDept 
+                    } 
+                }
             });
             if (error) throw error;
 
@@ -1497,18 +1545,28 @@ window.handleAuth = async function() {
             if (newUserId) {
                 try {
                     await dbClient.from('grad_checks').upsert({
-                        id: newUserId, student_id: cleanSid, full_name: name, entry_year: entryYear,
-                        entry_dept: entryDept, role: role, tutor: matchedTutor, credits_json: {}, total_credits: 0, updated_at: new Date().toISOString()
+                        id: newUserId, 
+                        student_id: cleanSid, 
+                        full_name: name, 
+                        entry_year: entryYear,
+                        entry_dept: entryDept, 
+                        role: role, 
+                        tutor: matchedTutor, 
+                        credits_json: {}, 
+                        total_credits: 0, 
+                        updated_at: new Date().toISOString()
                     });
                 } catch (upsertErr) {}
             }
 
             updateSyncStatusIndicator('success');
-            showMsg(isTeacher ? "教師帳號註冊成功！" : "學生帳號註冊成功！");
+            showMsg(isTeacher ? (entryYear !== '未設定' ? "導師帳號註冊成功！" : "教師帳號註冊成功！") : "學生帳號註冊成功！");
             switchAuthMode();
             document.getElementById('authID').value = cleanSid;
             logAuditRecord("使用者註冊", cleanSid, name, { role, year: entryYear, dept: entryDept });
+
         } else {
+            // 登入流程
             if (!pwd) {
                 let accountExists = false;
                 try {
