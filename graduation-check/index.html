@@ -49,12 +49,13 @@
 					<input type="text" id="authName" placeholder="請輸入真實姓名">
 				</div>
 
-				<!-- 教職員專用職務選擇 (僅在比對為教職員時顯示) -->
+				<!-- 教職員專用：請選擇身份 (比對為教職員時顯示) -->
 				<div class="auth-form-group" id="regTeacherRoleGroup" style="display:none">
-					<label>職務</label>
+					<label>請選擇身份</label>
 					<select id="authTeacherType" class="bg-white" onchange="handleTeacherTypeChange()">
-						<option value="teacher">教師</option>
+						<option value="">請選擇身份</option>
 						<option value="tutor">導師</option>
+						<option value="teacher">教師</option>
 					</select>
 				</div>
 
