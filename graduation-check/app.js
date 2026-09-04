@@ -1,57 +1,71 @@
 // app.js
 let currentIndependentPage = null;
 
-// 判斷帳號是否屬於教師名單（本地白名單 + Supabase 表雙重比對）
+// 教師身分快取 (避免每次按鍵重複打資料庫)
+const teacherCache = new Map();
+
+// 核心函式：直接向 Supabase teacher_whitelist 資料表比對帳號
 window.checkIsTeacherAccount = async function(cleanSid) {
     if (!cleanSid) return false;
     const lowerSid = cleanSid.toLowerCase().trim();
-    if (typeof TEACHER_WHITELIST !== 'undefined' && TEACHER_WHITELIST.includes(lowerSid)) {
-        return true;
+
+    if (teacherCache.has(lowerSid)) {
+        return teacherCache.get(lowerSid);
     }
-    if (dbClient) {
-        try {
-            const { data } = await dbClient
-                .from('teacher_whitelist')
-                .select('teacher_id')
-                .eq('teacher_id', lowerSid)
-                .maybeSingle();
-            if (data) return true;
-        } catch (e) {}
+
+    if (!dbClient) return false;
+
+    try {
+        const { data, error } = await dbClient
+            .from('teacher_whitelist')
+            .select('teacher_id')
+            .ilike('teacher_id', lowerSid)
+            .maybeSingle();
+
+        const isTeacher = !!(!error && data);
+        teacherCache.set(lowerSid, isTeacher);
+        return isTeacher;
+    } catch (e) {
+        console.warn("比對 teacher_whitelist 失敗:", e);
+        return false;
     }
-    return false;
 };
 
-// 即時提示身分並在註冊時隱藏入學年/科別
-window.checkAuthIdRoleHint = async function() {
-    const sidInput = document.getElementById('authID')?.value.trim();
-    const hintEl = document.getElementById('authRoleHint');
-    const regYearGroup = document.getElementById('regYearGroup');
-    const regDeptGroup = document.getElementById('regDeptGroup');
-    const isReg = document.getElementById('regFields')?.style.display === 'block';
+// 帳號輸入框即時比對資料庫並動態切換表單
+let checkHintDebounceTimer = null;
+window.checkAuthIdRoleHint = function() {
+    clearTimeout(checkHintDebounceTimer);
+    checkHintDebounceTimer = setTimeout(async () => {
+        const sidInput = document.getElementById('authID')?.value.trim();
+        const hintEl = document.getElementById('authRoleHint');
+        const regYearGroup = document.getElementById('regYearGroup');
+        const regDeptGroup = document.getElementById('regDeptGroup');
+        const isReg = document.getElementById('regFields')?.style.display === 'block';
 
-    if (!sidInput) {
-        if (hintEl) hintEl.innerHTML = '';
-        if (regYearGroup) regYearGroup.style.display = 'block';
-        if (regDeptGroup) regDeptGroup.style.display = 'block';
-        return;
-    }
-
-    const cleanSid = sidInput.split('@')[0].toLowerCase().trim();
-    const isTeacher = await checkIsTeacherAccount(cleanSid);
-
-    if (isTeacher) {
-        if (hintEl) hintEl.innerHTML = '<span class="text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">👨‍🏫 識別身分：教職員帳號</span>';
-        if (isReg) {
-            if (regYearGroup) regYearGroup.style.display = 'none';
-            if (regDeptGroup) regDeptGroup.style.display = 'none';
-        }
-    } else {
-        if (hintEl) hintEl.innerHTML = '<span class="text-sky-600 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded">🎓 識別身分：學生帳號</span>';
-        if (isReg) {
+        if (!sidInput) {
+            if (hintEl) hintEl.innerHTML = '';
             if (regYearGroup) regYearGroup.style.display = 'block';
             if (regDeptGroup) regDeptGroup.style.display = 'block';
+            return;
         }
-    }
+
+        const cleanSid = sidInput.split('@')[0].toLowerCase().trim();
+        const isTeacher = await checkIsTeacherAccount(cleanSid);
+
+        if (isTeacher) {
+            if (hintEl) hintEl.innerHTML = '<span class="text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-black">👨‍🏫 識別身分：教職員帳號</span>';
+            if (isReg) {
+                if (regYearGroup) regYearGroup.style.display = 'none';
+                if (regDeptGroup) regDeptGroup.style.display = 'none';
+            }
+        } else {
+            if (hintEl) hintEl.innerHTML = '<span class="text-sky-600 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded font-black">🎓 識別身分：學生帳號</span>';
+            if (isReg) {
+                if (regYearGroup) regYearGroup.style.display = 'block';
+                if (regDeptGroup) regDeptGroup.style.display = 'block';
+            }
+        }
+    }, 200);
 };
 
 window.formatDateTime = function(isoStr) {
