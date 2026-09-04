@@ -1,7 +1,7 @@
 // app.js
 let currentIndependentPage = null;
 
-// 教師身分快取 (避免每次按鍵輸入重複打向資料庫)
+// 教師身分快取 (避免每次輸入鍵盤都重複打向資料庫)
 const teacherCache = new Map();
 
 // 核心函式：動態向 Supabase teacher_whitelist 資料表比對帳號
@@ -31,24 +31,24 @@ window.checkIsTeacherAccount = async function(cleanSid) {
     }
 };
 
-// 切換教職員職務類型（教師 / 導師）
+// 切換教職員身分時動態控制班級選單
 window.handleTeacherTypeChange = function() {
     const teacherType = document.getElementById('authTeacherType')?.value;
     const regYearGroup = document.getElementById('regYearGroup');
     const regDeptGroup = document.getElementById('regDeptGroup');
     
     if (teacherType === 'tutor') {
-        // 導師：展開入學年與科別選單
+        // 選擇「導師」：展開入學年與科別-班級
         if (regYearGroup) regYearGroup.style.display = 'block';
         if (regDeptGroup) regDeptGroup.style.display = 'block';
     } else {
-        // 教師：隱藏入學年與科別選單
+        // 選擇「教師」或未選擇：隱藏入學年與科別-班級
         if (regYearGroup) regYearGroup.style.display = 'none';
         if (regDeptGroup) regDeptGroup.style.display = 'none';
     }
 };
 
-// 帳號輸入框即時比對（學生完全不顯示身分標籤，教職員顯示綠色提示）
+// 帳號輸入框即時比對（學生不顯示任何標籤，教職員顯示「👨‍🏫 教師帳號」）
 let checkHintDebounceTimer = null;
 window.checkAuthIdRoleHint = function() {
     clearTimeout(checkHintDebounceTimer);
@@ -72,8 +72,8 @@ window.checkAuthIdRoleHint = function() {
         const isTeacher = await checkIsTeacherAccount(cleanSid);
 
         if (isTeacher) {
-            // 是教職員才顯示提示
-            if (hintEl) hintEl.innerHTML = '<span class="text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-black">👨‍🏫 識別身分：教職員帳號</span>';
+            // 是教職員時提示「👨‍🏫 教師帳號」
+            if (hintEl) hintEl.innerHTML = '<span class="text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-black">👨‍🏫 教師帳號</span>';
             if (isReg) {
                 if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'block';
                 handleTeacherTypeChange();
@@ -1509,8 +1509,12 @@ window.handleAuth = async function() {
 
             if (isTeacher) {
                 const teacherType = document.getElementById('authTeacherType')?.value;
+                if (!teacherType) {
+                    throw new Error("請選擇您的教師身份（導師或教師）！");
+                }
+
                 if (teacherType === 'tutor') {
-                    // 擔任導師需填寫負責班級
+                    // 導師必須選擇班級
                     entryYear = document.getElementById('authEntryYear').value;
                     entryDept = document.getElementById('authEntryDept').value;
                     if (!entryYear || !entryDept || entryYear.includes('請選擇') || entryDept.includes('請選擇')) {
@@ -1518,7 +1522,7 @@ window.handleAuth = async function() {
                     }
                 }
             } else {
-                // 學生註冊流程
+                // 學生註冊
                 entryYear = document.getElementById('authEntryYear').value;
                 entryDept = document.getElementById('authEntryDept').value;
                 if (!entryYear || !entryDept || entryYear.includes('請選擇') || entryDept.includes('請選擇')) {
@@ -1566,7 +1570,7 @@ window.handleAuth = async function() {
             logAuditRecord("使用者註冊", cleanSid, name, { role, year: entryYear, dept: entryDept });
 
         } else {
-            // 登入流程
+            // 登入
             if (!pwd) {
                 let accountExists = false;
                 try {
