@@ -1653,7 +1653,7 @@ window.updateUI = function() {
             adminBackend.style.display = 'block';
             document.getElementById('backendTitle').innerText = (role === 'admin') ? '資料管理' : '班級資料';
             if (backToTrialAdminBtn) backToTrialAdminBtn.style.display = 'inline-block';
-            document.getElementById('teacherMgmtHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
+            document.getElementById('teacherMgmtHeaderBtn').style.display = (role === 'admin' || role === 'teacher') ? 'inline-flex' : 'none';
             document.getElementById('auditLogHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
             document.getElementById('feedbackListHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
             document.getElementById('announceMgmtHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
