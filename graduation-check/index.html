@@ -37,9 +37,11 @@
 			<h2 id="authTitle" class="auth-title">帳號登入</h2>
 			<p class="auth-subtitle">新社高中畢業自我檢核系統</p>
 			<div class="auth-form-group">
-				<label>帳號</label>
+				<div class="flex items-center justify-between mb-1.5">
+					<label class="!mb-0">帳號</label>
+					<span id="authRoleHint" class="text-xs font-black text-emerald-600"></span>
+				</div>
 				<input type="text" id="authID" placeholder="請輸入帳號(學號/教職員編號)" oninput="checkAuthIdRoleHint()">
-				<div id="authRoleHint" class="mt-1.5 text-xs font-bold"></div>
 			</div>
 			<div id="regFields" style="display:none">
 				<div class="auth-form-group">
