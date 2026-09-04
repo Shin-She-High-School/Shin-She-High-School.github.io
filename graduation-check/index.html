@@ -25,8 +25,6 @@
 </head>
 <body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col">
 	<div id="msgBox"></div>
-
-	<!-- 登入與註冊頁面 -->
 	<div id="authWorkspace">
 		<div class="auth-glow-1"></div>
 		<div class="auth-glow-2"></div>
@@ -48,8 +46,6 @@
 					<label>姓名</label>
 					<input type="text" id="authName" placeholder="請輸入真實姓名">
 				</div>
-
-				<!-- 教職員專用：請選擇身份 (比對為教職員時顯示) -->
 				<div class="auth-form-group" id="regTeacherRoleGroup" style="display:none">
 					<label>請選擇身份</label>
 					<select id="authTeacherType" class="bg-white" onchange="handleTeacherTypeChange()">
@@ -58,7 +54,6 @@
 						<option value="teacher">教師</option>
 					</select>
 				</div>
-
 				<div class="auth-form-group" id="regYearGroup">
 					<label>入學年 (高三113、高二114、高一115)</label>
 					<select id="authEntryYear" class="bg-white"></select>
@@ -81,15 +76,12 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- 系統主畫面 -->
 	<div id="appWorkspace" style="display: none;" class="flex-grow flex flex-col h-full overflow-hidden">
 		<div id="statusHeader" class="shrink-0" style="display: none;">
 			<div class="app-container">
 				<div id="userStatusDisplay"></div>
 			</div>
 		</div>
-
 		<div id="marqueeBanner" class="marquee-container shrink-0 cursor-pointer" onclick="openIndependentPage('announceView')">
 			<span class="font-black text-amber-300 flex items-center gap-1.5 shrink-0 z-10 bg-[#1e1b4b] pr-2">
 				<span>📢</span>
@@ -101,7 +93,6 @@
 				</div>
 			</div>
 		</div>
-
 		<div id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar pb-[calc(96px+env(safe-area-inset-bottom,24px))]">
 			<div id="mainDashboardView">
 				<div id="dashboardSection" class="app-container mt-4" style="display: none;">
@@ -140,7 +131,6 @@
 						</div>
 					</div>
 				</div>
-
 				<div id="layoutSwitcherArea" class="app-container mt-3 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
 					<span class="text-sm font-extrabold text-slate-700 shrink-0 text-center md:text-left">檢視版面切換：</span>
 					<div class="inline-flex rounded-xl p-1 bg-slate-200 border border-slate-300">
@@ -152,7 +142,6 @@
 						</button>
 					</div>
 				</div>
-
 				<div class="app-container mt-2">
 					<div id="adminBackend" class="admin-backend">
 						<div class="admin-header">
@@ -167,12 +156,9 @@
 								<button id="announceMgmtHeaderBtn" class="btn-mini" style="background:#f59e0b; display:none;" onclick="openIndependentPage('announceMgmtView')">📢 公告管理</button>
 							</div>
 						</div>
-
 						<div id="adminStatsPanel" class="mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
-
 						<div class="admin-toolbar">
 							<input type="text" id="adminSearchInput" class="admin-filter-input" placeholder="搜尋姓名或帳號" oninput="fetchAdminList(true)">
-							
 							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-role">
 								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'role')">
 									<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-role">所有身份</span>
@@ -196,7 +182,6 @@
 									</label>
 								</div>
 							</div>
-
 							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-year">
 								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'year')">
 									<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-year">所有年度</span>
@@ -204,7 +189,6 @@
 								</div>
 								<div id="ms-drop-year" class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5"></div>
 							</div>
-
 							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-dept">
 								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'dept')">
 									<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-dept">所有科別</span>
@@ -212,7 +196,6 @@
 								</div>
 								<div id="ms-drop-dept" class="absolute z-50 w-[200%] sm:w-[150%] md:w-full right-0 md:right-auto mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5"></div>
 							</div>
-
 							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-status">
 								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'status')">
 									<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-status">所有畢業狀態</span>
@@ -236,7 +219,6 @@
 									</label>
 								</div>
 							</div>
-
 							<select id="adminSort" class="sort-select" onchange="fetchAdminList(true)">
 								<option value="class" selected>預設排序</option>
 								<option value="sid">帳號排序</option>
@@ -268,7 +250,6 @@
 						</div>
 						<div id="adminCardsContainer" class="admin-cards-grid"></div>
 					</div>
-
 					<div id="unsetNoticeBox" class="hidden app-container my-6">
 						<div class="bg-white border-2 border-amber-300 rounded-2xl p-8 text-center shadow-md max-w-xl mx-auto">
 							<div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black">⚠️</div>
@@ -288,8 +269,6 @@
 					<div id="mobileCardsContainer" class="mobile-cards-grid"></div>
 				</div>
 			</div>
-
-			<!-- 獨立分頁：公告 -->
 			<div id="pageAnnounceView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
@@ -302,8 +281,6 @@
 					<div id="independentAnnounceList" class="space-y-3"></div>
 				</div>
 			</div>
-
-			<!-- 獨立分頁：稽核紀錄 -->
 			<div id="pageAuditLogView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
@@ -313,7 +290,6 @@
 						</span>
 						<button type="button" class="btn-mini bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-3" onclick="closeIndependentPage()">← 返回管理後台</button>
 					</div>
-
 					<div class="mb-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 						<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 							<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
@@ -367,7 +343,6 @@
 							</div>
 						</div>
 					</div>
-
 					<div id="auditLogTableContainer" class="overflow-x-hidden overflow-y-auto w-full custom-scrollbar max-h-[60dvh] border border-slate-200 rounded-xl relative">
 						<table class="w-full border-collapse text-left text-xs">
 							<thead class="sticky top-0 z-20 bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200 shadow-xs">
@@ -384,8 +359,6 @@
 					</div>
 				</div>
 			</div>
-
-			<!-- 獨立分頁：意見回饋管理 -->
 			<div id="pageFeedbackListView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
@@ -395,7 +368,6 @@
 						</span>
 						<button type="button" class="btn-mini bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-3" onclick="closeIndependentPage()">← 返回管理後台</button>
 					</div>
-
 					<div class="mb-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
 						<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 							<input type="text" id="fbSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或內容" oninput="renderFeedbackList()">
@@ -418,7 +390,6 @@
 							<span id="fbCountText" class="text-xs font-bold text-slate-500">共 0 筆回饋</span>
 						</div>
 					</div>
-
 					<div class="overflow-x-hidden w-full custom-scrollbar max-h-[60dvh] border border-slate-200 rounded-xl">
 						<table class="w-full border-collapse text-left text-xs table-fixed">
 							<colgroup>
@@ -442,8 +413,6 @@
 					</div>
 				</div>
 			</div>
-
-			<!-- 獨立分頁：公告管理 -->
 			<div id="pageAnnounceMgmtView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
@@ -453,7 +422,6 @@
 						</span>
 						<button type="button" class="btn-mini bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-3" onclick="closeIndependentPage()">← 返回管理後台</button>
 					</div>
-
 					<div class="space-y-4">
 						<div id="announceFormCard" class="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-4 text-xs font-semibold text-amber-950 space-y-3 transition-all duration-300">
 							<div class="flex items-center justify-between border-b border-amber-200/60 pb-2">
@@ -484,7 +452,6 @@
 								<label class="block text-[11px] font-black text-slate-700 mb-1">公告內文詳細說明</label>
 								<textarea id="newAnnounceContent" rows="3" placeholder="請輸入公告詳細內容..." class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white outline-none focus:border-amber-500 font-semibold leading-relaxed"></textarea>
 							</div>
-
 							<div class="bg-white/80 border border-amber-200 rounded-xl p-3 space-y-2">
 								<div class="text-[11px] font-black text-amber-900 flex items-center gap-1">
 									<span>🕒 時間排程控制項（可留空，預設立即發布且永久有效）：</span>
@@ -504,7 +471,6 @@
 									</div>
 								</div>
 							</div>
-
 							<div class="flex flex-wrap items-center justify-between gap-3 pt-1">
 								<div class="flex items-center gap-4">
 									<label class="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-700 select-none">
@@ -519,7 +485,6 @@
 								<button id="submitAnnounceBtn" class="action-btn py-2 px-5 text-xs font-black shrink-0" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="submitNewAnnouncement()">確認發布公告</button>
 							</div>
 						</div>
-
 						<div class="border-t border-slate-200 pt-3">
 							<div class="flex items-center justify-between mb-2">
 								<h4 class="font-black text-sm text-slate-800 flex items-center gap-1.5">
@@ -534,15 +499,12 @@
 				</div>
 			</div>
 		</div>
-
 		<button id="backToTopBtn" class="fixed bottom-[calc(88px+env(safe-area-inset-bottom,16px))] md:bottom-[calc(24px+env(safe-area-inset-bottom,16px))] right-6 z-40 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none flex items-center justify-center border border-emerald-400" onclick="scrollToTop()">
 			<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path>
 			</svg>
 		</button>
 	</div>
-
-	<!-- 彈跳視窗集合 -->
 	<div id="feedbackModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:420px;">
 			<div class="modal-header">
@@ -570,7 +532,6 @@
 			</div>
 		</div>
 	</div>
-
 	<div id="profileModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:400px;">
 			<div class="modal-header"><span>個人資料管理</span><span class="close-modal-btn" onclick="toggleUIModal(false,'profileModal')">&times;</span></div>
@@ -600,7 +561,6 @@
 			</div>
 		</div>
 	</div>
-
 	<div id="adminUserModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:420px;">
 			<div class="modal-header"><span>更改帳號資料</span><span class="close-modal-btn" onclick="toggleUIModal(false,'adminUserModal')">&times;</span></div>
@@ -639,7 +599,6 @@
 			<button class="action-btn btn-admin" style="width:100%; margin-top: 15px;" onclick="saveAdminUserEdit()">儲存帳號修改</button>
 		</div>
 	</div>
-
 	<div id="missingCreditsModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-md !w-full">
 			<div class="modal-header">
@@ -658,7 +617,6 @@
 			</div>
 		</div>
 	</div>
-
 	<div id="confirmModal" class="modal-overlay">
 		<div class="modal-content" style="max-width:320px; text-align:center;">
 			<div class="modal-header"><span>確認操作</span></div>
@@ -669,7 +627,6 @@
 			</div>
 		</div>
 	</div>
-
 	<div id="helpModal" class="modal-overlay">
 		<div class="modal-content !max-w-xl !w-full !p-6 md:!p-8" onclick="event.stopPropagation()">
 			<div class="modal-header" style="border-bottom: none; margin-bottom: 8px; padding-bottom: 0;">
@@ -805,7 +762,6 @@
 			</div>
 		</div>
 	</div>
-
 	<script src="app.js"></script>
 </body>
 </html>
