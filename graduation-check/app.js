@@ -1762,7 +1762,6 @@ window.applyFilters = function() {
     const searchText = document.getElementById('adminSearchInput').value.toLowerCase(), 
         filterRoles = getMSValues('role'), filterYears = getMSValues('year'),
         filterDepts = getMSValues('dept'), filterStatuses = getMSValues('status'),
-        sortType = document.getElementById('adminSort')?.value || 'default',
         role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student',
         myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year,
         myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept;
@@ -1802,11 +1801,6 @@ window.applyFilters = function() {
     filtered.sort((a, b) => {
         const orderA = roleOrder[a.role] || 4, orderB = roleOrder[b.role] || 4;
         if (orderA !== orderB) return orderA - orderB;
-        if (sortType === 'sid') {
-            return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
-        } else if (sortType === 'name') {
-            return (a.full_name || '').localeCompare(b.full_name || '');
-        }
         const yA = a.entry_year || '999';
         const yB = b.entry_year || '999';
         if (yA !== yB) return yA.localeCompare(yB, undefined, { numeric: true });
