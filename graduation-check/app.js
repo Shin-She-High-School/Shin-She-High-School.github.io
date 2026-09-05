@@ -1762,7 +1762,7 @@ window.applyFilters = function() {
     const searchText = document.getElementById('adminSearchInput').value.toLowerCase(), 
         filterRoles = getMSValues('role'), filterYears = getMSValues('year'),
         filterDepts = getMSValues('dept'), filterStatuses = getMSValues('status'),
-        sortType = document.getElementById('adminSort')?.value || 'role',
+        sortType = document.getElementById('adminSort')?.value || 'default',
         role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student',
         myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year,
         myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept;
@@ -1792,15 +1792,27 @@ window.applyFilters = function() {
         });
     }
     const roleOrder = { admin: 1, teacher: 2, student: 3 };
+    const getDeptNumber = (dept) => {
+        if (!dept || dept === '未設定') return 999;
+        const match = dept.match(/-(\d+)$/);
+        if (match) return parseInt(match[1], 10);
+        const idx = DEPT_OPTIONS.indexOf(dept);
+        return idx !== -1 ? idx + 1 : 999;
+    };
     filtered.sort((a, b) => {
         const orderA = roleOrder[a.role] || 4, orderB = roleOrder[b.role] || 4;
         if (orderA !== orderB) return orderA - orderB;
-        if (sortType === 'class' || sortType === 'role') {
-            const yA = a.entry_year || '999', yB = b.entry_year || '999';
-            if (yA !== yB) return yA.localeCompare(yB, undefined, { numeric: true });
+        if (sortType === 'sid') {
             return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
-        } else if (sortType === 'sid') return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
-        else if (sortType === 'name') return (a.full_name || '').localeCompare(b.full_name || '');
+        } else if (sortType === 'name') {
+            return (a.full_name || '').localeCompare(b.full_name || '');
+        }
+        const yA = a.entry_year || '999';
+        const yB = b.entry_year || '999';
+        if (yA !== yB) return yA.localeCompare(yB, undefined, { numeric: true });
+        const deptNumA = getDeptNumber(a.entry_dept);
+        const deptNumB = getDeptNumber(b.entry_dept);
+        if (deptNumA !== deptNumB) return deptNumA - deptNumB;
         return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
     });
     return filtered;
