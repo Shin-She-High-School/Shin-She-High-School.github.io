@@ -1,10 +1,21 @@
 let currentIndependentPage = null;
 const teacherCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000;
+window.escapeHtml = function(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
 window.checkIsTeacherAccount = async function(cleanSid) {
     if (!cleanSid) return false;
     const lowerSid = cleanSid.toLowerCase().trim();
-    if (teacherCache.has(lowerSid)) {
-        return teacherCache.get(lowerSid);
+    const cached = teacherCache.get(lowerSid);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+        return cached.isTeacher;
     }
     if (!dbClient) return false;
     try {
@@ -14,7 +25,7 @@ window.checkIsTeacherAccount = async function(cleanSid) {
             .ilike('teacher_id', lowerSid)
             .maybeSingle();
         const isTeacher = !!(!error && data);
-        teacherCache.set(lowerSid, isTeacher);
+        teacherCache.set(lowerSid, { isTeacher, timestamp: Date.now() });
         return isTeacher;
     } catch (e) {
         return false;
@@ -43,7 +54,7 @@ window.checkAuthIdRoleHint = function() {
         const regDeptGroup = document.getElementById('regDeptGroup');
         const isReg = document.getElementById('regFields')?.style.display === 'block';
         if (!sidInput) {
-            if (hintEl) hintEl.innerHTML = '';
+            if (hintEl) hintEl.textContent = '';
             if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'none';
             if (regYearGroup) regYearGroup.style.display = 'block';
             if (regDeptGroup) regDeptGroup.style.display = 'block';
@@ -51,14 +62,16 @@ window.checkAuthIdRoleHint = function() {
         }
         const cleanSid = sidInput.split('@')[0].toLowerCase().trim();
         const isTeacher = await checkIsTeacherAccount(cleanSid);
+        const currentCleanSid = document.getElementById('authID')?.value.trim().split('@')[0].toLowerCase().trim();
+        if (currentCleanSid !== cleanSid) return;
         if (isTeacher) {
-            if (hintEl) hintEl.innerHTML = '👨‍🏫 教師帳號';
+            if (hintEl) hintEl.textContent = '👨‍🏫 教師帳號';
             if (isReg) {
                 if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'block';
                 handleTeacherTypeChange();
             }
         } else {
-            if (hintEl) hintEl.innerHTML = '';
+            if (hintEl) hintEl.textContent = '';
             if (isReg) {
                 if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'none';
                 if (regYearGroup) regYearGroup.style.display = 'block';
@@ -311,7 +324,7 @@ window.renderMarquee = function() {
         marqueeEl.innerHTML = `<span>目前尚無跑馬燈公告。</span>`;
         return;
     }
-    let html = marqueeItems.map(a => `<span class="inline-flex items-center gap-1.5"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-extrabold text-[10px]">${a.category || '🎓 公告'}</span><b>${a.title}</b>: ${a.content}</span>`).join('<span class="opacity-40 px-3">丨</span>');
+    let html = marqueeItems.map(a => `<span class="inline-flex items-center gap-1.5"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-extrabold text-[10px]">${escapeHtml(a.category || '🎓 公告')}</span><b>${escapeHtml(a.title)}</b>: ${escapeHtml(a.content)}</span>`).join('<span class="opacity-40 px-3">丨</span>');
     marqueeEl.innerHTML = html;
 };
 window.renderIndependentAnnouncements = function() {
@@ -327,17 +340,17 @@ window.renderIndependentAnnouncements = function() {
         const pubStr = formatDateTime(pubDate);
         const updatedStr = a.updated_at ? formatDateTime(a.updated_at) : null;
         const isEdited = updatedStr && a.created_at && Math.abs(new Date(a.updated_at) - new Date(a.created_at)) > 2000;
-        let timeHtml = `<span class="text-slate-400 font-mono">📅 發布時間: ${pubStr}</span>`;
-        if (isEdited) timeHtml += `<span class="text-amber-600 font-bold font-mono ml-2"><br>✏️ 最後修改: ${updatedStr}</span>`;
+        let timeHtml = `<span class="text-slate-400 font-mono">📅 發布時間: ${escapeHtml(pubStr)}</span>`;
+        if (isEdited) timeHtml += `<span class="text-amber-600 font-bold font-mono ml-2"><br>✏️ 最後修改: ${escapeHtml(updatedStr)}</span>`;
         return `
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
             <div class="flex items-center justify-between flex-wrap gap-2">
-                <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-black text-xs shrink-0">${a.category || '🎓 畢業檢核'}</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-black text-xs shrink-0">${escapeHtml(a.category || '🎓 畢業檢核')}</span>
                 <span class="text-[11px] font-mono whitespace-nowrap">${timeHtml}</span>
             </div>
-            <h4 class="font-black text-slate-800 text-sm md:text-base">${a.title}</h4>
-            <p class="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap break-words">${a.content}</p>
-            <div class="text-[10px] text-slate-400 font-bold text-right pt-1 border-t border-slate-100">發布者：${a.created_by || '系統管理員'}</div>
+            <h4 class="font-black text-slate-800 text-sm md:text-base">${escapeHtml(a.title)}</h4>
+            <p class="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(a.content)}</p>
+            <div class="text-[10px] text-slate-400 font-bold text-right pt-1 border-t border-slate-100">發布者：${escapeHtml(a.created_by || '系統管理員')}</div>
         </div>`;
     }).join('');
 };
@@ -404,24 +417,24 @@ window.renderAdminAnnounceList = function() {
             <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-3 text-xs shadow-2xs hover:shadow-xs transition">
                 <div class="flex items-center gap-3 min-w-0 flex-1 flex-wrap sm:flex-nowrap">
                     <div class="font-mono text-slate-500 text-[11px] shrink-0 whitespace-nowrap leading-tight text-center">
-                        <div>${pubDatePart}</div><div>${pubTimePart}</div>
+                        <div>${escapeHtml(pubDatePart)}</div><div>${escapeHtml(pubTimePart)}</div>
                     </div>
                     <div class="shrink-0 flex items-center gap-1.5">
-                        <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-extrabold text-[11px] whitespace-nowrap">${a.category || '大會公告'}</span>
+                        <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-extrabold text-[11px] whitespace-nowrap">${escapeHtml(a.category || '大會公告')}</span>
                         ${statusBadge}
                         ${a.is_marquee ? '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-amber-100 text-amber-800 border border-amber-200 shrink-0">📢</span>' : ''}
                     </div>
                     <div class="min-w-0 flex-1">
-                        <div class="font-bold text-slate-800 truncate text-xs sm:text-sm">${a.title}</div>
-                        <div class="text-[11px] text-slate-400 truncate mt-0.5">${a.content || ''}</div>
+                        <div class="font-bold text-slate-800 truncate text-xs sm:text-sm">${escapeHtml(a.title)}</div>
+                        <div class="text-[11px] text-slate-400 truncate mt-0.5">${escapeHtml(a.content || '')}</div>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
-                    <button type="button" class="btn-table-action bg-[#242938] text-white" onclick="toggleAnnounceStatus('${a.id}', ${!a.is_active})"><i class="fa-regular fa-file-lines text-xs"></i></button>
+                    <button type="button" class="btn-table-action bg-[#242938] text-white" onclick="toggleAnnounceStatus('${escapeHtml(a.id)}', ${!a.is_active})"><i class="fa-regular fa-file-lines text-xs"></i></button>
                     <button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
                     <button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, 1)" ${idx === announcementsData.length - 1 ? 'disabled' : ''}>▼</button>
-                    <button type="button" class="h-7 px-2.5 rounded-md font-extrabold text-white bg-[#f59e0b] hover:bg-[#d97706] text-xs transition" onclick="openEditAnnouncement('${a.id}')">編輯</button>
-                    <button type="button" class="h-7 px-2.5 rounded-md font-extrabold text-white bg-[#dc2626] hover:bg-[#b91c1c] text-xs transition" onclick="deleteAnnouncement('${a.id}', '${a.title}')">刪除</button>
+                    <button type="button" class="h-7 px-2.5 rounded-md font-extrabold text-white bg-[#f59e0b] hover:bg-[#d97706] text-xs transition" onclick="openEditAnnouncement('${escapeHtml(a.id)}')">編輯</button>
+                    <button type="button" class="h-7 px-2.5 rounded-md font-extrabold text-white bg-[#dc2626] hover:bg-[#b91c1c] text-xs transition" onclick="deleteAnnouncement('${escapeHtml(a.id)}', '${escapeHtml(a.title)}')">刪除</button>
                 </div>
             </div>
         `;
@@ -440,7 +453,7 @@ window.openEditAnnouncement = function(id) {
     document.getElementById('newAnnounceMarquee').checked = !!item.is_marquee;
     document.getElementById('newAnnounceActive').checked = !!item.is_active;
     document.getElementById('announceFormIcon').innerText = '✏️';
-    document.getElementById('announceFormTitle').innerHTML = '正在編輯公告：<span class="text-indigo-700 font-black">' + (item.title || '') + '</span>';
+    document.getElementById('announceFormTitle').innerHTML = '正在編輯公告：<span class="text-indigo-700 font-black">' + escapeHtml(item.title || '') + '</span>';
     document.getElementById('submitAnnounceBtn').innerText = '儲存修改公告';
     document.getElementById('cancelAnnounceEditBtn').style.display = 'inline-block';
     document.getElementById('announceFormCard')?.classList.add('ring-4', 'ring-amber-400/80', 'shadow-lg');
@@ -497,7 +510,10 @@ window.submitNewAnnouncement = async function() {
         } else {
             let minOrder = 0;
             if (announcementsData.length > 0) {
-                minOrder = Math.min(...announcementsData.map(a => (a.sort_order ?? 0))) - 1;
+                minOrder = announcementsData.reduce((min, a) => {
+                    const order = Number.isFinite(a.sort_order) ? a.sort_order : 0;
+                    return order < min ? order : min;
+                }, 0) - 1;
             }
             const payload = {
                 title, category, content, published_at: publishedAtIso, start_at: startAtIso,
@@ -562,7 +578,7 @@ window.buildCardContent = function(title, value, target, isTotalCard = false) {
         }
     }
     return `
-        <div class="card-title">${title}</div>
+        <div class="card-title">${escapeHtml(title)}</div>
         <div class="flex items-baseline justify-center gap-1 text-lg xs:text-xl md:text-2xl font-black text-slate-900"><span>${value === null ? "-" : value}</span><span style="font-size: 0.85rem; color: #475569; font-weight: 700;">/ ${target === null ? "-" : target}</span></div>
         <div class="card-progress-bg"><div class="card-progress-fill" style="width: ${percentage}%; background-color: ${barColor};"></div></div>`;
 };
@@ -690,16 +706,16 @@ window.renderFeedbackList = function() {
         else if (item.category === '學分資料疑義') catBadge = "bg-blue-50 text-blue-700 border-blue-200";
         tr.innerHTML = `
             <td class="p-2.5 text-slate-500 font-mono text-[11px] leading-tight text-center whitespace-nowrap">
-                <div>${datePart}</div><div>${timePart}</div>
+                <div>${escapeHtml(datePart)}</div><div>${escapeHtml(timePart)}</div>
             </td>
             <td class="p-2.5 font-bold break-words leading-tight">
-                <div class="text-slate-800">${item.full_name || '訪客'} <span class="text-[10px] text-slate-400 block sm:inline">(${mapping.role[item.role] || item.role})</span></div>
-                <div class="text-[10px] font-mono text-slate-400 mt-0.5 break-all">${item.student_id || ''}</div>
+                <div class="text-slate-800">${escapeHtml(item.full_name || '訪客')} <span class="text-[10px] text-slate-400 block sm:inline">(${escapeHtml(mapping.role[item.role] || item.role)})</span></div>
+                <div class="text-[10px] font-mono text-slate-400 mt-0.5 break-all">${escapeHtml(item.student_id || '')}</div>
             </td>
-            <td class="p-2.5"><span class="px-2 py-0.5 rounded-full border font-extrabold text-[10px] sm:text-[11px] inline-block ${catBadge}">${item.category || '其他'}</span></td>
-            <td class="p-2.5 text-slate-700 leading-relaxed font-semibold whitespace-pre-wrap break-words">${item.content || ''}</td>
+            <td class="p-2.5"><span class="px-2 py-0.5 rounded-full border font-extrabold text-[10px] sm:text-[11px] inline-block ${catBadge}">${escapeHtml(item.category || '其他')}</span></td>
+            <td class="p-2.5 text-slate-700 leading-relaxed font-semibold whitespace-pre-wrap break-words">${escapeHtml(item.content || '')}</td>
             <td class="p-2.5 text-center">
-                <button class="btn-mini" style="background:#ef4444; padding:0 6px; height:28px;" onclick="deleteFeedback('${item.id}', '${item.full_name}')">刪除</button>
+                <button class="btn-mini" style="background:#ef4444; padding:0 6px; height:28px;" onclick="deleteFeedback('${escapeHtml(item.id)}', '${escapeHtml(item.full_name)}')">刪除</button>
             </td>
         `;
         listBody.appendChild(tr);
@@ -836,28 +852,28 @@ window.renderAuditLogList = function() {
             const d = log.details || {};
             diffHtml = `<div class="inline-flex flex-wrap items-center gap-2 p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 font-bold text-xs shadow-xs">
                 <span class="px-2 py-0.5 rounded-md bg-rose-600 text-white font-black text-[11px]">🗑️ 被刪除帳號資料</span>
-                <span>姓名：<b class="text-rose-950 font-black text-sm">${d.deleted_name || log.target_student_name || '未知'}</b></span>
+                <span>姓名：<b class="text-rose-950 font-black text-sm">${escapeHtml(d.deleted_name || log.target_student_name || '未知')}</b></span>
                 <span class="text-rose-300">|</span>
-                <span>帳號：<b class="font-mono text-rose-900 font-extrabold">${d.deleted_sid || log.target_student_id || '未知'}</b></span>
+                <span>帳號：<b class="font-mono text-rose-900 font-extrabold">${escapeHtml(d.deleted_sid || log.target_student_id || '未知')}</b></span>
             </div>`;
         } else if (log.details && typeof log.details === 'object') {
             const d = log.details;
             let headerChips = [];
             if (d.old_version && d.new_version) {
                 headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 font-extrabold text-[11px] shadow-xs">
-                    <span class="text-slate-500">原版本: ${d.old_version}</span> <span class="text-sky-600 font-black">➔</span> <span class="text-indigo-700 font-black">新版本: ${d.new_version}</span>
+                    <span class="text-slate-500">原版本: ${escapeHtml(d.old_version)}</span> <span class="text-sky-600 font-black">➔</span> <span class="text-indigo-700 font-black">新版本: ${escapeHtml(d.new_version)}</span>
                 </div>`);
             }
             if (d.old_total !== undefined && d.new_total !== undefined) {
                 const isIncreased = d.new_total > d.old_total;
                 const totalBadgeColor = isIncreased ? 'bg-emerald-50 border-emerald-200' : (d.new_total < d.old_total ? 'bg-rose-50 border-rose-200' : 'bg-indigo-50 border-indigo-100');
                 headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-extrabold text-[11px] shadow-xs ${totalBadgeColor}">
-                    <span class="text-slate-500">舊學分: ${d.old_total}</span> <span class="text-slate-400 font-black">➔</span> <span class="${isIncreased ? 'text-emerald-700 font-black' : 'text-indigo-700 font-black'}">新學分: ${d.new_total}</span>
+                    <span class="text-slate-500">舊學分: ${escapeHtml(d.old_total)}</span> <span class="text-slate-400 font-black">➔</span> <span class="${isIncreased ? 'text-emerald-700 font-black' : 'text-indigo-700 font-black'}">新學分: ${escapeHtml(d.new_total)}</span>
                 </div>`);
             }
             if (d.semester) {
                 headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 font-extrabold text-[11px]">
-                    <span class="text-amber-800">📅 ${d.semester}</span>
+                    <span class="text-amber-800">📅 ${escapeHtml(d.semester)}</span>
                 </div>`);
             }
             if (headerChips.length > 0) diffHtml += `<div class="flex flex-wrap gap-1.5 mb-1.5">${headerChips.join('')}</div>`;
@@ -867,7 +883,7 @@ window.renderAuditLogList = function() {
                     const isGain = f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格');
                     const badgeStyle = isGain ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-rose-50 text-rose-900 border-rose-300';
                     diffHtml += `<div class="inline-flex items-center gap-1 border px-2 py-0.5 rounded-lg text-[11px] font-bold shadow-xs ${badgeStyle}">
-                        <span>${f.field}:</span><s class="opacity-60 font-semibold">${f.oldVal}</s><span class="font-black opacity-80">➔</span><b class="font-black">${f.newVal}</b>
+                        <span>${escapeHtml(f.field)}:</span><s class="opacity-60 font-semibold">${escapeHtml(f.oldVal)}</s><span class="font-black opacity-80">➔</span><b class="font-black">${escapeHtml(f.newVal)}</b>
                     </div>`;
                 });
                 diffHtml += `</div>`;
@@ -877,7 +893,7 @@ window.renderAuditLogList = function() {
                     if (!['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode'].includes(k)) {
                         let valStr = typeof v === 'object' ? JSON.stringify(v) : v;
                         chipItems.push(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] bg-slate-100 text-slate-700 border-slate-200">
-                            <span class="opacity-60 text-[10px] font-bold">${k}:</span><span class="font-extrabold">${valStr}</span>
+                            <span class="opacity-60 text-[10px] font-bold">${escapeHtml(k)}:</span><span class="font-extrabold">${escapeHtml(valStr)}</span>
                         </span>`);
                     }
                 }
@@ -891,22 +907,22 @@ window.renderAuditLogList = function() {
         else if (log.operator_role === 'student') roleBadgeColor = "bg-blue-100 text-blue-800";
         tr.innerHTML = `
             <td class="p-3 text-slate-500 font-mono text-[11px] leading-tight text-center whitespace-nowrap">
-                <div>${datePart}</div><div>${timePart}</div>
+                <div>${escapeHtml(datePart)}</div><div>${escapeHtml(timePart)}</div>
             </td>
             <td class="p-3 font-bold">
                 <div class="text-slate-800 flex items-center gap-1">
-                    <span>${log.operator_name || '系統'}</span>
-                    <span class="text-[9px] px-1.5 py-0.5 rounded font-black ${roleBadgeColor}">${mapping.role[log.operator_role] || log.operator_role}</span>
+                    <span>${escapeHtml(log.operator_name || '系統')}</span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded font-black ${roleBadgeColor}">${escapeHtml(mapping.role[log.operator_role] || log.operator_role)}</span>
                 </div>
-                <div class="text-[10px] font-mono text-slate-400 mt-0.5">${log.ip_address || '未知 IP'}</div>
+                <div class="text-[10px] font-mono text-slate-400 mt-0.5">${escapeHtml(log.ip_address || '未知 IP')}</div>
             </td>
             <td class="p-3">
-                <div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${log.target_student_name || '-'}</div>
-                <div class="text-slate-500 font-mono text-[11px] mt-0.5">${log.target_student_id || '-'}</div>
+                <div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${escapeHtml(log.target_student_name || '-')}</div>
+                <div class="text-slate-500 font-mono text-[11px] mt-0.5">${escapeHtml(log.target_student_id || '-')}</div>
             </td>
             <td class="p-3">
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] whitespace-nowrap font-black ${cfg.class}">
-                    <span>${cfg.icon}</span><span>${log.action_type}</span>
+                    <span>${cfg.icon}</span><span>${escapeHtml(log.action_type)}</span>
                 </span>
             </td>
             <td class="p-3 text-slate-700">${diffHtml}</td>
@@ -1466,7 +1482,7 @@ window.renderUserStatusDisplay = function() {
     const displayClass = (myYear === '未設定' || myDept === '未設定') ? ` ｜ ${roleTitle}` : ` ｜ ${myYear}年 ${myDept} ${roleTitle}`;
     userStatusDisplay.innerHTML = `
         <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 w-full text-xs sm:text-sm leading-tight">
-            <div class="font-extrabold text-slate-100 shrink-0">您好，${displayName}${displayClass}</div>
+            <div class="font-extrabold text-slate-100 shrink-0">您好，${escapeHtml(displayName)}${escapeHtml(displayClass)}</div>
             <div class="user-info-actions flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap">
                 <span id="syncStatusIndicator" class="sync-badge sync-success"><span>同步成功</span></span>
                 <a href="javascript:void(0)" onclick="openFeedbackModal()" class="text-amber-300 hover:text-amber-200 font-extrabold transition">💡 意見回饋</a>
@@ -1641,7 +1657,7 @@ window.loadFromCloud = async function(tid = null) {
                 const name = data.full_name || '學生';
                 const sid = data.student_id ? ` (帳號: ${data.student_id})` : '';
                 const classStr = (data.entry_year && data.entry_dept && data.entry_year !== '未設定' && data.entry_dept !== '未設定') ? ` ｜ ${data.entry_year}年 ${data.entry_dept}` : '';
-                targetNameEl.innerHTML = `<b class="text-amber-300">${name}</b>${sid}${classStr}`;
+                targetNameEl.innerHTML = `<b class="text-amber-300">${escapeHtml(name)}</b>${escapeHtml(sid)}${escapeHtml(classStr)}`;
             }
             const version = determineCurriculumVersion(data);
             selectCurriculum(version.year, version.dept);
@@ -1872,33 +1888,33 @@ window.renderAdminTable = function() {
         const roleDisplayName = s.role === 'admin' ? '管理員' : (isTutor ? '導師' : (mapping.role[s.role] || '使用者'));
         const classInfo = (s.entry_year === '未設定' || s.entry_dept === '未設定') ? '未設定' : `${s.entry_year}年/${s.entry_dept}`;
         const evalRes = s.role === 'student' ? evaluateStudentStatus(s) : null;
-        const statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${evalRes.statusText}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>';
+        const statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${escapeHtml(evalRes.statusText)}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>';
         const tr = document.createElement('tr');
         let btnsDesktop = '<div class="flex items-center w-full gap-1.5 flex-nowrap">';
         const studentTargetId = s.student_id || s.id;
         if (s.role === 'student') {
-            btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#10b981" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
+            btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#10b981" onclick="enterAdminEditMode('${escapeHtml(studentTargetId)}','${escapeHtml(s.full_name)}')">檢視學分狀態</button>`;
         }
-        btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#6366f1;" onclick="openAuditLogModal('${s.student_id}')">📜 歷程</button>`;
+        btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#6366f1;" onclick="openAuditLogModal('${escapeHtml(s.student_id)}')">📜 歷程</button>`;
         btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
-                        <button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#ef4444" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button></div>`;
-        tr.innerHTML = `<td><b>${s.full_name}</b></td><td>${s.student_id || '-'}</td><td><span class="role-badge ${roleClass}">${roleDisplayName}</span></td><td>${classInfo}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
+                        <button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#ef4444" onclick="deleteStudentData('${escapeHtml(s.id)}','${escapeHtml(s.full_name)}')">刪除</button></div>`;
+        tr.innerHTML = `<td><b>${escapeHtml(s.full_name)}</b></td><td>${escapeHtml(s.student_id || '-')}</td><td><span class="role-badge ${roleClass}">${escapeHtml(roleDisplayName)}</span></td><td>${escapeHtml(classInfo)}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
         tableBody.appendChild(tr);
         const card = document.createElement('div');
         card.className = "mobile-card p-4 flex flex-col gap-3";
         let btnsMobile = '';
         if (s.role === 'student') {
-            btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-emerald-500" onclick="enterAdminEditMode('${studentTargetId}','${s.full_name}')">檢視學分狀態</button>`;
+            btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-emerald-500" onclick="enterAdminEditMode('${escapeHtml(studentTargetId)}','${escapeHtml(s.full_name)}')">檢視學分狀態</button>`;
         }
-        btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-indigo-600" onclick="openAuditLogModal('${s.student_id}')">📜 歷程</button>`;
+        btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-indigo-600" onclick="openAuditLogModal('${escapeHtml(s.student_id)}')">📜 歷程</button>`;
         btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-blue-500" onclick="openAdminUserEdit(${i})">帳號設定</button>
-                       <button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-red-500" onclick="deleteStudentData('${s.id}','${s.full_name}')">刪除</button>`;
+                       <button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-red-500" onclick="deleteStudentData('${escapeHtml(s.id)}','${escapeHtml(s.full_name)}')">刪除</button>`;
         card.innerHTML = `
             <div class="flex justify-between items-start border-b border-slate-100 pb-2">
-                <div><div class="text-sm font-bold text-slate-800">${s.full_name}</div><div class="text-xs text-slate-500">帳號: ${s.student_id || '-'}</div></div>
-                <span class="role-badge ${roleClass} text-xs py-1 px-2.5 rounded-full font-bold text-white">${roleDisplayName}</span>
+                <div><div class="text-sm font-bold text-slate-800">${escapeHtml(s.full_name)}</div><div class="text-xs text-slate-500">帳號: ${escapeHtml(s.student_id || '-')}</div></div>
+                <span class="role-badge ${roleClass} text-xs py-1 px-2.5 rounded-full font-bold text-white">${escapeHtml(roleDisplayName)}</span>
             </div>
-            <div class="text-xs text-slate-600 flex justify-between"><span>入學年 / 科別:</span><span class="font-semibold text-slate-800">${classInfo}</span></div>
+            <div class="text-xs text-slate-600 flex justify-between"><span>入學年 / 科別:</span><span class="font-semibold text-slate-800">${escapeHtml(classInfo)}</span></div>
             <div class="text-xs text-slate-600 flex justify-between border-t border-dashed border-slate-200 pt-2"><span>畢業門檻資格:</span><div>${statusTagHtml}</div></div>
             <div class="flex gap-1.5 mt-1">${btnsMobile}</div>
         `;
@@ -1935,7 +1951,7 @@ window.toggleAdminTutorField = function(roleVal, currentTutor = '') {
     if (roleVal === 'student') {
         sec.style.display = 'block';
         let optionsHtml = `<select id="editUserTutor" class="sort-select w-full bg-white"><option value="未設定">未設定</option>`;
-        teacherNames.forEach(tName => { optionsHtml += `<option value="${tName}">${tName}</option>`; });
+        teacherNames.forEach(tName => { optionsHtml += `<option value="${escapeHtml(tName)}">${escapeHtml(tName)}</option>`; });
         wrapper.innerHTML = optionsHtml + `</select>`;
         if (currentTutor) document.getElementById('editUserTutor').value = currentTutor;
     } else {
@@ -1981,15 +1997,15 @@ window.renderMobileCards = function(checkedStates) {
                 const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (!item.defaultUnchecked);
                 semGridHtml += `
                     <div class="mobile-sem-item">
-                        <span class="mobile-sem-label">${semNames[sIdx]}</span>
+                        <span class="mobile-sem-label">${escapeHtml(semNames[sIdx])}</span>
                         <div class="mobile-score-box">
-                            <input type="checkbox" id="${id}" class="toggle-checkbox" data-cat="${item.cat}" data-type="${item.type}" data-val="${c}" data-sem="${sIdx}" data-name="${item.name}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); saveToCloud(true);">
-                            <label for="${id}" class="score-label">${c}</label>
+                            <input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); saveToCloud(true);">
+                            <label for="${escapeHtml(id)}" class="score-label">${c}</label>
                         </div>
                     </div>`;
             } else {
                 semGridHtml += `
-                    <div class="mobile-sem-item"><span class="mobile-sem-label">${semNames[sIdx]}</span>
+                    <div class="mobile-sem-item"><span class="mobile-sem-label">${escapeHtml(semNames[sIdx])}</span>
                         <div class="mobile-score-box"><div class="score-label zero-score">-</div></div>
                     </div>`;
             }
@@ -1997,10 +2013,10 @@ window.renderMobileCards = function(checkedStates) {
         semGridHtml += `</div>`;
         card.innerHTML = `
             <div class="flex items-start justify-between gap-2 mb-3 pb-2 border-b border-slate-100">
-                <span class="font-extrabold text-sm sm:text-base text-slate-800 break-words leading-snug">${item.name}</span>
+                <span class="font-extrabold text-sm sm:text-base text-slate-800 break-words leading-snug">${escapeHtml(item.name)}</span>
                 <div class="flex items-center gap-1.5 shrink-0 pt-0.5">
-                    <span class="mobile-badge ${catInfo.class}">${catInfo.text}</span>
-                    <span class="mobile-badge bg-slate-100 text-slate-600 border border-slate-200">${mapping.type[item.type] || "一般"}</span>
+                    <span class="mobile-badge ${catInfo.class}">${escapeHtml(catInfo.text)}</span>
+                    <span class="mobile-badge bg-slate-100 text-slate-600 border border-slate-200">${escapeHtml(mapping.type[item.type] || "一般")}</span>
                 </div>
             </div>
             ${semGridHtml}
@@ -2038,17 +2054,17 @@ window.renderSemesterCards = function(checkedStates) {
                 const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700 border border-slate-200" };
                 itemsHtml += `
                     <div class="sem-item-row flex items-center justify-between p-2.5 rounded-xl transition-all gap-2 cursor-pointer select-none">
-                        <input type="checkbox" id="${id}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${item.cat}" data-type="${item.type}" data-val="${c}" data-sem="${sIdx}" data-name="${item.name}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); saveToCloud(true);">
-                        <label for="${id}" class="sem-label flex items-center justify-between w-full cursor-pointer gap-2 min-w-0">
+                        <input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); saveToCloud(true);">
+                        <label for="${escapeHtml(id)}" class="sem-label flex items-center justify-between w-full cursor-pointer gap-2 min-w-0">
                             <div class="flex items-center gap-2.5 min-w-0 flex-1">
                                 <div class="custom-check-box w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all shrink-0">
                                     <i class="fa-solid fa-check text-[10px] text-white opacity-0 transform scale-50 transition-all"></i>
                                 </div>
-                                <span class="sub-name text-xs sm:text-sm font-extrabold text-slate-800 break-words leading-snug">${item.name}</span>
+                                <span class="sub-name text-xs sm:text-sm font-extrabold text-slate-800 break-words leading-snug">${escapeHtml(item.name)}</span>
                                 <span class="credit-badge text-[10px] font-black px-1.5 py-0.5 rounded-md bg-slate-200/80 text-slate-700 shrink-0">${c} 學分</span>
                             </div>
                             <div class="flex items-center gap-1 shrink-0 pt-0.5">
-                                <span class="mobile-badge text-[10px] py-0.5 px-1.5 ${catInfo.class}">${catInfo.text}</span>
+                                <span class="mobile-badge text-[10px] py-0.5 px-1.5 ${catInfo.class}">${escapeHtml(catInfo.text)}</span>
                             </div>
                         </label>
                     </div>`;
@@ -2060,7 +2076,7 @@ window.renderSemesterCards = function(checkedStates) {
         card.innerHTML = `
             <div>
                 <div class="flex items-center justify-between mb-2">
-                    <h4 class="text-sm sm:text-base font-black text-slate-800 flex items-center gap-2"><span class="w-2 h-4 bg-emerald-500 rounded-full"></span>${semTitle}</h4>
+                    <h4 class="text-sm sm:text-base font-black text-slate-800 flex items-center gap-2"><span class="w-2 h-4 bg-emerald-500 rounded-full"></span>${escapeHtml(semTitle)}</h4>
                     <div class="text-xs font-black text-slate-600">取得 <span class="sem-earned-val text-emerald-600 text-sm font-black">${semEarned}</span> / <span>${semMax}</span> 學分</div>
                 </div>
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
@@ -2188,10 +2204,10 @@ window.renderMissingCreditsFiltered = function() {
         semFullNames.forEach(sem => {
             if (grouped[sem] && grouped[sem].length > 0) {
                 html += `<div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 shadow-sm mb-3">
-                    <h5 class="text-xs font-black text-slate-700 border-b border-slate-200/80 pb-2 mb-2 flex justify-between"><span>📅 ${sem}</span><span class="text-red-600">未得 ${grouped[sem].reduce((sum, i) => sum + i.val, 0)} 學分</span></h5>
+                    <h5 class="text-xs font-black text-slate-700 border-b border-slate-200/80 pb-2 mb-2 flex justify-between"><span>📅 ${escapeHtml(sem)}</span><span class="text-red-600">未得 ${grouped[sem].reduce((sum, i) => sum + i.val, 0)} 學分</span></h5>
                     <div class="space-y-2">`;
                 grouped[sem].forEach(item => {
-                    html += `<div class="flex items-center justify-between text-xs py-1 px-1.5"><span class="font-bold text-slate-800">${item.name}</span><span class="font-extrabold text-red-500">${item.val} 學分</span></div>`;
+                    html += `<div class="flex items-center justify-between text-xs py-1 px-1.5"><span class="font-bold text-slate-800">${escapeHtml(item.name)}</span><span class="font-extrabold text-red-500">${item.val} 學分</span></div>`;
                 });
                 html += `</div></div>`;
             }
