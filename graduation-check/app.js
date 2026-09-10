@@ -440,6 +440,7 @@ window.moveAnnouncementOrder = async function(index, direction) {
     }
 };
 
+// 編輯公告時平滑滾動回表單並反白聚焦
 window.openEditAnnouncement = function(id) {
     const item = announcementsData.find(a => String(a.id) === String(id));
     if (!item) return;
@@ -453,12 +454,12 @@ window.openEditAnnouncement = function(id) {
     document.getElementById('newAnnounceEndAt').value = formatDateTimeInput(item.end_at);
     document.getElementById('newAnnounceMarquee').checked = !!item.is_marquee;
     document.getElementById('newAnnounceActive').checked = !!item.is_active;
-
+    
     document.getElementById('announceFormIcon').innerText = '✏️';
     document.getElementById('announceFormTitle').innerHTML = '正在編輯公告：<span class="text-indigo-700 font-black truncate max-w-[200px] inline-block align-bottom">' + escapeHtml(item.title || '') + '</span>';
     document.getElementById('submitAnnounceBtn').innerText = '儲存修改公告';
     document.getElementById('cancelAnnounceEditBtn').style.display = 'inline-block';
-
+    
     const formCard = document.getElementById('announceFormCard');
     if (formCard) {
         formCard.classList.add('ring-4', 'ring-indigo-400/70', 'shadow-lg');
@@ -476,15 +477,16 @@ window.cancelAnnounceEdit = function() {
     document.getElementById('newAnnounceEndAt').value = '';
     document.getElementById('newAnnounceMarquee').checked = true;
     document.getElementById('newAnnounceActive').checked = true;
-
+    
     document.getElementById('announceFormIcon').innerText = '✨';
     document.getElementById('announceFormTitle').innerText = '發布新公告';
     document.getElementById('submitAnnounceBtn').innerText = '確認發布公告';
     document.getElementById('cancelAnnounceEditBtn').style.display = 'none';
-
+    
     document.getElementById('announceFormCard')?.classList.remove('ring-4', 'ring-indigo-400/70', 'shadow-lg');
 };
 
+// 支援搜尋與狀態篩選的列表渲染
 window.renderAdminAnnounceList = function() {
     const container = document.getElementById('adminAnnounceList');
     const countText = document.getElementById('announceCountText');
@@ -492,8 +494,10 @@ window.renderAdminAnnounceList = function() {
     const statusFilter = document.getElementById('announceStatusFilter')?.value || 'all';
 
     if (!container) return;
+
     const now = new Date().getTime();
 
+    // 篩選公告
     let filtered = [...announcementsData];
 
     if (searchTxt) {
@@ -566,6 +570,7 @@ window.renderAdminAnnounceList = function() {
                         </div>
                     </div>
 
+                    <!-- 操作按鈕列 -->
                     <div class="flex items-center gap-1.5 shrink-0 self-start sm:self-center">
                         <button type="button" class="btn-table-action ${a.is_active ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-500 hover:bg-slate-600'} text-white" onclick="toggleAnnounceStatus('${escapeHtml(a.id)}', ${!a.is_active})" title="${a.is_active ? '點擊下架' : '點擊重新上架'}">
                             <i class="fa-solid ${a.is_active ? 'fa-eye' : 'fa-eye-slash'}"></i>
@@ -577,6 +582,7 @@ window.renderAdminAnnounceList = function() {
                     </div>
                 </div>
 
+                <!-- 內容折疊或簡介 -->
                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap break-words">
                     ${escapeHtml(a.content || '')}
                 </div>
