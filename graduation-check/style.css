@@ -381,6 +381,48 @@ html, body {
 .bg-sch-req-main { background-color: #dcfce7 !important; color: #14532d !important; border: 1px solid #86efac !important; }
 .bg-sch-opt-main { background-color: #dbeafe !important; color: #1e3a8a !important; border: 1px solid #93c5fd !important; }
 
+/* 方案 A：現代膠囊卡片風 (Audit Log 專用樣式) */
+.audit-details-card {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.audit-field-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    white-space: nowrap;
+}
+
+.audit-field-label {
+    color: #64748b;
+    font-weight: 700;
+}
+
+.audit-field-val {
+    color: #1e293b;
+    font-weight: 800;
+}
+
+.audit-field-val.is-unset {
+    color: #94a3b8;
+    font-weight: 600;
+    font-style: italic;
+}
+
 /* 彈出視窗（Modal） */
 .modal-overlay { 
     display: none; 
