@@ -913,24 +913,26 @@ window.renderAuditLogList = function() {
         '更新公告排序': { icon: '↕️', class: 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-black' }
     };
 
-    const formatDetailValue = (key, val) => {
-        if (key === 'role') return mapping.role[val] || val;
-        if (key === 'year') return val === '未設定' ? '未設定' : `${val} 學年度`;
-        return val;
-    };
-
     const detailKeyLabels = {
         role: '身份',
         year: '入學年',
         dept: '科別班級',
         status: '狀態',
-        category: '類別',
+        category: '回饋類別',
         method: '重設方式',
         passwordChanged: '密碼變更',
         fromOrder: '原始順序',
         toOrder: '新順序',
         isMarquee: '跑馬燈同步',
         isActive: '公開狀態'
+    };
+
+    const formatDetailValue = (key, val) => {
+        if (key === 'role') return mapping.role[val] || val;
+        if (key === 'year') return val === '未設定' ? '未設定' : `${val} 學年度`;
+        if (key === 'passwordChanged') return val ? '是 (已覆寫)' : '否 (未更改)';
+        if (typeof val === 'boolean') return val ? '是' : '否';
+        return val;
     };
 
     filtered.forEach(log => {
@@ -979,17 +981,24 @@ window.renderAuditLogList = function() {
                 });
                 diffHtml += `</div>`;
             } else {
-                let chipItems = [];
-                for (const [k, v] of Object.entries(d)) {
-                    if (!['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode'].includes(k)) {
+                // 方案 A：現代膠囊卡片風輸出結構
+                const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode'].includes(k));
+                if (metaKeys.length > 0) {
+                    diffHtml += `<div class="audit-details-card">`;
+                    metaKeys.forEach(k => {
                         const labelText = detailKeyLabels[k] || k;
-                        const formattedVal = formatDetailValue(k, typeof v === 'object' ? JSON.stringify(v) : v);
-                        chipItems.push(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] bg-slate-100 text-slate-700 border-slate-200">
-                            <span class="opacity-60 text-[10px] font-bold">${escapeHtml(labelText)}:</span><span class="font-extrabold">${escapeHtml(formattedVal)}</span>
-                        </span>`);
-                    }
+                        const rawVal = d[k];
+                        const formattedVal = formatDetailValue(k, typeof rawVal === 'object' ? JSON.stringify(rawVal) : rawVal);
+                        const isUnset = (formattedVal === '未設定');
+                        diffHtml += `
+                            <div class="audit-field-pill">
+                                <span class="audit-field-label">${escapeHtml(labelText)}:</span>
+                                <span class="audit-field-val ${isUnset ? 'is-unset' : ''}">${escapeHtml(formattedVal)}</span>
+                            </div>
+                        `;
+                    });
+                    diffHtml += `</div>`;
                 }
-                if (chipItems.length > 0) diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">${chipItems.join('')}</div>`;
             }
         }
         const cfg = actionConfig[log.action_type] || { icon: '📌', class: 'bg-slate-700 text-white font-bold' };
@@ -1503,6 +1512,9 @@ window.handleAuth = async function() {
                     if (!entryYear || !entryDept || entryYear.includes('請選擇') || entryDept.includes('請選擇')) {
                         throw new Error("擔任導師請務必選擇負責的入學年與科別班級！");
                     }
+                } else {
+                    entryYear = '未設定';
+                    entryDept = '未設定';
                 }
             } else {
                 entryYear = document.getElementById('authEntryYear').value;
