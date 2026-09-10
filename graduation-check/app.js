@@ -2,6 +2,9 @@ let currentIndependentPage = null;
 const teacherCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000;
 let autoSaveDebounceTimer = null;
+let saveBaselineChecks = null;
+let saveBaselineTotal = null;
+let pendingBulkActionInfo = null;
 
 window.escapeHtml = function(str) {
     if (str === null || str === undefined) return '';
@@ -225,6 +228,9 @@ window.clearAppRuntimeState = function() {
     isViewingClassList = false;
     editingStudentId = null;
     lastUserId = null;
+    pendingBulkActionInfo = null;
+    saveBaselineChecks = null;
+    saveBaselineTotal = null;
     if (autoSaveDebounceTimer) {
         clearTimeout(autoSaveDebounceTimer);
         autoSaveDebounceTimer = null;
@@ -906,6 +912,27 @@ window.renderAuditLogList = function() {
         '編輯系統公告': { icon: '✏️', class: 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-black' },
         '更新公告排序': { icon: '↕️', class: 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-black' }
     };
+
+    const formatDetailValue = (key, val) => {
+        if (key === 'role') return mapping.role[val] || val;
+        if (key === 'year') return val === '未設定' ? '未設定' : `${val} 學年度`;
+        return val;
+    };
+
+    const detailKeyLabels = {
+        role: '身份',
+        year: '入學年',
+        dept: '科別班級',
+        status: '狀態',
+        category: '類別',
+        method: '重設方式',
+        passwordChanged: '密碼變更',
+        fromOrder: '原始順序',
+        toOrder: '新順序',
+        isMarquee: '跑馬燈同步',
+        isActive: '公開狀態'
+    };
+
     filtered.forEach(log => {
         const timeStr = formatDateTime(log.created_at);
         const [datePart, timePart] = timeStr.includes(' ') ? timeStr.split(' ') : [timeStr, ''];
@@ -955,9 +982,10 @@ window.renderAuditLogList = function() {
                 let chipItems = [];
                 for (const [k, v] of Object.entries(d)) {
                     if (!['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode'].includes(k)) {
-                        let valStr = typeof v === 'object' ? JSON.stringify(v) : v;
+                        const labelText = detailKeyLabels[k] || k;
+                        const formattedVal = formatDetailValue(k, typeof v === 'object' ? JSON.stringify(v) : v);
                         chipItems.push(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] bg-slate-100 text-slate-700 border-slate-200">
-                            <span class="opacity-60 text-[10px] font-bold">${escapeHtml(k)}:</span><span class="font-extrabold">${escapeHtml(valStr)}</span>
+                            <span class="opacity-60 text-[10px] font-bold">${escapeHtml(labelText)}:</span><span class="font-extrabold">${escapeHtml(formattedVal)}</span>
                         </span>`);
                     }
                 }
@@ -1670,14 +1698,33 @@ window.updateUI = function() {
 
 window.debouncedSaveToCloud = function(bulkActionInfo = null) {
     updateSyncStatusIndicator('saving');
+
+    if (!saveBaselineChecks) {
+        const curRecord = editingStudentId ? activeStudentDBRecord : userDBRecord;
+        saveBaselineChecks = JSON.parse(JSON.stringify(curRecord?.credits_json || {}));
+        saveBaselineTotal = curRecord?.total_credits !== undefined ? curRecord.total_credits : 0;
+    }
+
+    if (bulkActionInfo) {
+        pendingBulkActionInfo = bulkActionInfo;
+    }
+
     clearTimeout(autoSaveDebounceTimer);
     autoSaveDebounceTimer = setTimeout(() => {
-        saveToCloud(true, bulkActionInfo);
-    }, 600);
+        const actionToSend = pendingBulkActionInfo;
+        pendingBulkActionInfo = null;
+        executeDeferredSave(actionToSend);
+    }, 1500);
 };
 
-window.saveToCloud = async function(isAuto = false, bulkActionInfo = null) {
-    if (!currentUser || !dbClient || curriculum.length === 0) { updateSyncStatusIndicator('offline'); return; }
+async function executeDeferredSave(bulkActionInfo = null) {
+    if (!currentUser || !dbClient || curriculum.length === 0) {
+        updateSyncStatusIndicator('offline');
+        saveBaselineChecks = null;
+        saveBaselineTotal = null;
+        return;
+    }
+
     const targetId = editingStudentId ? (activeStudentDBRecord?.id || editingStudentId) : currentUser.id;
     const curRecord = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata);
     const targetRole = curRecord?.role || 'student';
@@ -1685,14 +1732,17 @@ window.saveToCloud = async function(isAuto = false, bulkActionInfo = null) {
     const entryDept = curRecord?.entry_dept || '未設定';
     const targetName = curRecord?.full_name || '學生';
     const targetSid = (curRecord?.student_id || '').split('@')[0].toLowerCase().trim();
-    const oldTotal = editingStudentId ? (activeStudentDBRecord?.total_credits || 0) : (userDBRecord?.total_credits || 0);
-    const oldChecks = (editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {};
-    const oldViewYr = oldChecks['_view_year'] || entryYear;
-    const oldViewDept = oldChecks['_view_dept'] || entryDept;
-    updateSyncStatusIndicator('saving');
+
+    const oldTotal = saveBaselineTotal !== null ? saveBaselineTotal : (curRecord?.total_credits || 0);
+    const oldChecks = saveBaselineChecks !== null ? saveBaselineChecks : (curRecord?.credits_json || {});
+
+    saveBaselineChecks = null;
+    saveBaselineTotal = null;
+
     const checks = {};
     const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
     const changedFields = [];
+
     document.querySelectorAll(".toggle-checkbox").forEach(c => {
         checks[c.id] = c.checked;
         const semIdx = parseInt(c.dataset.sem || "0");
@@ -1700,6 +1750,7 @@ window.saveToCloud = async function(isAuto = false, bulkActionInfo = null) {
         const subName = c.dataset.name || "未知名科目";
         const credVal = c.dataset.val || "0";
         const isDefaultUnchecked = c.dataset.defaultUnchecked === 'true';
+
         const wasChecked = oldChecks[c.id] !== undefined ? !!oldChecks[c.id] : !isDefaultUnchecked;
         if (wasChecked !== c.checked) {
             changedFields.push({
@@ -1709,14 +1760,16 @@ window.saveToCloud = async function(isAuto = false, bulkActionInfo = null) {
             });
         }
     });
+
     const version = determineCurriculumVersion(curRecord);
     const newViewYr = version.locked ? entryYear : currentYear;
     const newViewDept = version.locked ? entryDept : currentDept;
     checks['_view_year'] = newViewYr;
     checks['_view_dept'] = newViewDept;
-    const isVersionChanged = targetRole !== 'student' && !version.locked && (oldViewYr !== '未設定' && newViewYr !== '未設定') && (oldViewYr !== newViewYr || oldViewDept !== newViewDept);
+
     const res = calculateStats();
     let matchedTutor = curRecord?.tutor || (targetRole === 'student' ? await findTutorByYearDept(entryYear, entryDept) : (targetRole === 'admin' ? '管理員免設定' : '教師帳號免設定'));
+
     try {
         let rpcSuccess = false;
         try {
@@ -1726,6 +1779,7 @@ window.saveToCloud = async function(isAuto = false, bulkActionInfo = null) {
             });
             if (!rpcErr) rpcSuccess = true;
         } catch (e) {}
+
         if (!rpcSuccess) {
             const payload = {
                 id: targetId, student_id: targetSid, full_name: targetName, entry_year: entryYear,
@@ -1735,14 +1789,13 @@ window.saveToCloud = async function(isAuto = false, bulkActionInfo = null) {
             const { error } = await dbClient.from('grad_checks').upsert(payload);
             if (error) throw error;
         }
+
         updateSyncStatusIndicator('success');
-        if (!isAuto) showMsg("雲端存檔成功！");
+
         const activeRec = editingStudentId ? (activeStudentDBRecord || (activeStudentDBRecord = {})) : (userDBRecord || (userDBRecord = {}));
         activeRec.credits_json = checks;
         activeRec.total_credits = res.total || 0;
-        if (isVersionChanged) {
-            await logAuditRecord("切換版本", targetSid, targetName, { old_version: `${oldViewYr}年 ${oldViewDept}`, new_version: `${newViewYr}年 ${newViewDept}` });
-        }
+
         if (bulkActionInfo || changedFields.length > 0) {
             await logAuditRecord(bulkActionInfo ? bulkActionInfo.actionType : "變更學分紀錄", targetSid, targetName, {
                 old_total: oldTotal, new_total: res.total || 0, ...(bulkActionInfo ? bulkActionInfo.details : {}), changed_fields: changedFields
@@ -1750,9 +1803,8 @@ window.saveToCloud = async function(isAuto = false, bulkActionInfo = null) {
         }
     } catch (err) {
         updateSyncStatusIndicator('offline');
-        if (!isAuto) showMsg(translateError(err.message), 'error');
     }
-};
+}
 
 window.loadFromCloud = async function(tid = null) {
     if (!currentUser || !dbClient) return;
