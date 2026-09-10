@@ -440,63 +440,10 @@ window.moveAnnouncementOrder = async function(index, direction) {
     }
 };
 
-window.renderAdminAnnounceList = function() {
-    const container = document.getElementById('adminAnnounceList');
-    const countText = document.getElementById('announceCountText');
-    if (countText) countText.innerText = `共 ${announcementsData.length} 筆紀錄`;
-    if (!container) return;
-    if (announcementsData.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs font-bold">目前資料庫尚無任何公告紀錄</div>`;
-        return;
-    }
-    const now = new Date().getTime();
-    container.innerHTML = announcementsData.map((a, idx) => {
-        const pubDate = a.published_at || a.created_at;
-        const pubFormatted = formatDateTime(pubDate);
-        const [pubDatePart, pubTimePart] = pubFormatted.includes(' ') ? pubFormatted.split(' ') : [pubFormatted, ''];
-        let statusBadge = '';
-        if (!a.is_active) {
-            statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-rose-100 text-rose-800 border border-rose-200 shrink-0">○ 下架</span>';
-        } else if (a.published_at && new Date(a.published_at).getTime() > now) {
-            statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-amber-100 text-amber-800 border border-amber-200 shrink-0">⏳ 預約中</span>';
-        } else if (a.start_at && new Date(a.start_at).getTime() > now) {
-            statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-sky-100 text-sky-800 border border-sky-200 shrink-0">⏳ 未開始</span>';
-        } else if (a.end_at && new Date(a.end_at).getTime() < now) {
-            statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-slate-200 text-slate-700 border border-slate-300 shrink-0">⌛ 已過期</span>';
-        } else {
-            statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">● 公開中</span>';
-        }
-        return `
-            <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-3 text-xs shadow-2xs hover:shadow-xs transition">
-                <div class="flex items-center gap-3 min-w-0 flex-1 flex-wrap sm:flex-nowrap">
-                    <div class="font-mono text-slate-500 text-[11px] shrink-0 whitespace-nowrap leading-tight text-center">
-                        <div>${escapeHtml(pubDatePart)}</div><div>${escapeHtml(pubTimePart)}</div>
-                    </div>
-                    <div class="shrink-0 flex items-center gap-1.5">
-                        <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-extrabold text-[11px] whitespace-nowrap">${escapeHtml(a.category || '大會公告')}</span>
-                        ${statusBadge}
-                        ${a.is_marquee ? '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-amber-100 text-amber-800 border border-amber-200 shrink-0">📢</span>' : ''}
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="font-bold text-slate-800 truncate text-xs sm:text-sm">${escapeHtml(a.title)}</div>
-                        <div class="text-[11px] text-slate-400 truncate mt-0.5">${escapeHtml(a.content || '')}</div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-1.5 shrink-0">
-                    <button type="button" class="btn-table-action bg-[#242938] text-white" onclick="toggleAnnounceStatus('${escapeHtml(a.id)}', ${!a.is_active})"><i class="fa-regular fa-file-lines text-xs"></i></button>
-                    <button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
-                    <button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, 1)" ${idx === announcementsData.length - 1 ? 'disabled' : ''}>▼</button>
-                    <button type="button" class="h-7 px-2.5 rounded-md font-extrabold text-white bg-[#f59e0b] hover:bg-[#d97706] text-xs transition" onclick="openEditAnnouncement('${escapeHtml(a.id)}')">編輯</button>
-                    <button type="button" class="h-7 px-2.5 rounded-md font-extrabold text-white bg-[#dc2626] hover:bg-[#b91c1c] text-xs transition" onclick="deleteAnnouncement('${escapeHtml(a.id)}', '${escapeHtml(a.title)}')">刪除</button>
-                </div>
-            </div>
-        `;
-    }).join('');
-};
-
 window.openEditAnnouncement = function(id) {
     const item = announcementsData.find(a => String(a.id) === String(id));
     if (!item) return;
+
     document.getElementById('editingAnnounceId').value = item.id;
     document.getElementById('newAnnounceTitle').value = item.title || '';
     document.getElementById('newAnnounceCategory').value = item.category || '大會公告';
@@ -506,11 +453,17 @@ window.openEditAnnouncement = function(id) {
     document.getElementById('newAnnounceEndAt').value = formatDateTimeInput(item.end_at);
     document.getElementById('newAnnounceMarquee').checked = !!item.is_marquee;
     document.getElementById('newAnnounceActive').checked = !!item.is_active;
+
     document.getElementById('announceFormIcon').innerText = '✏️';
-    document.getElementById('announceFormTitle').innerHTML = '正在編輯公告：<span class="text-indigo-700 font-black">' + escapeHtml(item.title || '') + '</span>';
+    document.getElementById('announceFormTitle').innerHTML = '正在編輯公告：<span class="text-indigo-700 font-black truncate max-w-[200px] inline-block align-bottom">' + escapeHtml(item.title || '') + '</span>';
     document.getElementById('submitAnnounceBtn').innerText = '儲存修改公告';
     document.getElementById('cancelAnnounceEditBtn').style.display = 'inline-block';
-    document.getElementById('announceFormCard')?.classList.add('ring-4', 'ring-amber-400/80', 'shadow-lg');
+
+    const formCard = document.getElementById('announceFormCard');
+    if (formCard) {
+        formCard.classList.add('ring-4', 'ring-indigo-400/70', 'shadow-lg');
+        formCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 };
 
 window.cancelAnnounceEdit = function() {
@@ -523,11 +476,113 @@ window.cancelAnnounceEdit = function() {
     document.getElementById('newAnnounceEndAt').value = '';
     document.getElementById('newAnnounceMarquee').checked = true;
     document.getElementById('newAnnounceActive').checked = true;
+
     document.getElementById('announceFormIcon').innerText = '✨';
     document.getElementById('announceFormTitle').innerText = '發布新公告';
     document.getElementById('submitAnnounceBtn').innerText = '確認發布公告';
     document.getElementById('cancelAnnounceEditBtn').style.display = 'none';
-    document.getElementById('announceFormCard')?.classList.remove('ring-4', 'ring-amber-400/80', 'shadow-lg');
+
+    document.getElementById('announceFormCard')?.classList.remove('ring-4', 'ring-indigo-400/70', 'shadow-lg');
+};
+
+window.renderAdminAnnounceList = function() {
+    const container = document.getElementById('adminAnnounceList');
+    const countText = document.getElementById('announceCountText');
+    const searchTxt = (document.getElementById('announceSearchInput')?.value || '').toLowerCase().trim();
+    const statusFilter = document.getElementById('announceStatusFilter')?.value || 'all';
+
+    if (!container) return;
+    const now = new Date().getTime();
+
+    let filtered = [...announcementsData];
+
+    if (searchTxt) {
+        filtered = filtered.filter(a => 
+            (a.title && a.title.toLowerCase().includes(searchTxt)) ||
+            (a.content && a.content.toLowerCase().includes(searchTxt)) ||
+            (a.category && a.category.toLowerCase().includes(searchTxt))
+        );
+    }
+
+    if (statusFilter !== 'all') {
+        filtered = filtered.filter(a => {
+            const isInactive = !a.is_active;
+            const isScheduled = (a.published_at && new Date(a.published_at).getTime() > now) || (a.start_at && new Date(a.start_at).getTime() > now);
+            const isExpired = a.end_at && new Date(a.end_at).getTime() < now;
+            const isActiveNow = a.is_active && !isScheduled && !isExpired;
+
+            if (statusFilter === 'active') return isActiveNow;
+            if (statusFilter === 'scheduled') return !isInactive && isScheduled;
+            if (statusFilter === 'expired') return !isInactive && isExpired;
+            if (statusFilter === 'inactive') return isInactive;
+            return true;
+        });
+    }
+
+    if (countText) countText.innerText = `共 ${filtered.length} 筆紀錄`;
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div class="bg-white border border-slate-200 rounded-2xl p-10 text-center text-slate-400 font-bold space-y-2">
+                <div class="text-3xl">📭</div>
+                <div class="text-xs">查無符合條件之公告紀錄</div>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = filtered.map((a, idx) => {
+        const pubDate = a.published_at || a.created_at;
+        const pubFormatted = formatDateTime(pubDate);
+        const [pubDatePart, pubTimePart] = pubFormatted.includes(' ') ? pubFormatted.split(' ') : [pubFormatted, ''];
+        
+        let statusBadge = '';
+        if (!a.is_active) {
+            statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-rose-50 text-rose-700 border border-rose-200 shrink-0">○ 已下架</span>';
+        } else if (a.published_at && new Date(a.published_at).getTime() > now) {
+            statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-amber-50 text-amber-700 border border-amber-200 shrink-0">⏳ 預約中</span>';
+        } else if (a.start_at && new Date(a.start_at).getTime() > now) {
+            statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-sky-50 text-sky-700 border border-sky-200 shrink-0">⏳ 未開始</span>';
+        } else if (a.end_at && new Date(a.end_at).getTime() < now) {
+            statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-slate-100 text-slate-600 border border-slate-300 shrink-0">⌛ 已過期</span>';
+        } else {
+            statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-emerald-50 text-emerald-700 border border-emerald-300 shrink-0">● 公開中</span>';
+        }
+
+        return `
+            <div class="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 shadow-2xs hover:shadow-sm transition space-y-3">
+                <div class="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
+                    <div class="flex items-start gap-3 min-w-0 flex-1">
+                        <div class="font-mono text-slate-500 text-[11px] leading-tight text-center bg-slate-50 border border-slate-200 px-2 py-1.5 rounded-lg shrink-0">
+                            <div class="font-bold text-slate-700">${escapeHtml(pubDatePart)}</div>
+                            <div class="text-[10px] opacity-70">${escapeHtml(pubTimePart)}</div>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-extrabold text-[10px] border border-slate-200">${escapeHtml(a.category || '大會公告')}</span>
+                                ${statusBadge}
+                                ${a.is_marquee ? '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-amber-50 text-amber-700 border border-amber-200">📢 跑馬燈</span>' : ''}
+                            </div>
+                            <h4 class="font-black text-slate-900 text-sm md:text-base break-words">${escapeHtml(a.title)}</h4>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 shrink-0 self-start sm:self-center">
+                        <button type="button" class="btn-table-action ${a.is_active ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-500 hover:bg-slate-600'} text-white" onclick="toggleAnnounceStatus('${escapeHtml(a.id)}', ${!a.is_active})" title="${a.is_active ? '點擊下架' : '點擊重新上架'}">
+                            <i class="fa-solid ${a.is_active ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                        </button>
+                        <button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="上移順序">▲</button>
+                        <button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, 1)" ${idx === filtered.length - 1 ? 'disabled' : ''} title="下移順序">▼</button>
+                        <button type="button" class="h-7 px-3 rounded-lg font-black text-white bg-amber-500 hover:bg-amber-600 text-xs transition" onclick="openEditAnnouncement('${escapeHtml(a.id)}')">編輯</button>
+                        <button type="button" class="h-7 px-3 rounded-lg font-black text-white bg-rose-600 hover:bg-rose-700 text-xs transition" onclick="deleteAnnouncement('${escapeHtml(a.id)}', '${escapeHtml(a.title)}')">刪除</button>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap break-words">
+                    ${escapeHtml(a.content || '')}
+                </div>
+            </div>
+        `;
+    }).join('');
 };
 
 window.submitNewAnnouncement = async function() {
