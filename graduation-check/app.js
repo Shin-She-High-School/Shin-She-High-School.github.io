@@ -47,12 +47,18 @@ let checkHintDebounceTimer = null;
 window.checkAuthIdRoleHint = function() {
     clearTimeout(checkHintDebounceTimer);
     checkHintDebounceTimer = setTimeout(async () => {
-        const sidInput = document.getElementById('authID')?.value.trim();
+        const isReg = document.getElementById('regFields')?.style.display === 'block';
         const hintEl = document.getElementById('authRoleHint');
         const regTeacherRoleGroup = document.getElementById('regTeacherRoleGroup');
         const regYearGroup = document.getElementById('regYearGroup');
         const regDeptGroup = document.getElementById('regDeptGroup');
-        const isReg = document.getElementById('regFields')?.style.display === 'block';
+
+        if (!isReg) {
+            if (hintEl) hintEl.textContent = '';
+            return;
+        }
+
+        const sidInput = document.getElementById('authID')?.value.trim();
         if (!sidInput) {
             if (hintEl) hintEl.textContent = '';
             if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'none';
@@ -66,17 +72,13 @@ window.checkAuthIdRoleHint = function() {
         if (currentCleanSid !== cleanSid) return;
         if (isTeacher) {
             if (hintEl) hintEl.textContent = '👨‍🏫 教師帳號';
-            if (isReg) {
-                if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'block';
-                handleTeacherTypeChange();
-            }
+            if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'block';
+            handleTeacherTypeChange();
         } else {
             if (hintEl) hintEl.textContent = '';
-            if (isReg) {
-                if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'none';
-                if (regYearGroup) regYearGroup.style.display = 'block';
-                if (regDeptGroup) regDeptGroup.style.display = 'block';
-            }
+            if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'none';
+            if (regYearGroup) regYearGroup.style.display = 'block';
+            if (regDeptGroup) regDeptGroup.style.display = 'block';
         }
     }, 200);
 };
@@ -1352,8 +1354,8 @@ window.handleAuth = async function() {
     const isReg = document.getElementById('regFields').style.display === 'block';
     try {
         updateSyncStatusIndicator('saving');
-        const isTeacher = await checkIsTeacherAccount(cleanSid);
         if (isReg) {
+            const isTeacher = await checkIsTeacherAccount(cleanSid);
             const name = document.getElementById('authName').value.trim();
             if (!name) throw new Error("請輸入姓名！");
             let role = isTeacher ? 'teacher' : 'student';
@@ -1442,16 +1444,12 @@ window.handleAuth = async function() {
                 }
                 throw error;
             }
-            if (isTeacher) {
-                const loggedInUserId = authResult?.user?.id;
-                try { await dbClient.from('grad_checks').update({ role: 'teacher' }).eq('id', loggedInUserId); } catch (updateErr) {}
-            }
             let loginDisplayName = cleanSid;
             if (authResult?.user?.user_metadata?.full_name) loginDisplayName = authResult.user.user_metadata.full_name;
             updateSyncStatusIndicator('success'); showMsg("登入成功！");
             document.getElementById('authWorkspace').style.display = 'none'; document.getElementById('appWorkspace').style.display = 'flex';
             hasLoadedInitialData = false; updateUI();
-            logAuditRecord("使用者登入", cleanSid, loginDisplayName, { status: "登入成功", role: isTeacher ? 'teacher' : 'student' });
+            logAuditRecord("使用者登入", cleanSid, loginDisplayName, { status: "登入成功" });
         }
     } catch (e) { updateSyncStatusIndicator('offline'); showMsg(translateError(e.message), 'error'); }
 };
@@ -2064,7 +2062,7 @@ window.renderSemesterCards = function(checkedStates) {
                                 <span class="credit-badge text-[10px] font-black px-1.5 py-0.5 rounded-md bg-slate-200/80 text-slate-700 shrink-0">${c} 學分</span>
                             </div>
                             <div class="flex items-center gap-1 shrink-0 pt-0.5">
-                                <span class="mobile-badge text-[10px] py-0.5 px-1.5 ${catInfo.class}">${escapeHtml(catInfo.text)}</span>
+                                <span class="mobile-badge text-[10px] py-0.5 px-1.5 ${catInfo.class}">${catInfo.text}</span>
                             </div>
                         </label>
                     </div>`;
