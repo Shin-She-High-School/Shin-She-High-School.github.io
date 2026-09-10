@@ -981,23 +981,45 @@ window.renderAuditLogList = function() {
                 });
                 diffHtml += `</div>`;
             } else {
-                // 方案 A：現代膠囊卡片風輸出結構
-                const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode'].includes(k));
-                if (metaKeys.length > 0) {
-                    diffHtml += `<div class="audit-details-card">`;
-                    metaKeys.forEach(k => {
-                        const labelText = detailKeyLabels[k] || k;
-                        const rawVal = d[k];
-                        const formattedVal = formatDetailValue(k, typeof rawVal === 'object' ? JSON.stringify(rawVal) : rawVal);
-                        const isUnset = (formattedVal === '未設定');
-                        diffHtml += `
-                            <div class="audit-field-pill">
-                                <span class="audit-field-label">${escapeHtml(labelText)}:</span>
-                                <span class="audit-field-val ${isUnset ? 'is-unset' : ''}">${escapeHtml(formattedVal)}</span>
-                            </div>
-                        `;
-                    });
-                    diffHtml += `</div>`;
+                if (log.action_type === '使用者登入') {
+                    diffHtml = `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-extrabold text-xs shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>登入成功</span>
+                    </div>`;
+                } else if (log.action_type === '使用者登出') {
+                    diffHtml = `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-extrabold text-xs shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                        <span>安全登出</span>
+                    </div>`;
+                } else if (log.action_type === '使用者註冊') {
+                    const r = d.role === 'teacher' ? (d.year && d.year !== '未設定' ? '👨‍🏫 導師' : '👨‍🏫 教師') : '🎓 學生';
+                    const y = d.year && d.year !== '未設定' ? `${d.year} 學年度` : '未指定學年';
+                    const dept = d.dept && d.dept !== '未設定' ? d.dept : '一般專任(未設定班級)';
+                    
+                    diffHtml = `<div class="inline-flex flex-wrap items-center gap-2 p-1.5 px-3 rounded-xl bg-teal-50 border border-teal-200 text-teal-950 font-bold text-xs shadow-xs">
+                        <span class="px-2 py-0.5 rounded-md bg-teal-700 text-white font-black text-[11px]">${r}</span>
+                        <span class="text-teal-800 font-extrabold">${escapeHtml(y)}</span>
+                        <span class="text-teal-300">丨</span>
+                        <span class="text-teal-900 font-black">${escapeHtml(dept)}</span>
+                    </div>`;
+                } else {
+                    const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode'].includes(k));
+                    if (metaKeys.length > 0) {
+                        diffHtml += `<div class="audit-details-card">`;
+                        metaKeys.forEach(k => {
+                            const labelText = detailKeyLabels[k] || k;
+                            const rawVal = d[k];
+                            const formattedVal = formatDetailValue(k, typeof rawVal === 'object' ? JSON.stringify(rawVal) : rawVal);
+                            const isUnset = (formattedVal === '未設定');
+                            diffHtml += `
+                                <div class="audit-field-pill">
+                                    <span class="audit-field-label">${escapeHtml(labelText)}:</span>
+                                    <span class="audit-field-val ${isUnset ? 'is-unset' : ''}">${escapeHtml(formattedVal)}</span>
+                                </div>
+                            `;
+                        });
+                        diffHtml += `</div>`;
+                    }
                 }
             }
         }
