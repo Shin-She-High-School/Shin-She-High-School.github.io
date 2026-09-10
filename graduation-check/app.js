@@ -1,6 +1,8 @@
 let currentIndependentPage = null;
 const teacherCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000;
+let autoSaveDebounceTimer = null;
+
 window.escapeHtml = function(str) {
     if (str === null || str === undefined) return '';
     return String(str)
@@ -10,6 +12,7 @@ window.escapeHtml = function(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 };
+
 window.checkIsTeacherAccount = async function(cleanSid) {
     if (!cleanSid) return false;
     const lowerSid = cleanSid.toLowerCase().trim();
@@ -31,6 +34,7 @@ window.checkIsTeacherAccount = async function(cleanSid) {
         return false;
     }
 };
+
 window.handleTeacherTypeChange = function() {
     const teacherType = document.getElementById('authTeacherType')?.value;
     const regYearGroup = document.getElementById('regYearGroup');
@@ -43,6 +47,7 @@ window.handleTeacherTypeChange = function() {
         if (regDeptGroup) regDeptGroup.style.display = 'none';
     }
 };
+
 let checkHintDebounceTimer = null;
 window.checkAuthIdRoleHint = function() {
     clearTimeout(checkHintDebounceTimer);
@@ -82,6 +87,7 @@ window.checkAuthIdRoleHint = function() {
         }
     }, 200);
 };
+
 window.formatDateTime = function(isoStr) {
     if (!isoStr) return '-';
     const d = new Date(isoStr);
@@ -95,6 +101,7 @@ window.formatDateTime = function(isoStr) {
     const ss = pad(d.getSeconds());
     return `${yyyy}/${mm}/${dd} ${hh}:${min}:${ss}`;
 };
+
 window.openIndependentPage = function(pageType) {
     currentIndependentPage = pageType;
     const mainDashboard = document.getElementById('mainDashboardView');
@@ -124,6 +131,7 @@ window.openIndependentPage = function(pageType) {
     updateHash();
     scrollToTop();
 };
+
 window.closeIndependentPage = function() {
     const mainDashboard = document.getElementById('mainDashboardView');
     const announcePage = document.getElementById('pageAnnounceView');
@@ -139,6 +147,7 @@ window.closeIndependentPage = function() {
     updateHash();
     scrollToTop();
 };
+
 window.switchAuthMode = function() {
     const regFields = document.getElementById('regFields');
     const authTitle = document.getElementById('authTitle');
@@ -158,6 +167,7 @@ window.switchAuthMode = function() {
     }
     checkAuthIdRoleHint();
 };
+
 const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
     SB_KEY = "sb_publishable_ojrdIB0TeCnl8eZXbzWsdQ_2W3JB3xT",
     EMAIL_DOMAIN = "@sshs.tc.edu.tw",
@@ -184,18 +194,43 @@ const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
         type: { 1: "一般科目", 2: "專業科目", 3: "實習科目" },
         role: { student: "學生", teacher: "教師", admin: "管理員" }
     };
+
 let curriculums = {};
 let curriculum = [], dbClient = null;
 try {
     if (typeof supabase !== 'undefined' && supabase) dbClient = supabase.createClient(SB_URL, SB_KEY);
     else if (typeof window.supabase !== 'undefined' && window.supabase) dbClient = window.supabase.createClient(SB_URL, SB_KEY);
 } catch (e) {}
+
 let currentUser = null, DEPT_THRESHOLD = 0, userDBRecord = null, activeStudentDBRecord = null,
     hasLoadedInitialData = false, lastLoadedStudentId = null, adminListData = [], auditLogsData = [], userFeedbacksData = [], announcementsData = [], teacherNames = [],
     isViewingClassList = false, editingStudentId = null, confirmAction = null,
     currentYear = "113", currentDept = "普通科(理工生醫群)-1", lastUserId = null, currentLayoutMode = "subject",
     currentUncheckedCredits = [];
+
 let realtimeGradChecksChannel = null, realtimeFeedbacksChannel = null, realtimeAuditLogsChannel = null, realtimeAnnouncementsChannel = null;
+
+window.clearAppRuntimeState = function() {
+    teacherCache.clear();
+    adminListData = [];
+    auditLogsData = [];
+    userFeedbacksData = [];
+    announcementsData = [];
+    teacherNames = [];
+    currentUncheckedCredits = [];
+    userDBRecord = null;
+    activeStudentDBRecord = null;
+    hasLoadedInitialData = false;
+    lastLoadedStudentId = null;
+    isViewingClassList = false;
+    editingStudentId = null;
+    lastUserId = null;
+    if (autoSaveDebounceTimer) {
+        clearTimeout(autoSaveDebounceTimer);
+        autoSaveDebounceTimer = null;
+    }
+};
+
 window.isWebSocketAllowed = function() {
     if (typeof WebSocket === 'undefined') return false;
     try {
@@ -206,6 +241,7 @@ window.isWebSocketAllowed = function() {
         return false;
     }
 };
+
 window.setupRealtimeSubscriptions = function() {
     if (!dbClient) return;
     window.cleanupRealtimeSubscriptions();
@@ -269,6 +305,7 @@ window.setupRealtimeSubscriptions = function() {
             .subscribe();
     } catch (e) {}
 };
+
 window.cleanupRealtimeSubscriptions = function() {
     if (!dbClient) return;
     try {
@@ -282,6 +319,7 @@ window.cleanupRealtimeSubscriptions = function() {
     realtimeAuditLogsChannel = null;
     realtimeAnnouncementsChannel = null;
 };
+
 window.isAnnouncementVisibleNow = function(a) {
     if (!a.is_active) return false;
     const now = new Date().getTime();
@@ -290,6 +328,7 @@ window.isAnnouncementVisibleNow = function(a) {
     if (a.end_at && now > new Date(a.end_at).getTime()) return false;
     return true;
 };
+
 window.formatDateTimeInput = function(isoStr) {
     if (!isoStr) return '';
     const d = new Date(isoStr);
@@ -297,6 +336,7 @@ window.formatDateTimeInput = function(isoStr) {
     const pad = (n) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
+
 window.sortAnnouncementsData = function() {
     announcementsData.sort((a, b) => {
         const orderA = a.sort_order !== undefined && a.sort_order !== null ? a.sort_order : 0;
@@ -305,6 +345,7 @@ window.sortAnnouncementsData = function() {
         return new Date(b.created_at || 0) - new Date(a.created_at || 0);
     });
 };
+
 window.fetchAnnouncements = async function() {
     if (!dbClient) return;
     try {
@@ -318,6 +359,7 @@ window.fetchAnnouncements = async function() {
         }
     } catch (e) {}
 };
+
 window.renderMarquee = function() {
     const marqueeEl = document.getElementById('marqueeContent');
     if (!marqueeEl) return;
@@ -329,6 +371,7 @@ window.renderMarquee = function() {
     let html = marqueeItems.map(a => `<span class="inline-flex items-center gap-1.5"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-extrabold text-[10px]">${escapeHtml(a.category || '🎓 公告')}</span><b>${escapeHtml(a.title)}</b>: ${escapeHtml(a.content)}</span>`).join('<span class="opacity-40 px-3">丨</span>');
     marqueeEl.innerHTML = html;
 };
+
 window.renderIndependentAnnouncements = function() {
     const container = document.getElementById('independentAnnounceList');
     if (!container) return;
@@ -356,6 +399,7 @@ window.renderIndependentAnnouncements = function() {
         </div>`;
     }).join('');
 };
+
 window.moveAnnouncementOrder = async function(index, direction) {
     if (!dbClient) return;
     const targetIndex = index + direction;
@@ -389,6 +433,7 @@ window.moveAnnouncementOrder = async function(index, direction) {
         fetchAnnouncements();
     }
 };
+
 window.renderAdminAnnounceList = function() {
     const container = document.getElementById('adminAnnounceList');
     const countText = document.getElementById('announceCountText');
@@ -442,6 +487,7 @@ window.renderAdminAnnounceList = function() {
         `;
     }).join('');
 };
+
 window.openEditAnnouncement = function(id) {
     const item = announcementsData.find(a => String(a.id) === String(id));
     if (!item) return;
@@ -460,6 +506,7 @@ window.openEditAnnouncement = function(id) {
     document.getElementById('cancelAnnounceEditBtn').style.display = 'inline-block';
     document.getElementById('announceFormCard')?.classList.add('ring-4', 'ring-amber-400/80', 'shadow-lg');
 };
+
 window.cancelAnnounceEdit = function() {
     document.getElementById('editingAnnounceId').value = '';
     document.getElementById('newAnnounceTitle').value = '';
@@ -476,6 +523,7 @@ window.cancelAnnounceEdit = function() {
     document.getElementById('cancelAnnounceEditBtn').style.display = 'none';
     document.getElementById('announceFormCard')?.classList.remove('ring-4', 'ring-amber-400/80', 'shadow-lg');
 };
+
 window.submitNewAnnouncement = async function() {
     if (!dbClient) return;
     const editId = document.getElementById('editingAnnounceId').value;
@@ -535,6 +583,7 @@ window.submitNewAnnouncement = async function() {
         showMsg("公告作業失敗：" + translateError(err.message), "error");
     }
 };
+
 window.toggleAnnounceStatus = async function(id, newStatus) {
     if (!dbClient) return;
     try {
@@ -549,6 +598,7 @@ window.toggleAnnounceStatus = async function(id, newStatus) {
         showMsg("操作失敗：" + translateError(err.message), "error");
     }
 };
+
 window.deleteAnnouncement = function(id, title) {
     if (!dbClient) return;
     showConfirmModal(`您確定要刪除公告「${title}」嗎？`, "刪除公告", async () => {
@@ -567,6 +617,7 @@ window.deleteAnnouncement = function(id, title) {
         }
     }, "確認刪除", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
+
 window.buildCardContent = function(title, value, target, isTotalCard = false) {
     const percentage = (value === null || target === null) ? 0 : Math.min(100, Math.round((value / target) * 100));
     let barColor = '#d97706';
@@ -584,6 +635,7 @@ window.buildCardContent = function(title, value, target, isTotalCard = false) {
         <div class="flex items-baseline justify-center gap-1 text-lg xs:text-xl md:text-2xl font-black text-slate-900"><span>${value === null ? "-" : value}</span><span style="font-size: 0.85rem; color: #475569; font-weight: 700;">/ ${target === null ? "-" : target}</span></div>
         <div class="card-progress-bg"><div class="card-progress-fill" style="width: ${percentage}%; background-color: ${barColor};"></div></div>`;
 };
+
 window.getClientIP = async function() {
     try {
         const controller = new AbortController();
@@ -595,6 +647,7 @@ window.getClientIP = async function() {
         return '內網/無法取得 IP';
     }
 };
+
 window.logAuditRecord = async function(actionType, targetSid, targetName, details) {
     if (!dbClient) return;
     try {
@@ -626,11 +679,13 @@ window.logAuditRecord = async function(actionType, targetSid, targetName, detail
         }
     } catch (e) {}
 };
+
 window.openFeedbackModal = function() {
     document.getElementById('fbContent').value = '';
     document.getElementById('fbCategory').value = '功能建議';
     toggleUIModal(true, 'feedbackModal');
 };
+
 window.submitUserFeedback = async function() {
     if (!dbClient) { showMsg("資料庫連線異常，無法送出！", "error"); return; }
     const category = document.getElementById('fbCategory').value;
@@ -661,6 +716,7 @@ window.submitUserFeedback = async function() {
         showMsg("送出失敗，請確認資料表已建立！", "error");
     }
 };
+
 window.refreshFeedbackList = async function() {
     if (!dbClient) return;
     const listBody = document.getElementById('feedbackListBody');
@@ -674,6 +730,7 @@ window.refreshFeedbackList = async function() {
         if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-500 font-bold">⚠️ 載入失敗！</td></tr>`;
     }
 };
+
 window.renderFeedbackList = function() {
     const searchTxt = (document.getElementById('fbSearchInput')?.value || '').toLowerCase().trim();
     const catFilter = document.getElementById('fbFilterCategory')?.value || 'all';
@@ -723,6 +780,7 @@ window.renderFeedbackList = function() {
         listBody.appendChild(tr);
     });
 };
+
 window.deleteFeedback = function(id, name) {
     if (!dbClient) return;
     showConfirmModal(`您確定要刪除來自「${name || '使用者'}」的此筆意見回饋嗎？`, "刪除意見回饋", async () => {
@@ -743,6 +801,7 @@ window.deleteFeedback = function(id, name) {
         }
     }, "確認刪除", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
+
 window.openAuditLogModal = async function(filterStudentId = null) {
     if (!dbClient) return;
     const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
@@ -753,6 +812,7 @@ window.openAuditLogModal = async function(filterStudentId = null) {
     else if (searchInput) searchInput.value = '';
     await refreshAuditLogs();
 };
+
 window.refreshAuditLogs = async function() {
     if (!dbClient) return;
     const listBody = document.getElementById('auditLogListBody');
@@ -781,6 +841,7 @@ window.refreshAuditLogs = async function() {
     auditLogsData = allLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     renderAuditLogList();
 };
+
 window.resetAuditFilters = function() {
     document.getElementById('auditSearchInput').value = '';
     document.getElementById('auditFilterAction').value = 'all';
@@ -789,6 +850,7 @@ window.resetAuditFilters = function() {
     document.getElementById('auditEndDate').value = '';
     renderAuditLogList();
 };
+
 window.renderAuditLogList = function() {
     const searchTxt = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
     const actionFilter = document.getElementById('auditFilterAction')?.value || 'all';
@@ -932,6 +994,7 @@ window.renderAuditLogList = function() {
         listBody.appendChild(tr);
     });
 };
+
 window.fetchCloudCurriculums = async function() {
     if (!dbClient) return;
     try {
@@ -945,6 +1008,7 @@ window.fetchCloudCurriculums = async function() {
         }
     } catch (e) {}
 };
+
 window.initDropdowns = function(isAdmin = false) {
     const yearSelects = ['authEntryYear', 'dashSelectYear', 'profEntryYear', 'editUserEntryYear'];
     const deptSelects = ['authEntryDept', 'dashSelectDept', 'profEntryDept', 'editUserEntryDept'];
@@ -993,15 +1057,18 @@ window.initDropdowns = function(isAdmin = false) {
         fDept.innerHTML = h;
     }
 };
+
 window.getTrackType = function(deptName) {
     if (!deptName) return 'vocational';
     if (deptName.includes('普通科')) return 'academic';
     if (deptName.includes('體育班')) return 'sports';
     return 'vocational';
 };
+
 window.getChkId = function(name, sIdx) {
     return `chk_${name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}_${sIdx}`;
 };
+
 window.translateError = function(msg) {
     if (!msg) return "發生未知錯誤";
     if (msg.includes("Invalid login credentials")) return "帳號或密碼錯誤，請重新確認！";
@@ -1009,10 +1076,12 @@ window.translateError = function(msg) {
     if (msg.includes("Password should be at least")) return "密碼長度太短！";
     return msg;
 };
+
 window.scrollToTop = function() {
     document.getElementById('scrollContainer')?.scrollTo({ top: 0, behavior: 'smooth' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+
 window.updateHash = function() {
     if (!currentUser) return;
     if (currentIndependentPage) window.location.hash = `#page-${currentIndependentPage}`;
@@ -1020,6 +1089,7 @@ window.updateHash = function() {
     else if (isViewingClassList) window.location.hash = '#class-data';
     else window.location.hash = '#dashboard';
 };
+
 window.handleHashRouting = function() {
     if (!currentUser) return;
     const hash = window.location.hash;
@@ -1050,6 +1120,7 @@ window.handleHashRouting = function() {
         }
     }
 };
+
 window.toggleUIModal = function(show, modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -1062,6 +1133,7 @@ window.toggleUIModal = function(show, modalId) {
         if (helpScroll) helpScroll.scrollTop = 0;
     }
 };
+
 window.updateHelpModalDetails = function() {
     const curRec = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata);
     let dept = curRec?.entry_dept || currentDept;
@@ -1073,6 +1145,7 @@ window.updateHelpModalDetails = function() {
     if (voc) voc.open = (track === 'vocational');
     if (sports) sports.open = (track === 'sports');
 };
+
 window.findTutorByYearDept = async function(yr, dept) {
     if (!dbClient || yr === '未設定' || dept === '未設定') return '未設定';
     try {
@@ -1080,6 +1153,7 @@ window.findTutorByYearDept = async function(yr, dept) {
         return data?.full_name || '未設定';
     } catch (e) { return '未設定'; }
 };
+
 window.determineCurriculumVersion = function(record) {
     if (!record) return { year: currentYear, dept: currentDept, locked: false };
     const role = record.role || 'student';
@@ -1097,6 +1171,7 @@ window.determineCurriculumVersion = function(record) {
         };
     }
 };
+
 window.selectCurriculum = function(yr, dept) {
     currentYear = yr;
     currentDept = dept;
@@ -1105,6 +1180,7 @@ window.selectCurriculum = function(yr, dept) {
     updateCurriculumSelectorVisibility();
     updateHelpModalDetails();
 };
+
 window.updateCurriculumSelectorVisibility = function() {
     const selectorArea = document.getElementById('curriculumSelectorArea');
     if (!selectorArea) return;
@@ -1114,11 +1190,13 @@ window.updateCurriculumSelectorVisibility = function() {
     document.getElementById('dashSelectYear').value = currentYear;
     document.getElementById('dashSelectDept').value = currentDept;
 };
+
 window.initThresholds = function() {
     let maxDept = 0;
     curriculum.forEach(i => { if (i.cat === 'dept') maxDept += i.credits.reduce((a, b) => a + b, 0); });
     DEPT_THRESHOLD = Math.ceil(maxDept * 0.85);
 };
+
 window.calculateStats = function() {
     let total = 0, dept = 0, prof = 0, prac = 0;
     let reqEarned = 0, optEarned = 0;
@@ -1153,6 +1231,7 @@ window.calculateStats = function() {
         return { total, pass: (total >= 160 && dept >= DEPT_THRESHOLD && prof >= 60 && prac >= 45), dept, prof, prac, trackType };
     }
 };
+
 window.calculate = function() {
     const isNullState = curriculum.length === 0;
     const stats = isNullState ? { total: null, pass: false } : calculateStats();
@@ -1208,17 +1287,20 @@ window.calculate = function() {
         }
     }
 };
+
 window.confirmSetAllStatus = function(p) {
     if (curriculum.length === 0) { showMsg("目前版本的課表尚未建置！", "error"); return; }
     const msg = p ? "您確定要將所有課程學分一次設為「及格」嗎？" : "您確定要將所有及格學分「全部歸零」嗎？";
     showConfirmModal(msg, p ? "確認全部及格" : "確認學分歸零", () => { setAllStatus(p); toggleUIModal(false, 'confirmModal'); }, p ? "確認全部及格" : "確認學分歸零", p ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" : "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
+
 window.setAllStatus = function(p) {
     document.querySelectorAll(".toggle-checkbox").forEach(chk => { chk.checked = p; });
     calculate();
     renderTable();
-    saveToCloud(true, { actionType: p ? "批次全部及格" : "批次學分歸零" });
+    debouncedSaveToCloud({ actionType: p ? "批次全部及格" : "批次學分歸零" });
 };
+
 window.setSemesterStatus = function(sIdx, p) {
     if (curriculum.length === 0) return;
     const semNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
@@ -1226,8 +1308,9 @@ window.setSemesterStatus = function(sIdx, p) {
     calculate();
     renderTable();
     showMsg(p ? `已將 ${semNames[sIdx]} 設為全部及格` : `已將 ${semNames[sIdx]} 學分歸零`);
-    saveToCloud(true, { actionType: p ? "單學期全選及格" : "單學期學分歸零", details: { semester: semNames[sIdx] } });
+    debouncedSaveToCloud({ actionType: p ? "單學期全選及格" : "單學期學分歸零", details: { semester: semNames[sIdx] } });
 };
+
 window.initHelpModalScrollGuard = function() {
     const container = document.getElementById('helpScrollContainer');
     if (!container) return;
@@ -1235,6 +1318,7 @@ window.initHelpModalScrollGuard = function() {
         if (container.scrollHeight - container.scrollTop <= container.clientHeight + 12) unlockConfirmButton();
     });
 };
+
 window.unlockConfirmButton = function() {
     const btn = document.getElementById('btnConfirmHelp');
     if (!btn) return;
@@ -1242,7 +1326,9 @@ window.unlockConfirmButton = function() {
     btn.className = "action-btn btn-pass-all w-full py-3.5 text-base font-extrabold rounded-xl shadow-md transition duration-150 cursor-pointer opacity-100";
     btn.style.pointerEvents = "auto";
 };
+
 window.confirmReadHelp = function() { sessionStorage.setItem('helpModalShown', 'true'); toggleUIModal(false, 'helpModal'); };
+
 window.handleOutsideClick = function(event) {
     if (event.target.classList.contains('modal-overlay')) {
         if (!currentUser && event.target.id === 'authWorkspace') return;
@@ -1252,6 +1338,7 @@ window.handleOutsideClick = function(event) {
         document.querySelectorAll('[id^="ms-drop-"]').forEach(d => { d.classList.add('hidden'); d.classList.remove('flex'); });
     }
 };
+
 window.toggleMS = function(event, type) {
     event.stopPropagation();
     const drop = document.getElementById(`ms-drop-${type}`);
@@ -1259,17 +1346,20 @@ window.toggleMS = function(event, type) {
     document.querySelectorAll('[id^="ms-drop-"]').forEach(d => { d.classList.add('hidden'); d.classList.remove('flex'); });
     if (isHidden) { drop.classList.remove('hidden'); drop.classList.add('flex'); }
 };
+
 window.handleMSAll = function(type, chk) {
     if (chk.checked) document.querySelectorAll(`.ms-opt-${type}`).forEach(c => c.checked = false);
     updateMSText(type);
     fetchAdminList(true);
 };
+
 window.handleMSOpt = function(type) {
     const opts = document.querySelectorAll(`.ms-opt-${type}:checked`);
     document.querySelector(`.ms-all-${type}`).checked = opts.length === 0;
     updateMSText(type);
     fetchAdminList(true);
 };
+
 window.updateMSText = function(type) {
     const opts = document.querySelectorAll(`.ms-opt-${type}:checked`);
     const textEl = document.getElementById(`ms-text-${type}`);
@@ -1285,11 +1375,13 @@ window.updateMSText = function(type) {
         textEl.classList.add('text-indigo-700');
     }
 };
+
 window.getMSValues = function(type) {
     const allChk = document.querySelector(`.ms-all-${type}`);
     if (allChk && allChk.checked) return ['all'];
     return Array.from(document.querySelectorAll(`.ms-opt-${type}:checked`)).map(o => o.value);
 };
+
 window.showMsg = function(txt, type = 'info') {
     const b = document.getElementById('msgBox');
     b.innerText = txt;
@@ -1297,12 +1389,14 @@ window.showMsg = function(txt, type = 'info') {
     b.style.display = 'block';
     setTimeout(() => b.style.display = 'none', 2500);
 };
+
 window.updateSyncStatusIndicator = function(status) {
     const badge = document.getElementById('syncStatusIndicator');
     if (!badge) return;
     badge.className = "sync-badge " + (status === 'offline' ? 'sync-offline' : (status === 'saving' ? 'sync-saving' : 'sync-success'));
     badge.innerHTML = `<span>${status === 'offline' ? '同步失敗，請聯繫管理員！' : (status === 'saving' ? '正在儲存...' : '同步成功')}</span>`;
 };
+
 window.showConfirmModal = function(msg, title, action, confirmBtnText, confirmBtnBg) {
     const btn = document.querySelector('#confirmModal .btn-pass-all');
     btn.style.background = confirmBtnBg || (title.includes("重設") ? "linear-gradient(135deg, #6366f1, #4f46e5)" : "#dc3545");
@@ -1312,10 +1406,16 @@ window.showConfirmModal = function(msg, title, action, confirmBtnText, confirmBt
     confirmAction = action;
     toggleUIModal(true, 'confirmModal');
 };
+
 window.triggerConfirmAction = function() { if (confirmAction) confirmAction(); };
+
 window.directResetPasswordToSid = async function() {
     const id = document.getElementById('editUserId').value, sid = document.getElementById('editUserSid').value.trim(), name = document.getElementById('editUserName').value.trim();
     if (!sid) { showMsg("無法重設：此帳號目前沒有設定帳號！", "error"); return; }
+    if (sid.length < 6) {
+        showMsg(`無法直接重設：帳號「${sid}」長度小於 6 碼，不符系統密碼規定，請改用左側「自訂新密碼」！`, "error");
+        return;
+    }
     showConfirmModal(`您確定要將「${name}」的登入密碼立即重設為其帳號「${sid}」嗎？`, "確認重設密碼", async () => {
         try {
             updateSyncStatusIndicator('saving');
@@ -1328,6 +1428,7 @@ window.directResetPasswordToSid = async function() {
         } catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
     });
 };
+
 window.customResetPassword = async function() {
     const id = document.getElementById('editUserId').value, name = document.getElementById('editUserName').value.trim(), sid = document.getElementById('editUserSid').value.trim();
     const newPwd = document.getElementById('editUserCustomPassword').value.trim();
@@ -1346,6 +1447,7 @@ window.customResetPassword = async function() {
         } catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
     });
 };
+
 window.handleAuth = async function() {
     if (!dbClient) { showMsg("無法進行登入 or 註冊！請聯絡管理員。", "error"); return; }
     const sid = document.getElementById('authID').value.trim(), pwd = document.getElementById('authPassword').value;
@@ -1453,6 +1555,7 @@ window.handleAuth = async function() {
         }
     } catch (e) { updateSyncStatusIndicator('offline'); showMsg(translateError(e.message), 'error'); }
 };
+
 window.handleLogout = async function() { 
     try { 
         if (currentUser) {
@@ -1462,11 +1565,13 @@ window.handleLogout = async function() {
             await logAuditRecord("使用者登出", curSid, curName, { status: "登出成功" });
         }
         cleanupRealtimeSubscriptions();
+        window.clearAppRuntimeState();
         if (dbClient) await dbClient.auth.signOut(); 
         window.location.hash = ''; 
         window.location.reload(); 
     } catch (e) { showMsg("登出失敗", 'error'); } 
 };
+
 window.renderUserStatusDisplay = function() {
     const userStatusDisplay = document.getElementById('userStatusDisplay');
     if (!userStatusDisplay || !currentUser) return;
@@ -1489,6 +1594,7 @@ window.renderUserStatusDisplay = function() {
             </div>
         </div>`;
 };
+
 window.updateUI = function() {
     const mobileContainer = document.getElementById('mobileCardsContainer'), adminBackend = document.getElementById('adminBackend'),
         dashboard = document.getElementById('dashboardSection'), saveBtn = document.getElementById('saveBtn'),
@@ -1561,6 +1667,15 @@ window.updateUI = function() {
         }
     }
 };
+
+window.debouncedSaveToCloud = function(bulkActionInfo = null) {
+    updateSyncStatusIndicator('saving');
+    clearTimeout(autoSaveDebounceTimer);
+    autoSaveDebounceTimer = setTimeout(() => {
+        saveToCloud(true, bulkActionInfo);
+    }, 600);
+};
+
 window.saveToCloud = async function(isAuto = false, bulkActionInfo = null) {
     if (!currentUser || !dbClient || curriculum.length === 0) { updateSyncStatusIndicator('offline'); return; }
     const targetId = editingStudentId ? (activeStudentDBRecord?.id || editingStudentId) : currentUser.id;
@@ -1638,6 +1753,7 @@ window.saveToCloud = async function(isAuto = false, bulkActionInfo = null) {
         if (!isAuto) showMsg(translateError(err.message), 'error');
     }
 };
+
 window.loadFromCloud = async function(tid = null) {
     if (!currentUser || !dbClient) return;
     updateSyncStatusIndicator('saving');
@@ -1679,6 +1795,7 @@ window.loadFromCloud = async function(tid = null) {
         updateSyncStatusIndicator('success');
     } catch (err) { updateSyncStatusIndicator('offline'); }
 };
+
 window.applyLoadedChecks = function(checks) {
     renderTable();
     document.querySelectorAll(".toggle-checkbox").forEach(c => {
@@ -1686,6 +1803,7 @@ window.applyLoadedChecks = function(checks) {
     });
     calculate();
 };
+
 window.evaluateStudentStatus = function(s) {
     const ey = (s.entry_year && s.entry_year !== '未設定') ? s.entry_year : '113';
     const ed = (s.entry_dept && s.entry_dept !== '未設定') ? s.entry_dept : '普通科(理工生醫群)-1';
@@ -1727,6 +1845,7 @@ window.evaluateStudentStatus = function(s) {
     else if (total >= 120) return { status: 'completion', total, statusText: '📜 修業證明資格', badgeClass: 'bg-amber-100 text-amber-800 border border-amber-300' };
     else return { status: 'fail', total, statusText: '⚠️ 需重補修/成績證明', badgeClass: 'bg-rose-100 text-rose-800 border border-rose-300' };
 };
+
 window.renderAdminStats = function(filteredList) {
     const panel = document.getElementById('adminStatsPanel');
     if (!panel) return;
@@ -1772,6 +1891,7 @@ window.renderAdminStats = function(filteredList) {
         </div>
     `;
 };
+
 window.applyFilters = function() {
     const searchText = document.getElementById('adminSearchInput').value.toLowerCase(), 
         filterRoles = getMSValues('role'), filterYears = getMSValues('year'),
@@ -1825,6 +1945,7 @@ window.applyFilters = function() {
     });
     return filtered;
 };
+
 window.fetchAdminList = async function(isClientOnly = false) {
     if (!dbClient) return;
     updateSyncStatusIndicator('saving');
@@ -1839,6 +1960,7 @@ window.fetchAdminList = async function(isClientOnly = false) {
         updateSyncStatusIndicator('success');
     } catch (err) { updateSyncStatusIndicator('offline'); }
 };
+
 window.deleteStudentData = function(id, name) {
     if (!dbClient) return;
     showConfirmModal(`您確定要刪除「${name}」嗎？此操作將清除該帳號所有資料，無法恢復！`, "刪除帳號", async () => {
@@ -1873,6 +1995,7 @@ window.deleteStudentData = function(id, name) {
         }
     }, "確認刪除資料", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
+
 window.renderAdminTable = function() {
     const tableBody = document.getElementById('adminListBody'), cardsContainer = document.getElementById('adminCardsContainer');
     tableBody.innerHTML = ""; cardsContainer.innerHTML = "";
@@ -1919,16 +2042,19 @@ window.renderAdminTable = function() {
         cardsContainer.appendChild(card);
     });
 };
+
 window.enterAdminEditMode = function(id, name) {
     if (currentIndependentPage) closeIndependentPage();
     editingStudentId = id; isViewingClassList = false;
     document.getElementById('targetStudentName').innerText = `${name || '學生'} (資料讀取中...)`;
     scrollToTop(); updateUI(); loadFromCloud(id);
 };
+
 window.exitAdminEditMode = function() {
     editingStudentId = null; activeStudentDBRecord = null; lastLoadedStudentId = null; isViewingClassList = true;
     scrollToTop(); updateUI();
 };
+
 window.openAdminUserEdit = function(index) {
     const s = applyFilters()[index];
     if (!s) return;
@@ -1942,6 +2068,7 @@ window.openAdminUserEdit = function(index) {
     document.getElementById('editUserCustomPassword').value = '';
     toggleUIModal(true, 'adminUserModal');
 };
+
 window.toggleAdminTutorField = function(roleVal, currentTutor = '') {
     const sec = document.getElementById('editTutorSection');
     const wrapper = document.getElementById('editTutorWrapper');
@@ -1956,6 +2083,7 @@ window.toggleAdminTutorField = function(roleVal, currentTutor = '') {
         sec.style.display = 'none'; wrapper.innerHTML = '';
     }
 };
+
 window.saveAdminUserEdit = async function() {
     if (!dbClient) return;
     const id = document.getElementById('editUserId').value;
@@ -1978,6 +2106,7 @@ window.saveAdminUserEdit = async function() {
         updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error');
     }
 };
+
 window.renderMobileCards = function(checkedStates) {
     const container = document.getElementById("mobileCardsContainer");
     if (!container) return;
@@ -1997,7 +2126,7 @@ window.renderMobileCards = function(checkedStates) {
                     <div class="mobile-sem-item">
                         <span class="mobile-sem-label">${escapeHtml(semNames[sIdx])}</span>
                         <div class="mobile-score-box">
-                            <input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); saveToCloud(true);">
+                            <input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); debouncedSaveToCloud();">
                             <label for="${escapeHtml(id)}" class="score-label">${c}</label>
                         </div>
                     </div>`;
@@ -2022,6 +2151,7 @@ window.renderMobileCards = function(checkedStates) {
         container.appendChild(card);
     });
 };
+
 window.updateSemesterProgress = function(input, sIdx) {
     const card = input.closest('.semester-card');
     if (!card) return;
@@ -2034,6 +2164,7 @@ window.updateSemesterProgress = function(input, sIdx) {
     card.querySelector('.sem-earned-val').innerText = semEarned;
     card.querySelector('.sem-progress-bar').style.width = `${semMax > 0 ? Math.min(100, Math.round((semEarned / semMax) * 100)) : 0}%`;
 };
+
 window.renderSemesterCards = function(checkedStates) {
     const container = document.getElementById("mobileCardsContainer");
     if (!container) return;
@@ -2052,7 +2183,7 @@ window.renderSemesterCards = function(checkedStates) {
                 const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700 border border-slate-200" };
                 itemsHtml += `
                     <div class="sem-item-row flex items-center justify-between p-2.5 rounded-xl transition-all gap-2 cursor-pointer select-none">
-                        <input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); saveToCloud(true);">
+                        <input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); debouncedSaveToCloud();">
                         <label for="${escapeHtml(id)}" class="sem-label flex items-center justify-between w-full cursor-pointer gap-2 min-w-0">
                             <div class="flex items-center gap-2.5 min-w-0 flex-1">
                                 <div class="custom-check-box w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all shrink-0">
@@ -2090,6 +2221,7 @@ window.renderSemesterCards = function(checkedStates) {
         container.appendChild(card);
     });
 };
+
 window.renderTable = function() {
     const mobileContainer = document.getElementById("mobileCardsContainer"), constructionBox = document.getElementById("underConstructionBox");
     const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
@@ -2112,12 +2244,14 @@ window.renderTable = function() {
     if (currentLayoutMode === 'subject') renderMobileCards(checkedStates);
     else renderSemesterCards(checkedStates);
 };
+
 window.changeDashCurriculum = function() {
     const yr = document.getElementById('dashSelectYear').value, dept = document.getElementById('dashSelectDept').value;
     sessionStorage.setItem('tempSelectedYear', yr); sessionStorage.setItem('tempSelectedDept', dept);
     selectCurriculum(yr, dept);
     applyLoadedChecks((editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {});
 };
+
 window.setLayoutMode = function(mode) {
     currentLayoutMode = mode;
     sessionStorage.setItem('tempLayoutMode', mode);
@@ -2125,6 +2259,7 @@ window.setLayoutMode = function(mode) {
     document.getElementById('btnLayoutSemester').className = mode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700";
     scrollToTop(); renderTable(); calculate();
 };
+
 window.handleMainAction = function() {
     const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
     if (role === 'admin' || role === 'teacher') {
@@ -2133,6 +2268,7 @@ window.handleMainAction = function() {
         scrollToTop(); updateUI();
     }
 };
+
 window.handleReturnToTrial = function() {
     if (currentIndependentPage) closeIndependentPage();
     isViewingClassList = false;
@@ -2140,6 +2276,7 @@ window.handleReturnToTrial = function() {
     selectCurriculum(myYear, myDept);
     scrollToTop(); updateUI(); loadFromCloud();
 };
+
 window.openProfile = function() {
     if (!currentUser) return;
     const curData = userDBRecord || currentUser.user_metadata, role = curData.role || 'student';
@@ -2153,6 +2290,7 @@ window.openProfile = function() {
     document.getElementById('profPassword').value = '';
     toggleUIModal(true, 'profileModal');
 };
+
 window.updateProfile = async function() {
     const n = document.getElementById('profName').value, p = document.getElementById('profPassword').value, d = { data: { full_name: n } };
     if (p) d.password = p;
@@ -2168,6 +2306,7 @@ window.updateProfile = async function() {
         updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error');
     }
 };
+
 window.showMissingCreditsModal = function() {
     if (curriculum.length === 0) { showMsg("目前版本的課表尚未建置！", "error"); return; }
     const semFullNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
@@ -2186,6 +2325,7 @@ window.showMissingCreditsModal = function() {
     renderMissingCreditsFiltered();
     toggleUIModal(true, 'missingCreditsModal');
 };
+
 window.renderMissingCreditsFiltered = function() {
     const filterVal = document.getElementById("missingCreditsFilter").value;
     const listContainer = document.getElementById("missingCreditsList");
@@ -2213,6 +2353,7 @@ window.renderMissingCreditsFiltered = function() {
         listContainer.innerHTML = html;
     }
 };
+
 window.initBackToTop = function() {
     const sc = document.getElementById('scrollContainer');
     if (sc) {
@@ -2229,19 +2370,24 @@ window.initBackToTop = function() {
         });
     }
 };
+
 if (dbClient) {
     dbClient.auth.onAuthStateChange((event, session) => {
         currentUser = session ? session.user : null;
         const authWorkspace = document.getElementById('authWorkspace'), appWorkspace = document.getElementById('appWorkspace');
         if (!currentUser) {
             cleanupRealtimeSubscriptions();
-            authWorkspace.style.display = 'flex'; appWorkspace.style.display = 'none'; userDBRecord = null;
-            hasLoadedInitialData = false; lastLoadedStudentId = null; activeStudentDBRecord = null; isViewingClassList = false;
-            editingStudentId = null; lastUserId = null; sessionStorage.removeItem('helpModalShown');
+            window.clearAppRuntimeState();
+            authWorkspace.style.display = 'flex'; appWorkspace.style.display = 'none';
+            sessionStorage.removeItem('helpModalShown');
             currentIndependentPage = null; window.location.hash = '';
         } else {
             authWorkspace.style.display = 'none'; appWorkspace.style.display = 'flex';
-            if (lastUserId !== currentUser.id) { hasLoadedInitialData = false; userDBRecord = null; lastUserId = currentUser.id; }
+            if (lastUserId !== currentUser.id) { 
+                hasLoadedInitialData = false; 
+                userDBRecord = null; 
+                lastUserId = currentUser.id; 
+            }
             handleHashRouting();
             setupRealtimeSubscriptions();
             fetchAnnouncements();
@@ -2254,12 +2400,14 @@ if (dbClient) {
         document.getElementById('appWorkspace').style.display = 'none';
     }, 100);
 }
+
 window.addEventListener('hashchange', () => {
     if (currentUser) {
         handleHashRouting();
         updateUI();
     }
 });
+
 initDropdowns(false);
 fetchCloudCurriculums().then(() => {
     selectCurriculum(currentYear, currentDept);
