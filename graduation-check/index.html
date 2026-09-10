@@ -409,93 +409,128 @@
 						</table>
 					</div>
 				</div>
-			</div>
-			<div id="pageAnnounceMgmtView" class="app-container mt-4 hidden">
-				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-						<span class="font-black text-slate-800 text-xl flex items-center gap-2">
-							<span class="w-2.5 h-5 rounded-full bg-amber-500"></span>
-							📢 發布與管理系統公告
-						</span>
-						<button type="button" class="btn-mini bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-3" onclick="closeIndependentPage()">← 返回管理後台</button>
+			</div><!-- 獨立頁面：系統公告管理 (管理員專用) -->
+<div id="pageAnnounceMgmtView" class="hidden pb-12">
+    <!-- 頂部導覽 -->
+    <div class="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 flex-wrap">
+        <div class="flex items-center gap-3">
+            <button type="button" class="btn-table-action bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition" onclick="closeIndependentPage()" title="返回上一頁">
+                <i class="fa-solid fa-arrow-left text-sm"></i>
+            </button>
+            <div>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                    <span>📢 系統公告發布與管理</span>
+                </h2>
+                <p class="text-xs text-slate-500 font-bold mt-0.5">即時發布校園檢核通知、維護公告與重要資訊，支援頂部跑馬燈連動與預約排程</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" class="px-4 py-2 text-xs font-black rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 transition" onclick="closeIndependentPage()">
+                返回控制台
+            </button>
+        </div>
+    </div>
+
+		<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+			<!-- 左側/上方：公告編輯/發布表單卡片 -->
+			<div class="lg:col-span-5 xl:col-span-4 sticky top-4">
+				<div id="announceFormCard" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all duration-300">
+					<div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+						<h3 class="text-base font-black text-slate-800 flex items-center gap-2">
+							<span id="announceFormIcon">✨</span>
+							<span id="announceFormTitle">發布新公告</span>
+						</h3>
+						<button type="button" id="cancelAnnounceEditBtn" style="display:none;" onclick="cancelAnnounceEdit()" class="text-xs text-rose-500 hover:text-rose-700 font-extrabold transition">
+							✕ 取消編輯
+						</button>
 					</div>
+	
+					<input type="hidden" id="editingAnnounceId" value="">
+	
 					<div class="space-y-4">
-						<div id="announceFormCard" class="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-4 text-xs font-semibold text-amber-950 space-y-3 transition-all duration-300">
-							<div class="flex items-center justify-between border-b border-amber-200/60 pb-2">
-								<h4 class="font-black text-sm text-amber-950 flex items-center gap-2">
-									<span id="announceFormIcon" class="text-base">✨</span>
-									<span id="announceFormTitle">發布新公告</span>
-								</h4>
-								<button id="cancelAnnounceEditBtn" type="button" class="text-xs font-black text-rose-600 hover:text-rose-800 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg transition" style="display:none;" onclick="cancelAnnounceEdit()">✕ 取消編輯</button>
+						<div class="input-group mb-0">
+							<label class="text-xs font-black text-slate-700 mb-1">公告標題 <span class="text-rose-500">*</span></label>
+							<input type="text" id="newAnnounceTitle" class="w-full text-xs font-bold" placeholder="例如：113學年度第一學期學分檢核開放通知" maxlength="80">
+						</div>
+	
+						<div class="grid grid-cols-2 gap-3">
+							<div class="input-group mb-0">
+								<label class="text-xs font-black text-slate-700 mb-1">分類標籤</label>
+								<select id="newAnnounceCategory" class="w-full text-xs font-bold bg-white">
+									<option value="大會公告">🎓 大會公告</option>
+									<option value="系統維護">🛠️ 系統維護</option>
+									<option value="教務通知">📋 教務通知</option>
+									<option value="重要提醒">⚠️ 重要提醒</option>
+								</select>
 							</div>
-							<input type="hidden" id="editingAnnounceId" value="">
-							<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-								<div>
-									<label class="block text-[11px] font-black text-slate-700 mb-1">公告標題</label>
-									<input type="text" id="newAnnounceTitle" placeholder="請輸入公告標題" class="admin-filter-input w-full bg-white text-xs">
-								</div>
-								<div>
-									<label class="block text-[11px] font-black text-slate-700 mb-1">公告類別</label>
-									<select id="newAnnounceCategory" class="sort-select w-full bg-white text-xs">
-										<option value="大會公告">大會公告</option>
-										<option value="🎓 畢業檢核">🎓 畢業檢核</option>
-										<option value="📢 重要通知">📢 重要通知</option>
-										<option value="⚠️ 系統維護">⚠️ 系統維護</option>
-										<option value="💡 系統優化">💡 系統優化</option>
-									</select>
-								</div>
-							</div>
-							<div>
-								<label class="block text-[11px] font-black text-slate-700 mb-1">公告內文詳細說明</label>
-								<textarea id="newAnnounceContent" rows="3" placeholder="請輸入公告詳細內容..." class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white outline-none focus:border-amber-500 font-semibold leading-relaxed"></textarea>
-							</div>
-							<div class="bg-white/80 border border-amber-200 rounded-xl p-3 space-y-2">
-								<div class="text-[11px] font-black text-amber-900 flex items-center gap-1">
-									<span>🕒 時間排程控制項（可留空，預設立即發布且永久有效）：</span>
-								</div>
-								<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-									<div>
-										<label class="block text-[10px] font-bold text-slate-600 mb-0.5">發布時間 (預約發布)</label>
-										<input type="datetime-local" id="newAnnouncePublishedAt" class="admin-filter-input w-full bg-white text-[11px] py-1 px-1.5">
-									</div>
-									<div>
-										<label class="block text-[10px] font-bold text-slate-600 mb-0.5">展示起始時間</label>
-										<input type="datetime-local" id="newAnnounceStartAt" class="admin-filter-input w-full bg-white text-[11px] py-1 px-1.5">
-									</div>
-									<div>
-										<label class="block text-[10px] font-bold text-slate-600 mb-0.5">展示結束時間 (過期自動下架)</label>
-										<input type="datetime-local" id="newAnnounceEndAt" class="admin-filter-input w-full bg-white text-[11px] py-1 px-1.5">
-									</div>
-								</div>
-							</div>
-							<div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-								<div class="flex items-center gap-4">
-									<label class="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-700 select-none">
-										<input type="checkbox" id="newAnnounceMarquee" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500">
-										同步至頂部跑馬燈
-									</label>
-									<label class="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-700 select-none">
-										<input type="checkbox" id="newAnnounceActive" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500">
-										立即上架公開
-									</label>
-								</div>
-								<button id="submitAnnounceBtn" class="action-btn py-2 px-5 text-xs font-black shrink-0" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="submitNewAnnouncement()">確認發布公告</button>
+							<div class="input-group mb-0">
+								<label class="text-xs font-black text-slate-700 mb-1">發布時間 (選填)</label>
+								<input type="datetime-local" id="newAnnouncePublishedAt" class="w-full text-xs font-bold">
 							</div>
 						</div>
-						<div class="border-t border-slate-200 pt-3">
-							<div class="flex items-center justify-between mb-2">
-								<h4 class="font-black text-sm text-slate-800 flex items-center gap-1.5">
-									<span class="w-2 h-2 rounded-full bg-amber-500"></span>
-									已發布公告列表與排序
-								</h4>
-								<span id="announceCountText" class="text-xs font-bold text-slate-400">共 0 筆紀錄</span>
+	
+						<div class="grid grid-cols-2 gap-3">
+							<div class="input-group mb-0">
+								<label class="text-xs font-black text-slate-700 mb-1">展示開始時間</label>
+								<input type="datetime-local" id="newAnnounceStartAt" class="w-full text-xs font-bold">
 							</div>
-							<div id="adminAnnounceList" class="space-y-2 max-h-[50dvh] overflow-y-auto custom-scrollbar pr-1"></div>
+							<div class="input-group mb-0">
+								<label class="text-xs font-black text-slate-700 mb-1">展示結束時間</label>
+								<input type="datetime-local" id="newAnnounceEndAt" class="w-full text-xs font-bold">
+							</div>
 						</div>
+	
+						<div class="input-group mb-0">
+							<label class="text-xs font-black text-slate-700 mb-1">公告詳細內容 <span class="text-rose-500">*</span></label>
+							<textarea id="newAnnounceContent" rows="4" class="w-full text-xs font-semibold leading-relaxed" placeholder="請輸入詳細公告說明內容..."></textarea>
+						</div>
+	
+						<!-- 選項勾選組 -->
+						<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+							<label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-700">
+								<input type="checkbox" id="newAnnounceMarquee" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" checked>
+								<span>📢 同步展示於首頁跑馬燈</span>
+							</label>
+							<label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-700">
+								<input type="checkbox" id="newAnnounceActive" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" checked>
+								<span>● 立即設為公開發布狀態</span>
+							</label>
+						</div>
+	
+						<button type="button" id="submitAnnounceBtn" onclick="submitNewAnnouncement()" class="w-full py-3 rounded-xl font-extrabold text-white text-sm bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-md transition-all">
+							確認發布公告
+						</button>
 					</div>
 				</div>
 			</div>
+	
+			<!-- 右側/下方：既有公告管理列表 -->
+			<div class="lg:col-span-7 xl:col-span-8 space-y-4">
+				<!-- 列表工具列 (搜尋 + 狀態篩選 + 計數) -->
+				<div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 flex-wrap">
+					<div class="flex items-center gap-2 flex-1 min-w-[200px]">
+						<i class="fa-solid fa-magnifying-glass text-slate-400 text-xs pl-1"></i>
+						<input type="text" id="announceSearchInput" oninput="renderAdminAnnounceList()" placeholder="搜尋標題或內容關鍵字..." class="w-full text-xs font-bold border-none outline-none focus:ring-0 p-1">
+					</div>
+					<div class="flex items-center gap-2 shrink-0">
+						<select id="announceStatusFilter" onchange="renderAdminAnnounceList()" class="sort-select text-xs font-bold py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-lg">
+							<option value="all">所有狀態</option>
+							<option value="active">● 公開中</option>
+							<option value="scheduled">⏳ 預約中 / 未開始</option>
+							<option value="expired">⌛ 已過期</option>
+							<option value="inactive">○ 已下架</option>
+						</select>
+						<span id="announceCountText" class="text-xs font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">共 0 筆紀錄</span>
+					</div>
+				</div>
+	
+				<!-- 公告卡片容器 -->
+				<div id="adminAnnounceList" class="space-y-3">
+					<!-- 動態注入公告列表項目 -->
+				</div>
+			</div>
 		</div>
+	</div>
 		<button id="backToTopBtn" class="fixed bottom-[calc(88px+env(safe-area-inset-bottom,16px))] md:bottom-[calc(24px+env(safe-area-inset-bottom,16px))] right-6 z-40 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none flex items-center justify-center border border-emerald-400" onclick="scrollToTop()">
 			<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path>
