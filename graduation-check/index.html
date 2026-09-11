@@ -1,799 +1,712 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-	<title>新社高中畢業自我檢核系統</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	<script src="https://cdn.tailwindcss.com"></script>
-	<script>
-		tailwind.config = {
-			theme: {
-				extend: {
-					fontFamily: {
-						sans: ['"Noto Sans TC"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"PingFang TC"', '"Microsoft JhengHei"', 'sans-serif'],
-					}
-				}
-			}
-		}
-	</script>
-	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-	<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>高中畢業學分檢核系統</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 圖示庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 自訂樣式表 -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col">
-	<div id="msgBox"></div>
-	<div id="authWorkspace">
-		<div class="auth-glow-1"></div>
-		<div class="auth-glow-2"></div>
-		<div class="auth-card">
-			<div class="flex justify-center mb-3">
-				<div class="p-2.5 bg-white rounded-full shadow-md">
-					<img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="新社高中校徽" class="h-14 w-auto object-contain">
-				</div>
-			</div>
-			<h2 id="authTitle" class="auth-title">帳號登入</h2>
-			<p class="auth-subtitle">新社高中畢業自我檢核系統</p>
-			<div class="auth-form-group">
-				<div class="flex items-center justify-between mb-1.5">
-					<label class="!mb-0">帳號</label>
-					<span id="authRoleHint" class="text-xs font-black text-emerald-600"></span>
-				</div>
-				<input type="text" id="authID" placeholder="請輸入帳號(學號/教職員編號)" oninput="checkAuthIdRoleHint()">
-			</div>
-			<div id="regFields" style="display:none">
-				<div class="auth-form-group">
-					<label>姓名</label>
-					<input type="text" id="authName" placeholder="請輸入真實姓名">
-				</div>
-				<div class="auth-form-group" id="regTeacherRoleGroup" style="display:none">
-					<label>請選擇身份</label>
-					<select id="authTeacherType" class="bg-white" onchange="handleTeacherTypeChange()">
-						<option value="">請選擇身份</option>
-						<option value="tutor">導師</option>
-						<option value="teacher">教師</option>
-					</select>
-				</div>
-				<div class="auth-form-group" id="regYearGroup">
-					<label>入學年 (高三113、高二114、高一115)</label>
-					<select id="authEntryYear" class="bg-white"></select>
-				</div>
-				<div class="auth-form-group" id="regDeptGroup">
-					<label>科別-班級 (數字代表目前班級)</label>
-					<select id="authEntryDept" class="bg-white"></select>
-				</div>
-			</div>
-			<div class="auth-form-group">
-				<label>密碼</label>
-				<input type="password" id="authPassword" placeholder="請輸入密碼">
-			</div>
-			<button class="auth-btn-primary" onclick="handleAuth()">確認登入</button>
-			<div id="authSwitchLink" class="auth-switch-link" onclick="switchAuthMode()">尚未有帳號？點此註冊</div>
-			<div class="mt-4 border-t border-slate-100 pt-3">
-				<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#06C755] hover:bg-[#05b34c] text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-sm transition-all w-full text-center">
-					<span>💬 聯絡管理員</span>
-				</a>
-			</div>
-		</div>
-	</div>
-	<div id="appWorkspace" style="display: none;" class="flex-grow flex flex-col h-full overflow-hidden">
-		<div id="statusHeader" class="shrink-0" style="display: none;">
-			<div class="app-container">
-				<div id="userStatusDisplay"></div>
-			</div>
-		</div>
-		<div id="marqueeBanner" class="marquee-container shrink-0 cursor-pointer" onclick="openIndependentPage('announceView')">
-			<span class="font-black text-amber-300 flex items-center gap-1.5 shrink-0 z-10 bg-[#1e1b4b] pr-2">
-				<span>📢</span>
-				<span>系統公告:</span>
-			</span>
-			<div class="overflow-hidden flex-1">
-				<div id="marqueeContent" class="marquee-content font-bold">
-					<span>載入最新公告中...</span>
-				</div>
-			</div>
-		</div>
-		<div id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar pb-[calc(96px+env(safe-area-inset-bottom,24px))]">
-			<div id="mainDashboardView">
-				<div id="dashboardSection" class="app-container mt-4" style="display: none;">
-					<div class="bg-white border border-slate-200 rounded-2xl py-6 px-5 shadow-sm">
-						<div id="curriculumSelectorArea" class="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center mb-6 pb-4 border-b border-slate-100">
-							<span class="text-xs sm:text-sm font-extrabold text-slate-700 shrink-0">學分表檢視版本：</span>
-							<div class="flex gap-2 w-full sm:w-auto items-center">
-								<select id="dashSelectYear" class="sort-select text-xs sm:text-sm py-1.5 px-2.5 shrink-0 bg-white" onchange="changeDashCurriculum()"></select>
-								<select id="dashSelectDept" class="sort-select text-xs sm:text-sm py-1.5 px-2.5 flex-grow sm:flex-initial max-w-full truncate bg-white" onchange="changeDashCurriculum()"></select>
-							</div>
-						</div>
-						<div id="adminEditBanner" class="admin-edit-banner" style="display:none; background:#4f46e5; color:white; padding:12px 16px; text-align:center; font-weight:bold; border-radius:12px; margin-bottom:16px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">
-							<div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-xs sm:text-sm md:text-base">
-								<span>✏️ <span id="targetStudentName" class="text-amber-300 font-black">正在編輯學生資料...</span></span>
-								<a href="javascript:void(0)" onclick="exitAdminEditMode()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-xs font-extrabold transition-all ml-2 underline decoration-white/50">✕ 完成編輯 / 返回列表</a>
-							</div>
-						</div>
-						<div id="finalStatus" class="status-bar status-fail">計算中...</div>
-						<div class="result-grid">
-							<div class="result-card" id="cell-total"></div>
-							<div class="result-card" id="cell-dept"></div>
-							<div class="result-card" id="cell-prof-prac"></div>
-							<div class="result-card" id="cell-prac"></div>
-						</div>
-						<div class="btn-group">
-							<button class="action-btn btn-help" onclick="toggleUIModal(true,'helpModal')">使用說明</button>
-							<button class="action-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="showMissingCreditsModal()">未得學分清單</button>
-							<button class="action-btn" style="background: linear-gradient(135deg, #eab308, #ca8a04);" onclick="openIndependentPage('announceView')">📢 系統公告</button>
-							<button class="action-btn btn-feedback" onclick="openFeedbackModal()">💡 意見回饋</button>
-							<button id="saveBtn" class="action-btn btn-cloud" style="display: none;" onclick="handleMainAction()">班級資料</button>
-							<button class="action-btn btn-pass-all" onclick="confirmSetAllStatus(true)">全部及格</button>
-							<button class="action-btn btn-fail-all" onclick="confirmSetAllStatus(false)">學分歸零</button>
-							<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="action-btn flex items-center justify-center gap-1.5" style="background: linear-gradient(135deg, #06C755, #05b34c);">
-								<span>💬 聯絡管理員</span>
-							</a>
-						</div>
-					</div>
-				</div>
-				<div id="layoutSwitcherArea" class="app-container mt-3 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
-					<span class="text-sm font-extrabold text-slate-700 shrink-0 text-center md:text-left">檢視版面切換：</span>
-					<div class="inline-flex rounded-xl p-1 bg-slate-200 border border-slate-300">
-						<button id="btnLayoutSubject" onclick="setLayoutMode('subject')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md">
-							按科目檢視
-						</button>
-						<button id="btnLayoutSemester" onclick="setLayoutMode('semester')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900">
-							按學期檢視
-						</button>
-					</div>
-				</div>
-				<div class="app-container mt-2">
-					<div id="adminBackend" class="admin-backend">
-						<div class="admin-header">
-							<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-								<div class="flex items-center gap-2">
-									<span id="backendTitle">資料管理</span>
-									<span id="adminTotalCountText" class="text-xs sm:text-sm font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-lg shadow-sm" style="display:none;">共 0 筆帳號</span>
-								</div>
-								<button id="backToTrialBtn" class="btn-mini" style="background:#6c757d; display:none;" onclick="handleReturnToTrial()">返回檢核表試算</button>
-								<button id="auditLogHeaderBtn" class="btn-mini" style="background:#4f46e5; display:none;" onclick="openIndependentPage('auditLogView')">📜 歷史異動紀錄</button>
-								<button id="feedbackListHeaderBtn" class="btn-mini" style="background:#8b5cf6; display:none;" onclick="openIndependentPage('feedbackListView')">💡 檢視意見回饋</button>
-								<button id="announceMgmtHeaderBtn" class="btn-mini" style="background:#f59e0b; display:none;" onclick="openIndependentPage('announceMgmtView')">📢 公告管理</button>
-							</div>
-						</div>
-						<div id="adminStatsPanel" class="mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
-						<div class="admin-toolbar">
-							<input type="text" id="adminSearchInput" class="admin-filter-input" placeholder="搜尋姓名或帳號" oninput="fetchAdminList(true)">
-							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-role">
-								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'role')">
-									<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-role">所有身份</span>
-									<span class="text-[10px] text-slate-400">▼</span>
-								</div>
-								<div id="ms-drop-role" class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="all" class="ms-all-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('role', this)" checked> (全選)
-									</label>
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="student" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 🎓 學生
-									</label>
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="tutor" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👨‍🏫 導師
-									</label>
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="teacher" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👩‍🏫 教師
-									</label>
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="admin" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👑 管理員
-									</label>
-								</div>
-							</div>
-							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-year">
-								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'year')">
-									<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-year">所有年度</span>
-									<span class="text-[10px] text-slate-400">▼</span>
-								</div>
-								<div id="ms-drop-year" class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5"></div>
-							</div>
-							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-dept">
-								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'dept')">
-									<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-dept">所有科別</span>
-									<span class="text-[10px] text-slate-400">▼</span>
-								</div>
-								<div id="ms-drop-dept" class="absolute z-50 w-[200%] sm:w-[150%] md:w-full right-0 md:right-auto mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5"></div>
-							</div>
-							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-status">
-								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full" onclick="toggleMS(event, 'status')">
-									<span class="truncate pr-2 text-xs font-bold text-slate-700" id="ms-text-status">所有畢業狀態</span>
-									<span class="text-[10px] text-slate-400">▼</span>
-								</div>
-								<div id="ms-drop-status" class="absolute z-50 w-[150%] sm:w-full right-0 sm:right-auto mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="all" class="ms-all-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('status', this)" checked> (全選)
-									</label>
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="pass" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> 🎓 符合畢業門檻
-									</label>
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="not_pass" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> ⚠️ 未達畢業門檻
-									</label>
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="completion" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> 📜 修業證明資格
-									</label>
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
-										<input type="checkbox" value="fail" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> ⚠️ 需重補修/成績證明
-									</label>
-								</div>
-							</div>
-						</div>
-						<div id="adminTableContainer" class="admin-table-container custom-scrollbar">
-							<table class="admin-table">
-								<colgroup>
-									<col style="width: 10%;">
-									<col style="width: 11%;">
-									<col style="width: 8%;">
-									<col style="width: 19%;">
-									<col style="width: 16%;">
-									<col style="width: 36%;">
-								</colgroup>
-								<thead>
-									<tr>
-										<th>姓名</th>
-										<th>帳號</th>
-										<th>身份</th>
-										<th>入學年 / 科別</th>
-										<th>畢業門檻</th>
-										<th>操作</th>
-									</tr>
-								</thead>
-								<tbody id="adminListBody"></tbody>
-							</table>
-						</div>
-						<div id="adminCardsContainer" class="admin-cards-grid"></div>
-					</div>
-					<div id="unsetNoticeBox" class="hidden app-container my-6">
-						<div class="bg-white border-2 border-amber-300 rounded-2xl p-8 text-center shadow-md max-w-xl mx-auto">
-							<div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black">⚠️</div>
-							<h3 class="text-xl font-black text-slate-800 mb-2">帳號資料未設定，請聯絡管理員更改！</h3>
-							<p class="text-slate-600 text-sm mb-6 font-semibold leading-relaxed">
-								您目前的入學年或科別班級尚未設定，無法進行學分試算。<br>請點擊下方按鈕聯繫管理員協助更正帳號設定。
-							</p>
-							<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#06C755] hover:bg-[#05b34c] text-white text-sm font-extrabold rounded-xl shadow-md transition-all">
-								<span>💬 聯絡管理員</span>
-							</a>
-						</div>
-					</div>
-					<div id="underConstructionBox" class="hidden bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm my-6">
-						<h3 class="text-xl font-bold text-slate-800 mb-2">課程資料建置中！</h3>
-						<p class="text-slate-500 text-sm">目前選擇的年度與科別（<span id="constYearDept" class="font-bold text-[#059669]"></span>）課程資料建置中！</p>
-					</div>
-					<div id="mobileCardsContainer" class="mobile-cards-grid"></div>
-				</div>
-			</div>
-			<div id="pageAnnounceView" class="app-container mt-4 hidden">
-				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
-						<span class="font-black text-slate-800 text-xl flex items-center gap-2">
-							<span class="w-2.5 h-5 rounded-full bg-amber-500"></span>
-							📢 系統公告歷史消息
-						</span>
-						<button type="button" class="btn-mini bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-3" onclick="closeIndependentPage()">← 返回上一頁</button>
-					</div>
-					<div id="independentAnnounceList" class="space-y-3"></div>
-				</div>
-			</div>
-			<div id="pageAuditLogView" class="app-container mt-4 hidden">
-				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-						<span class="font-black text-slate-800 text-xl flex items-center gap-2">
-							<span class="w-2.5 h-5 rounded-full bg-indigo-600"></span>
-							📜 全域稽核日誌 (Audit Log) 進階分析
-						</span>
-						<button type="button" class="btn-mini bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-3" onclick="closeIndependentPage()">← 返回管理後台</button>
-					</div>
-					<div class="mb-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
-						<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-							<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
-							<select id="auditFilterAction" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
-								<option value="all">所有異動項目</option>
-								<optgroup label="📘 學分與課綱類">
-									<option value="變更學分紀錄">📘 變更學分紀錄</option>
-									<option value="切換版本">🔄 切換版本</option>
-									<option value="批次全部及格">✅ 批次全部及格</option>
-									<option value="批次學分歸零">🧹 批次學分歸零</option>
-									<option value="單學期全選及格">✔ 單學期全選及格</option>
-									<option value="單學期學分歸零">⚠️ 單學期學分歸零</option>
-								</optgroup>
-								<optgroup label="📝 帳號與個人資料">
-									<option value="更改帳號資料">📝 更改帳號資料</option>
-									<option value="重設帳號密碼">⚡ 重設帳號密碼</option>
-									<option value="更新個人資料">👤 更新個人資料</option>
-									<option value="送出系統回饋">💡 送出系統回饋</option>
-								</optgroup>
-								<optgroup label="📢 系統公告">
-									<option value="發布系統公告">📢 發布系統公告</option>
-									<option value="編輯系統公告">✏️ 編輯系統公告</option>
-									<option value="更新公告排序">↕️ 更新公告排序</option>
-								</optgroup>
-								<optgroup label="🔑 系統登入與安全">
-									<option value="使用者登入">🔑 使用者登入</option>
-									<option value="使用者登出">🚪 使用者登出</option>
-									<option value="使用者註冊">✨ 使用者註冊</option>
-								</optgroup>
-								<optgroup label="⚠️ 刪除與警示">
-									<option value="刪除帳號">🗑️ 刪除帳號</option>
-								</optgroup>
-							</select>
-							<select id="auditFilterOperatorRole" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
-								<option value="all">所有操作身分</option>
-								<option value="admin">👑 管理員</option>
-								<option value="teacher">👩‍🏫 教師/導師</option>
-								<option value="student">🎓 學生</option>
-							</select>
-						</div>
-						<div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
-							<div class="flex items-center gap-2 w-full sm:w-auto">
-								<span class="text-xs font-bold text-slate-500 shrink-0">日期區間:</span>
-								<input type="date" id="auditStartDate" class="admin-filter-input text-xs py-1 px-2 bg-white" onchange="renderAuditLogList()">
-								<span class="text-xs text-slate-400">至</span>
-								<input type="date" id="auditEndDate" class="admin-filter-input text-xs py-1 px-2 bg-white" onchange="renderAuditLogList()">
-							</div>
-							<div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-								<button type="button" class="text-xs font-extrabold text-slate-600 hover:text-slate-900 bg-white border border-slate-300 px-3 py-1.5 rounded-lg shadow-sm transition" onclick="resetAuditFilters()">重設篩選</button>
-								<span id="auditCountText" class="text-xs font-bold text-slate-500">共 0 筆紀錄</span>
-							</div>
-						</div>
-					</div>
-					<div id="auditLogTableContainer" class="overflow-x-hidden overflow-y-auto w-full custom-scrollbar max-h-[60dvh] border border-slate-200 rounded-xl relative">
-						<table class="w-full border-collapse text-left text-xs">
-							<thead class="sticky top-0 z-20 bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200 shadow-xs">
-								<tr>
-									<th class="p-3 w-36 bg-slate-100 font-mono">異動時間</th>
-									<th class="p-3 w-28 bg-slate-100">操作者 (IP)</th>
-									<th class="p-3 w-28 bg-slate-100">目標對象</th>
-									<th class="p-3 w-24 bg-slate-100">異動項目</th>
-									<th class="p-3 bg-slate-100">前後比對與詳細變更紀錄</th>
-								</tr>
-							</thead>
-							<tbody id="auditLogListBody" class="divide-y divide-slate-100 font-semibold text-slate-800"></tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-			<div id="pageFeedbackListView" class="app-container mt-4 hidden">
-				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-						<span class="font-black text-slate-800 text-xl flex items-center gap-2">
-							<span class="w-2.5 h-5 rounded-full bg-violet-600"></span>
-							💡 意見回饋紀錄管理
-						</span>
-						<button type="button" class="btn-mini bg-slate-600 hover:bg-slate-700 text-white font-extrabold px-3" onclick="closeIndependentPage()">← 返回管理後台</button>
-					</div>
-					<div class="mb-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-						<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-							<input type="text" id="fbSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或內容" oninput="renderFeedbackList()">
-							<select id="fbFilterCategory" class="sort-select text-xs bg-white" onchange="renderFeedbackList()">
-								<option value="all">所有回饋類別</option>
-								<option value="功能建議">💡 功能建議</option>
-								<option value="操作問題">⚠️ 操作問題</option>
-								<option value="學分資料疑義">📘 學分資料疑義</option>
-								<option value="其他">💬 其他寶貴意見</option>
-							</select>
-							<select id="fbFilterRole" class="sort-select text-xs bg-white" onchange="renderFeedbackList()">
-								<option value="all">所有提交身分</option>
-								<option value="student">🎓 學生</option>
-								<option value="teacher">👩‍🏫 教師/導師</option>
-								<option value="admin">👑 管理員</option>
-							</select>
-						</div>
-						<div class="flex items-center justify-between pt-1 border-t border-slate-200/60">
-							<button type="button" class="text-xs font-extrabold text-violet-600 hover:text-violet-800 bg-violet-50 border border-violet-200 px-3 py-1 rounded-lg transition" onclick="refreshFeedbackList()">🔄 重新整理</button>
-							<span id="fbCountText" class="text-xs font-bold text-slate-500">共 0 筆回饋</span>
-						</div>
-					</div>
-					<div class="overflow-x-hidden w-full custom-scrollbar max-h-[60dvh] border border-slate-200 rounded-xl">
-						<table class="w-full border-collapse text-left text-xs table-fixed">
-							<colgroup>
-								<col class="w-[22%] sm:w-[18%]">
-								<col class="w-[20%] sm:w-[18%]">
-								<col class="w-[18%] sm:w-[16%]">
-								<col class="w-[28%] sm:w-[36%]">
-								<col class="w-[12%] sm:w-[12%]">
-							</colgroup>
-							<thead>
-								<tr class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
-									<th class="p-2.5 font-mono">提交時間</th>
-									<th class="p-2.5">提交者</th>
-									<th class="p-2.5">類別</th>
-									<th class="p-2.5">回饋內容與寶貴建言</th>
-									<th class="p-2.5 text-center">操作</th>
-								</tr>
-							</thead>
-							<tbody id="feedbackListBody" class="divide-y divide-slate-100 font-semibold text-slate-800"></tbody>
-						</table>
-					</div>
-				</div>
-			</div><!-- 獨立頁面：系統公告管理 (管理員專用) -->
-<div id="pageAnnounceMgmtView" class="hidden pb-12">
-    <!-- 頂部導覽 -->
-    <div class="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 flex-wrap">
-        <div class="flex items-center gap-3">
-            <button type="button" class="btn-table-action bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition" onclick="closeIndependentPage()" title="返回上一頁">
-                <i class="fa-solid fa-arrow-left text-sm"></i>
-            </button>
-            <div>
-                <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                    <span>📢 系統公告發布與管理</span>
-                </h2>
-                <p class="text-xs text-slate-500 font-bold mt-0.5">即時發布校園檢核通知、維護公告與重要資訊，支援頂部跑馬燈連動與預約排程</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-2">
-            <button type="button" class="px-4 py-2 text-xs font-black rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 transition" onclick="closeIndependentPage()">
-                返回控制台
-            </button>
+<body class="custom-scrollbar selection:bg-emerald-500 selection:text-white" onclick="handleOutsideClick(event)">
+
+    <!-- 訊息提示吐司浮窗 -->
+    <div id="msgBox"></div>
+
+    <!-- 登入/註冊全螢幕工作區 -->
+    <div id="authWorkspace">
+        <div class="auth-glow-1"></div>
+        <div class="auth-glow-2"></div>
+        <div class="auth-card">
+            <h1 class="auth-title" id="authTitle">帳號登入</h1>
+            <p class="auth-subtitle">高中學生畢業學分檢核審查系統</p>
+
+            <form onsubmit="event.preventDefault(); handleAuth();" autocomplete="off">
+                <div class="auth-form-group">
+                    <div class="flex justify-between items-center mb-1">
+                        <label for="authID">帳號 / 學號 / 教職員編號</label>
+                        <span id="authRoleHint" class="text-xs font-black text-emerald-700"></span>
+                    </div>
+                    <input type="text" id="authID" placeholder="請輸入您的帳號" required oninput="checkAuthIdRoleHint()">
+                </div>
+
+                <div class="auth-form-group">
+                    <label for="authPassword">密碼</label>
+                    <input type="password" id="authPassword" placeholder="請輸入密碼" required>
+                </div>
+
+                <!-- 註冊專用動態欄位 (切換至註冊模式時顯示) -->
+                <div id="regFields" style="display: none;" class="space-y-3 pt-1 border-t border-slate-200">
+                    <div class="auth-form-group">
+                        <label for="authName">真實姓名</label>
+                        <input type="text" id="authName" placeholder="請輸入完整姓名">
+                    </div>
+
+                    <!-- 教師註冊時的身分選單 (維持原樣：專任教師 vs 導師) -->
+                    <div id="regTeacherRoleGroup" class="auth-form-group" style="display: none;">
+                        <label for="authTeacherType">教師身分設定</label>
+                        <select id="authTeacherType" onchange="handleTeacherTypeChange()">
+                            <option value="teacher">專任教師 (免設定班級)</option>
+                            <option value="tutor">班級導師 (需設定所屬班級)</option>
+                        </select>
+                    </div>
+
+                    <div id="regYearGroup" class="auth-form-group">
+                        <label for="authEntryYear">入學年</label>
+                        <select id="authEntryYear">
+                            <option value="">請選擇入學年</option>
+                        </select>
+                    </div>
+
+                    <div id="regDeptGroup" class="auth-form-group">
+                        <label for="authEntryDept">科別 - 班級</label>
+                        <select id="authEntryDept">
+                            <option value="">請選擇科別-班級</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn-primary">確認登入</button>
+            </form>
+
+            <div class="auth-switch-link" id="authSwitchLink" onclick="switchAuthMode()">尚未有帳號？點此註冊</div>
         </div>
     </div>
 
-		<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-			<!-- 左側/上方：公告編輯/發布表單卡片 -->
-			<div class="lg:col-span-5 xl:col-span-4 sticky top-4">
-				<div id="announceFormCard" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all duration-300">
-					<div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-						<h3 class="text-base font-black text-slate-800 flex items-center gap-2">
-							<span id="announceFormIcon">✨</span>
-							<span id="announceFormTitle">發布新公告</span>
-						</h3>
-						<button type="button" id="cancelAnnounceEditBtn" style="display:none;" onclick="cancelAnnounceEdit()" class="text-xs text-rose-500 hover:text-rose-700 font-extrabold transition">
-							✕ 取消編輯
-						</button>
-					</div>
-	
-					<input type="hidden" id="editingAnnounceId" value="">
-	
-					<div class="space-y-4">
-						<div class="input-group mb-0">
-							<label class="text-xs font-black text-slate-700 mb-1">公告標題 <span class="text-rose-500">*</span></label>
-							<input type="text" id="newAnnounceTitle" class="w-full text-xs font-bold" placeholder="例如：113學年度第一學期學分檢核開放通知" maxlength="80">
-						</div>
-	
-						<div class="grid grid-cols-2 gap-3">
-							<div class="input-group mb-0">
-								<label class="text-xs font-black text-slate-700 mb-1">分類標籤</label>
-								<select id="newAnnounceCategory" class="w-full text-xs font-bold bg-white">
-									<option value="大會公告">🎓 大會公告</option>
-									<option value="系統維護">🛠️ 系統維護</option>
-									<option value="教務通知">📋 教務通知</option>
-									<option value="重要提醒">⚠️ 重要提醒</option>
-								</select>
-							</div>
-							<div class="input-group mb-0">
-								<label class="text-xs font-black text-slate-700 mb-1">發布時間 (選填)</label>
-								<input type="datetime-local" id="newAnnouncePublishedAt" class="w-full text-xs font-bold">
-							</div>
-						</div>
-	
-						<div class="grid grid-cols-2 gap-3">
-							<div class="input-group mb-0">
-								<label class="text-xs font-black text-slate-700 mb-1">展示開始時間</label>
-								<input type="datetime-local" id="newAnnounceStartAt" class="w-full text-xs font-bold">
-							</div>
-							<div class="input-group mb-0">
-								<label class="text-xs font-black text-slate-700 mb-1">展示結束時間</label>
-								<input type="datetime-local" id="newAnnounceEndAt" class="w-full text-xs font-bold">
-							</div>
-						</div>
-	
-						<div class="input-group mb-0">
-							<label class="text-xs font-black text-slate-700 mb-1">公告詳細內容 <span class="text-rose-500">*</span></label>
-							<textarea id="newAnnounceContent" rows="4" class="w-full text-xs font-semibold leading-relaxed" placeholder="請輸入詳細公告說明內容..."></textarea>
-						</div>
-	
-						<!-- 選項勾選組 -->
-						<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-							<label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-700">
-								<input type="checkbox" id="newAnnounceMarquee" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" checked>
-								<span>📢 同步展示於首頁跑馬燈</span>
-							</label>
-							<label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-700">
-								<input type="checkbox" id="newAnnounceActive" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" checked>
-								<span>● 立即設為公開發布狀態</span>
-							</label>
-						</div>
-	
-						<button type="button" id="submitAnnounceBtn" onclick="submitNewAnnouncement()" class="w-full py-3 rounded-xl font-extrabold text-white text-sm bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-md transition-all">
-							確認發布公告
-						</button>
-					</div>
-				</div>
-			</div>
-	
-			<!-- 右側/下方：既有公告管理列表 -->
-			<div class="lg:col-span-7 xl:col-span-8 space-y-4">
-				<!-- 列表工具列 (搜尋 + 狀態篩選 + 計數) -->
-				<div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 flex-wrap">
-					<div class="flex items-center gap-2 flex-1 min-w-[200px]">
-						<i class="fa-solid fa-magnifying-glass text-slate-400 text-xs pl-1"></i>
-						<input type="text" id="announceSearchInput" oninput="renderAdminAnnounceList()" placeholder="搜尋標題或內容關鍵字..." class="w-full text-xs font-bold border-none outline-none focus:ring-0 p-1">
-					</div>
-					<div class="flex items-center gap-2 shrink-0">
-						<select id="announceStatusFilter" onchange="renderAdminAnnounceList()" class="sort-select text-xs font-bold py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-lg">
-							<option value="all">所有狀態</option>
-							<option value="active">● 公開中</option>
-							<option value="scheduled">⏳ 預約中 / 未開始</option>
-							<option value="expired">⌛ 已過期</option>
-							<option value="inactive">○ 已下架</option>
-						</select>
-						<span id="announceCountText" class="text-xs font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">共 0 筆紀錄</span>
-					</div>
-				</div>
-	
-				<!-- 公告卡片容器 -->
-				<div id="adminAnnounceList" class="space-y-3">
-					<!-- 動態注入公告列表項目 -->
-				</div>
-			</div>
-		</div>
-	</div>
-		<button id="backToTopBtn" class="fixed bottom-[calc(88px+env(safe-area-inset-bottom,16px))] md:bottom-[calc(24px+env(safe-area-inset-bottom,16px))] right-6 z-40 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none flex items-center justify-center border border-emerald-400" onclick="scrollToTop()">
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path>
-			</svg>
-		</button>
-	</div>
-	<div id="feedbackModal" class="modal-overlay" onclick="handleOutsideClick(event)">
-		<div class="modal-content" style="max-width:420px;">
-			<div class="modal-header">
-				<span class="font-black text-slate-800 text-xl flex items-center gap-2">
-					<span class="w-2.5 h-5 rounded-full bg-violet-600"></span>
-					💡 系統意見回饋
-				</span>
-				<span class="close-modal-btn" onclick="toggleUIModal(false,'feedbackModal')">&times;</span>
-			</div>
-			<div class="modal-body">
-				<div class="input-group">
-					<label>回饋類別</label>
-					<select id="fbCategory" class="sort-select w-full bg-white">
-						<option value="功能建議">💡 功能建議</option>
-						<option value="操作問題">⚠️ 操作問題</option>
-						<option value="學分資料疑義">📘 學分資料疑義</option>
-						<option value="其他">💬 其他寶貴意見</option>
-					</select>
-				</div>
-				<div class="input-group">
-					<label>意見說明與寶貴建言</label>
-					<textarea id="fbContent" rows="4" class="w-full p-3 text-xs sm:text-sm border border-slate-300 rounded-xl outline-none focus:border-violet-500 font-semibold" placeholder="請填寫您的寶貴建議或遇到的問題說明..."></textarea>
-				</div>
-				<button class="action-btn btn-feedback w-full py-3 mt-2 text-sm font-extrabold rounded-xl shadow-md" onclick="submitUserFeedback()">送出意見回饋</button>
-			</div>
-		</div>
-	</div>
-	<div id="profileModal" class="modal-overlay" onclick="handleOutsideClick(event)">
-		<div class="modal-content" style="max-width:400px;">
-			<div class="modal-header"><span>個人資料管理</span><span class="close-modal-btn" onclick="toggleUIModal(false,'profileModal')">&times;</span></div>
-			<div class="input-group">
-				<label id="profAccountLabel">帳號</label>
-				<input type="text" id="profAccount" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;">
-			</div>
-			<div class="input-group">
-				<label>姓名</label>
-				<input type="text" id="profName" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;">
-			</div>
-			<div class="input-group"><label id="profYearLabel">入學年</label><select id="profEntryYear" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;"></select></div>
-			<div class="input-group"><label id="profDeptLabel">科別-班級</label><select id="profEntryDept" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;"></select></div>
-			<div id="profStudentTutorArea" class="input-group">
-				<label id="profTutorLabel">導師 (系統自動對應)</label>
-				<input type="text" id="profTutor" disabled style="background:#f1f5f9; border: 1px solid #cbd5e1; color: #64748b;">
-			</div>
-			<p id="profTipMessage" style="font-size:0.85rem; color:#d946ef; margin-bottom:10px; font-weight:bold;">※ 帳號資料有誤請洽管理員更正，僅能修改密碼。</p>
-			<div class="mb-4">
-				<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#06C755] hover:bg-[#05b34c] text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-sm transition-all w-full text-center">
-					<span>💬 聯絡管理員</span>
-				</a>
-			</div>
-			<div class="input-group"><label>更改密碼 (不更改保持空白)</label><input type="password" id="profPassword"></div>
-			<div class="flex gap-2">
-				<button class="action-btn btn-admin" style="width:100%;" onclick="updateProfile()">儲存修改</button>
-			</div>
-		</div>
-	</div>
-	<div id="adminUserModal" class="modal-overlay" onclick="handleOutsideClick(event)">
-		<div class="modal-content" style="max-width:420px;">
-			<div class="modal-header"><span>更改帳號資料</span><span class="close-modal-btn" onclick="toggleUIModal(false,'adminUserModal')">&times;</span></div>
-			<input type="hidden" id="editUserId">
-			<div class="input-group"><label>帳號</label><input type="text" id="editUserSid"></div>
-			<div class="input-group"><label>姓名</label><input type="text" id="editUserName"></div>
-			<div class="input-group">
-				<label>入學年 (高三113、高二114、高一115)</label>
-				<select id="editUserEntryYear"><option value="未設定">未設定</option></select>
-			</div>
-			<div class="input-group">
-				<label>科別-班級 (數字代表目前班級)</label>
-				<select id="editUserEntryDept"><option value="未設定">未設定</option></select>
-			</div>
-			<div class="input-group">
-				<label>身份</label>
-				<select id="editUserRole" onchange="toggleAdminTutorField(this.value)"><option value="student">學生</option><option value="teacher">教師/導師</option><option value="admin">管理員</option></select>
-			</div>
-			<div id="editTutorSection" class="input-group">
-				<label id="editTutorLabel">導師</label>
-				<div id="editTutorWrapper"></div>
-			</div>
-			<div class="input-group" style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 15px;">
-				<label style="color: #6366f1; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; display: block;">密碼重設選項</label>
-				<div class="flex flex-col sm:flex-row gap-2 items-center">
-					<div class="flex gap-1.5 flex-grow w-full sm:w-auto min-w-0">
-						<input type="password" id="editUserCustomPassword" placeholder="自訂新密碼" class="flex-grow p-2 text-xs border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-semibold min-w-0">
-						<button type="button" class="px-2.5 py-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-lg shrink-0 transition shadow-sm whitespace-nowrap" onclick="customResetPassword()">確認重設</button>
-					</div>
-					<button type="button" class="action-btn shrink-0 w-full sm:w-auto" style="border-radius: 8px; background: linear-gradient(135deg, #6366f1, #4f46e5); font-size: 0.8rem; padding: 9px 10px; margin: 0; white-space: nowrap;" onclick="directResetPasswordToSid()">
-						⚡ 重設為「帳號」
-					</button>
-				</div>
-				<p style="font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.4;">※ 點擊任意重設按鈕後，系統會立即將該使用者的登入密碼覆寫。</p>
-			</div>
-			<button class="action-btn btn-admin" style="width:100%; margin-top: 15px;" onclick="saveAdminUserEdit()">儲存帳號修改</button>
-		</div>
-	</div>
-	<div id="missingCreditsModal" class="modal-overlay" onclick="handleOutsideClick(event)">
-		<div class="modal-content !max-w-md !w-full">
-			<div class="modal-header">
-				<span class="font-black text-slate-800 text-xl flex items-center gap-2">
-					<span class="w-2.5 h-5 rounded-full bg-amber-500"></span>
-					未獲得學分明細
-				</span>
-				<span class="close-modal-btn" onclick="toggleUIModal(false,'missingCreditsModal')">&times;</span>
-			</div>
-			<div class="mb-4 px-1">
-				<label class="block text-xs font-bold text-slate-500 mb-1.5">選擇欲檢視的學期學分：</label>
-				<select id="missingCreditsFilter" class="sort-select text-sm py-1.5 px-3 w-full bg-white border border-slate-200 rounded-xl outline-none" onchange="renderMissingCreditsFiltered()"></select>
-			</div>
-			<div class="modal-body">
-				<div id="missingCreditsList" class="max-h-[45dvh] overflow-y-auto custom-scrollbar space-y-3 pr-1"></div>
-			</div>
-		</div>
-	</div>
-	<div id="confirmModal" class="modal-overlay">
-		<div class="modal-content" style="max-width:320px; text-align:center;">
-			<div class="modal-header"><span>確認操作</span></div>
-			<div class="modal-body" id="confirmMsg">確定要執行此操作嗎？</div>
-			<div style="display:flex; gap:10px; margin-top:20px;">
-				<button class="action-btn btn-fail-all" style="background:#6c757d;" onclick="toggleUIModal(false,'confirmModal')"><b>取消</b></button>
-				<button class="action-btn btn-pass-all" style="background:#dc3545;" onclick="triggerConfirmAction()"><b>確認</b></button>
-			</div>
-		</div>
-	</div>
-	<div id="helpModal" class="modal-overlay">
-		<div class="modal-content !max-w-xl !w-full !p-6 md:!p-8" onclick="event.stopPropagation()">
-			<div class="modal-header" style="border-bottom: none; margin-bottom: 8px; padding-bottom: 0;">
-				<span class="font-black text-slate-800 text-2xl">畢業自我檢核系統說明</span>
-			</div>
-			<div class="modal-body !text-base">
-				<div id="helpScrollContainer" class="max-h-[48dvh] overflow-y-auto p-2 custom-scrollbar mb-4">
-					<p class="text-base text-slate-500 font-extrabold mb-4 pb-2 border-b border-dashed border-slate-200">請完整閱讀以下所有資訊：</p>
-					<div class="mb-6">
-						<span class="text-lg font-black text-slate-800 flex items-center gap-1.5 mb-3">
-							<span class="w-2 h-4 rounded-full bg-emerald-500"></span>
-							1. 儀表板狀態說明
-						</span>
-						<div class="space-y-4 max-w-lg mb-4">
-							<div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-								<h5 class="text-sm font-black text-slate-700 mb-2.5 flex items-center gap-1.5">
-									<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-									(一) 學分勾選
-								</h5>
-								<div class="flex flex-col gap-3">
-									<div class="flex items-center gap-3">
-										<div class="w-12 h-10 rounded-lg bg-green-50 border-2 border-green-500 flex items-center justify-center font-black text-sm text-green-700 relative shrink-0">
-											3<span class="absolute right-1 top-0.5 text-[9px] text-green-500 font-black">✔</span>
-										</div>
-										<div class="text-sm text-slate-600 font-semibold leading-relaxed">
-											<span class="text-emerald-600 font-black">已勾選 (及格)</span>：代表您已取得該學分，學分數會即時計算並計入總學分與各類門檻累計。
-										</div>
-									</div>
-									<div class="flex items-center gap-3">
-										<div class="w-12 h-10 rounded-lg bg-red-50 border-2 border-red-200 flex items-center justify-center font-black text-sm text-red-500 shrink-0">
-											3
-										</div>
-										<div class="text-sm text-slate-600 font-semibold leading-relaxed">
-											<span class="text-red-500 font-black">未勾選 (不及格)</span>：代表您未獲得該學分，不計入任何統計數據中。
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-								<h5 class="text-sm font-black text-slate-700 mb-2.5 flex items-center gap-1.5">
-									<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-									(二) 總學分狀態卡片（畢業、修業、成績證明）
-								</h5>
-								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-									<div class="border border-emerald-200 bg-emerald-50/40 p-3 rounded-xl text-center shadow-sm">
-										<div class="text-[11px] font-black text-emerald-800">畢業證書資格</div>
-										<div class="text-lg font-black text-emerald-700 mt-1">160</div>
-										<div class="w-full bg-emerald-100 h-1 rounded-full overflow-hidden mt-2">
-											<div class="h-full bg-emerald-500" style="width: 100%"></div>
-										</div>
-										<div class="text-[10px] font-extrabold text-emerald-600 mt-1.5 leading-snug">符合畢業門檻，<br>核發畢業證書。</div>
-									</div>
-									<div class="border border-amber-200 bg-amber-50/40 p-3 rounded-xl text-center shadow-sm">
-										<div class="text-[11px] font-black text-amber-800">修業證明資格</div>
-										<div class="text-lg font-black text-amber-700 mt-1">120</div>
-										<div class="w-full bg-amber-100 h-1 rounded-full overflow-hidden mt-2">
-											<div class="h-full bg-amber-500" style="width: 75%"></div>
-										</div>
-										<div class="text-[10px] font-extrabold text-amber-600 mt-1.5 leading-snug">未符合畢業門檻，<br>核發修業證明。</div>
-									</div>
-									<div class="border border-rose-200 bg-rose-50/40 p-3 rounded-xl text-center shadow-sm">
-										<div class="text-[11px] font-black text-rose-800">僅發成績證明</div>
-										<div class="text-lg font-black text-rose-700 mt-1">90</div>
-										<div class="w-full bg-rose-100 h-1 rounded-full overflow-hidden mt-2">
-											<div class="h-full bg-rose-500" style="width: 56%"></div>
-										</div>
-										<div class="text-[10px] font-extrabold text-rose-500 mt-1.5 leading-snug">未符合畢業門檻，<br>核發成績證明。</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<span class="text-lg font-black text-slate-800 flex items-center gap-1.5 mb-3 mt-6">
-							<span class="w-2 h-4 rounded-full bg-emerald-500"></span>
-							2. 畢業條件規定
-						</span>
-						<p class="text-xs text-slate-500 mb-3 font-medium">（已自動為您展開目前科系之對應條件，亦可點擊切換）</p>
-						<div class="space-y-3 max-w-lg mb-6">
-							<details id="helpDetailsAcademic" class="group bg-slate-50 rounded-xl border border-slate-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
-								<summary class="flex justify-between items-center p-3.5 font-bold text-slate-800 cursor-pointer hover:bg-slate-100 transition-colors duration-150">
-									<span class="flex items-center gap-2 text-sm md:text-base">
-										<span class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black">普</span>
-										(一) 普通型高中畢業條件
-									</span>
-									<span class="text-xs text-slate-400 group-open:rotate-180 transition-transform duration-200">▼</span>
-								</summary>
-								<div class="p-4 border-t border-slate-200/60 text-sm text-slate-600 space-y-2 leading-relaxed bg-white">
-									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">1.</span><p><b>應修習總學分</b>：182 學分。</p></div>
-									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">2.</span><p><b>畢業之最低學分數</b>：150 學分成績及格。</p></div>
-									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">3.</span><p><b>必修及選修學分</b>：部定必修及校訂必修至少需 <b>102 學分</b>且成績及格；同時選修學分至少需修習 <b>40 學分</b>且成績及格。</p></div>
-									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">4.</span><p><b>德行操守表現</b>：修業期間德行評量之獎懲紀錄相抵後，<b>未滿三大過</b>。</p></div>
-								</div>
-							</details>
-							<details id="helpDetailsVocational" class="group bg-slate-50 rounded-xl border border-slate-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
-								<summary class="flex justify-between items-center p-3.5 font-bold text-slate-800 cursor-pointer hover:bg-slate-100 transition-colors duration-150">
-									<span class="flex items-center gap-2 text-sm md:text-base">
-										<span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-black">技</span>
-										(二) 技術型高中畢業條件
-									</span>
-									<span class="text-xs text-slate-400 group-open:rotate-180 transition-transform duration-200">▼</span>
-								</summary>
-								<div class="p-4 border-t border-slate-200/60 text-sm text-slate-600 space-y-2 leading-relaxed bg-white">
-									<div class="flex gap-1.5"><span class="text-emerald-500 font-bold shrink-0">1.</span><p><b>應修習總學分</b>：180-192 學分，畢業及格學分數至少為 <b>160 學分</b>。</p></div>
-									<div class="flex gap-1.5"><span class="text-emerald-500 font-bold shrink-0">2.</span><p><b>部定必修要求</b>：表列部定必修科目 111-136 學分均須修習，並至少 <b>85% 及格</b>，始得畢業。</p></div>
-									<div class="flex gap-1.5"><span class="text-emerald-500 font-bold shrink-0">3.</span><p><b>專業與實習學分</b>：專業科目及實習科目至少須修習 80 學分以上，其中至少 <b>60 學分及格</b>，含實習(實驗、實務)科目至少 <b>45 學分以上及格</b>。</p></div>
-									<div class="flex gap-1.5"><span class="text-emerald-500 font-bold shrink-0">4.</span><p><b>德行操守表現</b>：修業期間德行評量之獎懲紀錄相抵後，<b>未滿三大過</b>。</p></div>
-								</div>
-							</details>
-							<details id="helpDetailsSports" class="group bg-slate-50 rounded-xl border border-slate-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
-								<summary class="flex justify-between items-center p-3.5 font-bold text-slate-800 cursor-pointer hover:bg-slate-100 transition-colors duration-150">
-									<span class="flex items-center gap-2 text-sm md:text-base">
-										<span class="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-black">體</span>
-										(三) 體育班畢業條件
-									</span>
-									<span class="text-xs text-slate-400 group-open:rotate-180 transition-transform duration-200">▼</span>
-								</summary>
-								<div class="p-4 border-t border-slate-200/60 text-sm text-slate-600 space-y-2 leading-relaxed bg-white">
-									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">1.</span><p><b>應修習總學分</b>：182 學分。</p></div>
-									<div class="flex gap-1.5"><span class="text-blue-500 font-bold shrink-0">2.</span><p><b>畢業之最低學分數</b>：150 學分成績及格。</p></div>
-									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">3.</span><p><b>部定必修一般科目要求</b>：至少須 <b>80% 及格</b>。</p></div>
-									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">4.</span><p><b>部定必修體育專業科目要求</b>：至少須 <b>85% 及格</b>。</p></div>
-									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">5.</span><p><b>選修科目學分要求</b>：至少須 <b>70% 及格</b>。</p></div>
-									<div class="flex gap-1.5"><span class="text-amber-500 font-bold shrink-0">6.</span><p><b>德行操守表現</b>：修業期間德行評量之獎懲紀錄相抵後，<b>未滿三大過</b>。</p></div>
-								</div>
-							</details>
-						</div>
-					</div>
-					<div class="mt-3">
-						<button id="btnConfirmHelp" disabled class="w-full py-3.5 text-base font-extrabold rounded-xl shadow-md transition duration-150 bg-slate-300 text-slate-500 cursor-not-allowed opacity-60 pointer-events-none" onclick="confirmReadHelp()">
-							我已詳閱上述說明
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<script src="app.js"></script>
+    <!-- 主應用程式工作區 (登入後呈現) -->
+    <div id="appWorkspace" style="display: none;" class="flex-col min-h-screen">
+
+        <!-- 頂端狀態列 -->
+        <header id="statusHeader">
+            <div class="app-container">
+                <div id="userStatusDisplay"></div>
+            </div>
+        </header>
+
+        <!-- 跑馬燈公告列 -->
+        <div class="marquee-container cursor-pointer" onclick="openIndependentPage('announceView')" title="點擊檢視公告詳情">
+            <span class="px-2 py-0.5 rounded bg-amber-500 text-slate-900 font-black text-xs shrink-0 flex items-center gap-1">
+                <i class="fa-solid fa-bullhorn text-[11px]"></i> 最新公告
+            </span>
+            <div class="marquee-content" id="marqueeContent">
+                <span>目前尚無系統公告事項。</span>
+            </div>
+        </div>
+
+        <!-- 頁面主要內容滾動容器 -->
+        <main id="scrollContainer" class="flex-1 overflow-y-auto custom-scrollbar">
+            <div class="app-container py-4">
+
+                <!-- 管理員編輯學生模式提示條 -->
+                <div id="adminEditBanner" style="display: none;" class="admin-edit-banner flex items-center justify-between gap-3 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-user-pen text-lg"></i>
+                        <span>正在檢視/編輯學生：<span id="targetStudentName" class="font-black"></span></span>
+                    </div>
+                    <button type="button" class="px-3 py-1 bg-white text-indigo-700 hover:bg-slate-100 rounded-lg text-xs font-black shadow-xs transition" onclick="exitAdminEditMode()">
+                        退出並返回名單
+                    </button>
+                </div>
+
+                <!-- 學生未設定入學年提示區 -->
+                <div id="unsetNoticeBox" class="hidden my-8 p-8 bg-amber-50 border-2 border-amber-300 rounded-2xl text-center space-y-3">
+                    <div class="text-4xl">⚠️</div>
+                    <h3 class="text-lg font-black text-amber-900">帳號尚未設定入學年與科別班級</h3>
+                    <p class="text-sm font-bold text-amber-700">您的學生身分尚未綁定課綱版本，請點選右上角「👤 個人資料」或聯繫導師與教務處進行設定。</p>
+                    <button type="button" onclick="openProfile()" class="px-5 py-2.5 bg-amber-600 text-white rounded-xl font-black text-sm hover:bg-amber-700 transition">前往個人資料設定</button>
+                </div>
+
+                <!-- 主檢核儀表板工作區 -->
+                <div id="mainDashboardView">
+                    <div id="dashboardSection">
+
+                        <!-- 畢業審查核定狀態條 -->
+                        <div id="finalStatus" class="status-bar status-pass">載入學分資料中...</div>
+
+                        <!-- 統計指標卡片網格 -->
+                        <div class="result-grid grid-cols-4">
+                            <div class="result-card" id="cell-total"></div>
+                            <div class="result-card" id="cell-dept"></div>
+                            <div class="result-card" id="cell-prof-prac"></div>
+                            <div class="result-card" id="cell-prac"></div>
+                        </div>
+
+                        <!-- 快捷操作與切換按鈕組 -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 my-3">
+                            <!-- 課表版本下拉選單 (非學生身分可手動切換) -->
+                            <div id="curriculumSelectorArea" class="flex items-center gap-2 flex-wrap text-xs font-bold">
+                                <span class="text-slate-500 font-extrabold">課表版本:</span>
+                                <select id="dashSelectYear" class="sort-select py-1.5 px-3 bg-white" onchange="changeDashCurriculum()"></select>
+                                <select id="dashSelectDept" class="sort-select py-1.5 px-3 bg-white" onchange="changeDashCurriculum()"></select>
+                            </div>
+
+                            <!-- 排版切換（依科目 vs 依學期） -->
+                            <div id="layoutSwitcherArea" class="flex items-center bg-slate-200/80 p-1 rounded-xl gap-1">
+                                <button type="button" id="btnLayoutSubject" class="flex-1 md:flex-none px-4 py-1.5 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-xs" onclick="setLayoutMode('subject')">依科目檢視</button>
+                                <button type="button" id="btnLayoutSemester" class="flex-1 md:flex-none px-4 py-1.5 text-xs font-extrabold rounded-lg transition-all text-slate-600" onclick="setLayoutMode('semester')">依學期檢視</button>
+                            </div>
+                        </div>
+
+                        <!-- 功能操作按鈕列 -->
+                        <div class="btn-group">
+                            <button type="button" class="action-btn btn-pass-all" onclick="confirmSetAllStatus(true)">全部及格</button>
+                            <button type="button" class="action-btn btn-fail-all" onclick="confirmSetAllStatus(false)">學分歸零</button>
+                            <button type="button" class="action-btn btn-help" onclick="showMissingCreditsModal()">未得學分清單</button>
+                            <button type="button" class="action-btn btn-feedback" onclick="toggleUIModal(true, 'helpModal')">畢業門檻說明</button>
+                            <button type="button" id="saveBtn" class="action-btn btn-admin" onclick="handleMainAction()">班級資料</button>
+                            <button type="button" id="backToTrialBtn" style="display:none;" class="action-btn btn-cloud" onclick="handleReturnToTrial()">個人試算</button>
+                        </div>
+
+                        <!-- 課程課表建置中提示 -->
+                        <div id="underConstructionBox" class="hidden my-8 p-12 bg-white border border-slate-200 rounded-2xl text-center shadow-xs space-y-3">
+                            <div class="text-4xl">🚧</div>
+                            <h3 class="text-lg font-black text-slate-800">該學年度課程課綱建置中</h3>
+                            <p class="text-xs font-bold text-slate-500" id="constYearDept"></p>
+                        </div>
+
+                        <!-- 動態課程清單卡片容器 -->
+                        <div id="mobileCardsContainer"></div>
+                    </div>
+
+                    <!-- 管理後台/班級資料檢視區塊 -->
+                    <div id="adminBackend" class="admin-backend">
+                        <div class="admin-header">
+                            <span id="backendTitle">班級學生資料</span>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button type="button" id="announceMgmtHeaderBtn" class="btn-mini px-3 font-bold" style="background:#4f46e5;" onclick="openIndependentPage('announceMgmtView')">📢 公告管理</button>
+                                <button type="button" id="auditLogHeaderBtn" class="btn-mini px-3 font-bold" style="background:#0891b2;" onclick="openIndependentPage('auditLogView')">📜 歷史異動紀錄</button>
+                                <button type="button" id="feedbackListHeaderBtn" class="btn-mini px-3 font-bold" style="background:#8b5cf6;" onclick="openIndependentPage('feedbackListView')">💡 意見回饋紀錄</button>
+                            </div>
+                        </div>
+
+                        <!-- 班級統計數據看板 -->
+                        <div id="adminStatsPanel" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4"></div>
+
+                        <!-- 篩選與搜尋工具列 -->
+                        <div class="admin-toolbar">
+                            <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="搜尋姓名或帳號..." class="admin-filter-input">
+                            
+                            <!-- 身分多選 -->
+                            <div id="ms-wrap-role" class="relative">
+                                <div class="sort-select cursor-pointer flex justify-between items-center bg-white" onclick="toggleMS(event, 'role')">
+                                    <span id="ms-text-role" class="truncate">所有身份</span>
+                                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                                </div>
+                                <div id="ms-drop-role" class="hidden flex-col absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-50 max-h-48 overflow-y-auto custom-scrollbar"></div>
+                            </div>
+
+                            <!-- 年度多選 -->
+                            <div id="ms-wrap-year" class="relative">
+                                <div class="sort-select cursor-pointer flex justify-between items-center bg-white" onclick="toggleMS(event, 'year')">
+                                    <span id="ms-text-year" class="truncate">所有年度</span>
+                                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                                </div>
+                                <div id="ms-drop-year" class="hidden flex-col absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-50 max-h-48 overflow-y-auto custom-scrollbar"></div>
+                            </div>
+
+                            <!-- 科別多選 -->
+                            <div id="ms-wrap-dept" class="relative">
+                                <div class="sort-select cursor-pointer flex justify-between items-center bg-white" onclick="toggleMS(event, 'dept')">
+                                    <span id="ms-text-dept" class="truncate">所有科別</span>
+                                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                                </div>
+                                <div id="ms-drop-dept" class="hidden flex-col absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-50 max-h-48 overflow-y-auto custom-scrollbar"></div>
+                            </div>
+
+                            <!-- 狀態多選 -->
+                            <div id="ms-wrap-status" class="relative">
+                                <div class="sort-select cursor-pointer flex justify-between items-center bg-white" onclick="toggleMS(event, 'status')">
+                                    <span id="ms-text-status" class="truncate">所有畢業狀態</span>
+                                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                                </div>
+                                <div id="ms-drop-status" class="hidden flex-col absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-50 max-h-48 overflow-y-auto custom-scrollbar">
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                                        <input type="checkbox" value="all" class="ms-all-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('status', this)" checked> (全選)
+                                    </label>
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                                        <input type="checkbox" value="pass" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> 🎓 畢業證書資格
+                                    </label>
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                                        <input type="checkbox" value="completion" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> 📜 修業證明資格
+                                    </label>
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                                        <input type="checkbox" value="fail" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> ⚠️ 需重補修/成績證明
+                                    </label>
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                                        <input type="checkbox" value="not_pass" class="ms-opt-status text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('status')"> ✕ 未符合畢業門檻 (修業+需重補修)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 資料列表顯示 (電腦版表格 / 手機版卡片) -->
+                        <div class="flex justify-end mb-2">
+                            <span id="adminTotalCountText" class="text-xs font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">共 0 筆帳號</span>
+                        </div>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 14%;">姓名</th>
+                                        <th style="width: 16%;">帳號 / 學號</th>
+                                        <th style="width: 12%;">身分</th>
+                                        <th style="width: 20%;">班級</th>
+                                        <th style="width: 16%;">畢業門檻判定</th>
+                                        <th style="width: 22%;">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminListBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="adminCardsContainer" class="admin-cards-grid"></div>
+                    </div>
+                </div>
+
+                <!-- 獨立頁面：公開公告事項瀏覽 (所有身分皆可檢視) -->
+                <div id="pageAnnounceView" class="hidden pb-12">
+                    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-900">🎓 公告事項</h2>
+                            <p class="text-xs text-slate-500 font-bold mt-0.5">學校發布之畢業檢核規則與重要通知說明</p>
+                        </div>
+                        <button type="button" class="px-4 py-2 text-xs font-black rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 transition" onclick="closeIndependentPage()">返回主畫面</button>
+                    </div>
+                    <div id="independentAnnounceList" class="space-y-4"></div>
+                </div>
+
+                <!-- 獨立頁面：歷史異動紀錄 (管理員專用) -->
+                <div id="pageAuditLogView" class="hidden pb-12">
+                    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200 flex-wrap gap-2">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-900">📜 系統歷史異動紀錄 (Audit Log)</h2>
+                            <p class="text-xs text-slate-500 font-bold mt-0.5">即時記錄所有使用者的登入登出、註冊、密碼重設與學分異動歷程</p>
+                        </div>
+                        <button type="button" class="px-4 py-2 text-xs font-black rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 transition" onclick="closeIndependentPage()">返回後台</button>
+                    </div>
+
+                    <!-- 搜尋過濾工具列 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-4 space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                            <input type="text" id="auditSearchInput" oninput="renderAuditLogList()" placeholder="搜尋姓名、帳號、IP..." class="admin-filter-input text-xs">
+                            <select id="auditFilterAction" onchange="renderAuditLogList()" class="sort-select text-xs bg-white">
+                                <option value="all">所有操作類型</option>
+                                <option value="使用者登入">🔑 使用者登入</option>
+                                <option value="使用者登出">🚪 使用者登出</option>
+                                <option value="使用者註冊">✨ 使用者註冊</option>
+                                <option value="變更學分紀錄">📘 變更學分紀錄</option>
+                                <option value="批次全部及格">✅ 批次全部及格</option>
+                                <option value="批次學分歸零">🧹 批次學分歸零</option>
+                                <option value="單學期全選及格">✔ 單學期全選及格</option>
+                                <option value="單學期學分歸零">⚠️ 單學期學分歸零</option>
+                                <option value="切換版本">🔄 切換版本</option>
+                                <option value="更改帳號資料">📝 更改帳號資料</option>
+                                <option value="重設帳號密碼">⚡ 重設帳號密碼</option>
+                                <option value="刪除帳號">🗑️ 刪除帳號</option>
+                            </select>
+                            <select id="auditFilterOperatorRole" onchange="renderAuditLogList()" class="sort-select text-xs bg-white">
+                                <option value="all">所有操作者身分</option>
+                                <option value="admin">管理員</option>
+                                <option value="counselor">輔導教師</option>
+                                <option value="teacher">教師 / 導師</option>
+                                <option value="student">學生</option>
+                            </select>
+                            <input type="date" id="auditStartDate" onchange="renderAuditLogList()" class="admin-filter-input text-xs" title="起始日期">
+                            <input type="date" id="auditEndDate" onchange="renderAuditLogList()" class="admin-filter-input text-xs" title="結束日期">
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 flex-wrap gap-2">
+                            <span id="auditCountText" class="text-xs font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">共 0 筆紀錄</span>
+                            <button type="button" onclick="resetAuditFilters()" class="text-xs text-slate-500 hover:text-slate-800 font-extrabold underline">清空篩選條件</button>
+                        </div>
+                    </div>
+
+                    <!-- 異動清單表格 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-200 text-slate-700 font-black text-xs">
+                                    <th class="p-3 text-center" style="width: 14%;">時間</th>
+                                    <th class="p-3" style="width: 18%;">操作者</th>
+                                    <th class="p-3" style="width: 18%;">目標對象</th>
+                                    <th class="p-3" style="width: 16%;">操作行為</th>
+                                    <th class="p-3" style="width: 34%;">前後比對與詳細變更紀錄</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditLogListBody" class="divide-y divide-slate-100 text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 獨立頁面：意見回饋管理 (管理員專用) -->
+                <div id="pageFeedbackListView" class="hidden pb-12">
+                    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200 flex-wrap gap-2">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-900">💡 使用者意見回饋管理</h2>
+                            <p class="text-xs text-slate-500 font-bold mt-0.5">檢視全體師生送出的操作疑問、功能建議與學分資料疑義</p>
+                        </div>
+                        <button type="button" class="px-4 py-2 text-xs font-black rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 transition" onclick="closeIndependentPage()">返回後台</button>
+                    </div>
+
+                    <!-- 工具列 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-4 flex items-center justify-between gap-3 flex-wrap">
+                        <div class="flex items-center gap-3 flex-1 min-w-[220px]">
+                            <input type="text" id="fbSearchInput" oninput="renderFeedbackList()" placeholder="搜尋姓名、帳號或內文..." class="admin-filter-input text-xs w-full">
+                            <select id="fbFilterCategory" onchange="renderFeedbackList()" class="sort-select text-xs bg-white shrink-0">
+                                <option value="all">所有問題類別</option>
+                                <option value="功能建議">功能建議</option>
+                                <option value="操作問題">操作問題</option>
+                                <option value="學分資料疑義">學分資料疑義</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <span id="fbCountText" class="text-xs font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">共 0 筆回饋</span>
+                    </div>
+
+                    <!-- 回饋清單表格 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-200 text-slate-700 font-black text-xs">
+                                    <th class="p-3 text-center" style="width: 15%;">提報時間</th>
+                                    <th class="p-3" style="width: 20%;">提報使用者</th>
+                                    <th class="p-3" style="width: 15%;">類別</th>
+                                    <th class="p-3" style="width: 40%;">意見內容</th>
+                                    <th class="p-3 text-center" style="width: 10%;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="feedbackListBody" class="divide-y divide-slate-100 text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 獨立頁面：系統公告發布與管理 (管理員專用) -->
+                <div id="pageAnnounceMgmtView" class="hidden pb-12">
+                    <div class="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 flex-wrap">
+                        <div class="flex items-center gap-3">
+                            <button type="button" class="btn-table-action bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition" onclick="closeIndependentPage()" title="返回上一頁">
+                                <i class="fa-solid fa-arrow-left text-sm"></i>
+                            </button>
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                                    <span>📢 系統公告發布與管理</span>
+                                </h2>
+                                <p class="text-xs text-slate-500 font-bold mt-0.5">即時發布校園檢核通知、維護公告與重要資訊，支援頂部跑馬燈連動與預約排程</p>
+                            </div>
+                        </div>
+                        <button type="button" class="px-4 py-2 text-xs font-black rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 transition" onclick="closeIndependentPage()">返回後台</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        <!-- 左側：公告編輯/發布表單 -->
+                        <div class="lg:col-span-5 xl:col-span-4 sticky top-4">
+                            <div id="announceFormCard" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all duration-300">
+                                <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                                    <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
+                                        <span id="announceFormIcon">✨</span>
+                                        <span id="announceFormTitle">發布新公告</span>
+                                    </h3>
+                                    <button type="button" id="cancelAnnounceEditBtn" style="display:none;" onclick="cancelAnnounceEdit()" class="text-xs text-rose-500 hover:text-rose-700 font-extrabold transition">✕ 取消編輯</button>
+                                </div>
+
+                                <input type="hidden" id="editingAnnounceId" value="">
+
+                                <div class="space-y-3">
+                                    <div class="input-group mb-0">
+                                        <label class="text-xs font-black text-slate-700 mb-1">公告標題 <span class="text-rose-500">*</span></label>
+                                        <input type="text" id="newAnnounceTitle" class="w-full text-xs font-bold" placeholder="例如：113學年度第一學期學分檢核開放通知" maxlength="80">
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="input-group mb-0">
+                                            <label class="text-xs font-black text-slate-700 mb-1">分類標籤</label>
+                                            <select id="newAnnounceCategory" class="w-full text-xs font-bold bg-white">
+                                                <option value="大會公告">🎓 大會公告</option>
+                                                <option value="系統維護">🛠️ 系統維護</option>
+                                                <option value="教務通知">📋 教務通知</option>
+                                                <option value="重要提醒">⚠️ 重要提醒</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group mb-0">
+                                            <label class="text-xs font-black text-slate-700 mb-1">發布時間 (選填)</label>
+                                            <input type="datetime-local" id="newAnnouncePublishedAt" class="w-full text-xs font-bold">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="input-group mb-0">
+                                            <label class="text-xs font-black text-slate-700 mb-1">展示開始時間</label>
+                                            <input type="datetime-local" id="newAnnounceStartAt" class="w-full text-xs font-bold">
+                                        </div>
+                                        <div class="input-group mb-0">
+                                            <label class="text-xs font-black text-slate-700 mb-1">展示結束時間</label>
+                                            <input type="datetime-local" id="newAnnounceEndAt" class="w-full text-xs font-bold">
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group mb-0">
+                                        <label class="text-xs font-black text-slate-700 mb-1">公告內容 <span class="text-rose-500">*</span></label>
+                                        <textarea id="newAnnounceContent" rows="4" class="w-full text-xs font-semibold leading-relaxed" placeholder="請輸入詳細說明內容..."></textarea>
+                                    </div>
+
+                                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                                        <label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-700">
+                                            <input type="checkbox" id="newAnnounceMarquee" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" checked>
+                                            <span>📢 同步展示於首頁跑馬燈</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-700">
+                                            <input type="checkbox" id="newAnnounceActive" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" checked>
+                                            <span>● 立即設為公開發布狀態</span>
+                                        </label>
+                                    </div>
+
+                                    <button type="button" id="submitAnnounceBtn" onclick="submitNewAnnouncement()" class="w-full py-3 rounded-xl font-extrabold text-white text-sm bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-md transition-all">
+                                        確認發布公告
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右側：公告清單與篩選工具 -->
+                        <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+                            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 flex-wrap">
+                                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs pl-1"></i>
+                                    <input type="text" id="announceSearchInput" oninput="renderAdminAnnounceList()" placeholder="搜尋標題或內容關鍵字..." class="w-full text-xs font-bold border-none outline-none focus:ring-0 p-1">
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <select id="announceStatusFilter" onchange="renderAdminAnnounceList()" class="sort-select text-xs font-bold py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-lg">
+                                        <option value="all">所有狀態</option>
+                                        <option value="active">● 公開中</option>
+                                        <option value="scheduled">⏳ 預約中 / 未開始</option>
+                                        <option value="expired">⌛ 已過期</option>
+                                        <option value="inactive">○ 已下架</option>
+                                    </select>
+                                    <span id="announceCountText" class="text-xs font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">共 0 筆紀錄</span>
+                                </div>
+                            </div>
+
+                            <div id="adminAnnounceList" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- 回到頂端浮動按鈕 -->
+        <button id="backToTopBtn" onclick="scrollToTop()" class="fixed bottom-6 right-6 w-11 h-11 rounded-full bg-slate-900 text-white shadow-lg flex items-center justify-center opacity-0 translate-y-10 pointer-events-none transition-all duration-300 hover:bg-slate-800 z-40">
+            <i class="fa-solid fa-arrow-up text-sm"></i>
+        </button>
+    </div>
+
+    <!-- 彈窗：畢業門檻說明 -->
+    <div id="helpModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>🎓 畢業門檻檢核標準說明</span>
+                <span class="close-modal-btn" onclick="toggleUIModal(false, 'helpModal')">&times;</span>
+            </div>
+            <div id="helpScrollContainer" class="modal-body space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1">
+                <details id="helpDetailsAcademic" class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <summary class="font-black text-slate-800 cursor-pointer text-sm">普通型高級中等學校 (普通科)</summary>
+                    <div class="text-xs text-slate-600 mt-2 space-y-1.5 leading-relaxed font-semibold">
+                        <p>1. 應修習總學分數達 180 學分，畢業最低及格學分數為 <b>150 學分</b>。</p>
+                        <p>2. 部定必修與校定必修科目至少需修習及格達 <b>102 學分</b>。</p>
+                        <p>3. 選修科目學分至少需及格達 <b>40 學分</b>。</p>
+                    </div>
+                </details>
+                <details id="helpDetailsVocational" class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <summary class="font-black text-slate-800 cursor-pointer text-sm">技術型高級中等學校 (職業類科)</summary>
+                    <div class="text-xs text-slate-600 mt-2 space-y-1.5 leading-relaxed font-semibold">
+                        <p>1. 應修習總學分數達 180-192 學分，畢業最低及格學分數為 <b>160 學分</b>。</p>
+                        <p>2. 部定必修科目至少需修習達 <b>85% 及格</b>。</p>
+                        <p>3. 專業科目與實習科目至少需及格達 <b>60 學分</b>，且其中實習科目至少需及格達 <b>45 學分</b>。</p>
+                    </div>
+                </details>
+                <details id="helpDetailsSports" class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <summary class="font-black text-slate-800 cursor-pointer text-sm">體育班檢核標準</summary>
+                    <div class="text-xs text-slate-600 mt-2 space-y-1.5 leading-relaxed font-semibold">
+                        <p>1. 畢業最低及格學分數為 <b>150 學分</b>。</p>
+                        <p>2. 部定一般必修至少達 80% 及格；體育專業科目至少達 85% 及格；選修科目至少達 70% 及格。</p>
+                    </div>
+                </details>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100">
+                <button type="button" id="btnConfirmHelp" onclick="confirmReadHelp()" class="action-btn btn-pass-all w-full py-2.5 rounded-xl font-bold">我已瞭解並詳閱規範</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 彈窗：未取得學分科目清單 -->
+    <div id="missingCreditsModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <span>⚠️ 未得學分與重補修科目清單</span>
+                <span class="close-modal-btn" onclick="toggleUIModal(false, 'missingCreditsModal')">&times;</span>
+            </div>
+            <div class="mb-3">
+                <select id="missingCreditsFilter" onchange="renderMissingCreditsFiltered()" class="sort-select w-full bg-white text-xs font-bold"></select>
+            </div>
+            <div id="missingCreditsList" class="modal-body max-h-[50vh] overflow-y-auto custom-scrollbar"></div>
+        </div>
+    </div>
+
+    <!-- 彈窗：個人資料修改 -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>👤 個人資料設定</span>
+                <span class="close-modal-btn" onclick="toggleUIModal(false, 'profileModal')">&times;</span>
+            </div>
+            <div class="modal-body space-y-3">
+                <div class="input-group mb-0">
+                    <label>帳號 / 學號</label>
+                    <input type="text" id="profAccount" disabled class="bg-slate-100 text-slate-500 font-bold">
+                </div>
+                <div class="input-group mb-0">
+                    <label>真實姓名</label>
+                    <input type="text" id="profName" class="font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="input-group mb-0">
+                        <label>入學年</label>
+                        <select id="profEntryYear" disabled class="bg-slate-100 text-slate-500 font-bold"></select>
+                    </div>
+                    <div class="input-group mb-0">
+                        <label>科別 - 班級</label>
+                        <select id="profEntryDept" disabled class="bg-slate-100 text-slate-500 font-bold"></select>
+                    </div>
+                </div>
+                <div id="profStudentTutorArea" class="input-group mb-0">
+                    <label>班級導師</label>
+                    <input type="text" id="profTutor" disabled class="bg-slate-100 text-slate-500 font-bold">
+                </div>
+                <div class="input-group mb-0">
+                    <label>變更密碼 (不修改請留空)</label>
+                    <input type="password" id="profPassword" placeholder="輸入至少 6 碼新密碼">
+                </div>
+                <button type="button" onclick="updateProfile()" class="action-btn btn-cloud w-full py-2.5 rounded-xl font-bold mt-2">儲存修改資料</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 彈窗：意見回饋提報 -->
+    <div id="feedbackModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>💡 意見回饋與問題提報</span>
+                <span class="close-modal-btn" onclick="toggleUIModal(false, 'feedbackModal')">&times;</span>
+            </div>
+            <div class="modal-body space-y-3">
+                <div class="input-group mb-0">
+                    <label>回饋問題類別</label>
+                    <select id="fbCategory" class="sort-select w-full bg-white text-xs font-bold">
+                        <option value="功能建議">功能建議</option>
+                        <option value="操作問題">操作問題</option>
+                        <option value="學分資料疑義">學分資料疑義</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div class="input-group mb-0">
+                    <label>詳細意見說明</label>
+                    <textarea id="fbContent" rows="4" class="w-full text-xs font-semibold" placeholder="請詳細描述您的問題或建議..."></textarea>
+                </div>
+                <button type="button" onclick="submitUserFeedback()" class="action-btn btn-feedback w-full py-2.5 rounded-xl font-bold">確認送出意見</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 彈窗：後台帳號設定修改 (管理員專用，包含輔導教師身分切換) -->
+    <div id="adminUserModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="modal-header">
+                <span>⚙️ 帳號權限與身分設定</span>
+                <span class="close-modal-btn" onclick="toggleUIModal(false, 'adminUserModal')">&times;</span>
+            </div>
+            <div class="modal-body space-y-3">
+                <input type="hidden" id="editUserId">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="input-group mb-0">
+                        <label>帳號 / 學號</label>
+                        <input type="text" id="editUserSid" class="font-mono font-bold">
+                    </div>
+                    <div class="input-group mb-0">
+                        <label>真實姓名</label>
+                        <input type="text" id="editUserName" class="font-bold">
+                    </div>
+                </div>
+
+                <!-- 系統身分下拉選單 (補齊輔導教師選項) -->
+                <div class="input-group mb-0">
+                    <label>系統身份</label>
+                    <select id="editUserRole" class="sort-select w-full bg-white font-bold" onchange="toggleAdminTutorField(this.value)">
+                        <option value="student">學生</option>
+                        <option value="teacher">教師 / 導師</option>
+                        <option value="counselor">輔導教師</option>
+                        <option value="admin">系統管理員</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="input-group mb-0">
+                        <label>入學年</label>
+                        <select id="editUserEntryYear" class="sort-select w-full bg-white font-bold"></select>
+                    </div>
+                    <div class="input-group mb-0">
+                        <label>科別 - 班級</label>
+                        <select id="editUserEntryDept" class="sort-select w-full bg-white font-bold"></select>
+                    </div>
+                </div>
+
+                <div id="editTutorSection" class="input-group mb-0" style="display: none;">
+                    <label>負責導師</label>
+                    <div id="editTutorWrapper"></div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex gap-2">
+                    <button type="button" onclick="saveAdminUserEdit()" class="action-btn btn-pass-all flex-1 py-2 rounded-xl text-xs font-bold">儲存帳號資料</button>
+                </div>
+
+                <!-- 密碼重設區塊 -->
+                <div class="pt-3 border-t border-slate-200 mt-3">
+                    <label class="block text-xs font-black text-slate-700 mb-2">密碼重設作業</label>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="editUserCustomPassword" placeholder="輸入自訂新密碼 (至少6碼)" class="flex-1 text-xs font-mono p-2 border rounded-lg">
+                        <button type="button" onclick="customResetPassword()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-black shrink-0">確認修改密碼</button>
+                    </div>
+                    <button type="button" onclick="directResetPasswordToSid()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg text-xs font-black transition">
+                        ⚡ 一鍵將密碼重設為帳號 (需滿6碼)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通用操作二次確認彈窗 -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header border-none pb-0 justify-center">
+                <span class="text-lg font-black text-slate-800">操作確認</span>
+            </div>
+            <div class="modal-body py-4">
+                <p id="confirmMsg" class="text-sm font-bold text-slate-700 leading-relaxed"></p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" class="action-btn btn-fail-all flex-1 py-2.5 rounded-xl font-bold" onclick="toggleUIModal(false, 'confirmModal')">取消</button>
+                <button type="button" class="action-btn btn-pass-all flex-1 py-2.5 rounded-xl font-bold" onclick="triggerConfirmAction()">確認</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 邏輯程式碼 -->
+    <script src="app.js"></script>
 </body>
 </html>
