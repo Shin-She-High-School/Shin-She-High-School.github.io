@@ -446,6 +446,8 @@ window.openEditAnnouncement = function(id) {
 
 	document.getElementById('editingAnnounceId').value = item.id;
 	document.getElementById('newAnnounceTitle').value = item.title || '';
+	const titleCnt = document.getElementById('announceTitleCount');
+	if (titleCnt) titleCnt.innerText = `${(item.title || '').length}/80`;
 	document.getElementById('newAnnounceCategory').value = item.category || '大會公告';
 	document.getElementById('newAnnounceContent').value = item.content || '';
 	document.getElementById('newAnnouncePublishedAt').value = formatDateTimeInput(item.published_at);
@@ -455,13 +457,15 @@ window.openEditAnnouncement = function(id) {
 	document.getElementById('newAnnounceActive').checked = !!item.is_active;
 
 	document.getElementById('announceFormIcon').innerText = '✏️';
-	document.getElementById('announceFormTitle').innerHTML = '正在編輯公告：<span class="text-indigo-700 font-black truncate max-w-[200px] inline-block align-bottom">' + escapeHtml(item.title || '') + '</span>';
-	document.getElementById('submitAnnounceBtn').innerText = '儲存修改公告';
+	document.getElementById('announceFormTitle').innerHTML = '編輯中：<span class="text-amber-600 font-black truncate max-w-[180px] inline-block align-bottom">' + escapeHtml(item.title || '') + '</span>';
+	const submitBtn = document.getElementById('submitAnnounceBtn');
+	submitBtn.innerText = '儲存修改內容';
+	submitBtn.className = "w-full py-3 rounded-xl font-extrabold text-white text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all";
 	document.getElementById('cancelAnnounceEditBtn').style.display = 'inline-block';
 
 	const formCard = document.getElementById('announceFormCard');
 	if (formCard) {
-		formCard.classList.add('ring-4', 'ring-indigo-400/70', 'shadow-lg');
+		formCard.classList.add('ring-4', 'ring-amber-400/80', 'shadow-md');
 		formCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
 	}
 };
@@ -469,6 +473,8 @@ window.openEditAnnouncement = function(id) {
 window.cancelAnnounceEdit = function() {
 	document.getElementById('editingAnnounceId').value = '';
 	document.getElementById('newAnnounceTitle').value = '';
+	const titleCnt = document.getElementById('announceTitleCount');
+	if (titleCnt) titleCnt.innerText = '0/80';
 	document.getElementById('newAnnounceContent').value = '';
 	document.getElementById('newAnnounceCategory').value = '大會公告';
 	document.getElementById('newAnnouncePublishedAt').value = '';
@@ -479,20 +485,60 @@ window.cancelAnnounceEdit = function() {
 
 	document.getElementById('announceFormIcon').innerText = '✨';
 	document.getElementById('announceFormTitle').innerText = '發布新公告';
-	document.getElementById('submitAnnounceBtn').innerText = '確認發布公告';
+	const submitBtn = document.getElementById('submitAnnounceBtn');
+	submitBtn.innerText = '確認發布公告';
+	submitBtn.className = "w-full py-3 rounded-xl font-extrabold text-white text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-md transition-all";
 	document.getElementById('cancelAnnounceEditBtn').style.display = 'none';
 
-	document.getElementById('announceFormCard')?.classList.remove('ring-4', 'ring-indigo-400/70', 'shadow-lg');
+	document.getElementById('announceFormCard')?.classList.remove('ring-4', 'ring-amber-400/80', 'shadow-md');
 };
 
 window.renderAdminAnnounceList = function() {
 	const container = document.getElementById('adminAnnounceList');
 	const countText = document.getElementById('announceCountText');
+	const metricContainer = document.getElementById('announceMetricBoxes');
 	const searchTxt = (document.getElementById('announceSearchInput')?.value || '').toLowerCase().trim();
 	const statusFilter = document.getElementById('announceStatusFilter')?.value || 'all';
 
 	if (!container) return;
-	const now = new Date().getTime();
+	const now = Date.now();
+
+	let activeCount = 0;
+	let scheduledCount = 0;
+	let expiredCount = 0;
+	let inactiveCount = 0;
+
+	announcementsData.forEach(a => {
+		const isInactive = !a.is_active;
+		const isScheduled = (a.published_at && new Date(a.published_at).getTime() > now) || (a.start_at && new Date(a.start_at).getTime() > now);
+		const isExpired = a.end_at && new Date(a.end_at).getTime() < now;
+
+		if (isInactive) inactiveCount++;
+		else if (isExpired) expiredCount++;
+		else if (isScheduled) scheduledCount++;
+		else activeCount++;
+	});
+
+	if (metricContainer) {
+		metricContainer.innerHTML = `
+			<div class="bg-white border border-emerald-200 rounded-xl p-2.5 text-center shadow-2xs">
+				<div class="text-[10px] font-bold text-emerald-800">公開中</div>
+				<div class="text-base font-black text-emerald-600 mt-0.5">${activeCount}</div>
+			</div>
+			<div class="bg-white border border-sky-200 rounded-xl p-2.5 text-center shadow-2xs">
+				<div class="text-[10px] font-bold text-sky-800">排程預約</div>
+				<div class="text-base font-black text-sky-600 mt-0.5">${scheduledCount}</div>
+			</div>
+			<div class="bg-white border border-slate-200 rounded-xl p-2.5 text-center shadow-2xs">
+				<div class="text-[10px] font-bold text-slate-600">已過期</div>
+				<div class="text-base font-black text-slate-600 mt-0.5">${expiredCount}</div>
+			</div>
+			<div class="bg-white border border-rose-200 rounded-xl p-2.5 text-center shadow-2xs">
+				<div class="text-[10px] font-bold text-rose-800">手動下架</div>
+				<div class="text-base font-black text-rose-600 mt-0.5">${inactiveCount}</div>
+			</div>
+		`;
+	}
 
 	let filtered = [...announcementsData];
 
@@ -519,13 +565,13 @@ window.renderAdminAnnounceList = function() {
 		});
 	}
 
-	if (countText) countText.innerText = `共 ${filtered.length} 筆紀錄`;
+	if (countText) countText.innerText = `共 ${filtered.length} 筆`;
 
 	if (filtered.length === 0) {
 		container.innerHTML = `
 			<div class="bg-white border border-slate-200 rounded-2xl p-10 text-center text-slate-400 font-bold space-y-2">
 				<div class="text-3xl">📭</div>
-				<div class="text-xs">查無符合條件之公告紀錄</div>
+				<div class="text-xs">查無符合條件之系統公告事項</div>
 			</div>`;
 		return;
 	}
@@ -537,43 +583,48 @@ window.renderAdminAnnounceList = function() {
 		
 		let statusBadge = '';
 		if (!a.is_active) {
-			statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-rose-50 text-rose-700 border border-rose-200 shrink-0">○ 已下架</span>';
+			statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-rose-50 text-rose-700 border border-rose-200 shrink-0">○ 已下架</span>';
 		} else if (a.published_at && new Date(a.published_at).getTime() > now) {
-			statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-amber-50 text-amber-700 border border-amber-200 shrink-0">⏳ 預約中</span>';
+			statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-amber-50 text-amber-700 border border-amber-200 shrink-0">⏳ 預約中</span>';
 		} else if (a.start_at && new Date(a.start_at).getTime() > now) {
-			statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-sky-50 text-sky-700 border border-sky-200 shrink-0">⏳ 未開始</span>';
+			statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-sky-50 text-sky-700 border border-sky-200 shrink-0">⏳ 未開始</span>';
 		} else if (a.end_at && new Date(a.end_at).getTime() < now) {
-			statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-slate-100 text-slate-600 border border-slate-300 shrink-0">⌛ 已過期</span>';
+			statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-slate-100 text-slate-600 border border-slate-300 shrink-0">⌛ 已過期</span>';
 		} else {
-			statusBadge = '<span class="text-[10px] px-2.5 py-0.5 rounded-full font-black bg-emerald-50 text-emerald-700 border border-emerald-300 shrink-0">● 公開中</span>';
+			statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-emerald-50 text-emerald-700 border border-emerald-300 shrink-0">● 公開中</span>';
 		}
 
+		let categoryColor = 'bg-slate-100 text-slate-700 border-slate-200';
+		if (a.category === '重要提醒') categoryColor = 'bg-rose-50 text-rose-800 border-rose-200';
+		else if (a.category === '教務通知') categoryColor = 'bg-blue-50 text-blue-800 border-blue-200';
+		else if (a.category === '系統維護') categoryColor = 'bg-amber-50 text-amber-800 border-amber-200';
+
 		return `
-			<div class="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 shadow-2xs hover:shadow-sm transition space-y-3">
+			<div class="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 shadow-2xs hover:shadow-xs transition space-y-3">
 				<div class="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
 					<div class="flex items-start gap-3 min-w-0 flex-1">
-						<div class="font-mono text-slate-500 text-[11px] leading-tight text-center bg-slate-50 border border-slate-200 px-2 py-1.5 rounded-lg shrink-0">
-							<div class="font-bold text-slate-700">${escapeHtml(pubDatePart)}</div>
-							<div class="text-[10px] opacity-70">${escapeHtml(pubTimePart)}</div>
+						<div class="font-mono text-slate-500 text-[11px] leading-tight text-center bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl shrink-0">
+							<div class="font-black text-slate-800">${escapeHtml(pubDatePart)}</div>
+							<div class="text-[10px] opacity-60 font-semibold mt-0.5">${escapeHtml(pubTimePart)}</div>
 						</div>
 						<div class="min-w-0 flex-1">
 							<div class="flex items-center gap-1.5 flex-wrap mb-1">
-								<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-extrabold text-[10px] border border-slate-200">${escapeHtml(a.category || '大會公告')}</span>
+								<span class="px-2 py-0.5 rounded-md font-extrabold text-[10px] border ${categoryColor}">${escapeHtml(a.category || '大會公告')}</span>
 								${statusBadge}
-								${a.is_marquee ? '<span class="text-[10px] px-2 py-0.5 rounded-full font-black bg-amber-50 text-amber-700 border border-amber-200">📢 跑馬燈</span>' : ''}
+								${a.is_marquee ? '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-amber-50 text-amber-700 border border-amber-200">📢 跑馬燈</span>' : ''}
 							</div>
-							<h4 class="font-black text-slate-900 text-sm md:text-base break-words">${escapeHtml(a.title)}</h4>
+							<h4 class="font-black text-slate-900 text-sm sm:text-base break-words">${escapeHtml(a.title)}</h4>
 						</div>
 					</div>
 
 					<div class="flex items-center gap-1.5 shrink-0 self-start sm:self-center">
-						<button type="button" class="btn-table-action ${a.is_active ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-500 hover:bg-slate-600'} text-white" onclick="toggleAnnounceStatus('${escapeHtml(a.id)}', ${!a.is_active})" title="${a.is_active ? '點擊下架' : '點擊重新上架'}">
-							<i class="fa-solid ${a.is_active ? 'fa-eye' : 'fa-eye-slash'}"></i>
+						<button type="button" class="btn-table-action ${a.is_active ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-400 hover:bg-slate-500'} text-white" onclick="toggleAnnounceStatus('${escapeHtml(a.id)}', ${!a.is_active})" title="${a.is_active ? '點擊手動下架' : '點擊重新公開'}">
+							<i class="fa-solid ${a.is_active ? 'fa-eye' : 'fa-eye-slash'} text-xs"></i>
 						</button>
-						<button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="上移順序">▲</button>
-						<button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, 1)" ${idx === filtered.length - 1 ? 'disabled' : ''} title="下移順序">▼</button>
-						<button type="button" class="h-7 px-3 rounded-lg font-black text-white bg-amber-500 hover:bg-amber-600 text-xs transition" onclick="openEditAnnouncement('${escapeHtml(a.id)}')">編輯</button>
-						<button type="button" class="h-7 px-3 rounded-lg font-black text-white bg-rose-600 hover:bg-rose-700 text-xs transition" onclick="deleteAnnouncement('${escapeHtml(a.id)}', '${escapeHtml(a.title)}')">刪除</button>
+						<button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="上移">▲</button>
+						<button type="button" class="btn-table-action border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none" onclick="moveAnnouncementOrder(${idx}, 1)" ${idx === filtered.length - 1 ? 'disabled' : ''} title="下移">▼</button>
+						<button type="button" class="h-7 px-2.5 rounded-lg font-black text-white bg-amber-500 hover:bg-amber-600 text-xs transition" onclick="openEditAnnouncement('${escapeHtml(a.id)}')">編輯</button>
+						<button type="button" class="h-7 px-2.5 rounded-lg font-black text-white bg-rose-600 hover:bg-rose-700 text-xs transition" onclick="deleteAnnouncement('${escapeHtml(a.id)}', '${escapeHtml(a.title)}')">刪除</button>
 					</div>
 				</div>
 
@@ -2006,7 +2057,7 @@ window.evaluateStudentStatus = function(s) {
 					if (item.type === 3) prac += c;
 					if (item.cat === 'dept' || item.cat === 'sch_req') reqEarned += c;
 					if (item.cat === 'sch_opt') optEarned += c;
-					if (item.cat === 'dept' && item.type === 1) deptGenEarned += v;
+					if (item.cat === 'dept' && item.type === 1) deptGenEarned += c;
 					if (item.cat === 'dept_sports' || (item.cat === 'dept' && item.type === 2)) deptSportsEarned += c;
 					if (item.cat === 'sch_opt') sportsOptEarned += c;
 				}
