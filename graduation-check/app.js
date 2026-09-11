@@ -1772,7 +1772,7 @@ window.updateUI = function() {
 		if (role === 'admin') {
 			saveBtn.innerText = '資料管理'; saveBtn.style.display = '';
 		} else if (role === 'counselor' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
-			saveBtn.innerText = '學生資料檢視'; saveBtn.style.display = '';
+			saveBtn.innerText = '學生資料'; saveBtn.style.display = '';
 		} else if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
 			saveBtn.innerText = '班級資料'; saveBtn.style.display = '';
 		} else {
