@@ -195,7 +195,7 @@ const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co",
             "sch_opt": { text: "校定選修", class: "bg-sch-opt-main" }
         },
         type: { 1: "一般科目", 2: "專業科目", 3: "實習科目" },
-        role: { student: "學生", teacher: "教師", admin: "管理員" }
+        role: { student: "學生", teacher: "教師", counselor: "輔導教師", admin: "管理員" }
     };
 
 let curriculums = {};
@@ -440,7 +440,6 @@ window.moveAnnouncementOrder = async function(index, direction) {
     }
 };
 
-// 編輯公告時平滑滾動回表單並反白聚焦
 window.openEditAnnouncement = function(id) {
     const item = announcementsData.find(a => String(a.id) === String(id));
     if (!item) return;
@@ -454,12 +453,12 @@ window.openEditAnnouncement = function(id) {
     document.getElementById('newAnnounceEndAt').value = formatDateTimeInput(item.end_at);
     document.getElementById('newAnnounceMarquee').checked = !!item.is_marquee;
     document.getElementById('newAnnounceActive').checked = !!item.is_active;
-    
+
     document.getElementById('announceFormIcon').innerText = '✏️';
     document.getElementById('announceFormTitle').innerHTML = '正在編輯公告：<span class="text-indigo-700 font-black truncate max-w-[200px] inline-block align-bottom">' + escapeHtml(item.title || '') + '</span>';
     document.getElementById('submitAnnounceBtn').innerText = '儲存修改公告';
     document.getElementById('cancelAnnounceEditBtn').style.display = 'inline-block';
-    
+
     const formCard = document.getElementById('announceFormCard');
     if (formCard) {
         formCard.classList.add('ring-4', 'ring-indigo-400/70', 'shadow-lg');
@@ -477,16 +476,15 @@ window.cancelAnnounceEdit = function() {
     document.getElementById('newAnnounceEndAt').value = '';
     document.getElementById('newAnnounceMarquee').checked = true;
     document.getElementById('newAnnounceActive').checked = true;
-    
+
     document.getElementById('announceFormIcon').innerText = '✨';
     document.getElementById('announceFormTitle').innerText = '發布新公告';
     document.getElementById('submitAnnounceBtn').innerText = '確認發布公告';
     document.getElementById('cancelAnnounceEditBtn').style.display = 'none';
-    
+
     document.getElementById('announceFormCard')?.classList.remove('ring-4', 'ring-indigo-400/70', 'shadow-lg');
 };
 
-// 支援搜尋與狀態篩選的列表渲染
 window.renderAdminAnnounceList = function() {
     const container = document.getElementById('adminAnnounceList');
     const countText = document.getElementById('announceCountText');
@@ -494,10 +492,8 @@ window.renderAdminAnnounceList = function() {
     const statusFilter = document.getElementById('announceStatusFilter')?.value || 'all';
 
     if (!container) return;
-
     const now = new Date().getTime();
 
-    // 篩選公告
     let filtered = [...announcementsData];
 
     if (searchTxt) {
@@ -570,7 +566,6 @@ window.renderAdminAnnounceList = function() {
                         </div>
                     </div>
 
-                    <!-- 操作按鈕列 -->
                     <div class="flex items-center gap-1.5 shrink-0 self-start sm:self-center">
                         <button type="button" class="btn-table-action ${a.is_active ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-500 hover:bg-slate-600'} text-white" onclick="toggleAnnounceStatus('${escapeHtml(a.id)}', ${!a.is_active})" title="${a.is_active ? '點擊下架' : '點擊重新上架'}">
                             <i class="fa-solid ${a.is_active ? 'fa-eye' : 'fa-eye-slash'}"></i>
@@ -582,7 +577,6 @@ window.renderAdminAnnounceList = function() {
                     </div>
                 </div>
 
-                <!-- 內容折疊或簡介 -->
                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-600 font-semibold leading-relaxed whitespace-pre-wrap break-words">
                     ${escapeHtml(a.content || '')}
                 </div>
@@ -1053,9 +1047,12 @@ window.renderAuditLogList = function() {
                         <span>安全登出</span>
                     </div>`;
                 } else if (log.action_type === '使用者註冊') {
-                    const r = d.role === 'teacher' ? (d.year && d.year !== '未設定' ? '👨‍🏫 導師' : '👨‍🏫 教師') : '🎓 學生';
+                    let r = '🎓 學生';
+                    if (d.role === 'counselor') r = '💜 輔導教師';
+                    else if (d.role === 'teacher') r = (d.year && d.year !== '未設定') ? '👨‍🏫 導師' : '👨‍🏫 教師';
+
                     const y = d.year && d.year !== '未設定' ? `${d.year} 學年度` : '未指定學年';
-                    const dept = d.dept && d.dept !== '未設定' ? d.dept : '一般專任(未設定班級)';
+                    const dept = d.dept && d.dept !== '未設定' ? d.dept : (d.role === 'counselor' ? '輔導室(全校權限)' : '一般專任(未設定班級)');
                     
                     diffHtml = `<div class="inline-flex flex-wrap items-center gap-2 p-1.5 px-3 rounded-xl bg-teal-50 border border-teal-200 text-teal-950 font-bold text-xs shadow-xs">
                         <span class="px-2 py-0.5 rounded-md bg-teal-700 text-white font-black text-[11px]">${r}</span>
@@ -1087,6 +1084,7 @@ window.renderAuditLogList = function() {
         const cfg = actionConfig[log.action_type] || { icon: '📌', class: 'bg-slate-700 text-white font-bold' };
         let roleBadgeColor = "bg-slate-100 text-slate-600";
         if (log.operator_role === 'admin') roleBadgeColor = "bg-indigo-100 text-indigo-800";
+        else if (log.operator_role === 'counselor') roleBadgeColor = "bg-purple-100 text-purple-800";
         else if (log.operator_role === 'teacher') roleBadgeColor = "bg-emerald-100 text-emerald-800";
         else if (log.operator_role === 'student') roleBadgeColor = "bg-blue-100 text-blue-800";
         tr.innerHTML = `
@@ -1156,6 +1154,29 @@ window.initDropdowns = function(isAdmin = false) {
         if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) el.value = currentVal;
         else if (id === 'dashSelectDept') el.value = currentDept;
     });
+    const fRole = document.getElementById('ms-drop-role');
+    if (fRole) {
+        fRole.innerHTML = `
+            <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                <input type="checkbox" value="all" class="ms-all-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('role', this)" checked> (全選)
+            </label>
+            <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                <input type="checkbox" value="student" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 學生
+            </label>
+            <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                <input type="checkbox" value="tutor" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 導師
+            </label>
+            <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                <input type="checkbox" value="teacher" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 專任教師
+            </label>
+            <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                <input type="checkbox" value="counselor" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 輔導教師
+            </label>
+            <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+                <input type="checkbox" value="admin" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 管理員
+            </label>
+        `;
+    }
     const fYear = document.getElementById('ms-drop-year');
     if (fYear) {
         let h = `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
@@ -1224,7 +1245,7 @@ window.handleHashRouting = function() {
     }
     if (currentIndependentPage) closeIndependentPage();
     if (hash === '#class-data') {
-        if (role === 'student' || (role === 'teacher' && (myYear === '未設定' || myDept === '未設定'))) {
+        if (role === 'student') {
             isViewingClassList = false; editingStudentId = null; window.location.hash = '#dashboard'; return;
         }
         isViewingClassList = true; editingStudentId = null;
@@ -1233,7 +1254,7 @@ window.handleHashRouting = function() {
     } else {
         let tid = hash.replace('#', '');
         if (tid) {
-            if (role === 'student' || (role === 'teacher' && (myYear === '未設定' || myDept === '未設定'))) {
+            if (role === 'student') {
                 editingStudentId = null; isViewingClassList = false; window.location.hash = '#dashboard'; return;
             }
             editingStudentId = tid; isViewingClassList = false;
@@ -1587,7 +1608,7 @@ window.handleAuth = async function() {
             if (isTeacher) {
                 const teacherType = document.getElementById('authTeacherType')?.value;
                 if (!teacherType) {
-                    throw new Error("請選擇您的教師身份（導師或教師）！");
+                    throw new Error("請選擇您的教師身份（專任教師或導師）！");
                 }
                 if (teacherType === 'tutor') {
                     entryYear = document.getElementById('authEntryYear').value;
@@ -1748,6 +1769,8 @@ window.updateUI = function() {
         }
         if (role === 'admin') {
             saveBtn.innerText = '資料管理'; saveBtn.style.display = '';
+        } else if (role === 'counselor' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
+            saveBtn.innerText = '學生資料檢視'; saveBtn.style.display = '';
         } else if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
             saveBtn.innerText = '班級資料'; saveBtn.style.display = '';
         } else {
@@ -1762,7 +1785,10 @@ window.updateUI = function() {
             document.getElementById("underConstructionBox")?.classList.add("hidden");
             mobileContainer.innerHTML = "";
             adminBackend.style.display = 'block';
-            document.getElementById('backendTitle').innerText = (role === 'admin') ? '資料管理' : '班級資料';
+            let bTitle = '班級資料';
+            if (role === 'admin') bTitle = '資料管理';
+            else if (role === 'counselor' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) bTitle = '全校學生資料檢視';
+            document.getElementById('backendTitle').innerText = bTitle;
             if (backToTrialAdminBtn) backToTrialAdminBtn.style.display = 'inline-block';
             document.getElementById('auditLogHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
             document.getElementById('feedbackListHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
@@ -1863,7 +1889,7 @@ async function executeDeferredSave(bulkActionInfo = null) {
     checks['_view_dept'] = newViewDept;
 
     const res = calculateStats();
-    let matchedTutor = curRecord?.tutor || (targetRole === 'student' ? await findTutorByYearDept(entryYear, entryDept) : (targetRole === 'admin' ? '管理員免設定' : '教師帳號免設定'));
+    let matchedTutor = curRecord?.tutor || (targetRole === 'student' ? await findTutorByYearDept(entryYear, entryDept) : (targetRole === 'admin' ? '管理員免設定' : (targetRole === 'counselor' ? '輔導教師免設定' : '教師帳號免設定')));
 
     try {
         let rpcSuccess = false;
@@ -2047,14 +2073,19 @@ window.applyFilters = function() {
         myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year,
         myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept;
     let filtered = [...adminListData];
-    if (role === 'teacher') {
-        filtered = (myYear !== '未設定' && myDept !== '未設定') ? filtered.filter(s => s.entry_year === myYear && s.entry_dept === myDept && s.role === 'student') : filtered.filter(s => s.role === 'student');
+
+    if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
+        filtered = filtered.filter(s => s.entry_year === myYear && s.entry_dept === myDept && s.role === 'student');
+    } else if (role === 'teacher' || role === 'counselor') {
+        filtered = filtered.filter(s => s.role === 'student');
     }
+
     if (searchText) filtered = filtered.filter(s => (s.full_name && s.full_name.toLowerCase().includes(searchText)) || (s.student_id && s.student_id.toLowerCase().includes(searchText)));
     if (!filterRoles.includes('all')) {
         filtered = filtered.filter(s => {
             if (filterRoles.includes('student') && s.role === 'student') return true;
             if (filterRoles.includes('admin') && s.role === 'admin') return true;
+            if (filterRoles.includes('counselor') && s.role === 'counselor') return true;
             const isTutor = (s.role === 'teacher' && s.entry_year !== '未設定' && s.entry_dept !== '未設定');
             if (filterRoles.includes('tutor') && isTutor) return true;
             if (filterRoles.includes('teacher') && s.role === 'teacher' && !isTutor) return true;
@@ -2071,7 +2102,7 @@ window.applyFilters = function() {
             return filterStatuses.includes(st.status);
         });
     }
-    const roleOrder = { admin: 1, teacher: 2, student: 3 };
+    const roleOrder = { admin: 1, counselor: 2, teacher: 3, student: 4 };
     const getDeptNumber = (dept) => {
         if (!dept || dept === '未設定') return 999;
         const match = dept.match(/-(\d+)$/);
@@ -2080,7 +2111,7 @@ window.applyFilters = function() {
         return idx !== -1 ? idx + 1 : 999;
     };
     filtered.sort((a, b) => {
-        const orderA = roleOrder[a.role] || 4, orderB = roleOrder[b.role] || 4;
+        const orderA = roleOrder[a.role] || 5, orderB = roleOrder[b.role] || 5;
         if (orderA !== orderB) return orderA - orderB;
         const yA = a.entry_year || '999';
         const yB = b.entry_year || '999';
@@ -2101,7 +2132,7 @@ window.fetchAdminList = async function(isClientOnly = false) {
             const { data, error } = await dbClient.from('grad_checks').select('*');
             if (error) throw error;
             adminListData = data || [];
-            teacherNames = adminListData.filter(u => u.role === 'teacher').map(u => u.full_name);
+            teacherNames = adminListData.filter(u => u.role === 'teacher' || u.role === 'counselor').map(u => u.full_name);
         }
         renderAdminTable();
         updateSyncStatusIndicator('success');
@@ -2150,33 +2181,52 @@ window.renderAdminTable = function() {
     const countText = document.getElementById('adminTotalCountText');
     if (countText) { countText.style.display = 'inline-block'; countText.innerText = `共 ${filtered.length} 筆帳號`; }
     renderAdminStats(filtered);
+    
+    const curRole = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+    const canModify = (curRole === 'admin');
+
     filtered.forEach((s, i) => {
         const isTutor = (s.role === 'teacher' && s.entry_year !== '未設定' && s.entry_dept !== '未設定');
-        const roleClass = s.role === 'admin' ? 'badge-admin' : (isTutor ? 'badge-tutor' : (s.role === 'teacher' ? 'badge-teacher' : 'badge-student'));
-        const roleDisplayName = s.role === 'admin' ? '管理員' : (isTutor ? '導師' : (mapping.role[s.role] || '使用者'));
+        let roleClass = 'badge-student';
+        if (s.role === 'admin') roleClass = 'badge-admin';
+        else if (s.role === 'counselor') roleClass = 'badge-counselor';
+        else if (isTutor) roleClass = 'badge-tutor';
+        else if (s.role === 'teacher') roleClass = 'badge-teacher';
+
+        let roleDisplayName = mapping.role[s.role] || '使用者';
+        if (isTutor) roleDisplayName = '導師';
+
         const classInfo = (s.entry_year === '未設定' || s.entry_dept === '未設定') ? '未設定' : `${s.entry_year}年/${s.entry_dept}`;
         const evalRes = s.role === 'student' ? evaluateStudentStatus(s) : null;
         const statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${escapeHtml(evalRes.statusText)}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>';
         const tr = document.createElement('tr');
+        
         let btnsDesktop = '<div class="flex items-center w-full gap-1.5 flex-nowrap">';
         const studentTargetId = s.student_id || s.id;
         if (s.role === 'student') {
             btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#10b981" onclick="enterAdminEditMode('${escapeHtml(studentTargetId)}','${escapeHtml(s.full_name)}')">檢視學分狀態</button>`;
         }
-        btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#6366f1;" onclick="openAuditLogModal('${escapeHtml(s.student_id)}')">📜 歷程</button>`;
-        btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
-                        <button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#ef4444" onclick="deleteStudentData('${escapeHtml(s.id)}','${escapeHtml(s.full_name)}')">刪除</button></div>`;
+        if (canModify) {
+            btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#6366f1;" onclick="openAuditLogModal('${escapeHtml(s.student_id)}')">📜 歷程</button>`;
+            btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#3b82f6" onclick="openAdminUserEdit(${i})">帳號設定</button>
+                            <button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#ef4444" onclick="deleteStudentData('${escapeHtml(s.id)}','${escapeHtml(s.full_name)}')">刪除</button>`;
+        }
+        btnsDesktop += '</div>';
+
         tr.innerHTML = `<td><b>${escapeHtml(s.full_name)}</b></td><td>${escapeHtml(s.student_id || '-')}</td><td><span class="role-badge ${roleClass}">${escapeHtml(roleDisplayName)}</span></td><td>${escapeHtml(classInfo)}</td><td>${statusTagHtml}</td><td>${btnsDesktop}</td>`;
         tableBody.appendChild(tr);
+
         const card = document.createElement('div');
         card.className = "mobile-card p-4 flex flex-col gap-3";
         let btnsMobile = '';
         if (s.role === 'student') {
             btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-emerald-500" onclick="enterAdminEditMode('${escapeHtml(studentTargetId)}','${escapeHtml(s.full_name)}')">檢視學分狀態</button>`;
         }
-        btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-indigo-600" onclick="openAuditLogModal('${escapeHtml(s.student_id)}')">📜 歷程</button>`;
-        btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-blue-500" onclick="openAdminUserEdit(${i})">帳號設定</button>
-                       <button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-red-500" onclick="deleteStudentData('${escapeHtml(s.id)}','${escapeHtml(s.full_name)}')">刪除</button>`;
+        if (canModify) {
+            btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-indigo-600" onclick="openAuditLogModal('${escapeHtml(s.student_id)}')">📜 歷程</button>`;
+            btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-blue-500" onclick="openAdminUserEdit(${i})">帳號設定</button>
+                           <button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-red-500" onclick="deleteStudentData('${escapeHtml(s.id)}','${escapeHtml(s.full_name)}')">刪除</button>`;
+        }
         card.innerHTML = `
             <div class="flex justify-between items-start border-b border-slate-100 pb-2">
                 <div><div class="text-sm font-bold text-slate-800">${escapeHtml(s.full_name)}</div><div class="text-xs text-slate-500">帳號: ${escapeHtml(s.student_id || '-')}</div></div>
@@ -2210,7 +2260,16 @@ window.openAdminUserEdit = function(index) {
     document.getElementById('editUserName').value = s.full_name || '';
     document.getElementById('editUserEntryYear').value = s.entry_year || '未設定';
     document.getElementById('editUserEntryDept').value = s.entry_dept || '未設定';
-    document.getElementById('editUserRole').value = s.role || 'student';
+    
+    const roleSelect = document.getElementById('editUserRole');
+    if (roleSelect && !roleSelect.querySelector('option[value="counselor"]')) {
+        const opt = document.createElement('option');
+        opt.value = 'counselor';
+        opt.textContent = '輔導教師';
+        roleSelect.appendChild(opt);
+    }
+    roleSelect.value = s.role || 'student';
+
     toggleAdminTutorField(s.role || 'student', s.tutor);
     document.getElementById('editUserCustomPassword').value = '';
     toggleUIModal(true, 'adminUserModal');
@@ -2409,7 +2468,7 @@ window.setLayoutMode = function(mode) {
 
 window.handleMainAction = function() {
     const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
-    if (role === 'admin' || role === 'teacher') {
+    if (role === 'admin' || role === 'teacher' || role === 'counselor') {
         if (currentIndependentPage) closeIndependentPage();
         isViewingClassList = true; editingStudentId = null;
         scrollToTop(); updateUI();
