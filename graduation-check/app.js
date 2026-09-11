@@ -1631,7 +1631,7 @@ window.handleAuth = async function() {
 			const { data: signUpData, error } = await dbClient.auth.signUp({
 				email, password: pwd, options: { 
 					data: { 
-                        full_name: name, 
+						full_name: name, 
 						student_id: cleanSid, 
 						role: role, 
 						tutor: matchedTutor, 
@@ -1772,7 +1772,7 @@ window.updateUI = function() {
 		if (role === 'admin') {
 			saveBtn.innerText = '資料管理'; saveBtn.style.display = '';
 		} else if (role === 'counselor' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
-			saveBtn.innerText = '學生資料'; saveBtn.style.display = '';
+			saveBtn.innerText = '學生資料檢視'; saveBtn.style.display = '';
 		} else if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
 			saveBtn.innerText = '班級資料'; saveBtn.style.display = '';
 		} else {
@@ -1796,11 +1796,13 @@ window.updateUI = function() {
 			document.getElementById('feedbackListHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
 			document.getElementById('announceMgmtHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
 			const msWrapRole = document.getElementById('ms-wrap-role'), msWrapYear = document.getElementById('ms-wrap-year'), msWrapDept = document.getElementById('ms-wrap-dept');
+			if (msWrapRole) {
+				msWrapRole.style.display = (role === 'admin') ? '' : 'none';
+			}
 			if (msWrapYear && msWrapDept) {
-				const hideFilters = (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定');
-				if (msWrapRole) msWrapRole.style.display = hideFilters ? 'none' : '';
-				msWrapYear.style.display = hideFilters ? 'none' : '';
-				msWrapDept.style.display = hideFilters ? 'none' : '';
+				const hideClassFilters = (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定');
+				msWrapYear.style.display = hideClassFilters ? 'none' : '';
+				msWrapDept.style.display = hideClassFilters ? 'none' : '';
 			}
 			fetchAdminList();
 		} else {
@@ -2004,7 +2006,7 @@ window.evaluateStudentStatus = function(s) {
 					if (item.type === 3) prac += c;
 					if (item.cat === 'dept' || item.cat === 'sch_req') reqEarned += c;
 					if (item.cat === 'sch_opt') optEarned += c;
-					if (item.cat === 'dept' && item.type === 1) deptGenEarned += c;
+					if (item.cat === 'dept' && item.type === 1) deptGenEarned += v;
 					if (item.cat === 'dept_sports' || (item.cat === 'dept' && item.type === 2)) deptSportsEarned += c;
 					if (item.cat === 'sch_opt') sportsOptEarned += c;
 				}
