@@ -250,6 +250,25 @@ let currentUser = null, DEPT_THRESHOLD = 0, userDBRecord = null, activeStudentDB
 
 let realtimeGradChecksChannel = null, realtimeFeedbacksChannel = null, realtimeAuditLogsChannel = null, realtimeAnnouncementsChannel = null;
 
+window.getUserCounselorClasses = function(record) {
+	if (!record) return [];
+	let allowedClasses = [];
+	try {
+		let cj = record.credits_json;
+		if (typeof cj === 'string') {
+			try { cj = JSON.parse(cj); } catch (e) { cj = {}; }
+		}
+		if (cj && Array.isArray(cj._counselor_classes)) {
+			allowedClasses = cj._counselor_classes;
+		} else if (record.entry_dept && typeof record.entry_dept === 'string' && record.entry_dept.startsWith('[')) {
+			allowedClasses = JSON.parse(record.entry_dept);
+		}
+	} catch (e) {
+		allowedClasses = [];
+	}
+	return Array.isArray(allowedClasses) ? allowedClasses : [];
+};
+
 window.clearAppRuntimeState = function() {
 	teacherCache.clear();
 	adminListData = [];
@@ -1564,22 +1583,8 @@ window.isUserAuthorizedForStudent = function(studentRec) {
 	}
 
 	if (role === 'counselor') {
-		let allowedClasses = [];
-		try {
-			let cClasses = userDBRecord?.credits_json?._counselor_classes;
-			if (!cClasses && typeof userDBRecord?.credits_json === 'string') {
-				cClasses = JSON.parse(userDBRecord.credits_json)?._counselor_classes;
-			}
-			if (Array.isArray(cClasses)) {
-				allowedClasses = cClasses;
-			} else if (myDept && myDept.startsWith('[')) {
-				allowedClasses = JSON.parse(myDept);
-			}
-		} catch (e) {}
-
-		if (!Array.isArray(allowedClasses) || allowedClasses.length === 0) {
-			return false;
-		}
+		const allowedClasses = getUserCounselorClasses(userDBRecord);
+		if (allowedClasses.length === 0) return false;
 		const studentClassKey = `${studentRec.entry_year}_${studentRec.entry_dept}`;
 		return allowedClasses.includes(studentClassKey);
 	}
@@ -1919,22 +1924,8 @@ window.renderUserStatusDisplay = function() {
 	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
 		displayClass = ` ｜ ${myYear}年 ${myDept} 導師`;
 	} else if (role === 'counselor') {
-		let count = 0;
-		try {
-			let cClasses = userDBRecord?.credits_json?._counselor_classes;
-			if (!cClasses && typeof userDBRecord?.credits_json === 'string') {
-				cClasses = JSON.parse(userDBRecord.credits_json)?._counselor_classes;
-			}
-			if (!cClasses && m?._counselor_classes) {
-				cClasses = m._counselor_classes;
-			}
-			if (Array.isArray(cClasses)) {
-				count = cClasses.length;
-			} else if (myDept && myDept.startsWith('[')) {
-				count = JSON.parse(myDept).length;
-			}
-		} catch (e) {}
-		displayClass = ` ｜ 輔導教師 (已授權 ${count} 班)`;
+		const allowedClasses = getUserCounselorClasses(userDBRecord);
+		displayClass = ` ｜ 輔導教師 (已授權 ${allowedClasses.length} 班)`;
 	} else if (role === 'student' && myYear !== '未設定' && myDept !== '未設定') {
 		displayClass = ` ｜ ${myYear}年 ${myDept} 學生`;
 	}
@@ -2320,21 +2311,10 @@ window.applyFilters = function() {
 			s.role === 'student'
 		);
 	} else if (role === 'counselor') {
-		let allowedClasses = [];
-		try {
-			let cClasses = userDBRecord?.credits_json?._counselor_classes;
-			if (!cClasses && typeof userDBRecord?.credits_json === 'string') {
-				cClasses = JSON.parse(userDBRecord.credits_json)?._counselor_classes;
-			}
-			if (Array.isArray(cClasses)) {
-				allowedClasses = cClasses;
-			} else if (myDept && myDept.startsWith('[')) {
-				allowedClasses = JSON.parse(myDept);
-			}
-		} catch (e) {}
-
+		const allowedClasses = getUserCounselorClasses(userDBRecord);
 		filtered = filtered.filter(s => {
 			if (s.role !== 'student') return false;
+			if (allowedClasses.length === 0) return false;
 			const studentKey = `${s.entry_year}_${s.entry_dept}`;
 			return allowedClasses.includes(studentKey);
 		});
@@ -2572,18 +2552,7 @@ window.openAdminUserEdit = function(index) {
 	}
 	roleSelect.value = s.role || 'student';
 
-	let assignedClasses = [];
-	try {
-		let cClasses = s.credits_json?._counselor_classes;
-		if (!cClasses && typeof s.credits_json === 'string') {
-			cClasses = JSON.parse(s.credits_json)?._counselor_classes;
-		}
-		if (Array.isArray(cClasses)) {
-			assignedClasses = cClasses;
-		} else if (s.entry_dept && s.entry_dept.startsWith('[')) {
-			assignedClasses = JSON.parse(s.entry_dept);
-		}
-	} catch (e) {}
+	const assignedClasses = getUserCounselorClasses(s);
 
 	toggleAdminUserRoleFields(s.role || 'student', assignedClasses);
 	document.getElementById('editUserCustomPassword').value = '';
@@ -2900,19 +2869,10 @@ window.showMissingCreditsModal = function() {
 
 window.toggleSingleCreditFromMissingModal = function(chkId) {
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
-	const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
-	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 
-	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定' && editingStudentId) {
-		if (activeStudentDBRecord && (activeStudentDBRecord.entry_year !== myYear || activeStudentDBRecord.entry_dept !== myDept)) {
-			showMsg("班級導師僅能修改所屬班級學生學分！", "error");
-			return;
-		}
-	}
-
-	if (role === 'counselor' && editingStudentId) {
+	if ((role === 'teacher' || role === 'counselor') && editingStudentId) {
 		if (activeStudentDBRecord && !isUserAuthorizedForStudent(activeStudentDBRecord)) {
-			showMsg("超出管理權限：您未被授權修改該學生之學分！", "error");
+			showMsg("超出管理權限：您未被授權修改該學生學分！", "error");
 			return;
 		}
 	}
@@ -2985,7 +2945,7 @@ window.initCopyrightYear = function() {
 };
 
 if (dbClient) {
-	dbClient.auth.onAuthStateChange((event, session) => {
+	dbClient.auth.onAuthStateChange(async (event, session) => {
 		currentUser = session ? session.user : null;
 		const authWorkspace = document.getElementById('authWorkspace'), appWorkspace = document.getElementById('appWorkspace');
 		if (!currentUser) {
@@ -3001,6 +2961,7 @@ if (dbClient) {
 				userDBRecord = null; 
 				lastUserId = currentUser.id; 
 			}
+			await loadFromCloud();
 			handleHashRouting();
 			setupRealtimeSubscriptions();
 			fetchAnnouncements();
