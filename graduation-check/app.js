@@ -1566,11 +1566,12 @@ window.isUserAuthorizedForStudent = function(studentRec) {
 	if (role === 'counselor') {
 		let allowedClasses = [];
 		try {
-			if (userDBRecord?.credits_json?._counselor_classes && Array.isArray(userDBRecord.credits_json._counselor_classes)) {
-				allowedClasses = userDBRecord.credits_json._counselor_classes;
-			} else if (typeof userDBRecord?.credits_json === 'string') {
-				const parsed = JSON.parse(userDBRecord.credits_json);
-				if (Array.isArray(parsed._counselor_classes)) allowedClasses = parsed._counselor_classes;
+			let cClasses = userDBRecord?.credits_json?._counselor_classes;
+			if (!cClasses && typeof userDBRecord?.credits_json === 'string') {
+				cClasses = JSON.parse(userDBRecord.credits_json)?._counselor_classes;
+			}
+			if (Array.isArray(cClasses)) {
+				allowedClasses = cClasses;
 			} else if (myDept && myDept.startsWith('[')) {
 				allowedClasses = JSON.parse(myDept);
 			}
@@ -1923,6 +1924,9 @@ window.renderUserStatusDisplay = function() {
 			let cClasses = userDBRecord?.credits_json?._counselor_classes;
 			if (!cClasses && typeof userDBRecord?.credits_json === 'string') {
 				cClasses = JSON.parse(userDBRecord.credits_json)?._counselor_classes;
+			}
+			if (!cClasses && m?._counselor_classes) {
+				cClasses = m._counselor_classes;
 			}
 			if (Array.isArray(cClasses)) {
 				count = cClasses.length;
