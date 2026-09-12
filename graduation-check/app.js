@@ -1068,7 +1068,8 @@ window.renderAuditLogList = function() {
 		fromOrder: '原始順序',
 		toOrder: '新順序',
 		isMarquee: '跑馬燈同步',
-		isActive: '公開狀態'
+		isActive: '公開狀態',
+		counselorClassesCount: '授權班級數'
 	};
 
 	const formatDetailValue = (key, val) => {
@@ -1558,14 +1559,18 @@ window.isUserAuthorizedForStudent = function(studentRec) {
 
 	if (role === 'teacher') {
 		if (myYear === '未設定' || myDept === '未設定') return false;
-		return studentRec.entry_year === myYear && studentRec.entry_dept === myDept;
+		return String(studentRec.entry_year).trim() === String(myYear).trim() && 
+		       String(studentRec.entry_dept).trim() === String(myDept).trim();
 	}
 
 	if (role === 'counselor') {
 		let allowedClasses = [];
 		try {
-			if (userDBRecord?.credits_json?._counselor_classes) {
+			if (userDBRecord?.credits_json?._counselor_classes && Array.isArray(userDBRecord.credits_json._counselor_classes)) {
 				allowedClasses = userDBRecord.credits_json._counselor_classes;
+			} else if (typeof userDBRecord?.credits_json === 'string') {
+				const parsed = JSON.parse(userDBRecord.credits_json);
+				if (Array.isArray(parsed._counselor_classes)) allowedClasses = parsed._counselor_classes;
 			} else if (myDept && myDept.startsWith('[')) {
 				allowedClasses = JSON.parse(myDept);
 			}
@@ -1690,7 +1695,8 @@ window.updateMSText = function(type) {
 window.getMSValues = function(type) {
 	const allChk = document.querySelector(`.ms-all-${type}`);
 	if (allChk && allChk.checked) return ['all'];
-	return Array.from(document.querySelectorAll(`.ms-opt-${type}:checked`)).map(o => o.value);
+	const checkedOpts = Array.from(document.querySelectorAll(`.ms-opt-${type}:checked`)).map(o => o.value);
+	return checkedOpts.length === 0 ? ['all'] : checkedOpts;
 };
 
 window.showMsg = function(txt, type = 'info') {
@@ -1914,8 +1920,12 @@ window.renderUserStatusDisplay = function() {
 	} else if (role === 'counselor') {
 		let count = 0;
 		try {
-			if (userDBRecord?.credits_json?._counselor_classes) {
-				count = userDBRecord.credits_json._counselor_classes.length;
+			let cClasses = userDBRecord?.credits_json?._counselor_classes;
+			if (!cClasses && typeof userDBRecord?.credits_json === 'string') {
+				cClasses = JSON.parse(userDBRecord.credits_json)?._counselor_classes;
+			}
+			if (Array.isArray(cClasses)) {
+				count = cClasses.length;
 			} else if (myDept && myDept.startsWith('[')) {
 				count = JSON.parse(myDept).length;
 			}
@@ -2286,21 +2296,34 @@ window.renderAdminStats = function(filteredList) {
 };
 
 window.applyFilters = function() {
-	const searchText = document.getElementById('adminSearchInput').value.toLowerCase(), 
-		filterRoles = getMSValues('role'), filterYears = getMSValues('year'),
-		filterDepts = getMSValues('dept'), filterStatuses = getMSValues('status'),
-		role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student',
-		myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year,
-		myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept;
+	const searchEl = document.getElementById('adminSearchInput');
+	const searchText = (searchEl ? searchEl.value : '').toLowerCase().trim();
+	const filterRoles = getMSValues('role');
+	const filterYears = getMSValues('year');
+	const filterDepts = getMSValues('dept');
+	const filterStatuses = getMSValues('status');
+
+	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+	const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
+	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
+
 	let filtered = [...adminListData];
 
 	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
-		filtered = filtered.filter(s => s.entry_year === myYear && s.entry_dept === myDept && s.role === 'student');
+		filtered = filtered.filter(s => 
+			String(s.entry_year).trim() === String(myYear).trim() && 
+			String(s.entry_dept).trim() === String(myDept).trim() && 
+			s.role === 'student'
+		);
 	} else if (role === 'counselor') {
 		let allowedClasses = [];
 		try {
-			if (userDBRecord?.credits_json?._counselor_classes) {
-				allowedClasses = userDBRecord.credits_json._counselor_classes;
+			let cClasses = userDBRecord?.credits_json?._counselor_classes;
+			if (!cClasses && typeof userDBRecord?.credits_json === 'string') {
+				cClasses = JSON.parse(userDBRecord.credits_json)?._counselor_classes;
+			}
+			if (Array.isArray(cClasses)) {
+				allowedClasses = cClasses;
 			} else if (myDept && myDept.startsWith('[')) {
 				allowedClasses = JSON.parse(myDept);
 			}
@@ -2315,8 +2338,14 @@ window.applyFilters = function() {
 		filtered = filtered.filter(s => s.role === 'student');
 	}
 
-	if (searchText) filtered = filtered.filter(s => (s.full_name && s.full_name.toLowerCase().includes(searchText)) || (s.student_id && s.student_id.toLowerCase().includes(searchText)));
-	if (!filterRoles.includes('all')) {
+	if (searchText) {
+		filtered = filtered.filter(s => 
+			(s.full_name && String(s.full_name).toLowerCase().includes(searchText)) || 
+			(s.student_id && String(s.student_id).toLowerCase().includes(searchText))
+		);
+	}
+
+	if (filterRoles.length > 0 && !filterRoles.includes('all')) {
 		filtered = filtered.filter(s => {
 			if (filterRoles.includes('student') && s.role === 'student') return true;
 			if (filterRoles.includes('admin') && s.role === 'admin') return true;
@@ -2327,9 +2356,16 @@ window.applyFilters = function() {
 			return false;
 		});
 	}
-	if (!filterYears.includes('all')) filtered = filtered.filter(s => filterYears.includes(s.entry_year));
-	if (!filterDepts.includes('all')) filtered = filtered.filter(s => filterDepts.includes(s.entry_dept));
-	if (!filterStatuses.includes('all')) {
+
+	if (filterYears.length > 0 && !filterYears.includes('all')) {
+		filtered = filtered.filter(s => filterYears.includes(String(s.entry_year).trim()));
+	}
+
+	if (filterDepts.length > 0 && !filterDepts.includes('all')) {
+		filtered = filtered.filter(s => filterDepts.includes(String(s.entry_dept).trim()));
+	}
+
+	if (filterStatuses.length > 0 && !filterStatuses.includes('all')) {
 		filtered = filtered.filter(s => {
 			if (s.role !== 'student') return false;
 			const st = evaluateStudentStatus(s);
@@ -2337,25 +2373,28 @@ window.applyFilters = function() {
 			return filterStatuses.includes(st.status);
 		});
 	}
+
 	const roleOrder = { admin: 1, counselor: 2, teacher: 3, student: 4 };
 	const getDeptNumber = (dept) => {
 		if (!dept || dept === '未設定') return 999;
-		const match = dept.match(/-(\d+)$/);
+		const match = String(dept).match(/-(\d+)$/);
 		if (match) return parseInt(match[1], 10);
 		const idx = CurriculumService.departments.indexOf(dept);
 		return idx !== -1 ? idx + 1 : 999;
 	};
+
 	filtered.sort((a, b) => {
 		const orderA = roleOrder[a.role] || 5, orderB = roleOrder[b.role] || 5;
 		if (orderA !== orderB) return orderA - orderB;
 		const yA = a.entry_year || '999';
 		const yB = b.entry_year || '999';
-		if (yA !== yB) return yA.localeCompare(yB, undefined, { numeric: true });
+		if (yA !== yB) return String(yA).localeCompare(String(yB), undefined, { numeric: true });
 		const deptNumA = getDeptNumber(a.entry_dept);
 		const deptNumB = getDeptNumber(b.entry_dept);
 		if (deptNumA !== deptNumB) return deptNumA - deptNumB;
 		return (a.student_id || '').localeCompare(b.student_id || '', undefined, { numeric: true });
 	});
+
 	return filtered;
 };
 
@@ -2531,8 +2570,12 @@ window.openAdminUserEdit = function(index) {
 
 	let assignedClasses = [];
 	try {
-		if (s.credits_json?._counselor_classes) {
-			assignedClasses = s.credits_json._counselor_classes;
+		let cClasses = s.credits_json?._counselor_classes;
+		if (!cClasses && typeof s.credits_json === 'string') {
+			cClasses = JSON.parse(s.credits_json)?._counselor_classes;
+		}
+		if (Array.isArray(cClasses)) {
+			assignedClasses = cClasses;
 		} else if (s.entry_dept && s.entry_dept.startsWith('[')) {
 			assignedClasses = JSON.parse(s.entry_dept);
 		}
@@ -2593,12 +2636,26 @@ window.saveAdminUserEdit = async function() {
 
 		if (role === 'counselor') {
 			const targetRecord = adminListData.find(item => item.id === id);
-			const currentJson = targetRecord?.credits_json || {};
+			let currentJson = targetRecord?.credits_json || {};
+			if (typeof currentJson === 'string') {
+				try { currentJson = JSON.parse(currentJson); } catch(e) { currentJson = {}; }
+			}
 			currentJson._counselor_classes = counselorClasses;
+
 			await dbClient.from('grad_checks').update({
 				credits_json: currentJson,
+				entry_dept: JSON.stringify(counselorClasses),
 				updated_at: new Date().toISOString()
 			}).eq('id', id);
+
+			if (targetRecord) {
+				targetRecord.credits_json = currentJson;
+				targetRecord.entry_dept = JSON.stringify(counselorClasses);
+			}
+			if (userDBRecord && userDBRecord.id === id) {
+				userDBRecord.credits_json = currentJson;
+				userDBRecord.entry_dept = JSON.stringify(counselorClasses);
+			}
 		}
 
 		updateSyncStatusIndicator('success');
@@ -2839,10 +2896,19 @@ window.showMissingCreditsModal = function() {
 
 window.toggleSingleCreditFromMissingModal = function(chkId) {
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+	const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
+	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 
-	if ((role === 'teacher' || role === 'counselor') && editingStudentId) {
+	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定' && editingStudentId) {
+		if (activeStudentDBRecord && (activeStudentDBRecord.entry_year !== myYear || activeStudentDBRecord.entry_dept !== myDept)) {
+			showMsg("班級導師僅能修改所屬班級學生學分！", "error");
+			return;
+		}
+	}
+
+	if (role === 'counselor' && editingStudentId) {
 		if (activeStudentDBRecord && !isUserAuthorizedForStudent(activeStudentDBRecord)) {
-			showMsg("超出管理權限：您未被授權修改該學生學分！", "error");
+			showMsg("超出管理權限：您未被授權修改該學生之學分！", "error");
 			return;
 		}
 	}
