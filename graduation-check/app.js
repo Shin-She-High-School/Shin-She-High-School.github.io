@@ -41,6 +41,29 @@ const CurriculumService = {
 	}
 };
 
+const ANNOUNCE_CATEGORIES = [
+	{ value: "大會公告", label: "🎓 大會公告" },
+	{ value: "教務通知", label: "📋 教務通知" },
+	{ value: "系統維護", label: "🛠️ 系統維護" },
+	{ value: "重要提醒", label: "⚠️ 重要提醒" }
+];
+
+const ANNOUNCE_STATUS_FILTERS = [
+	{ value: "all", label: "全部狀態" },
+	{ value: "active", label: "● 公開中" },
+	{ value: "scheduled", label: "⏳ 預約中 / 未到期" },
+	{ value: "expired", label: "⌛ 已過期" },
+	{ value: "inactive", label: "○ 已手動下架" }
+];
+
+const AUDIT_ACTION_OPTIONS = [
+	{ group: "📘 學分與課綱類", items: ["變更學分紀錄", "切換版本", "批次全部及格", "批次學分歸零", "單學期全選及格", "單學期學分歸零"] },
+	{ group: "📝 帳號與個人資料", items: ["更改帳號資料", "重設帳號密碼", "更新個人資料", "送出系統回饋"] },
+	{ group: "📢 系統公告", items: ["發布系統公告", "編輯系統公告", "更新公告排序"] },
+	{ group: "🔑 系統登入與安全", items: ["使用者登入", "使用者登出", "使用者註冊"] },
+	{ group: "⚠️ 刪除與警示", items: ["刪除帳號", "刪除學生帳號"] }
+];
+
 let currentIndependentPage = null;
 const teacherCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -173,6 +196,7 @@ window.openIndependentPage = function(pageType) {
 		renderIndependentAnnouncements();
 	} else if (pageType === 'auditLogView') {
 		if (auditPage) auditPage.classList.remove('hidden');
+		initAuditActionMultiSelect();
 		refreshAuditLogs();
 	} else if (pageType === 'feedbackListView') {
 		if (feedbackPage) feedbackPage.classList.remove('hidden');
@@ -523,7 +547,10 @@ window.openEditAnnouncement = function(id) {
 	const formCard = document.getElementById('announceFormCard');
 	if (formCard) {
 		formCard.classList.add('ring-4', 'ring-amber-400/80', 'shadow-md');
-		formCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		const scrollBox = document.getElementById('scrollContainer');
+		if (scrollBox) {
+			scrollBox.scrollTo({ top: formCard.offsetTop - 16, behavior: 'smooth' });
+		}
 	}
 };
 
@@ -971,6 +998,45 @@ window.deleteFeedback = function(id, name) {
 	}, "確認刪除", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
 
+window.initAuditActionMultiSelect = function() {
+	const oldSelect = document.getElementById('auditFilterAction');
+	if (!oldSelect || document.getElementById('ms-wrap-audit-action')) return;
+
+	const wrap = document.createElement('div');
+	wrap.id = 'ms-wrap-audit-action';
+	wrap.className = 'relative flex-1 min-w-[130px]';
+	wrap.innerHTML = `
+		<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full text-xs" onclick="toggleMS(event, 'audit-action')">
+			<span class="truncate pr-2 font-bold text-slate-700" id="ms-text-audit-action">所有異動項目</span>
+			<span class="text-[10px] text-slate-400">▼</span>
+		</div>
+		<div id="ms-drop-audit-action" class="absolute z-50 w-[180%] sm:w-[150%] md:w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
+			<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+				<input type="checkbox" value="all" class="ms-all-audit-action text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('audit-action', this)" checked> (全選所有異動項目)
+			</label>
+		</div>
+	`;
+
+	const drop = wrap.querySelector('#ms-drop-audit-action');
+	AUDIT_ACTION_OPTIONS.forEach(g => {
+		const groupHeader = document.createElement('div');
+		groupHeader.className = 'text-[10px] font-black text-slate-400 px-1.5 pt-1.5 pb-0.5';
+		groupHeader.innerText = g.group;
+		drop.appendChild(groupHeader);
+		g.items.forEach(act => {
+			const label = document.createElement('label');
+			label.className = 'flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700';
+			label.innerHTML = `
+				<input type="checkbox" value="${act}" class="ms-opt-audit-action text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('audit-action')">
+				<span>${act}</span>
+			`;
+			drop.appendChild(label);
+		});
+	});
+
+	oldSelect.parentNode.replaceChild(wrap, oldSelect);
+};
+
 window.openAuditLogModal = async function(filterStudentId = null) {
 	if (!dbClient) return;
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
@@ -1013,7 +1079,11 @@ window.refreshAuditLogs = async function() {
 
 window.resetAuditFilters = function() {
 	document.getElementById('auditSearchInput').value = '';
-	document.getElementById('auditFilterAction').value = 'all';
+	const allActionChk = document.querySelector('.ms-all-audit-action');
+	if (allActionChk) allActionChk.checked = true;
+	document.querySelectorAll('.ms-opt-audit-action').forEach(c => c.checked = false);
+	updateMSText('audit-action');
+
 	document.getElementById('auditFilterOperatorRole').value = 'all';
 	document.getElementById('auditStartDate').value = '';
 	document.getElementById('auditEndDate').value = '';
@@ -1022,7 +1092,7 @@ window.resetAuditFilters = function() {
 
 window.renderAuditLogList = function() {
 	const searchTxt = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
-	const actionFilter = document.getElementById('auditFilterAction')?.value || 'all';
+	const filterActions = getMSValues('audit-action');
 	const roleFilter = document.getElementById('auditFilterOperatorRole')?.value || 'all';
 	const startDate = document.getElementById('auditStartDate')?.value;
 	const endDate = document.getElementById('auditEndDate')?.value;
@@ -1030,6 +1100,7 @@ window.renderAuditLogList = function() {
 	const countText = document.getElementById('auditCountText');
 	if (!listBody) return;
 	let filtered = [...auditLogsData];
+
 	if (searchTxt) {
 		filtered = filtered.filter(l => 
 			(l.operator_name && l.operator_name.toLowerCase().includes(searchTxt)) ||
@@ -1039,7 +1110,11 @@ window.renderAuditLogList = function() {
 			(l.ip_address && l.ip_address.toLowerCase().includes(searchTxt))
 		);
 	}
-	if (actionFilter !== 'all') filtered = filtered.filter(l => l.action_type === actionFilter);
+
+	if (filterActions.length > 0 && !filterActions.includes('all')) {
+		filtered = filtered.filter(l => filterActions.includes(l.action_type));
+	}
+
 	if (roleFilter !== 'all') filtered = filtered.filter(l => l.operator_role === roleFilter);
 	if (startDate) {
 		const startMs = new Date(startDate + 'T00:00:00').getTime();
@@ -1306,31 +1381,115 @@ window.initDropdowns = function(isAdmin = false) {
 				</label>`);
 		fDept.innerHTML = h;
 	}
+
+	const newCatSelect = document.getElementById('newAnnounceCategory');
+	if (newCatSelect) {
+		newCatSelect.innerHTML = ANNOUNCE_CATEGORIES.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
+	}
+
+	const filterStatusSelect = document.getElementById('announceStatusFilter');
+	if (filterStatusSelect) {
+		filterStatusSelect.innerHTML = ANNOUNCE_STATUS_FILTERS.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
+	}
 };
 
 window.renderCounselorClassCheckboxes = function(selectedClassKeys = []) {
 	const container = document.getElementById('counselorClassChecklist');
 	if (!container) return;
 	const selectedSet = new Set(selectedClassKeys);
+	const yearLabels = { "113": "高三 (113學年度)", "114": "高二 (114學年度)" };
 	let html = '';
+
 	CurriculumService.years.forEach(y => {
+		let itemsHtml = '';
 		CurriculumService.departments.forEach(d => {
 			const key = `${y}_${d}`;
 			const isChecked = selectedSet.has(key);
-			html += `
-				<label class="flex items-center gap-2 p-1 bg-white hover:bg-indigo-50/60 rounded border border-slate-200 cursor-pointer transition">
-					<input type="checkbox" value="${key}" class="counselor-class-item rounded text-indigo-600 focus:ring-indigo-500" ${isChecked ? 'checked' : ''}>
-					<span class="truncate">${y}年 - ${escapeHtml(d)}</span>
+			const badge = getDeptBadgeInfo(d);
+			const activeClass = isChecked ? 'border-indigo-400 bg-indigo-50/50 ring-1 ring-indigo-300' : 'border-slate-200 bg-white hover:border-slate-300';
+
+			itemsHtml += `
+				<label class="counselor-checkbox-card flex items-center justify-between p-2 rounded-xl border cursor-pointer transition select-none ${activeClass}">
+					<div class="flex items-center gap-2 min-w-0 flex-1 mr-1">
+						<input type="checkbox" value="${key}" data-year="${y}" class="counselor-class-item rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" ${isChecked ? 'checked' : ''} onchange="handleCounselorItemCheckboxChange(this)">
+						<span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(d)}</span>
+					</div>
+					<span class="text-[10px] font-black px-1.5 py-0.5 rounded border shrink-0 ${badge.class}">${badge.tag}</span>
 				</label>
 			`;
 		});
+
+		html += `
+			<div class="bg-slate-100/70 p-2.5 rounded-xl border border-slate-200/80">
+				<div class="flex items-center justify-between mb-2">
+					<span class="text-xs font-black text-slate-700 flex items-center gap-1.5">
+						<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+						${yearLabels[y] || `${y} 學年度`}
+					</span>
+					<div class="flex gap-1.5 text-[10px] font-bold">
+						<button type="button" class="text-indigo-600 hover:underline" onclick="toggleYearCounselorClasses('${y}', true)">本年全選</button>
+						<span class="text-slate-300">|</span>
+						<button type="button" class="text-slate-500 hover:underline" onclick="toggleYearCounselorClasses('${y}', false)">本年清空</button>
+					</div>
+				</div>
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+					${itemsHtml}
+				</div>
+			</div>
+		`;
 	});
+
 	container.innerHTML = html;
+	updateCounselorSelectedCounter();
+};
+
+window.getDeptBadgeInfo = function(deptName) {
+	if (deptName.includes('普通科')) return { tag: '普通科', class: 'bg-blue-50 text-blue-700 border-blue-200' };
+	if (deptName.includes('體育班')) return { tag: '體育班', class: 'bg-amber-50 text-amber-800 border-amber-200' };
+	if (deptName.includes('農經科') || deptName.includes('園藝科')) return { tag: '農業群', class: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+	return { tag: '商管群', class: 'bg-purple-50 text-purple-700 border-purple-200' };
+};
+
+window.updateCounselorSelectedCounter = function() {
+	const checkedCount = document.querySelectorAll('.counselor-class-item:checked').length;
+	const badge = document.getElementById('counselorSelectedCountBadge');
+	if (badge) {
+		badge.innerText = `已選取 ${checkedCount} / 20 班`;
+		if (checkedCount === 20) {
+			badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300";
+		} else if (checkedCount === 0) {
+			badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-300";
+		} else {
+			badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200";
+		}
+	}
+};
+
+window.handleCounselorItemCheckboxChange = function(inputEl) {
+	const labelCard = inputEl.closest('.counselor-checkbox-card');
+	if (labelCard) {
+		if (inputEl.checked) {
+			labelCard.classList.add('border-indigo-400', 'bg-indigo-50/50', 'ring-1', 'ring-indigo-300');
+			labelCard.classList.remove('border-slate-200', 'bg-white');
+		} else {
+			labelCard.classList.remove('border-indigo-400', 'bg-indigo-50/50', 'ring-1', 'ring-indigo-300');
+			labelCard.classList.add('border-slate-200', 'bg-white');
+		}
+	}
+	updateCounselorSelectedCounter();
 };
 
 window.toggleAllCounselorClasses = function(checkAll) {
 	document.querySelectorAll('.counselor-class-item').forEach(chk => {
 		chk.checked = checkAll;
+		handleCounselorItemCheckboxChange(chk);
+	});
+};
+
+window.toggleYearCounselorClasses = function(yearStr, checkAll) {
+	document.querySelectorAll(`.counselor-class-item[data-year="${yearStr}"]`).forEach(chk => {
+		chk.checked = checkAll;
+		handleCounselorItemCheckboxChange(chk);
 	});
 };
 
@@ -1672,25 +1831,27 @@ window.toggleMS = function(event, type) {
 window.handleMSAll = function(type, chk) {
 	if (chk.checked) document.querySelectorAll(`.ms-opt-${type}`).forEach(c => c.checked = false);
 	updateMSText(type);
-	fetchAdminList(true);
+	if (type === 'audit-action') renderAuditLogList();
+	else fetchAdminList(true);
 };
 
 window.handleMSOpt = function(type) {
 	const opts = document.querySelectorAll(`.ms-opt-${type}:checked`);
 	document.querySelector(`.ms-all-${type}`).checked = opts.length === 0;
 	updateMSText(type);
-	fetchAdminList(true);
+	if (type === 'audit-action') renderAuditLogList();
+	else fetchAdminList(true);
 };
 
 window.updateMSText = function(type) {
 	const opts = document.querySelectorAll(`.ms-opt-${type}:checked`);
 	const textEl = document.getElementById(`ms-text-${type}`);
-	const allText = { role: '所有身份', year: '所有年度', dept: '所有科別', status: '所有畢業狀態' };
+	const allText = { role: '所有身份', year: '所有年度', dept: '所有科別', status: '所有畢業狀態', 'audit-action': '所有異動項目' };
 	if (opts.length === 0) {
 		textEl.innerText = allText[type];
 		textEl.classList.remove('text-indigo-700');
 	} else if (opts.length === 1) {
-		textEl.innerText = opts[0].parentElement.innerText.replace('(全選)', '').trim();
+		textEl.innerText = opts[0].parentElement.innerText.replace('(全選)', '').replace('(全選所有異動項目)', '').trim();
 		textEl.classList.add('text-indigo-700');
 	} else {
 		textEl.innerText = `已選擇 (${opts.length})`;
@@ -2869,8 +3030,17 @@ window.showMissingCreditsModal = function() {
 
 window.toggleSingleCreditFromMissingModal = function(chkId) {
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+	const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
+	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 
-	if ((role === 'teacher' || role === 'counselor') && editingStudentId) {
+	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定' && editingStudentId) {
+		if (activeStudentDBRecord && (activeStudentDBRecord.entry_year !== myYear || activeStudentDBRecord.entry_dept !== myDept)) {
+			showMsg("班級導師僅能修改所屬班級學生學分！", "error");
+			return;
+		}
+	}
+
+	if (role === 'counselor' && editingStudentId) {
 		if (activeStudentDBRecord && !isUserAuthorizedForStudent(activeStudentDBRecord)) {
 			showMsg("超出管理權限：您未被授權修改該學生學分！", "error");
 			return;
