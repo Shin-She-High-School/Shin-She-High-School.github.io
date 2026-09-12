@@ -1212,7 +1212,10 @@ window.initDropdowns = function(isAdmin = false) {
 		const currentVal = el.value;
 		let html = '';
 		if (id === 'authEntryYear') html += '<option value="">請選擇入學年</option>';
-		if (id === 'editUserEntryYear') html += '<option value="未設定">未設定</option>';
+		if (id === 'editUserEntryYear') {
+			html += '<option value="未設定">未設定</option>';
+			html += '<option value="all">全校所有年級</option>';
+		}
 		CurriculumService.years.forEach(y => { html += `<option value="${y}">${y} 學年度</option>`; });
 		el.innerHTML = html;
 		if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) el.value = currentVal;
@@ -1224,7 +1227,10 @@ window.initDropdowns = function(isAdmin = false) {
 		const currentVal = el.value;
 		let html = '';
 		if (id === 'authEntryDept') html += '<option value="">請選擇科別-班級</option>';
-		if (id === 'editUserEntryDept') html += '<option value="未設定">未設定</option>';
+		if (id === 'editUserEntryDept') {
+			html += '<option value="未設定">未設定</option>';
+			html += '<option value="all">全校所有科別</option>';
+		}
 		CurriculumService.departments.forEach(d => { html += `<option value="${d}">${d}</option>`; });
 		el.innerHTML = html;
 		if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) el.value = currentVal;
@@ -1373,7 +1379,7 @@ window.determineCurriculumVersion = function(record) {
 	const role = record.role || 'student';
 	const ey = record.entry_year || '未設定';
 	const ed = record.entry_dept || '未設定';
-	const hasSetting = (ey !== '未設定' && ed !== '未設定');
+	const hasSetting = (ey !== '未設定' && ed !== '未設定' && ey !== 'all' && ed !== 'all');
 	if (role === 'student') {
 		return { year: hasSetting ? ey : '113', dept: hasSetting ? ed : '普通科(理工生醫群)-1', locked: true };
 	} else {
@@ -1515,6 +1521,19 @@ window.confirmSetAllStatus = function(p) {
 		}
 	}
 
+	if (role === 'counselor' && editingStudentId) {
+		if (activeStudentDBRecord) {
+			if (myYear !== '未設定' && myYear !== 'all' && activeStudentDBRecord.entry_year !== myYear) {
+				showMsg("超出權限：該學生不在您被授權的年級範圍！", "error");
+				return;
+			}
+			if (myDept !== '未設定' && myDept !== 'all' && activeStudentDBRecord.entry_dept !== myDept) {
+				showMsg("超出權限：該學生不在您被授權的科別範圍！", "error");
+				return;
+			}
+		}
+	}
+
 	const msg = p ? "您確定要將所有課程學分一次設為「及格」嗎？" : "您確定要將所有及格學分「全部歸零」嗎？";
 	showConfirmModal(msg, p ? "確認全部及格" : "確認學分歸零", () => { setAllStatus(p); toggleUIModal(false, 'confirmModal'); }, p ? "確認全部及格" : "確認學分歸零", p ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" : "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
@@ -1536,6 +1555,19 @@ window.setSemesterStatus = function(sIdx, p) {
 		if (activeStudentDBRecord && (activeStudentDBRecord.entry_year !== myYear || activeStudentDBRecord.entry_dept !== myDept)) {
 			showMsg("班級導師僅能修改所屬班級學生學分！", "error");
 			return;
+		}
+	}
+
+	if (role === 'counselor' && editingStudentId) {
+		if (activeStudentDBRecord) {
+			if (myYear !== '未設定' && myYear !== 'all' && activeStudentDBRecord.entry_year !== myYear) {
+				showMsg("超出權限：該學生不在您被授權的年級範圍！", "error");
+				return;
+			}
+			if (myDept !== '未設定' && myDept !== 'all' && activeStudentDBRecord.entry_dept !== myDept) {
+				showMsg("超出權限：該學生不在您被授權的科別範圍！", "error");
+				return;
+			}
 		}
 	}
 
@@ -1752,7 +1784,7 @@ window.handleAuth = async function() {
 						id: newUserId, 
 						student_id: cleanSid, 
 						full_name: name, 
-						entry_year: entryYear, 
+						entry_year: entryYear,
 						entry_dept: entryDept, 
 						role: role, 
 						tutor: matchedTutor, 
@@ -1832,7 +1864,18 @@ window.renderUserStatusDisplay = function() {
 	const myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
 	let roleTitle = mapping.role[role] || '使用者';
 	if (role === 'teacher') roleTitle = (myYear !== '未設定' && myDept !== '未設定') ? '導師' : '教師';
-	const displayClass = (myYear === '未設定' || myDept === '未設定') ? ` ｜ ${roleTitle}` : ` ｜ ${myYear}年 ${myDept} ${roleTitle}`;
+	
+	let displayClass = ` ｜ ${roleTitle}`;
+	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
+		displayClass = ` ｜ ${myYear}年 ${myDept} 導師`;
+	} else if (role === 'counselor') {
+		const yrStr = (myYear === '未設定' || myYear === 'all') ? '全年級' : `${myYear}年`;
+		const deptStr = (myDept === '未設定' || myDept === 'all') ? '全科別' : `${myDept}`;
+		displayClass = ` ｜ 輔導教師 (${yrStr}/${deptStr})`;
+	} else if (role === 'student' && myYear !== '未設定' && myDept !== '未設定') {
+		displayClass = ` ｜ ${myYear}年 ${myDept} 學生`;
+	}
+
 	userStatusDisplay.innerHTML = `
 		<div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 w-full text-xs sm:text-sm leading-tight">
 			<div class="font-extrabold text-slate-100 shrink-0">您好，${escapeHtml(displayName)}${escapeHtml(displayClass)}</div>
@@ -1875,8 +1918,8 @@ window.updateUI = function() {
 		}
 		if (role === 'admin') {
 			saveBtn.innerText = '資料管理'; saveBtn.style.display = '';
-		} else if (role === 'counselor' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) {
-			saveBtn.innerText = '學生資料檢視'; saveBtn.style.display = '';
+		} else if (role === 'counselor') {
+			saveBtn.innerText = '輔導學生名冊'; saveBtn.style.display = '';
 		} else if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
 			saveBtn.innerText = '班級資料'; saveBtn.style.display = '';
 		} else {
@@ -1893,7 +1936,7 @@ window.updateUI = function() {
 			adminBackend.style.display = 'block';
 			let bTitle = '班級資料';
 			if (role === 'admin') bTitle = '資料管理';
-			else if (role === 'counselor' || (role === 'teacher' && myYear === '未設定' && myDept === '未設定')) bTitle = '全校學生資料檢視';
+			else if (role === 'counselor') bTitle = '輔導學生名冊與學分檢核';
 			document.getElementById('backendTitle').innerText = bTitle;
 			if (backToTrialAdminBtn) backToTrialAdminBtn.style.display = 'inline-block';
 			document.getElementById('auditLogHeaderBtn').style.display = (role === 'admin') ? 'inline-flex' : 'none';
@@ -1934,6 +1977,19 @@ window.debouncedSaveToCloud = function(bulkActionInfo = null) {
 		if (activeStudentDBRecord && (activeStudentDBRecord.entry_year !== myYear || activeStudentDBRecord.entry_dept !== myDept)) {
 			showMsg("班級導師僅能修改所屬班級學生學分！", "error");
 			return;
+		}
+	}
+
+	if (role === 'counselor' && editingStudentId) {
+		if (activeStudentDBRecord) {
+			if (myYear !== '未設定' && myYear !== 'all' && activeStudentDBRecord.entry_year !== myYear) {
+				showMsg("超出權限：該學生不在您被授權的年級範圍！", "error");
+				return;
+			}
+			if (myDept !== '未設定' && myDept !== 'all' && activeStudentDBRecord.entry_dept !== myDept) {
+				showMsg("超出權限：該學生不在您被授權的科別範圍！", "error");
+				return;
+			}
 		}
 	}
 
@@ -2207,7 +2263,14 @@ window.applyFilters = function() {
 
 	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
 		filtered = filtered.filter(s => s.entry_year === myYear && s.entry_dept === myDept && s.role === 'student');
-	} else if (role === 'teacher' || role === 'counselor') {
+	} else if (role === 'counselor') {
+		filtered = filtered.filter(s => {
+			if (s.role !== 'student') return false;
+			if (myYear !== '未設定' && myYear !== 'all' && s.entry_year !== myYear) return false;
+			if (myDept !== '未設定' && myDept !== 'all' && s.entry_dept !== myDept) return false;
+			return true;
+		});
+	} else if (role === 'teacher') {
 		filtered = filtered.filter(s => s.role === 'student');
 	}
 
@@ -2383,6 +2446,22 @@ window.exitAdminEditMode = function() {
 	scrollToTop(); updateUI();
 };
 
+window.toggleAdminUserRoleFields = function(roleVal) {
+	const yrLabel = document.getElementById('editUserEntryYearLabel');
+	const deptLabel = document.getElementById('editUserEntryDeptLabel');
+	if (roleVal === 'counselor') {
+		if (yrLabel) yrLabel.innerText = "開放檢核年級 (可選特定年級或全校)";
+		if (deptLabel) deptLabel.innerText = "開放檢核科別 (可選特定科別或全校)";
+	} else if (roleVal === 'student') {
+		if (yrLabel) yrLabel.innerText = "入學年 (高三113、高二114、高一115)";
+		if (deptLabel) deptLabel.innerText = "科別-班級 (數字代表目前班級)";
+	} else {
+		if (yrLabel) yrLabel.innerText = "負責班級入學年 (導師需設定)";
+		if (deptLabel) deptLabel.innerText = "負責科別-班級 (導師需設定)";
+	}
+	toggleAdminTutorField(roleVal);
+};
+
 window.openAdminUserEdit = function(index) {
 	const s = applyFilters()[index];
 	if (!s) return;
@@ -2401,7 +2480,7 @@ window.openAdminUserEdit = function(index) {
 	}
 	roleSelect.value = s.role || 'student';
 
-	toggleAdminTutorField(s.role || 'student', s.tutor);
+	toggleAdminUserRoleFields(s.role || 'student');
 	document.getElementById('editUserCustomPassword').value = '';
 	toggleUIModal(true, 'adminUserModal');
 };
@@ -2678,6 +2757,19 @@ window.toggleSingleCreditFromMissingModal = function(chkId) {
 		if (activeStudentDBRecord && (activeStudentDBRecord.entry_year !== myYear || activeStudentDBRecord.entry_dept !== myDept)) {
 			showMsg("班級導師僅能修改所屬班級學生學分！", "error");
 			return;
+		}
+	}
+
+	if (role === 'counselor' && editingStudentId) {
+		if (activeStudentDBRecord) {
+			if (myYear !== '未設定' && myYear !== 'all' && activeStudentDBRecord.entry_year !== myYear) {
+				showMsg("超出權限：該學生不在您被授權的年級範圍！", "error");
+				return;
+			}
+			if (myDept !== '未設定' && myDept !== 'all' && activeStudentDBRecord.entry_dept !== myDept) {
+				showMsg("超出權限：該學生不在您被授權的科別範圍！", "error");
+				return;
+			}
 		}
 	}
 
