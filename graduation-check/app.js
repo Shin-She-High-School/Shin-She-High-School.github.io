@@ -1649,6 +1649,7 @@ window.handleAuth = async function() {
 	try {
 		updateSyncStatusIndicator('saving');
 		if (isReg) {
+			if (pwd.length < 6) throw new Error("密碼長度至少需 6 個字元！");
 			const isTeacher = await checkIsTeacherAccount(cleanSid);
 			const name = document.getElementById('authName').value.trim();
 			if (!name) throw new Error("請輸入姓名！");
@@ -2574,7 +2575,8 @@ window.showMissingCreditsModal = function() {
 	currentUncheckedCredits = [];
 	document.querySelectorAll(".toggle-checkbox:not(:checked)").forEach(input => {
 		const name = input.dataset.name, semIdx = parseInt(input.dataset.sem), val = parseInt(input.dataset.val), cat = input.dataset.cat, type = parseInt(input.dataset.type);
-		if (name) currentUncheckedCredits.push({ name, sem: semFullNames[semIdx], val, cat, type, semIdx });
+		const id = input.id;
+		if (name) currentUncheckedCredits.push({ name, sem: semFullNames[semIdx], val, cat, type, semIdx, id });
 	});
 	const filterSel = document.getElementById("missingCreditsFilter");
 	if (filterSel) {
@@ -2585,6 +2587,17 @@ window.showMissingCreditsModal = function() {
 	}
 	renderMissingCreditsFiltered();
 	toggleUIModal(true, 'missingCreditsModal');
+};
+
+window.toggleCreditFromMissing = function(chkId) {
+	const chk = document.getElementById(chkId);
+	if (chk) {
+		chk.checked = !chk.checked;
+		calculate();
+		renderTable();
+		debouncedSaveToCloud();
+		showMissingCreditsModal();
+	}
 };
 
 window.renderMissingCreditsFiltered = function() {
@@ -2606,7 +2619,14 @@ window.renderMissingCreditsFiltered = function() {
 					<h5 class="text-xs font-black text-slate-700 border-b border-slate-200/80 pb-2 mb-2 flex justify-between"><span>📅 ${escapeHtml(sem)}</span><span class="text-red-600">未得 ${grouped[sem].reduce((sum, i) => sum + i.val, 0)} 學分</span></h5>
 					<div class="space-y-2">`;
 				grouped[sem].forEach(item => {
-					html += `<div class="flex items-center justify-between text-xs py-1 px-1.5"><span class="font-bold text-slate-800">${escapeHtml(item.name)}</span><span class="font-extrabold text-red-500">${item.val} 學分</span></div>`;
+					html += `
+						<div class="flex items-center justify-between text-xs py-1.5 px-2 bg-white rounded-lg border border-slate-100 hover:border-slate-300 transition cursor-pointer" onclick="toggleCreditFromMissing('${escapeHtml(item.id)}')">
+							<span class="font-bold text-slate-800">${escapeHtml(item.name)}</span>
+							<div class="flex items-center gap-2">
+								<span class="font-extrabold text-red-500">${item.val} 學分</span>
+								<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-black text-[10px]">點擊設為及格 ✔</span>
+							</div>
+						</div>`;
 				});
 				html += `</div></div>`;
 			}
@@ -2638,6 +2658,13 @@ window.initCopyrightYear = function() {
 		el.textContent = currentYear;
 	});
 };
+
+window.addEventListener('beforeunload', (e) => {
+	if (autoSaveDebounceTimer || saveBaselineChecks) {
+		e.preventDefault();
+		e.returnValue = '您還有變更尚未完全儲存至雲端，確定要離開嗎？';
+	}
+});
 
 if (dbClient) {
 	dbClient.auth.onAuthStateChange((event, session) => {
