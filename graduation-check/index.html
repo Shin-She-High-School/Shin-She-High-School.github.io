@@ -284,7 +284,7 @@
 					<div id="independentAnnounceList" class="space-y-3"></div>
 				</div>
 			</div>
-			<div id="pageAuditLogView" class="app-container mt-4 hidden">
+			<div id="pageAuditLogView" class="app-container mt-4 hidden pb-12">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
 						<span class="font-black text-slate-800 text-xl flex items-center gap-2">
@@ -296,36 +296,45 @@
 					<div class="mb-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 						<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 							<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
-							<select id="auditFilterAction" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
-								<option value="all">所有異動項目</option>
-								<optgroup label="📘 學分與課綱類">
-									<option value="變更學分紀錄">📘 變更學分紀錄</option>
-									<option value="切換版本">🔄 切換版本</option>
-									<option value="批次全部及格">✅ 批次全部及格</option>
-									<option value="批次學分歸零">🧹 批次學分歸零</option>
-									<option value="單學期全選及格">✔ 單學期全選及格</option>
-									<option value="單學期學分歸零">⚠️ 單學期學分歸零</option>
-								</optgroup>
-								<optgroup label="📝 帳號與個人資料">
-									<option value="更改帳號資料">📝 更改帳號資料</option>
-									<option value="重設帳號密碼">⚡ 重設帳號密碼</option>
-									<option value="更新個人資料">👤 更新個人資料</option>
-									<option value="送出系統回饋">💡 送出系統回饋</option>
-								</optgroup>
-								<optgroup label="📢 系統公告">
-									<option value="發布系統公告">📢 發布系統公告</option>
-									<option value="編輯系統公告">✏️ 編輯系統公告</option>
-									<option value="更新公告排序">↕️ 更新公告排序</option>
-								</optgroup>
-								<optgroup label="🔑 系統登入與安全">
-									<option value="使用者登入">🔑 使用者登入</option>
-									<option value="使用者登出">🚪 使用者登出</option>
-									<option value="使用者註冊">✨ 使用者註冊</option>
-								</optgroup>
-								<optgroup label="⚠️ 刪除與警示">
-									<option value="刪除帳號">🗑️ 刪除帳號</option>
-								</optgroup>
-							</select>
+							
+							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-audit-action">
+								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full text-xs" onclick="toggleMS(event, 'audit-action')">
+									<span class="truncate pr-2 font-bold text-slate-700" id="ms-text-audit-action">所有異動項目</span>
+									<span class="text-[10px] text-slate-400">▼</span>
+								</div>
+								<div id="ms-drop-audit-action" class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
+									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700 border-b border-slate-100 pb-1.5 mb-1">
+										<input type="checkbox" value="all" class="ms-all-audit-action text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('audit-action', this)" checked> (全選所有異動項目)
+									</label>
+									<div class="text-[10px] font-black text-slate-400 px-1 pt-1">📘 學分與課綱類</div>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="變更學分紀錄" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 變更學分紀錄</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="切換版本" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 切換版本</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="批次全部及格" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 批次全部及格</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="批次學分歸零" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 批次學分歸零</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="單學期全選及格" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 單學期全選及格</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="單學期學分歸零" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 單學期學分歸零</label>
+									
+									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">📝 帳號與個人資料</div>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更改帳號資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更改帳號資料</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="重設帳號密碼" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 重設帳號密碼</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新個人資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新個人資料</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="送出系統回饋" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 送出系統回饋</label>
+
+									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">📢 系統公告</div>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="發布系統公告" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 發布系統公告</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="編輯系統公告" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 編輯系統公告</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新公告排序" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新公告排序</label>
+
+									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">🔑 系統登入與安全</div>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="使用者登入" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 使用者登入</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="使用者登出" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 使用者登出</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="使用者註冊" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 使用者註冊</label>
+
+									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">⚠️ 刪除與警示</div>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="刪除帳號" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 刪除帳號</label>
+								</div>
+							</div>
+
 							<select id="auditFilterOperatorRole" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
 								<option value="all">所有操作身分</option>
 								<option value="admin">👑 管理員</option>
@@ -418,7 +427,7 @@
 					</div>
 				</div>
 			</div>
-			<div id="pageAnnounceMgmtView" class="app-container mt-4 hidden pb-12">
+			<div id="pageAnnounceMgmtView" class="app-container mt-4 hidden pb-28">
 				<div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6 gap-3 flex-wrap">
 					<div class="flex items-center gap-3">
 						<button type="button" class="btn-table-action bg-slate-700 hover:bg-slate-800 text-white rounded-xl transition shadow-xs" onclick="closeIndependentPage()" title="返回管理後台">
@@ -437,7 +446,7 @@
 					</button>
 				</div>
 				<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-					<div class="lg:col-span-5 xl:col-span-4 sticky top-4">
+					<div class="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-4">
 						<div id="announceFormCard" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all duration-300">
 							<div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
 								<div class="flex items-center gap-2">
@@ -460,12 +469,7 @@
 								<div class="grid grid-cols-2 gap-2.5">
 									<div class="input-group mb-0">
 										<label class="text-xs font-black text-slate-700 mb-1">分類標籤</label>
-										<select id="newAnnounceCategory" class="w-full text-xs font-bold bg-white">
-											<option value="大會公告">🎓 大會公告</option>
-											<option value="教務通知">📋 教務通知</option>
-											<option value="系統維護">🛠️ 系統維護</option>
-											<option value="重要提醒">⚠️ 重要提醒</option>
-										</select>
+										<select id="newAnnounceCategory" class="w-full text-xs font-bold bg-white"></select>
 									</div>
 									<div class="input-group mb-0">
 										<label class="text-xs font-black text-slate-700 mb-1">對外發布日期</label>
@@ -510,13 +514,7 @@
 								<input type="text" id="announceSearchInput" oninput="renderAdminAnnounceList()" placeholder="快速檢索標題、內容或分類..." class="w-full text-xs font-bold border-none outline-none focus:ring-0 p-1">
 							</div>
 							<div class="flex items-center gap-2 shrink-0">
-								<select id="announceStatusFilter" onchange="renderAdminAnnounceList()" class="sort-select text-xs font-bold py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-xl">
-									<option value="all">全部狀態</option>
-									<option value="active">● 公開中</option>
-									<option value="scheduled">⏳ 預約中 / 未到期</option>
-									<option value="expired">⌛ 已過期</option>
-									<option value="inactive">○ 已手動下架</option>
-								</select>
+								<select id="announceStatusFilter" onchange="renderAdminAnnounceList()" class="sort-select text-xs font-bold py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-xl"></select>
 								<span id="announceCountText" class="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-xl">共 0 筆</span>
 							</div>
 						</div>
@@ -619,15 +617,26 @@
 			</div>
 
 			<div id="editCounselorScopeGroup" class="input-group" style="display:none;">
-				<div class="flex justify-between items-center mb-1.5">
-					<label class="!mb-0 text-indigo-700 font-extrabold text-xs">授權檢核班級 (全校共20班)</label>
-					<div class="flex gap-2 text-[11px] font-bold">
-						<button type="button" class="text-indigo-600 hover:underline" onclick="toggleAllCounselorClasses(true)">全選</button>
-						<span class="text-slate-300">|</span>
-						<button type="button" class="text-slate-500 hover:underline" onclick="toggleAllCounselorClasses(false)">清空</button>
+				<div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3">
+					<div class="flex items-center justify-between pb-2 border-b border-slate-200/80 flex-wrap gap-2">
+						<div>
+							<div class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+								<span class="w-2 h-3.5 bg-indigo-600 rounded-full"></span>
+								<span>授權檢核班級</span>
+							</div>
+							<p class="text-[11px] text-slate-500 font-bold mt-0.5">勾選該輔導教師有權查閱與修改學分之班級</p>
+						</div>
+						<div class="flex items-center gap-1.5">
+							<span id="counselorSelectedCountBadge" class="text-[11px] font-black px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">已選取 0 / 20 班</span>
+							<div class="flex items-center gap-1 text-[11px] font-extrabold ml-1">
+								<button type="button" class="text-indigo-600 hover:text-indigo-800 hover:underline px-1" onclick="toggleAllCounselorClasses(true)">全選</button>
+								<span class="text-slate-300">|</span>
+								<button type="button" class="text-slate-500 hover:text-slate-700 hover:underline px-1" onclick="toggleAllCounselorClasses(false)">清空</button>
+							</div>
+						</div>
 					</div>
+					<div id="counselorClassChecklist" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-1"></div>
 				</div>
-				<div id="counselorClassChecklist" class="max-h-48 overflow-y-auto custom-scrollbar border border-slate-300 rounded-xl p-2.5 bg-slate-50 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs font-semibold"></div>
 			</div>
 
 			<div id="editTutorSection" class="input-group">
