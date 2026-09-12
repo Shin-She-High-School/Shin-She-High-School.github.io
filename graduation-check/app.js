@@ -1576,7 +1576,10 @@ window.toggleUIModal = function(show, modalId) {
 
 window.updateHelpModalDetails = function() {
 	const curRec = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata);
-	let dept = curRec?.entry_dept || currentDept;
+	let dept = curRec?.entry_dept;
+	if (!dept || dept === '未設定' || String(dept).startsWith('[')) {
+		dept = currentDept;
+	}
 	const track = getTrackType(dept);
 	const acad = document.getElementById('helpDetailsAcademic');
 	const voc = document.getElementById('helpDetailsVocational');
@@ -1599,20 +1602,34 @@ window.determineCurriculumVersion = function(record) {
 	const role = record.role || 'student';
 	const ey = record.entry_year || '未設定';
 	const ed = record.entry_dept || '未設定';
-	const hasSetting = (ey !== '未設定' && ed !== '未設定' && !ey.includes('_') && !ed.includes('_'));
+	const hasSetting = (ey !== '未設定' && ed !== '未設定' && !ey.includes('_') && !ed.includes('_') && !String(ed).startsWith('['));
 	if (role === 'student') {
 		return { year: hasSetting ? ey : '113', dept: hasSetting ? ed : '普通科(理工生醫群)-1', locked: true };
 	} else {
 		if (hasSetting && role === 'teacher') return { year: ey, dept: ed, locked: true };
+		let vYear = record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113';
+		let vDept = record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1';
+		if (String(vDept).startsWith('[') || !CurriculumService.departments.includes(vDept)) {
+			vDept = '普通科(理工生醫群)-1';
+		}
+		if (!CurriculumService.years.includes(vYear)) {
+			vYear = '113';
+		}
 		return {
-			year: record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113',
-			dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1',
+			year: vYear,
+			dept: vDept,
 			locked: false
 		};
 	}
 };
 
 window.selectCurriculum = function(yr, dept) {
+	if (!CurriculumService.years.includes(String(yr))) {
+		yr = '113';
+	}
+	if (typeof dept !== 'string' || String(dept).startsWith('[') || !CurriculumService.departments.includes(dept)) {
+		dept = '普通科(理工生醫群)-1';
+	}
 	currentYear = yr;
 	currentDept = dept;
 	curriculum = CurriculumService.getCurriculum(yr, dept);
@@ -2365,7 +2382,7 @@ window.applyLoadedChecks = function(checks) {
 
 window.evaluateStudentStatus = function(s) {
 	const ey = (s.entry_year && s.entry_year !== '未設定') ? s.entry_year : '113';
-	const ed = (s.entry_dept && s.entry_dept !== '未設定') ? s.entry_dept : '普通科(理工生醫群)-1';
+	const ed = (s.entry_dept && s.entry_dept !== '未設定' && !String(s.entry_dept).startsWith('[')) ? s.entry_dept : '普通科(理工生醫群)-1';
 	const curr = CurriculumService.getCurriculum(ey, ed);
 	if (!curr || curr.length === 0) return { status: 'unknown', total: 0, statusText: '課程資料建置中！', badgeClass: 'bg-slate-100 text-slate-600' };
 	const trackType = getTrackType(ed);
@@ -2932,7 +2949,9 @@ window.renderTable = function() {
 	if (curriculum.length === 0) {
 		if (mobileContainer) { mobileContainer.style.display = "none"; mobileContainer.innerHTML = ""; }
 		constructionBox?.classList.remove("hidden");
-		document.getElementById("constYearDept").innerText = `${currentYear}年入學 ${currentDept}`;
+		const cleanYear = CurriculumService.years.includes(String(currentYear)) ? currentYear : '113';
+		const cleanDept = CurriculumService.departments.includes(String(currentDept)) ? currentDept : '普通科(理工生醫群)-1';
+		document.getElementById("constYearDept").innerText = `${cleanYear}年入學 ${cleanDept}`;
 		return;
 	}
 	constructionBox?.classList.add("hidden");
@@ -2968,8 +2987,8 @@ window.handleMainAction = function() {
 window.handleReturnToTrial = function() {
 	if (currentIndependentPage) closeIndependentPage();
 	isViewingClassList = false;
-	const myYear = userDBRecord?.entry_year || '113', myDept = userDBRecord?.entry_dept || '普通科(理工生醫群)-1';
-	selectCurriculum(myYear, myDept);
+	const version = determineCurriculumVersion(userDBRecord);
+	selectCurriculum(version.year, version.dept);
 	scrollToTop(); updateUI(); loadFromCloud();
 };
 
@@ -2980,7 +2999,8 @@ window.openProfile = function() {
 	document.getElementById('profAccount').value = curData.student_id || '';
 	document.getElementById('profName').value = curData.full_name || '';
 	document.getElementById('profEntryYear').value = curData.entry_year || '未設定';
-	document.getElementById('profEntryDept').value = curData.entry_dept || '未設定';
+	const isCounselorDept = String(curData.entry_dept || '').startsWith('[');
+	document.getElementById('profEntryDept').value = isCounselorDept ? '未設定' : (curData.entry_dept || '未設定');
 	document.getElementById('profStudentTutorArea').style.display = role === 'student' ? 'block' : 'none';
 	if (role === 'student') document.getElementById('profTutor').value = curData.tutor || '未設定';
 	document.getElementById('profPassword').value = '';
