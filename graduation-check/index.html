@@ -592,7 +592,7 @@
 		</div>
 	</div>
 	<div id="adminUserModal" class="modal-overlay" onclick="handleOutsideClick(event)">
-		<div class="modal-content" style="max-width:420px;">
+		<div class="modal-content" style="max-width:520px;">
 			<div class="modal-header"><span>更改帳號資料</span><span class="close-modal-btn" onclick="toggleUIModal(false,'adminUserModal')">&times;</span></div>
 			<input type="hidden" id="editUserId">
 			<div class="input-group"><label>帳號</label><input type="text" id="editUserSid"></div>
@@ -606,14 +606,30 @@
 					<option value="admin">管理員</option>
 				</select>
 			</div>
-			<div class="input-group">
-				<label id="editUserEntryYearLabel">入學年 (高三113、高二114、高一115)</label>
-				<select id="editUserEntryYear"><option value="未設定">未設定</option></select>
+
+			<div id="editUserStandardClassGroup">
+				<div class="input-group">
+					<label id="editUserEntryYearLabel">負責班級入學年</label>
+					<select id="editUserEntryYear"><option value="未設定">未設定</option></select>
+				</div>
+				<div class="input-group">
+					<label id="editUserEntryDeptLabel">負責科別-班級</label>
+					<select id="editUserEntryDept"><option value="未設定">未設定</option></select>
+				</div>
 			</div>
-			<div class="input-group">
-				<label id="editUserEntryDeptLabel">科別-班級 (數字代表目前班級)</label>
-				<select id="editUserEntryDept"><option value="未設定">未設定</option></select>
+
+			<div id="editCounselorScopeGroup" class="input-group" style="display:none;">
+				<div class="flex justify-between items-center mb-1.5">
+					<label class="!mb-0 text-indigo-700 font-extrabold text-xs">授權檢核班級 (全校共20班)</label>
+					<div class="flex gap-2 text-[11px] font-bold">
+						<button type="button" class="text-indigo-600 hover:underline" onclick="toggleAllCounselorClasses(true)">全選</button>
+						<span class="text-slate-300">|</span>
+						<button type="button" class="text-slate-500 hover:underline" onclick="toggleAllCounselorClasses(false)">清空</button>
+					</div>
+				</div>
+				<div id="counselorClassChecklist" class="max-h-48 overflow-y-auto custom-scrollbar border border-slate-300 rounded-xl p-2.5 bg-slate-50 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs font-semibold"></div>
 			</div>
+
 			<div id="editTutorSection" class="input-group">
 				<label id="editTutorLabel">導師</label>
 				<div id="editTutorWrapper"></div>
