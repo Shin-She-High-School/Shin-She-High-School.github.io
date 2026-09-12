@@ -2632,6 +2632,13 @@ window.initBackToTop = function() {
 	}
 };
 
+window.initCopyrightYear = function() {
+	const currentYear = new Date().getFullYear();
+	document.querySelectorAll('.copyright-year').forEach(el => {
+		el.textContent = currentYear;
+	});
+};
+
 if (dbClient) {
 	dbClient.auth.onAuthStateChange((event, session) => {
 		currentUser = session ? session.user : null;
@@ -2678,3 +2685,4 @@ fetchCloudCurriculums().then(() => {
 fetchAnnouncements();
 initHelpModalScrollGuard();
 initBackToTop();
+initCopyrightYear();
