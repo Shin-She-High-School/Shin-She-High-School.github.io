@@ -31,11 +31,10 @@ const CurriculumService = {
 		});
 	},
 	getCurriculum(year, dept) {
-		const cleanDept = (dept && dept.startsWith('[')) ? "普通科(理工生醫群)-1" : dept;
-		return this.data[`${year}_${cleanDept}`] || [];
+		return this.data[`${year}_${dept}`] || [];
 	},
 	getTrackType(deptName) {
-		if (!deptName || deptName.startsWith('[')) return 'academic';
+		if (!deptName) return 'vocational';
 		if (deptName.includes('普通科')) return 'academic';
 		if (deptName.includes('體育班')) return 'sports';
 		return 'vocational';
@@ -57,8 +56,15 @@ const ANNOUNCE_STATUS_FILTERS = [
 	{ value: "inactive", label: "○ 已手動下架" }
 ];
 
+const AUDIT_ACTION_OPTIONS = [
+	{ group: "📘 學分與課綱類", items: ["變更學分紀錄", "切換版本", "批次全部及格", "批次學分歸零", "單學期全選及格", "單學期學分歸零"] },
+	{ group: "📝 帳號與個人資料", items: ["更改帳號資料", "重設帳號密碼", "更新個人資料", "送出系統回饋"] },
+	{ group: "📢 系統公告", items: ["發布系統公告", "編輯系統公告", "更新公告排序"] },
+	{ group: "🔑 系統登入與安全", items: ["使用者登入", "使用者登出", "使用者註冊"] },
+	{ group: "⚠️ 刪除與警示", items: ["刪除帳號", "刪除學生帳號"] }
+];
+
 let currentIndependentPage = null;
-let currentScopeCounselorId = null;
 const teacherCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000;
 let autoSaveDebounceTimer = null;
@@ -180,13 +186,11 @@ window.openIndependentPage = function(pageType) {
 	const auditPage = document.getElementById('pageAuditLogView');
 	const feedbackPage = document.getElementById('pageFeedbackListView');
 	const announceMgmtPage = document.getElementById('pageAnnounceMgmtView');
-	const counselorScopePage = document.getElementById('pageCounselorScopeView');
 	if (mainDashboard) mainDashboard.classList.add('hidden');
 	if (announcePage) announcePage.classList.add('hidden');
 	if (auditPage) auditPage.classList.add('hidden');
 	if (feedbackPage) feedbackPage.classList.add('hidden');
 	if (announceMgmtPage) announceMgmtPage.classList.add('hidden');
-	if (counselorScopePage) counselorScopePage.classList.add('hidden');
 	if (pageType === 'announceView') {
 		if (announcePage) announcePage.classList.remove('hidden');
 		renderIndependentAnnouncements();
@@ -201,11 +205,6 @@ window.openIndependentPage = function(pageType) {
 		if (announceMgmtPage) announceMgmtPage.classList.remove('hidden');
 		cancelAnnounceEdit();
 		renderAdminAnnounceList();
-	} else if (pageType === 'counselorScopeView') {
-		ensureCounselorScopePageExists();
-		const p = document.getElementById('pageCounselorScopeView');
-		if (p) p.classList.remove('hidden');
-		renderCounselorScopePage();
 	}
 	updateHash();
 	scrollToTop();
@@ -217,12 +216,10 @@ window.closeIndependentPage = function() {
 	const auditPage = document.getElementById('pageAuditLogView');
 	const feedbackPage = document.getElementById('pageFeedbackListView');
 	const announceMgmtPage = document.getElementById('pageAnnounceMgmtView');
-	const counselorScopePage = document.getElementById('pageCounselorScopeView');
 	if (announcePage) announcePage.classList.add('hidden');
 	if (auditPage) auditPage.classList.add('hidden');
 	if (feedbackPage) feedbackPage.classList.add('hidden');
 	if (announceMgmtPage) announceMgmtPage.classList.add('hidden');
-	if (counselorScopePage) counselorScopePage.classList.add('hidden');
 	if (mainDashboard) mainDashboard.classList.remove('hidden');
 	currentIndependentPage = null;
 	updateHash();
@@ -552,8 +549,7 @@ window.openEditAnnouncement = function(id) {
 		formCard.classList.add('ring-4', 'ring-amber-400/80', 'shadow-md');
 		const scrollBox = document.getElementById('scrollContainer');
 		if (scrollBox) {
-			const targetTop = formCard.getBoundingClientRect().top + scrollBox.scrollTop - 80;
-			scrollBox.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+			scrollBox.scrollTo({ top: formCard.offsetTop - 16, behavior: 'smooth' });
 		}
 	}
 };
@@ -1003,53 +999,42 @@ window.deleteFeedback = function(id, name) {
 };
 
 window.initAuditActionMultiSelect = function() {
-	const sel = document.getElementById('auditFilterAction');
-	if (!sel) return;
-	const parent = sel.parentElement;
-	if (!parent) return;
-
-	if (document.getElementById('ms-wrap-audit-action')) return;
-
-	const allActions = [
-		{ group: "📘 學分與課綱類", items: ["變更學分紀錄", "切換版本", "批次全部及格", "批次學分歸零", "單學期全選及格", "單學期學分歸零"] },
-		{ group: "📝 帳號與個人資料", items: ["更改帳號資料", "重設帳號密碼", "更新個人資料", "送出系統回饋"] },
-		{ group: "📢 系統公告", items: ["發布系統公告", "編輯系統公告", "更新公告排序"] },
-		{ group: "🔑 系統登入與安全", items: ["使用者登入", "使用者登出", "使用者註冊"] },
-		{ group: "⚠️ 刪除與警示", items: ["刪除帳號", "刪除學生帳號"] }
-	];
+	const oldSelect = document.getElementById('auditFilterAction');
+	if (!oldSelect || document.getElementById('ms-wrap-audit-action')) return;
 
 	const wrap = document.createElement('div');
-	wrap.className = "relative w-full";
-	wrap.id = "ms-wrap-audit-action";
-
-	let dropHtml = `
-		<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full text-xs font-bold" onclick="toggleMS(event, 'audit-action')">
-			<span class="truncate pr-2 text-slate-700" id="ms-text-audit-action">所有異動項目</span>
+	wrap.id = 'ms-wrap-audit-action';
+	wrap.className = 'relative flex-1 min-w-[130px]';
+	wrap.innerHTML = `
+		<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full text-xs" onclick="toggleMS(event, 'audit-action')">
+			<span class="truncate pr-2 font-bold text-slate-700" id="ms-text-audit-action">所有異動項目</span>
 			<span class="text-[10px] text-slate-400">▼</span>
 		</div>
-		<div id="ms-drop-audit-action" class="absolute z-50 w-[240px] sm:w-[280px] left-0 mt-1 bg-white border border-slate-300 rounded-xl shadow-xl hidden max-h-72 overflow-y-auto custom-scrollbar p-2 flex-col gap-1 text-xs">
-			<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded font-black text-indigo-700 border-b border-slate-100">
-				<input type="checkbox" value="all" class="ms-all-audit-action rounded text-indigo-600 focus:ring-indigo-500" onchange="handleMSAll('audit-action', this)" checked>
-				<span>(全選所有異動項目)</span>
+		<div id="ms-drop-audit-action" class="absolute z-50 w-[180%] sm:w-[150%] md:w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
+			<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+				<input type="checkbox" value="all" class="ms-all-audit-action text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('audit-action', this)" checked> (全選所有異動項目)
 			</label>
+		</div>
 	`;
 
-	allActions.forEach(g => {
-		dropHtml += `<div class="px-1.5 pt-2 pb-0.5 text-[11px] font-black text-slate-400 uppercase tracking-wider">${escapeHtml(g.group)}</div>`;
+	const drop = wrap.querySelector('#ms-drop-audit-action');
+	AUDIT_ACTION_OPTIONS.forEach(g => {
+		const groupHeader = document.createElement('div');
+		groupHeader.className = 'text-[10px] font-black text-slate-400 px-1.5 pt-1.5 pb-0.5';
+		groupHeader.innerText = g.group;
+		drop.appendChild(groupHeader);
 		g.items.forEach(act => {
-			dropHtml += `
-				<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-slate-700 font-bold">
-					<input type="checkbox" value="${escapeHtml(act)}" class="ms-opt-audit-action rounded text-indigo-600 focus:ring-indigo-500" onchange="handleMSOpt('audit-action')">
-					<span>${escapeHtml(act)}</span>
-				</label>
+			const label = document.createElement('label');
+			label.className = 'flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700';
+			label.innerHTML = `
+				<input type="checkbox" value="${act}" class="ms-opt-audit-action text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('audit-action')">
+				<span>${act}</span>
 			`;
+			drop.appendChild(label);
 		});
 	});
 
-	dropHtml += `</div>`;
-	wrap.innerHTML = dropHtml;
-	sel.style.display = 'none';
-	parent.insertBefore(wrap, sel);
+	oldSelect.parentNode.replaceChild(wrap, oldSelect);
 };
 
 window.openAuditLogModal = async function(filterStudentId = null) {
@@ -1312,170 +1297,99 @@ window.renderAuditLogList = function() {
 	});
 };
 
-window.ensureCounselorScopePageExists = function() {
-	if (document.getElementById('pageCounselorScopeView')) return;
-	const container = document.getElementById('scrollContainer');
-	if (!container) return;
-
-	const scopePage = document.createElement('div');
-	scopePage.id = 'pageCounselorScopeView';
-	scopePage.className = 'app-container mt-4 hidden pb-12';
-	scopePage.innerHTML = `
-		<div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-5 gap-3 flex-wrap">
-			<div class="flex items-center gap-3">
-				<button type="button" class="btn-table-action bg-slate-700 hover:bg-slate-800 text-white rounded-xl transition shadow-xs" onclick="closeIndependentPage()" title="返回管理後台">
-					<i class="fa-solid fa-arrow-left text-xs"></i>
-				</button>
-				<div>
-					<h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-						<span class="w-2.5 h-6 rounded-full bg-purple-600"></span>
-						輔導教師 班級授權管理
-					</h2>
-					<p class="text-xs text-slate-500 font-bold mt-0.5">獨立設定並指派輔導教師可查閱及檢核學分之班級權限 (全校共20班)</p>
-				</div>
-			</div>
-			<button type="button" class="px-4 py-2 text-xs font-black rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 transition" onclick="closeIndependentPage()">
-				返回管理後台
-			</button>
-		</div>
-
-		<div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm mb-5 space-y-4">
-			<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-				<div class="flex items-center gap-2.5 w-full md:w-auto">
-					<span class="text-xs sm:text-sm font-black text-slate-700 shrink-0">選擇輔導教師：</span>
-					<select id="scopeCounselorSelect" class="sort-select text-xs sm:text-sm py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-bold flex-1 md:w-64" onchange="changeScopeCounselor(this.value)"></select>
-				</div>
-				<div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end flex-wrap">
-					<span id="scopeSelectedCountBadge" class="text-xs font-black px-3 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs">已選取 0 / 20 班</span>
-					<button type="button" class="px-5 py-2 rounded-xl font-black text-white text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md transition-all active:scale-95" onclick="saveCounselorScopeSettings()">
-						💾 儲存授權設定
-					</button>
-				</div>
-			</div>
-
-			<div class="flex items-center justify-between gap-2 flex-wrap pt-1">
-				<div class="text-xs font-bold text-slate-600 flex items-center gap-1.5">
-					<span class="w-2 h-2 rounded-full bg-purple-500"></span>
-					快捷批次工具：
-				</div>
-				<div class="flex items-center gap-1.5 flex-wrap text-xs font-black">
-					<button type="button" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition" onclick="toggleAllCounselorClasses(true)">全校20班全選</button>
-					<button type="button" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 transition" onclick="toggleAllCounselorClasses(false)">全部清空</button>
-					<span class="text-slate-300">|</span>
-					<button type="button" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition" onclick="toggleYearCounselorClasses('113', true)">高三(113)全選</button>
-					<button type="button" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition" onclick="toggleYearCounselorClasses('114', true)">高二(114)全選</button>
-				</div>
-			</div>
-
-			<div id="counselorClassChecklist" class="space-y-4 pt-2"></div>
-
-			<div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
-				<button type="button" class="px-4 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 text-xs transition" onclick="closeIndependentPage()">
-					取消
-				</button>
-				<button type="button" class="px-6 py-2.5 rounded-xl font-black text-white text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md transition-all active:scale-95" onclick="saveCounselorScopeSettings()">
-					儲存授權設定
-				</button>
-			</div>
-		</div>
-	`;
-	container.appendChild(scopePage);
-};
-
-window.openCounselorScopePage = function(targetCounselorId = null) {
-	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
-	if (role !== 'admin') {
-		showMsg("僅系統管理員有權限配置輔導教師授權班級！", "error");
-		return;
-	}
-	toggleUIModal(false, 'adminUserModal');
-	currentScopeCounselorId = targetCounselorId;
-	openIndependentPage('counselorScopeView');
-};
-
-window.renderCounselorScopePage = function() {
-	ensureCounselorScopePageExists();
-	const selectEl = document.getElementById('scopeCounselorSelect');
-	if (!selectEl) return;
-
-	const counselorUsers = adminListData.filter(u => u.role === 'counselor');
-	if (counselorUsers.length === 0) {
-		selectEl.innerHTML = `<option value="">查無輔導教師帳號</option>`;
-		const checklist = document.getElementById('counselorClassChecklist');
-		if (checklist) checklist.innerHTML = `<div class="p-8 text-center text-slate-400 font-bold bg-slate-50 border border-slate-200 rounded-xl">目前系統尚無輔導教師角色之帳號，請先於資料管理將使用者身份設定為輔導教師。</div>`;
-		return;
-	}
-
-	selectEl.innerHTML = counselorUsers.map(c => {
-		const label = `${c.full_name || '未命名'} (${c.student_id || '無帳號'})`;
-		return `<option value="${escapeHtml(c.id)}">${escapeHtml(label)}</option>`;
-	}).join('');
-
-	if (!currentScopeCounselorId || !counselorUsers.some(c => c.id === currentScopeCounselorId)) {
-		currentScopeCounselorId = counselorUsers[0].id;
-	}
-	selectEl.value = currentScopeCounselorId;
-
-	const targetUser = counselorUsers.find(c => c.id === currentScopeCounselorId);
-	const assignedClasses = getUserCounselorClasses(targetUser);
-	renderCounselorClassCheckboxes(assignedClasses);
-};
-
-window.changeScopeCounselor = function(counselorId) {
-	currentScopeCounselorId = counselorId;
-	const targetUser = adminListData.find(c => c.id === counselorId);
-	const assignedClasses = getUserCounselorClasses(targetUser);
-	renderCounselorClassCheckboxes(assignedClasses);
-};
-
-window.saveCounselorScopeSettings = async function() {
-	if (!dbClient || !currentScopeCounselorId) return;
-	const targetRecord = adminListData.find(item => item.id === currentScopeCounselorId);
-	if (!targetRecord) {
-		showMsg("找不到指定的輔導教師帳號！", "error");
-		return;
-	}
-
-	const counselorClasses = getCounselorSelectedClasses();
-	const sid = (targetRecord.student_id || '').toLowerCase().trim();
-	const name = targetRecord.full_name || '輔導教師';
-
+window.fetchCloudCurriculums = async function() {
+	if (!dbClient) return;
 	try {
-		updateSyncStatusIndicator('saving');
-
-		let currentJson = targetRecord.credits_json || {};
-		if (typeof currentJson === 'string') {
-			try { currentJson = JSON.parse(currentJson); } catch (e) { currentJson = {}; }
+		const { data, error } = await dbClient.from('curriculums').select('*');
+		if (!error && data && data.length > 0) {
+			CurriculumService.setCurriculums(data);
 		}
-		currentJson._counselor_classes = counselorClasses;
+	} catch (e) {}
+};
 
-		const { error } = await dbClient.from('grad_checks').update({
-			credits_json: currentJson,
-			entry_dept: JSON.stringify(counselorClasses),
-			updated_at: new Date().toISOString()
-		}).eq('id', currentScopeCounselorId);
-
-		if (error) throw error;
-
-		targetRecord.credits_json = currentJson;
-		targetRecord.entry_dept = JSON.stringify(counselorClasses);
-
-		if (userDBRecord && userDBRecord.id === currentScopeCounselorId) {
-			userDBRecord.credits_json = currentJson;
-			userDBRecord.entry_dept = JSON.stringify(counselorClasses);
+window.initDropdowns = function(isAdmin = false) {
+	const yearSelects = ['authEntryYear', 'dashSelectYear', 'profEntryYear', 'editUserEntryYear'];
+	const deptSelects = ['authEntryDept', 'dashSelectDept', 'profEntryDept', 'editUserEntryDept'];
+	yearSelects.forEach(id => {
+		const el = document.getElementById(id);
+		if (!el) return;
+		const currentVal = el.value;
+		let html = '';
+		if (id === 'authEntryYear') html += '<option value="">請選擇入學年</option>';
+		if (id === 'editUserEntryYear') {
+			html += '<option value="未設定">未設定</option>';
 		}
+		CurriculumService.years.forEach(y => { html += `<option value="${y}">${y} 學年度</option>`; });
+		el.innerHTML = html;
+		if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) el.value = currentVal;
+		else if (id === 'dashSelectYear') el.value = currentYear;
+	});
+	deptSelects.forEach(id => {
+		const el = document.getElementById(id);
+		if (!el) return;
+		const currentVal = el.value;
+		let html = '';
+		if (id === 'authEntryDept') html += '<option value="">請選擇科別-班級</option>';
+		if (id === 'editUserEntryDept') {
+			html += '<option value="未設定">未設定</option>';
+		}
+		CurriculumService.departments.forEach(d => { html += `<option value="${d}">${d}</option>`; });
+		el.innerHTML = html;
+		if (currentVal && el.querySelector(`option[value="${currentVal}"]`)) el.value = currentVal;
+		else if (id === 'dashSelectDept') el.value = currentDept;
+	});
+	const fRole = document.getElementById('ms-drop-role');
+	if (fRole) {
+		fRole.innerHTML = `
+			<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+				<input type="checkbox" value="all" class="ms-all-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('role', this)" checked> (全選)
+			</label>
+			<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+				<input type="checkbox" value="student" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 🎓 學生
+			</label>
+			<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+				<input type="checkbox" value="tutor" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👨‍🏫 導師
+			</label>
+			<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+				<input type="checkbox" value="teacher" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👩‍🏫 教師
+			</label>
+			<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+				<input type="checkbox" value="counselor" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 💜 輔導教師
+			</label>
+			<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+				<input type="checkbox" value="admin" class="ms-opt-role text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('role')"> 👑 管理員
+			</label>
+		`;
+	}
+	const fYear = document.getElementById('ms-drop-year');
+	if (fYear) {
+		let h = `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+					<input type="checkbox" value="all" class="ms-all-year text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('year', this)" checked> (全選)
+				</label>`;
+		CurriculumService.years.forEach(y => h += `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+					<input type="checkbox" value="${y}" class="ms-opt-year text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('year')"> ${y} 學年度
+				</label>`);
+		fYear.innerHTML = h;
+	}
+	const fDept = document.getElementById('ms-drop-dept');
+	if (fDept) {
+		let h = `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+					<input type="checkbox" value="all" class="ms-all-dept text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('dept', this)" checked> (全選)
+				</label>`;
+		CurriculumService.departments.forEach(d => h += `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700">
+					<input type="checkbox" value="${d}" class="ms-opt-dept text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSOpt('dept')"> ${d}
+				</label>`);
+		fDept.innerHTML = h;
+	}
 
-		updateSyncStatusIndicator('success');
-		showMsg(`已成功更新「${name}」的班級授權 (共 ${counselorClasses.length} 班)！`);
-		logAuditRecord("更改帳號資料", sid, name, {
-			role: 'counselor',
-			counselorClassesCount: counselorClasses.length,
-			authorizedClasses: counselorClasses
-		});
-		renderAdminTable();
-	} catch (err) {
-		updateSyncStatusIndicator('offline');
-		showMsg("儲存授權班級失敗：" + translateError(err.message), "error");
+	const newCatSelect = document.getElementById('newAnnounceCategory');
+	if (newCatSelect) {
+		newCatSelect.innerHTML = ANNOUNCE_CATEGORIES.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
+	}
+
+	const filterStatusSelect = document.getElementById('announceStatusFilter');
+	if (filterStatusSelect) {
+		filterStatusSelect.innerHTML = ANNOUNCE_STATUS_FILTERS.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
 	}
 };
 
@@ -1492,12 +1406,12 @@ window.renderCounselorClassCheckboxes = function(selectedClassKeys = []) {
 			const key = `${y}_${d}`;
 			const isChecked = selectedSet.has(key);
 			const badge = getDeptBadgeInfo(d);
-			const activeClass = isChecked ? 'border-purple-400 bg-purple-50/50 ring-1 ring-purple-300' : 'border-slate-200 bg-white hover:border-slate-300';
+			const activeClass = isChecked ? 'border-indigo-400 bg-indigo-50/50 ring-1 ring-indigo-300' : 'border-slate-200 bg-white hover:border-slate-300';
 
 			itemsHtml += `
-				<label class="counselor-checkbox-card flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition select-none ${activeClass}">
-					<div class="flex items-center gap-2.5 min-w-0 flex-1 mr-1">
-						<input type="checkbox" value="${key}" data-year="${y}" class="counselor-class-item rounded text-purple-600 focus:ring-purple-500 w-4 h-4" ${isChecked ? 'checked' : ''} onchange="handleCounselorItemCheckboxChange(this)">
+				<label class="counselor-checkbox-card flex items-center justify-between p-2 rounded-xl border cursor-pointer transition select-none ${activeClass}">
+					<div class="flex items-center gap-2 min-w-0 flex-1 mr-1">
+						<input type="checkbox" value="${key}" data-year="${y}" class="counselor-class-item rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" ${isChecked ? 'checked' : ''} onchange="handleCounselorItemCheckboxChange(this)">
 						<span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(d)}</span>
 					</div>
 					<span class="text-[10px] font-black px-1.5 py-0.5 rounded border shrink-0 ${badge.class}">${badge.tag}</span>
@@ -1506,19 +1420,19 @@ window.renderCounselorClassCheckboxes = function(selectedClassKeys = []) {
 		});
 
 		html += `
-			<div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs">
-				<div class="flex items-center justify-between mb-2.5">
-					<span class="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-2">
-						<span class="w-2 h-4 rounded-full bg-purple-600"></span>
+			<div class="bg-slate-100/70 p-2.5 rounded-xl border border-slate-200/80">
+				<div class="flex items-center justify-between mb-2">
+					<span class="text-xs font-black text-slate-700 flex items-center gap-1.5">
+						<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
 						${yearLabels[y] || `${y} 學年度`}
 					</span>
-					<div class="flex gap-2 text-xs font-bold">
-						<button type="button" class="text-purple-600 hover:text-purple-800 hover:underline" onclick="toggleYearCounselorClasses('${y}', true)">本年全選</button>
+					<div class="flex gap-1.5 text-[10px] font-bold">
+						<button type="button" class="text-indigo-600 hover:underline" onclick="toggleYearCounselorClasses('${y}', true)">本年全選</button>
 						<span class="text-slate-300">|</span>
-						<button type="button" class="text-slate-500 hover:text-slate-700 hover:underline" onclick="toggleYearCounselorClasses('${y}', false)">本年清空</button>
+						<button type="button" class="text-slate-500 hover:underline" onclick="toggleYearCounselorClasses('${y}', false)">本年清空</button>
 					</div>
 				</div>
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
 					${itemsHtml}
 				</div>
 			</div>
@@ -1538,31 +1452,27 @@ window.getDeptBadgeInfo = function(deptName) {
 
 window.updateCounselorSelectedCounter = function() {
 	const checkedCount = document.querySelectorAll('.counselor-class-item:checked').length;
-	const badges = [
-		document.getElementById('counselorSelectedCountBadge'),
-		document.getElementById('scopeSelectedCountBadge')
-	];
-	badges.forEach(badge => {
-		if (!badge) return;
+	const badge = document.getElementById('counselorSelectedCountBadge');
+	if (badge) {
 		badge.innerText = `已選取 ${checkedCount} / 20 班`;
 		if (checkedCount === 20) {
-			badge.className = "text-xs font-black px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs";
+			badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300";
 		} else if (checkedCount === 0) {
-			badge.className = "text-xs font-black px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-300 shadow-2xs";
+			badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-300";
 		} else {
-			badge.className = "text-xs font-black px-3 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs";
+			badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200";
 		}
-	});
+	}
 };
 
 window.handleCounselorItemCheckboxChange = function(inputEl) {
 	const labelCard = inputEl.closest('.counselor-checkbox-card');
 	if (labelCard) {
 		if (inputEl.checked) {
-			labelCard.classList.add('border-purple-400', 'bg-purple-50/50', 'ring-1', 'ring-purple-300');
+			labelCard.classList.add('border-indigo-400', 'bg-indigo-50/50', 'ring-1', 'ring-indigo-300');
 			labelCard.classList.remove('border-slate-200', 'bg-white');
 		} else {
-			labelCard.classList.remove('border-purple-400', 'bg-purple-50/50', 'ring-1', 'ring-purple-300');
+			labelCard.classList.remove('border-indigo-400', 'bg-indigo-50/50', 'ring-1', 'ring-indigo-300');
 			labelCard.classList.add('border-slate-200', 'bg-white');
 		}
 	}
@@ -1628,7 +1538,7 @@ window.handleHashRouting = function() {
 	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 	if (hash.startsWith('#page-')) {
 		const pType = hash.replace('#page-', '');
-		if (pType === 'announceView' || (role === 'admin' && ['auditLogView', 'feedbackListView', 'announceMgmtView', 'counselorScopeView'].includes(pType))) {
+		if (pType === 'announceView' || (role === 'admin' && ['auditLogView', 'feedbackListView', 'announceMgmtView'].includes(pType))) {
 			openIndependentPage(pType); return;
 		}
 	}
@@ -1666,7 +1576,10 @@ window.toggleUIModal = function(show, modalId) {
 
 window.updateHelpModalDetails = function() {
 	const curRec = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata);
-	let dept = curRec?.entry_dept || currentDept;
+	let dept = curRec?.entry_dept;
+	if (!dept || dept === '未設定' || String(dept).startsWith('[')) {
+		dept = currentDept;
+	}
 	const track = getTrackType(dept);
 	const acad = document.getElementById('helpDetailsAcademic');
 	const voc = document.getElementById('helpDetailsVocational');
@@ -1688,25 +1601,38 @@ window.determineCurriculumVersion = function(record) {
 	if (!record) return { year: currentYear, dept: currentDept, locked: false };
 	const role = record.role || 'student';
 	const ey = record.entry_year || '未設定';
-	let ed = record.entry_dept || '未設定';
-	if (ed && ed.startsWith('[')) ed = '未設定';
-	const hasSetting = (ey !== '未設定' && ed !== '未設定');
+	const ed = record.entry_dept || '未設定';
+	const hasSetting = (ey !== '未設定' && ed !== '未設定' && !ey.includes('_') && !ed.includes('_') && !String(ed).startsWith('['));
 	if (role === 'student') {
 		return { year: hasSetting ? ey : '113', dept: hasSetting ? ed : '普通科(理工生醫群)-1', locked: true };
 	} else {
 		if (hasSetting && role === 'teacher') return { year: ey, dept: ed, locked: true };
+		let vYear = record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113';
+		let vDept = record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1';
+		if (String(vDept).startsWith('[') || !CurriculumService.departments.includes(vDept)) {
+			vDept = '普通科(理工生醫群)-1';
+		}
+		if (!CurriculumService.years.includes(vYear)) {
+			vYear = '113';
+		}
 		return {
-			year: record.credits_json?._view_year || sessionStorage.getItem('tempSelectedYear') || '113',
-			dept: record.credits_json?._view_dept || sessionStorage.getItem('tempSelectedDept') || '普通科(理工生醫群)-1',
+			year: vYear,
+			dept: vDept,
 			locked: false
 		};
 	}
 };
 
 window.selectCurriculum = function(yr, dept) {
+	if (!CurriculumService.years.includes(String(yr))) {
+		yr = '113';
+	}
+	if (typeof dept !== 'string' || String(dept).startsWith('[') || !CurriculumService.departments.includes(dept)) {
+		dept = '普通科(理工生醫群)-1';
+	}
 	currentYear = yr;
-	currentDept = (dept && !dept.startsWith('[')) ? dept : "普通科(理工生醫群)-1";
-	curriculum = CurriculumService.getCurriculum(currentYear, currentDept);
+	currentDept = dept;
+	curriculum = CurriculumService.getCurriculum(yr, dept);
 	initThresholds();
 	updateCurriculumSelectorVisibility();
 	updateHelpModalDetails();
@@ -2456,7 +2382,7 @@ window.applyLoadedChecks = function(checks) {
 
 window.evaluateStudentStatus = function(s) {
 	const ey = (s.entry_year && s.entry_year !== '未設定') ? s.entry_year : '113';
-	const ed = (s.entry_dept && s.entry_dept !== '未設定') ? s.entry_dept : '普通科(理工生醫群)-1';
+	const ed = (s.entry_dept && s.entry_dept !== '未設定' && !String(s.entry_dept).startsWith('[')) ? s.entry_dept : '普通科(理工生醫群)-1';
 	const curr = CurriculumService.getCurriculum(ey, ed);
 	if (!curr || curr.length === 0) return { status: 'unknown', total: 0, statusText: '課程資料建置中！', badgeClass: 'bg-slate-100 text-slate-600' };
 	const trackType = getTrackType(ed);
@@ -2706,12 +2632,7 @@ window.renderAdminTable = function() {
 		let roleDisplayName = mapping.role[s.role] || '使用者';
 		if (isTutor) roleDisplayName = '導師';
 
-		let classInfo = (s.entry_year === '未設定' || s.entry_dept === '未設定') ? '未設定' : `${s.entry_year}年/${s.entry_dept}`;
-		if (s.role === 'counselor') {
-			const cClasses = getUserCounselorClasses(s);
-			classInfo = `已授權 ${cClasses.length} 班`;
-		}
-
+		const classInfo = (s.entry_year === '未設定' || s.entry_dept === '未設定') ? '未設定' : `${s.entry_year}年/${s.entry_dept}`;
 		const evalRes = s.role === 'student' ? evaluateStudentStatus(s) : null;
 		const statusTagHtml = evalRes ? `<span class="text-[0.72rem] font-bold px-2.5 py-1 rounded-md inline-block ${evalRes.badgeClass}">${escapeHtml(evalRes.statusText)}<br><span class="opacity-80 font-semibold">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold">-</span>';
 		const tr = document.createElement('tr');
@@ -2720,9 +2641,6 @@ window.renderAdminTable = function() {
 		const studentTargetId = s.student_id || s.id;
 		if (s.role === 'student') {
 			btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#10b981" onclick="enterAdminEditMode('${escapeHtml(studentTargetId)}','${escapeHtml(s.full_name)}')">檢視/修改學分</button>`;
-		}
-		if (canModifyAccount && s.role === 'counselor') {
-			btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold bg-purple-600 hover:bg-purple-700 text-white" onclick="openCounselorScopePage('${escapeHtml(s.id)}')">🎯 授權班級</button>`;
 		}
 		if (canModifyAccount) {
 			btnsDesktop += `<button class="btn-mini flex-auto min-w-0 text-xs px-2 text-center font-bold" style="background:#6366f1;" onclick="openAuditLogModal('${escapeHtml(s.student_id)}')">📜 歷程</button>`;
@@ -2739,9 +2657,6 @@ window.renderAdminTable = function() {
 		let btnsMobile = '';
 		if (s.role === 'student') {
 			btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-emerald-500" onclick="enterAdminEditMode('${escapeHtml(studentTargetId)}','${escapeHtml(s.full_name)}')">檢視/修改學分</button>`;
-		}
-		if (canModifyAccount && s.role === 'counselor') {
-			btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-purple-600" onclick="openCounselorScopePage('${escapeHtml(s.id)}')">🎯 授權班級</button>`;
 		}
 		if (canModifyAccount) {
 			btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-indigo-600" onclick="openAuditLogModal('${escapeHtml(s.student_id)}')">📜 歷程</button>`;
@@ -2773,7 +2688,7 @@ window.exitAdminEditMode = function() {
 	scrollToTop(); updateUI();
 };
 
-window.toggleAdminUserRoleFields = function(roleVal, targetUserId = null) {
+window.toggleAdminUserRoleFields = function(roleVal, preSelectedClasses = []) {
 	const standardGroup = document.getElementById('editUserStandardClassGroup');
 	const counselorScopeGroup = document.getElementById('editCounselorScopeGroup');
 	const yrLabel = document.getElementById('editUserEntryYearLabel');
@@ -2781,24 +2696,8 @@ window.toggleAdminUserRoleFields = function(roleVal, targetUserId = null) {
 
 	if (roleVal === 'counselor') {
 		if (standardGroup) standardGroup.style.display = 'none';
-		if (counselorScopeGroup) {
-			counselorScopeGroup.style.display = 'block';
-			const uid = targetUserId || document.getElementById('editUserId')?.value;
-			const targetUser = adminListData.find(u => u.id === uid);
-			const count = getUserCounselorClasses(targetUser).length;
-			counselorScopeGroup.innerHTML = `
-				<label class="text-xs font-black text-purple-800 mb-1">班級授權狀態</label>
-				<div class="p-3 bg-purple-50/70 border border-purple-200 rounded-xl flex items-center justify-between gap-3">
-					<div>
-						<div class="text-xs font-black text-purple-900">目前已授權：<span class="text-sm font-black text-purple-600">${count}</span> / 20 班</div>
-						<div class="text-[11px] text-slate-500 font-semibold mt-0.5">點擊右側按鈕開啟獨立頁面進行全校20班細項勾選</div>
-					</div>
-					<button type="button" class="px-3.5 py-2 rounded-xl font-black text-white text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-sm shrink-0 transition" onclick="openCounselorScopePage('${escapeHtml(uid || '')}')">
-						🎯 前往授權頁面
-					</button>
-				</div>
-			`;
-		}
+		if (counselorScopeGroup) counselorScopeGroup.style.display = 'block';
+		renderCounselorClassCheckboxes(preSelectedClasses);
 	} else {
 		if (standardGroup) standardGroup.style.display = 'block';
 		if (counselorScopeGroup) counselorScopeGroup.style.display = 'none';
@@ -2831,7 +2730,9 @@ window.openAdminUserEdit = function(index) {
 	}
 	roleSelect.value = s.role || 'student';
 
-	toggleAdminUserRoleFields(s.role || 'student', s.id);
+	const assignedClasses = getUserCounselorClasses(s);
+
+	toggleAdminUserRoleFields(s.role || 'student', assignedClasses);
 	document.getElementById('editUserCustomPassword').value = '';
 	toggleUIModal(true, 'adminUserModal');
 };
@@ -2864,11 +2765,11 @@ window.saveAdminUserEdit = async function() {
 
 	if (!sid || !name) { showMsg("請填寫完整帳號與姓名", "error"); return; }
 
+	let counselorClasses = [];
 	if (role === 'counselor') {
-		const existingUser = adminListData.find(u => u.id === id);
-		const existingClasses = getUserCounselorClasses(existingUser);
+		counselorClasses = getCounselorSelectedClasses();
 		year = '未設定';
-		dept = JSON.stringify(existingClasses);
+		dept = JSON.stringify(counselorClasses);
 	}
 
 	try {
@@ -2884,9 +2785,33 @@ window.saveAdminUserEdit = async function() {
 		});
 		if (error) throw error;
 
+		if (role === 'counselor') {
+			const targetRecord = adminListData.find(item => item.id === id);
+			let currentJson = targetRecord?.credits_json || {};
+			if (typeof currentJson === 'string') {
+				try { currentJson = JSON.parse(currentJson); } catch(e) { currentJson = {}; }
+			}
+			currentJson._counselor_classes = counselorClasses;
+
+			await dbClient.from('grad_checks').update({
+				credits_json: currentJson,
+				entry_dept: JSON.stringify(counselorClasses),
+				updated_at: new Date().toISOString()
+			}).eq('id', id);
+
+			if (targetRecord) {
+				targetRecord.credits_json = currentJson;
+				targetRecord.entry_dept = JSON.stringify(counselorClasses);
+			}
+			if (userDBRecord && userDBRecord.id === id) {
+				userDBRecord.credits_json = currentJson;
+				userDBRecord.entry_dept = JSON.stringify(counselorClasses);
+			}
+		}
+
 		updateSyncStatusIndicator('success');
-		showMsg("帳號資料修改成功！");
-		logAuditRecord("更改帳號資料", sid, name, { year, dept, role });
+		showMsg("帳號與班級權限修改成功！");
+		logAuditRecord("更改帳號資料", sid, name, { year, dept, role, counselorClassesCount: counselorClasses.length });
 		toggleUIModal(false, 'adminUserModal');
 		fetchAdminList();
 	} catch (err) {
@@ -3014,9 +2939,7 @@ window.renderTable = function() {
 	const mobileContainer = document.getElementById("mobileCardsContainer"), constructionBox = document.getElementById("underConstructionBox");
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 	const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
-	let myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
-	if (myDept && myDept.startsWith('[')) myDept = '未設定';
-
+	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 	if (isViewingClassList || (!editingStudentId && role === 'student' && (myYear === '未設定' || myDept === '未設定'))) {
 		if (mobileContainer) { mobileContainer.style.display = "none"; mobileContainer.innerHTML = ""; }
 		constructionBox?.classList.add("hidden"); return;
@@ -3026,8 +2949,9 @@ window.renderTable = function() {
 	if (curriculum.length === 0) {
 		if (mobileContainer) { mobileContainer.style.display = "none"; mobileContainer.innerHTML = ""; }
 		constructionBox?.classList.remove("hidden");
-		const cleanDisplayDept = currentDept.startsWith('[') ? '普通科(理工生醫群)-1' : currentDept;
-		document.getElementById("constYearDept").innerText = `${currentYear}年入學 ${cleanDisplayDept}`;
+		const cleanYear = CurriculumService.years.includes(String(currentYear)) ? currentYear : '113';
+		const cleanDept = CurriculumService.departments.includes(String(currentDept)) ? currentDept : '普通科(理工生醫群)-1';
+		document.getElementById("constYearDept").innerText = `${cleanYear}年入學 ${cleanDept}`;
 		return;
 	}
 	constructionBox?.classList.add("hidden");
@@ -3074,8 +2998,9 @@ window.openProfile = function() {
 	initDropdowns(role === 'admin');
 	document.getElementById('profAccount').value = curData.student_id || '';
 	document.getElementById('profName').value = curData.full_name || '';
-	document.getElementById('profEntryYear').value = (curData.entry_year && !curData.entry_year.startsWith('[')) ? curData.entry_year : '未設定';
-	document.getElementById('profEntryDept').value = (curData.entry_dept && !curData.entry_dept.startsWith('[')) ? curData.entry_dept : '未設定';
+	document.getElementById('profEntryYear').value = curData.entry_year || '未設定';
+	const isCounselorDept = String(curData.entry_dept || '').startsWith('[');
+	document.getElementById('profEntryDept').value = isCounselorDept ? '未設定' : (curData.entry_dept || '未設定');
 	document.getElementById('profStudentTutorArea').style.display = role === 'student' ? 'block' : 'none';
 	if (role === 'student') document.getElementById('profTutor').value = curData.tutor || '未設定';
 	document.getElementById('profPassword').value = '';
@@ -3125,8 +3050,17 @@ window.showMissingCreditsModal = function() {
 
 window.toggleSingleCreditFromMissingModal = function(chkId) {
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+	const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
+	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 
-	if ((role === 'teacher' || role === 'counselor') && editingStudentId) {
+	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定' && editingStudentId) {
+		if (activeStudentDBRecord && (activeStudentDBRecord.entry_year !== myYear || activeStudentDBRecord.entry_dept !== myDept)) {
+			showMsg("班級導師僅能修改所屬班級學生學分！", "error");
+			return;
+		}
+	}
+
+	if (role === 'counselor' && editingStudentId) {
 		if (activeStudentDBRecord && !isUserAuthorizedForStudent(activeStudentDBRecord)) {
 			showMsg("超出管理權限：您未被授權修改該學生學分！", "error");
 			return;
