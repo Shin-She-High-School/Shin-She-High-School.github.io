@@ -51,6 +51,18 @@ window.getChkId = function(name, sIdx) {
 	return `chk_${name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}_${sIdx}`;
 };
 
+window.showCourseNote = function(event, noteText) {
+	if (event) {
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	if (typeof showMsg === 'function') {
+		showMsg(`📌 備註：${noteText}`, 'info');
+	} else {
+		alert(`📌 科目備註：\n${noteText}`);
+	}
+};
+
 window.fetchCloudCurriculums = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -259,9 +271,19 @@ window.renderMobileCards = function(checkedStates) {
 			}
 		});
 		semGridHtml += `</div>`;
+
+		const noteTagHtml = item.note ? `
+			<button type="button" class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-700 hover:text-amber-800 border border-amber-300/80 text-[10px] font-black transition shadow-2xs ml-1 shrink-0 cursor-pointer" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.note)}')">
+				<span>📌</span><span>備註</span>
+			</button>
+		` : '';
+
 		card.innerHTML = `
 			<div class="flex items-start justify-between gap-2 mb-3 pb-2 border-b border-slate-100">
-				<span class="font-extrabold text-sm sm:text-base text-slate-800 break-words leading-snug">${escapeHtml(item.name)}</span>
+				<div class="flex items-center flex-wrap gap-1 min-w-0 flex-1">
+					<span class="font-extrabold text-sm sm:text-base text-slate-800 break-words leading-snug">${escapeHtml(item.name)}</span>
+					${noteTagHtml}
+				</div>
 				<div class="flex items-center gap-1.5 shrink-0 pt-0.5">
 					<span class="mobile-badge ${catInfo.class}">${escapeHtml(catInfo.text)}</span>
 					<span class="mobile-badge bg-slate-100 text-slate-600 border border-slate-200">${escapeHtml(mapping.type[item.type] || "一般")}</span>
@@ -304,6 +326,13 @@ window.renderSemesterCards = function(checkedStates) {
 				const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (!item.defaultUnchecked);
 				if (isChecked) semEarned += c;
 				const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700 border border-slate-200" };
+				
+				const noteTagHtml = item.note ? `
+					<button type="button" class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-700 hover:text-amber-800 border border-amber-300/80 text-[10px] font-black transition shadow-2xs shrink-0 cursor-pointer" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.note)}')">
+						<span>📌</span><span>備註</span>
+					</button>
+				` : '';
+
 				itemsHtml += `
 					<div class="sem-item-row flex items-center justify-between p-2.5 rounded-xl transition-all gap-2 cursor-pointer select-none">
 						<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); debouncedSaveToCloud();">
@@ -312,8 +341,11 @@ window.renderSemesterCards = function(checkedStates) {
 								<div class="custom-check-box w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all shrink-0">
 									<i class="fa-solid fa-check text-[10px] text-white opacity-0 transform scale-50 transition-all"></i>
 								</div>
-								<span class="sub-name text-xs sm:text-sm font-extrabold text-slate-800 break-words leading-snug">${escapeHtml(item.name)}</span>
-								<span class="credit-badge text-[10px] font-black px-1.5 py-0.5 rounded-md bg-slate-200/80 text-slate-700 shrink-0">${c} 學分</span>
+								<div class="flex items-center flex-wrap gap-1.5 min-w-0 flex-1">
+									<span class="sub-name text-xs sm:text-sm font-extrabold text-slate-800 break-words leading-snug">${escapeHtml(item.name)}</span>
+									<span class="credit-badge text-[10px] font-black px-1.5 py-0.5 rounded-md bg-slate-200/80 text-slate-700 shrink-0">${c} 學分</span>
+									${noteTagHtml}
+								</div>
 							</div>
 							<div class="flex items-center gap-1 shrink-0 pt-0.5">
 								<span class="mobile-badge text-[10px] py-0.5 px-1.5 ${catInfo.class}">${catInfo.text}</span>
