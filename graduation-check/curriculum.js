@@ -414,10 +414,12 @@ window.renderTable = function() {
 
 window.changeDashCurriculum = function() {
 	const yr = document.getElementById('dashSelectYear').value, dept = document.getElementById('dashSelectDept').value;
+	const oldYr = currentYear, oldDept = currentDept;
 	sessionStorage.setItem('tempSelectedYear', yr);
 	sessionStorage.setItem('tempSelectedDept', dept);
 	selectCurriculum(yr, dept);
 	applyLoadedChecks((editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {});
+	markDirtyAndTriggerSave("切換版本", { old_version: `${oldYr}年 ${oldDept}`, new_version: `${yr}年 ${dept}` });
 };
 
 window.setLayoutMode = function(mode) {
@@ -430,6 +432,31 @@ window.setLayoutMode = function(mode) {
 	scrollToTop();
 	renderTable();
 	calculate();
+	markDirtyAndTriggerSave("切換版面配置", { mode: mode === 'subject' ? '按科目檢視' : '按學期檢視' });
+};
+
+window.setAllStatus = function(p) {
+	document.querySelectorAll(".toggle-checkbox").forEach(chk => { chk.checked = p; });
+	calculate();
+	renderTable();
+	markDirtyAndTriggerSave(p ? "批次全部及格" : "批次學分歸零");
+};
+
+window.setSemesterStatus = function(sIdx, p) {
+	if (curriculum.length === 0) return;
+	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+	if ((role === 'teacher' || role === 'counselor') && editingStudentId) {
+		if (activeStudentDBRecord && !isUserAuthorizedForStudent(activeStudentDBRecord)) {
+			showMsg("超出管理權限：您未被授權管理該學生學分！", "error");
+			return;
+		}
+	}
+	const semNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
+	document.querySelectorAll(`.toggle-checkbox[data-sem="${sIdx}"]`).forEach(chk => { chk.checked = p; });
+	calculate();
+	renderTable();
+	showMsg(p ? `已將 ${semNames[sIdx]} 設為全部及格` : `已將 ${semNames[sIdx]} 學分歸零`);
+	markDirtyAndTriggerSave(p ? "單學期全選及格" : "單學期學分歸零", { semester: semNames[sIdx] });
 };
 
 window.evaluateStudentStatus = function(s) {
