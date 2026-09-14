@@ -55,16 +55,16 @@ window.getChkId = function(name, sIdx) {
 	return `chk_${name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}_${sIdx}`;
 };
 
-window.showCourseNote = function(event, noteText) {
+window.showCourseNote = function(event, courseName, noteText) {
 	if (event) {
 		event.preventDefault();
 		event.stopPropagation();
 	}
-	if (typeof showMsg === 'function') {
-		showMsg(`📌 備註：${noteText}`, 'info');
-	} else {
-		alert(`📌 科目備註：\n${noteText}`);
-	}
+	const titleEl = document.getElementById('courseNoteModalTitle');
+	const contentEl = document.getElementById('courseNoteModalContent');
+	if (titleEl) titleEl.innerText = `${courseName} - 備註說明`;
+	if (contentEl) contentEl.innerText = noteText || '暫無額外備註。';
+	toggleUIModal(true, 'courseNoteModal');
 };
 
 window.fetchCloudCurriculums = async function() {
@@ -278,8 +278,9 @@ window.renderMobileCards = function(checkedStates) {
 
 		const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
 		const noteTagHtml = hasNote ? `
-			<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.note)}')">
-				<span>📌</span><span>備註</span>
+			<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">
+				<span class="note-icon">ℹ</span>
+				<span>備註</span>
 			</button>
 		` : '';
 
@@ -334,8 +335,9 @@ window.renderSemesterCards = function(checkedStates) {
 				
 				const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
 				const noteTagHtml = hasNote ? `
-					<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.note)}')">
-						<span>📌</span><span>備註</span>
+					<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">
+						<span class="note-icon">ℹ</span>
+						<span>備註</span>
 					</button>
 				` : '';
 
