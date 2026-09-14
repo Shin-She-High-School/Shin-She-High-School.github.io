@@ -548,6 +548,24 @@
 		</button>
 	</div>
 
+	<div id="courseNoteModal" class="modal-overlay" onclick="handleOutsideClick(event)">
+		<div class="modal-content !max-w-md !w-full !p-6" onclick="event.stopPropagation()">
+			<div class="modal-header !mb-3 !pb-3">
+				<span class="font-black text-slate-800 text-lg flex items-center gap-2">
+					<span class="w-2.5 h-5 rounded-full bg-indigo-600"></span>
+					<span id="courseNoteModalTitle">科目備註說明</span>
+				</span>
+				<span class="close-modal-btn" onclick="toggleUIModal(false,'courseNoteModal')">&times;</span>
+			</div>
+			<div class="modal-body space-y-4">
+				<div class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700 font-bold leading-relaxed whitespace-pre-wrap break-words" id="courseNoteModalContent"></div>
+				<button type="button" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-extrabold transition shadow-sm" onclick="toggleUIModal(false,'courseNoteModal')">
+					關閉
+				</button>
+			</div>
+		</div>
+	</div>
+
 	<div id="feedbackModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:420px;">
 			<div class="modal-header">
