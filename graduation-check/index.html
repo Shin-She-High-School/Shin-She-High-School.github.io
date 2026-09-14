@@ -25,6 +25,7 @@
 </head>
 <body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col">
 	<div id="msgBox"></div>
+
 	<div id="authWorkspace">
 		<div class="auth-glow-1"></div>
 		<div class="auth-glow-2"></div>
@@ -81,6 +82,7 @@
 			</div>
 		</div>
 	</div>
+
 	<div id="appWorkspace" style="display: none;" class="flex-grow flex flex-col h-full overflow-hidden">
 		<div id="statusHeader" class="shrink-0" style="display: none;">
 			<div class="app-container">
@@ -98,6 +100,7 @@
 				</div>
 			</div>
 		</div>
+
 		<div id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar pb-[calc(96px+env(safe-area-inset-bottom,24px))]">
 			<div id="mainDashboardView">
 				<div id="dashboardSection" class="app-container mt-4" style="display: none;">
@@ -136,6 +139,7 @@
 						</div>
 					</div>
 				</div>
+
 				<div id="layoutSwitcherArea" class="app-container mt-3 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
 					<span class="text-sm font-extrabold text-slate-700 shrink-0 text-center md:text-left">檢視版面切換：</span>
 					<div class="inline-flex rounded-xl p-1 bg-slate-200 border border-slate-300">
@@ -147,6 +151,7 @@
 						</button>
 					</div>
 				</div>
+
 				<div class="app-container mt-2">
 					<div id="adminBackend" class="admin-backend">
 						<div class="admin-header">
@@ -253,6 +258,7 @@
 						</div>
 						<div id="adminCardsContainer" class="admin-cards-grid"></div>
 					</div>
+
 					<div id="unsetNoticeBox" class="hidden app-container my-6">
 						<div class="bg-white border-2 border-amber-300 rounded-2xl p-8 text-center shadow-md max-w-xl mx-auto">
 							<div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black">⚠️</div>
@@ -265,13 +271,16 @@
 							</a>
 						</div>
 					</div>
+
 					<div id="underConstructionBox" class="hidden bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm my-6">
 						<h3 class="text-xl font-bold text-slate-800 mb-2">課程資料建置中！</h3>
 						<p class="text-slate-500 text-sm">目前選擇的年度與科別（<span id="constYearDept" class="font-bold text-[#059669]"></span>）課程資料建置中！</p>
 					</div>
+
 					<div id="mobileCardsContainer" class="mobile-cards-grid"></div>
 				</div>
 			</div>
+
 			<div id="pageAnnounceView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
@@ -284,7 +293,8 @@
 					<div id="independentAnnounceList" class="space-y-3"></div>
 				</div>
 			</div>
-			<div id="pageAuditLogView" class="app-container mt-4 hidden pb-12">
+
+			<div id="pageAuditLogView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
 						<span class="font-black text-slate-800 text-xl flex items-center gap-2">
@@ -296,45 +306,7 @@
 					<div class="mb-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 						<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 							<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
-							
-							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-audit-action">
-								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full text-xs" onclick="toggleMS(event, 'audit-action')">
-									<span class="truncate pr-2 font-bold text-slate-700" id="ms-text-audit-action">所有異動項目</span>
-									<span class="text-[10px] text-slate-400">▼</span>
-								</div>
-								<div id="ms-drop-audit-action" class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto custom-scrollbar p-1.5 flex-col gap-0.5">
-									<label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700 border-b border-slate-100 pb-1.5 mb-1">
-										<input type="checkbox" value="all" class="ms-all-audit-action text-indigo-600 focus:ring-indigo-500 rounded" onchange="handleMSAll('audit-action', this)" checked> (全選所有異動項目)
-									</label>
-									<div class="text-[10px] font-black text-slate-400 px-1 pt-1">📘 學分與課綱類</div>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="變更學分紀錄" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 變更學分紀錄</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="切換版本" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 切換版本</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="批次全部及格" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 批次全部及格</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="批次學分歸零" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 批次學分歸零</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="單學期全選及格" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 單學期全選及格</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="單學期學分歸零" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 單學期學分歸零</label>
-									
-									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">📝 帳號與個人資料</div>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更改帳號資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更改帳號資料</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="重設帳號密碼" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 重設帳號密碼</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新個人資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新個人資料</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="送出系統回饋" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 送出系統回饋</label>
-
-									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">📢 系統公告</div>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="發布系統公告" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 發布系統公告</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="編輯系統公告" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 編輯系統公告</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新公告排序" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新公告排序</label>
-
-									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">🔑 系統登入與安全</div>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="使用者登入" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 使用者登入</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="使用者登出" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 使用者登出</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="使用者註冊" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 使用者註冊</label>
-
-									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">⚠️ 刪除與警示</div>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="刪除帳號" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 刪除帳號</label>
-								</div>
-							</div>
-
+							<select id="auditFilterAction" class="sort-select text-xs bg-white"></select>
 							<select id="auditFilterOperatorRole" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
 								<option value="all">所有操作身分</option>
 								<option value="admin">👑 管理員</option>
@@ -372,6 +344,7 @@
 					</div>
 				</div>
 			</div>
+
 			<div id="pageFeedbackListView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
@@ -427,7 +400,8 @@
 					</div>
 				</div>
 			</div>
-			<div id="pageAnnounceMgmtView" class="app-container mt-4 hidden pb-28">
+
+			<div id="pageAnnounceMgmtView" class="app-container mt-4 hidden pb-12">
 				<div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6 gap-3 flex-wrap">
 					<div class="flex items-center gap-3">
 						<button type="button" class="btn-table-action bg-slate-700 hover:bg-slate-800 text-white rounded-xl transition shadow-xs" onclick="closeIndependentPage()" title="返回管理後台">
@@ -446,7 +420,7 @@
 					</button>
 				</div>
 				<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-					<div class="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-4">
+					<div class="lg:col-span-5 xl:col-span-4 sticky top-4">
 						<div id="announceFormCard" class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all duration-300">
 							<div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
 								<div class="flex items-center gap-2">
@@ -522,17 +496,64 @@
 					</div>
 				</div>
 			</div>
+
+			<div id="pageCounselorScopeView" class="app-container mt-4 hidden pb-12">
+				<div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6 gap-3 flex-wrap">
+					<div class="flex items-center gap-3">
+						<button type="button" class="btn-table-action bg-slate-700 hover:bg-slate-800 text-white rounded-xl transition shadow-xs" onclick="closeIndependentPage()" title="返回管理後台">
+							<i class="fa-solid fa-arrow-left text-xs"></i>
+						</button>
+						<div>
+							<h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+								<span class="w-2.5 h-6 rounded-full bg-indigo-600"></span>
+								輔導教師班級授權管理
+							</h2>
+							<p class="text-xs text-slate-500 font-bold mt-0.5">獨立設定特定輔導教師之查閱與學分修改授權（全校共 20 班）</p>
+						</div>
+					</div>
+					<div class="flex items-center gap-2">
+						<button type="button" class="px-4 py-2 text-xs font-black rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 transition" onclick="closeIndependentPage()">
+							返回管理後台
+						</button>
+						<button type="button" class="px-4 py-2 text-xs font-black rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition" onclick="saveCounselorScopePage()">
+							💾 儲存班級授權
+						</button>
+					</div>
+				</div>
+
+				<div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 max-w-4xl mx-auto">
+					<div class="flex items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl flex-wrap">
+						<div class="flex items-center gap-3">
+							<span class="text-xs font-black text-slate-600">選擇輔導教師：</span>
+							<select id="scopePageCounselorSelect" class="sort-select text-xs font-bold py-1.5 px-3 bg-white border border-slate-300 rounded-lg min-w-[180px]" onchange="changeCounselorInScopePage()"></select>
+						</div>
+						<div class="flex items-center gap-2">
+							<span id="scopePageCountBadge" class="text-xs font-black px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">已選取 0 / 20 班</span>
+							<div class="flex items-center gap-1.5 text-xs font-extrabold ml-1">
+								<button type="button" class="text-indigo-600 hover:underline" onclick="toggleAllCounselorClassesInScopePage(true)">全校全選</button>
+								<span class="text-slate-300">|</span>
+								<button type="button" class="text-slate-500 hover:underline" onclick="toggleAllCounselorClassesInScopePage(false)">全部清空</button>
+							</div>
+						</div>
+					</div>
+
+					<div id="scopePageClassCardsGrid" class="space-y-4"></div>
+				</div>
+			</div>
+
 			<footer class="mt-12 mb-6 text-center text-xs text-slate-400 font-semibold border-t border-slate-200/80 pt-6 space-y-1">
 				<div>© <span class="copyright-year"></span> 臺中市立新社高級中學 ． 教務處 ＆ 系統開發團隊 版權所有</div>
 				<div class="text-[11px] text-slate-400/80">本系統資料僅供學分試算與檢核參考，正式資格依學校教務處成績審查公告為準</div>
 			</footer>
 		</div>
+
 		<button id="backToTopBtn" class="fixed bottom-[calc(88px+env(safe-area-inset-bottom,16px))] md:bottom-[calc(24px+env(safe-area-inset-bottom,16px))] right-6 z-40 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none flex items-center justify-center border border-emerald-400" onclick="scrollToTop()">
 			<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path>
 			</svg>
 		</button>
 	</div>
+
 	<div id="feedbackModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:420px;">
 			<div class="modal-header">
@@ -560,6 +581,7 @@
 			</div>
 		</div>
 	</div>
+
 	<div id="profileModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:400px;">
 			<div class="modal-header"><span>個人資料管理</span><span class="close-modal-btn" onclick="toggleUIModal(false,'profileModal')">&times;</span></div>
@@ -589,8 +611,9 @@
 			</div>
 		</div>
 	</div>
+
 	<div id="adminUserModal" class="modal-overlay" onclick="handleOutsideClick(event)">
-		<div class="modal-content" style="max-width:520px;">
+		<div class="modal-content" style="max-width:440px;">
 			<div class="modal-header"><span>更改帳號資料</span><span class="close-modal-btn" onclick="toggleUIModal(false,'adminUserModal')">&times;</span></div>
 			<input type="hidden" id="editUserId">
 			<div class="input-group"><label>帳號</label><input type="text" id="editUserSid"></div>
@@ -616,26 +639,13 @@
 				</div>
 			</div>
 
-			<div id="editCounselorScopeGroup" class="input-group" style="display:none;">
-				<div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3">
-					<div class="flex items-center justify-between pb-2 border-b border-slate-200/80 flex-wrap gap-2">
-						<div>
-							<div class="text-xs font-black text-slate-800 flex items-center gap-1.5">
-								<span class="w-2 h-3.5 bg-indigo-600 rounded-full"></span>
-								<span>授權檢核班級</span>
-							</div>
-							<p class="text-[11px] text-slate-500 font-bold mt-0.5">勾選該輔導教師有權查閱與修改學分之班級</p>
-						</div>
-						<div class="flex items-center gap-1.5">
-							<span id="counselorSelectedCountBadge" class="text-[11px] font-black px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">已選取 0 / 20 班</span>
-							<div class="flex items-center gap-1 text-[11px] font-extrabold ml-1">
-								<button type="button" class="text-indigo-600 hover:text-indigo-800 hover:underline px-1" onclick="toggleAllCounselorClasses(true)">全選</button>
-								<span class="text-slate-300">|</span>
-								<button type="button" class="text-slate-500 hover:text-slate-700 hover:underline px-1" onclick="toggleAllCounselorClasses(false)">清空</button>
-							</div>
-						</div>
+			<div id="editCounselorScopeJumpBox" class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl mb-3" style="display:none;">
+				<div class="flex items-center justify-between">
+					<div>
+						<div class="text-xs font-black text-indigo-900">輔導班級授權管理</div>
+						<div id="modalCounselorScopeBadge" class="text-[11px] font-bold text-indigo-700 mt-0.5">已授權 0 班</div>
 					</div>
-					<div id="counselorClassChecklist" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-1"></div>
+					<button type="button" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-black transition" onclick="jumpToScopePageFromModal()">前往授權頁面</button>
 				</div>
 			</div>
 
@@ -659,6 +669,7 @@
 			<button class="action-btn btn-admin" style="width:100%; margin-top: 15px;" onclick="saveAdminUserEdit()">儲存帳號修改</button>
 		</div>
 	</div>
+
 	<div id="missingCreditsModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-md !w-full">
 			<div class="modal-header">
@@ -677,6 +688,7 @@
 			</div>
 		</div>
 	</div>
+
 	<div id="confirmModal" class="modal-overlay">
 		<div class="modal-content" style="max-width:320px; text-align:center;">
 			<div class="modal-header"><span>確認操作</span></div>
@@ -687,6 +699,7 @@
 			</div>
 		</div>
 	</div>
+
 	<div id="helpModal" class="modal-overlay">
 		<div class="modal-content !max-w-xl !w-full !p-6 md:!p-8" onclick="event.stopPropagation()">
 			<div class="modal-header" style="border-bottom: none; margin-bottom: 8px; padding-bottom: 0;">
@@ -822,6 +835,11 @@
 			</div>
 		</div>
 	</div>
+
+	<script src="config.js"></script>
+	<script src="curriculum.js"></script>
+	<script src="auth.js"></script>
+	<script src="admin.js"></script>
 	<script src="app.js"></script>
 </body>
 </html>
