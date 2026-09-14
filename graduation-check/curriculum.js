@@ -496,7 +496,7 @@ window.evaluateStudentStatus = function(s) {
 					if (item.type === 3) prac += c;
 					if (item.cat === 'dept' || item.cat === 'sch_req') reqEarned += c;
 					if (item.cat === 'sch_opt') optEarned += c;
-					if (item.cat === 'dept' && item.type === 1) deptGenEarned += v = c;
+					if (item.cat === 'dept' && item.type === 1) deptGenEarned += c;
 					if (item.cat === 'dept_sports' || (item.cat === 'dept' && item.type === 2)) deptSportsEarned += c;
 					if (item.cat === 'sch_opt') sportsOptEarned += c;
 				}
