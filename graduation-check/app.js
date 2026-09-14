@@ -165,7 +165,7 @@ window.moveAnnouncementOrder = async function(index, direction) {
 			client.from('announcements').update({ sort_order: targetItem.sort_order }).eq('id', targetItem.id)
 		]);
 		updateSyncStatusIndicator('success');
-		logAuditRecord("更新公告排序", currentItem.title, "系統公告", { fromOrder: currentOrder, toOrder: targetOrder });
+		AuditService.logRecord("更新公告排序", currentItem.title, "系統公告", { fromOrder: currentOrder, toOrder: targetOrder });
 	} catch (err) {
 		updateSyncStatusIndicator('offline');
 		showMsg("儲存排序失敗：" + translateError(err.message), "error");
@@ -507,262 +507,296 @@ window.initCopyrightYear = function() {
 	});
 };
 
-let cachedClientIP = null;
-
-function fetchIPWithTimeout(url, parser, timeoutMs = 2500) {
-	return new Promise((resolve, reject) => {
-		const controller = new AbortController();
-		const timer = setTimeout(() => {
-			controller.abort();
-			reject(new Error('timeout'));
-		}, timeoutMs);
-
-		fetch(url, { signal: controller.signal })
-			.then(res => {
-				clearTimeout(timer);
-				if (!res.ok) throw new Error('status not ok');
-				return parser(res);
-			})
-			.then(ip => {
-				if (ip && typeof ip === 'string' && ip.trim().length > 0) resolve(ip.trim());
-				else reject(new Error('invalid ip'));
-			})
-			.catch(err => {
-				clearTimeout(timer);
-				reject(err);
-			});
-	});
-}
-
-function getWebRTCLocalIP() {
-	return new Promise((resolve) => {
-		const RTCPeer = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-		if (!RTCPeer) {
-			resolve(null);
-			return;
+const ModalService = {
+	initAccessibility() {
+		window.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' || e.keyCode === 27) {
+				this.closeTopmostModal();
+			}
+		});
+	},
+	closeTopmostModal() {
+		const openModals = Array.from(document.querySelectorAll('.modal-overlay'))
+			.filter(m => m.style.display === 'flex');
+		if (openModals.length > 0) {
+			const topModal = openModals[openModals.length - 1];
+			topModal.style.display = 'none';
 		}
-		try {
-			const pc = new RTCPeer({ iceServers: [] });
-			pc.createDataChannel('');
-			pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(() => {});
+	}
+};
+
+const AuditService = {
+	cachedClientIP: null,
+	fetchIPWithTimeout(url, parser, timeoutMs = 2500) {
+		return new Promise((resolve, reject) => {
+			const controller = new AbortController();
 			const timer = setTimeout(() => {
-				pc.close();
-				resolve(null);
-			}, 1200);
+				controller.abort();
+				reject(new Error('timeout'));
+			}, timeoutMs);
 
-			pc.onicecandidate = (ice) => {
-				if (!ice || !ice.candidate || !ice.candidate.candidate) return;
-				const cand = ice.candidate.candidate;
-				const ipMatch = cand.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
-				if (ipMatch) {
+			fetch(url, { signal: controller.signal })
+				.then(res => {
 					clearTimeout(timer);
+					if (!res.ok) throw new Error('status not ok');
+					return parser(res);
+				})
+				.then(ip => {
+					if (ip && typeof ip === 'string' && ip.trim().length > 0) resolve(ip.trim());
+					else reject(new Error('invalid ip'));
+				})
+				.catch(err => {
+					clearTimeout(timer);
+					reject(err);
+				});
+		});
+	},
+	getWebRTCLocalIP() {
+		return new Promise((resolve) => {
+			const RTCPeer = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+			if (!RTCPeer) {
+				resolve(null);
+				return;
+			}
+			try {
+				const pc = new RTCPeer({ iceServers: [] });
+				pc.createDataChannel('');
+				pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(() => {});
+				const timer = setTimeout(() => {
 					pc.close();
-					resolve(`內網:${ipMatch[1]}`);
-				}
-			};
+					resolve(null);
+				}, 1200);
+
+				pc.onicecandidate = (ice) => {
+					if (!ice || !ice.candidate || !ice.candidate.candidate) return;
+					const cand = ice.candidate.candidate;
+					const ipMatch = cand.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+					if (ipMatch) {
+						clearTimeout(timer);
+						pc.close();
+						resolve(`內網:${ipMatch[1]}`);
+					}
+				};
+			} catch (e) {
+				resolve(null);
+			}
+		});
+	},
+	async getClientIP() {
+		if (this.cachedClientIP) return this.cachedClientIP;
+		const endpoints = [
+			this.fetchIPWithTimeout('https://api64.ipify.org?format=json', r => r.json().then(d => d.ip)),
+			this.fetchIPWithTimeout('https://api.ipify.org?format=json', r => r.json().then(d => d.ip)),
+			this.fetchIPWithTimeout('https://cloudflare.com/cdn-cgi/trace', r => r.text().then(t => {
+				const m = t.match(/ip=([^\n]+)/);
+				return m ? m[1] : null;
+			})),
+			this.fetchIPWithTimeout('https://ipapi.co/json/', r => r.json().then(d => d.ip))
+		];
+		try {
+			this.cachedClientIP = await Promise.any(endpoints);
+			return this.cachedClientIP;
 		} catch (e) {
-			resolve(null);
+			const localIP = await this.getWebRTCLocalIP();
+			if (localIP) {
+				this.cachedClientIP = localIP;
+				return this.cachedClientIP;
+			}
+			this.cachedClientIP = '校內網/代理伺服器';
+			return this.cachedClientIP;
 		}
-	});
-}
-
-window.getClientIP = async function() {
-	if (cachedClientIP) return cachedClientIP;
-
-	const endpoints = [
-		fetchIPWithTimeout('https://api64.ipify.org?format=json', r => r.json().then(d => d.ip)),
-		fetchIPWithTimeout('https://api.ipify.org?format=json', r => r.json().then(d => d.ip)),
-		fetchIPWithTimeout('https://cloudflare.com/cdn-cgi/trace', r => r.text().then(t => {
-			const m = t.match(/ip=([^\n]+)/);
-			return m ? m[1] : null;
-		})),
-		fetchIPWithTimeout('https://ipapi.co/json/', r => r.json().then(d => d.ip))
-	];
-
-	try {
-		cachedClientIP = await Promise.any(endpoints);
-		return cachedClientIP;
-	} catch (e) {
-		const localIP = await getWebRTCLocalIP();
-		if (localIP) {
-			cachedClientIP = localIP;
-			return cachedClientIP;
-		}
-		cachedClientIP = '校內網/代理伺服器';
-		return cachedClientIP;
+	},
+	async logRecord(actionType, targetSid, targetName, details) {
+		const client = ensureDbClient();
+		if (!client) return;
+		try {
+			let user = currentUser;
+			if (!user && client.auth) {
+				const userData = await client.auth.getUser();
+				user = userData?.data?.user;
+			}
+			const ip = await this.getClientIP();
+			const curRec = userDBRecord || user?.user_metadata || {};
+			let opId = user?.id || null;
+			if (opId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(opId)) opId = null;
+			const payload = {
+				operator_id: opId,
+				operator_name: curRec.full_name || '未知使用者',
+				operator_role: curRec.role || 'student',
+				target_student_id: targetSid || '無',
+				target_student_name: targetName || '無',
+				action_type: actionType,
+				details: details || {},
+				ip_address: ip,
+				user_agent: navigator.userAgent,
+				created_at: new Date().toISOString()
+			};
+			const { error } = await client.from('audit_logs').insert([payload]);
+			if (error && error.code === '23503' && opId) {
+				payload.operator_id = null;
+				await client.from('audit_logs').insert([payload]);
+			}
+		} catch (e) {}
 	}
 };
 
-window.logAuditRecord = async function(actionType, targetSid, targetName, details) {
-	const client = ensureDbClient();
-	if (!client) return;
-	try {
-		let user = currentUser;
-		if (!user && client.auth) {
-			const userData = await client.auth.getUser();
-			user = userData?.data?.user;
-		}
-		const ip = await getClientIP();
-		const curRec = userDBRecord || user?.user_metadata || {};
-		let opId = user?.id || null;
-		if (opId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(opId)) opId = null;
-		const payload = {
-			operator_id: opId,
-			operator_name: curRec.full_name || '未知使用者',
-			operator_role: curRec.role || 'student',
-			target_student_id: targetSid || '無',
-			target_student_name: targetName || '無',
-			action_type: actionType,
-			details: details || {},
-			ip_address: ip,
-			user_agent: navigator.userAgent,
-			created_at: new Date().toISOString()
-		};
-		const { error } = await client.from('audit_logs').insert([payload]);
-		if (error && error.code === '23503' && opId) {
-			payload.operator_id = null;
-			await client.from('audit_logs').insert([payload]);
-		}
-	} catch (e) {}
-};
+window.getClientIP = () => AuditService.getClientIP();
+window.logAuditRecord = (a, s, n, d) => AuditService.logRecord(a, s, n, d);
 
-window.markDirtyAndTriggerSave = function(actionType = "變更學分紀錄", extraDetails = {}) {
-	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
-	if (editingStudentId && (role === 'teacher' || role === 'counselor')) {
-		if (activeStudentDBRecord && !isUserAuthorizedForStudent(activeStudentDBRecord)) {
-			showMsg("超出管理權限：您未被授權修改該學生之學分！", "error");
+const SaveService = {
+	activeSaveAbortController: null,
+	saveSequenceId: 0,
+	markDirty(actionType = "變更學分紀錄", extraDetails = {}) {
+		const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
+		if (editingStudentId && (role === 'teacher' || role === 'counselor')) {
+			if (activeStudentDBRecord && !isUserAuthorizedForStudent(activeStudentDBRecord)) {
+				showMsg("超出管理權限：您未被授權修改該學生之學分！", "error");
+				return;
+			}
+		}
+		isDirty = true;
+		updateSyncStatusIndicator('dirty');
+
+		if (!saveBaselineChecks) {
+			const curRecord = editingStudentId ? activeStudentDBRecord : userDBRecord;
+			saveBaselineChecks = JSON.parse(JSON.stringify(curRecord?.credits_json || {}));
+			saveBaselineTotal = curRecord?.total_credits !== undefined ? curRecord.total_credits : 0;
+		}
+
+		if (actionType) {
+			pendingBulkActionInfo = { actionType, details: extraDetails };
+		}
+
+		clearTimeout(autoSaveDebounceTimer);
+		autoSaveDebounceTimer = setTimeout(() => {
+			const actionToSend = pendingBulkActionInfo;
+			pendingBulkActionInfo = null;
+			this.executeSave(actionToSend);
+		}, 1200);
+	},
+	async executeSave(bulkActionInfo = null) {
+		const client = ensureDbClient();
+		if (!currentUser || !client) {
+			updateSyncStatusIndicator('offline');
+			saveBaselineChecks = null;
+			saveBaselineTotal = null;
+			isDirty = false;
 			return;
 		}
-	}
-	isDirty = true;
-	updateSyncStatusIndicator('dirty');
 
-	if (!saveBaselineChecks) {
-		const curRecord = editingStudentId ? activeStudentDBRecord : userDBRecord;
-		saveBaselineChecks = JSON.parse(JSON.stringify(curRecord?.credits_json || {}));
-		saveBaselineTotal = curRecord?.total_credits !== undefined ? curRecord.total_credits : 0;
-	}
+		if (this.activeSaveAbortController) {
+			this.activeSaveAbortController.abort();
+		}
+		this.activeSaveAbortController = new AbortController();
+		const currentExecutionSeq = ++this.saveSequenceId;
 
-	if (actionType) {
-		pendingBulkActionInfo = { actionType, details: extraDetails };
-	}
-
-	clearTimeout(autoSaveDebounceTimer);
-	autoSaveDebounceTimer = setTimeout(() => {
-		const actionToSend = pendingBulkActionInfo;
-		pendingBulkActionInfo = null;
-		executeDeferredSave(actionToSend);
-	}, 1200);
-};
-
-window.debouncedSaveToCloud = function(bulkActionInfo = null) {
-	const actionType = bulkActionInfo?.actionType || "變更學分紀錄";
-	const details = bulkActionInfo?.details || {};
-	markDirtyAndTriggerSave(actionType, details);
-};
-
-async function executeDeferredSave(bulkActionInfo = null) {
-	const client = ensureDbClient();
-	if (!currentUser || !client) {
-		updateSyncStatusIndicator('offline');
+		updateSyncStatusIndicator('saving');
+		const targetId = editingStudentId ? (activeStudentDBRecord?.id || editingStudentId) : currentUser.id;
+		const curRecord = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata);
+		const targetRole = curRecord?.role || 'student';
+		const entryYear = curRecord?.entry_year || '未設定';
+		const entryDept = curRecord?.entry_dept || '未設定';
+		const targetName = curRecord?.full_name || '學生';
+		const targetSid = (curRecord?.student_id || '').split('@')[0].toLowerCase().trim();
+		const oldTotal = saveBaselineTotal !== null ? saveBaselineTotal : (curRecord?.total_credits || 0);
+		const oldChecks = saveBaselineChecks !== null ? saveBaselineChecks : (curRecord?.credits_json || {});
 		saveBaselineChecks = null;
 		saveBaselineTotal = null;
-		isDirty = false;
-		return;
-	}
-	updateSyncStatusIndicator('saving');
-	const targetId = editingStudentId ? (activeStudentDBRecord?.id || editingStudentId) : currentUser.id;
-	const curRecord = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata);
-	const targetRole = curRecord?.role || 'student';
-	const entryYear = curRecord?.entry_year || '未設定';
-	const entryDept = curRecord?.entry_dept || '未設定';
-	const targetName = curRecord?.full_name || '學生';
-	const targetSid = (curRecord?.student_id || '').split('@')[0].toLowerCase().trim();
-	const oldTotal = saveBaselineTotal !== null ? saveBaselineTotal : (curRecord?.total_credits || 0);
-	const oldChecks = saveBaselineChecks !== null ? saveBaselineChecks : (curRecord?.credits_json || {});
-	saveBaselineChecks = null;
-	saveBaselineTotal = null;
 
-	const checks = (curRecord && curRecord.credits_json) ? JSON.parse(JSON.stringify(curRecord.credits_json)) : {};
-	const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
-	const changedFields = [];
+		const checks = (curRecord && curRecord.credits_json) ? JSON.parse(JSON.stringify(curRecord.credits_json)) : {};
+		const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
+		const changedFields = [];
 
-	document.querySelectorAll(".toggle-checkbox").forEach(c => {
-		checks[c.id] = c.checked;
-		const semIdx = parseInt(c.dataset.sem || "0");
-		const semStr = semNames[semIdx] || `第${semIdx + 1}學期`;
-		const subName = c.dataset.name || "未知名科目";
-		const credVal = c.dataset.val || "0";
-		const isDefaultUnchecked = c.dataset.defaultUnchecked === 'true';
-		const wasChecked = oldChecks[c.id] !== undefined ? !!oldChecks[c.id] : !isDefaultUnchecked;
-		if (wasChecked !== c.checked) {
-			changedFields.push({
-				field: `📘 ${subName} 【${semStr}】 (${credVal}學分)`,
-				oldVal: wasChecked ? '及格' : '未及格',
-				newVal: c.checked ? '✔及格' : '✕未及格'
-			});
-		}
-	});
+		document.querySelectorAll(".toggle-checkbox").forEach(c => {
+			checks[c.id] = c.checked;
+			const semIdx = parseInt(c.dataset.sem || "0");
+			const semStr = semNames[semIdx] || `第${semIdx + 1}學期`;
+			const subName = c.dataset.name || "未知名科目";
+			const credVal = c.dataset.val || "0";
+			const isDefaultUnchecked = c.dataset.defaultUnchecked === 'true';
+			const wasChecked = oldChecks[c.id] !== undefined ? !!oldChecks[c.id] : !isDefaultUnchecked;
+			if (wasChecked !== c.checked) {
+				changedFields.push({
+					field: `📘 ${subName} 【${semStr}】 (${credVal}學分)`,
+					oldVal: wasChecked ? '及格' : '未及格',
+					newVal: c.checked ? '✔及格' : '✕未及格'
+				});
+			}
+		});
 
-	const version = determineCurriculumVersion(curRecord);
-	const newViewYr = version.locked ? entryYear : currentYear;
-	const newViewDept = version.locked ? entryDept : currentDept;
-	checks['_view_year'] = newViewYr;
-	checks['_view_dept'] = newViewDept;
-	checks['_layout_mode'] = currentLayoutMode;
+		const version = determineCurriculumVersion(curRecord);
+		const newViewYr = version.locked ? entryYear : currentYear;
+		const newViewDept = version.locked ? entryDept : currentDept;
+		checks['_view_year'] = newViewYr;
+		checks['_view_dept'] = newViewDept;
+		checks['_layout_mode'] = currentLayoutMode;
 
-	const res = calculateStats();
-	let matchedTutor = curRecord?.tutor || (targetRole === 'student' ? await findTutorByYearDept(entryYear, entryDept) : (targetRole === 'admin' ? '管理員免設定' : (targetRole === 'counselor' ? '輔導教師免設定' : '教師帳號免設定')));
+		const res = calculateStats();
+		let matchedTutor = curRecord?.tutor || (targetRole === 'student' ? await findTutorByYearDept(entryYear, entryDept) : (targetRole === 'admin' ? '管理員免設定' : (targetRole === 'counselor' ? '輔導教師免設定' : '教師帳號免設定')));
 
-	try {
-		let rpcSuccess = false;
 		try {
-			const { error: rpcErr } = await client.rpc('admin_save_student_credits', {
-				target_id: targetId, target_sid: targetSid, target_name: targetName, entry_year: entryYear,
-				entry_dept: entryDept, target_role: targetRole, tutor_name: matchedTutor, credits_data: checks, total_credits_val: res.total || 0
-			});
-			if (!rpcErr) rpcSuccess = true;
-			else throw rpcErr;
-		} catch (e) {
-			if (e.message && e.message.includes('權限不足')) throw e;
-		}
+			let rpcSuccess = false;
+			try {
+				const { error: rpcErr } = await client.rpc('admin_save_student_credits', {
+					target_id: targetId, target_sid: targetSid, target_name: targetName, entry_year: entryYear,
+					entry_dept: entryDept, target_role: targetRole, tutor_name: matchedTutor, credits_data: checks, total_credits_val: res.total || 0
+				});
+				if (!rpcErr) rpcSuccess = true;
+				else throw rpcErr;
+			} catch (e) {
+				if (e.name === 'AbortError') return;
+				if (e.message && e.message.includes('權限不足')) throw e;
+			}
 
-		if (!rpcSuccess) {
-			const payload = {
-				id: targetId, student_id: targetSid, full_name: targetName, entry_year: entryYear,
-				entry_dept: entryDept, role: targetRole, tutor: matchedTutor, credits_json: checks,
-				total_credits: res.total || 0, updated_at: new Date().toISOString()
-			};
-			const { error } = await client.from('grad_checks').upsert(payload);
-			if (error) throw error;
-		}
+			if (currentExecutionSeq !== this.saveSequenceId) return;
 
-		isDirty = false;
-		autoSaveDebounceTimer = null;
-		updateSyncStatusIndicator('success');
-		const activeRec = editingStudentId ? (activeStudentDBRecord || (activeStudentDBRecord = {})) : (userDBRecord || (userDBRecord = {}));
-		activeRec.credits_json = checks;
-		activeRec.total_credits = res.total || 0;
+			if (!rpcSuccess) {
+				const payload = {
+					id: targetId, student_id: targetSid, full_name: targetName, entry_year: entryYear,
+					entry_dept: entryDept, role: targetRole, tutor: matchedTutor, credits_json: checks,
+					total_credits: res.total || 0, updated_at: new Date().toISOString()
+				};
+				const { error } = await client.from('grad_checks').upsert(payload);
+				if (error) throw error;
+			}
 
-		const hasAction = Boolean(bulkActionInfo);
-		const hasCreditDiff = changedFields.length > 0;
-		if (hasAction || hasCreditDiff) {
-			const actionTitle = hasAction ? bulkActionInfo.actionType : "變更學分紀錄";
-			const detailsPayload = {
-				old_total: oldTotal,
-				new_total: res.total || 0,
-				...(hasAction ? bulkActionInfo.details : {}),
-				changed_fields: changedFields
-			};
-			await logAuditRecord(actionTitle, targetSid, targetName, detailsPayload);
+			if (currentExecutionSeq !== this.saveSequenceId) return;
+
+			isDirty = false;
+			autoSaveDebounceTimer = null;
+			updateSyncStatusIndicator('success');
+			const activeRec = editingStudentId ? (activeStudentDBRecord || (activeStudentDBRecord = {})) : (userDBRecord || (userDBRecord = {}));
+			activeRec.credits_json = checks;
+			activeRec.total_credits = res.total || 0;
+
+			const hasAction = Boolean(bulkActionInfo);
+			const hasCreditDiff = changedFields.length > 0;
+			if (hasAction || hasCreditDiff) {
+				const actionTitle = hasAction ? bulkActionInfo.actionType : "變更學分紀錄";
+				const detailsPayload = {
+					old_total: oldTotal,
+					new_total: res.total || 0,
+					...(hasAction ? bulkActionInfo.details : {}),
+					changed_fields: changedFields
+				};
+				await AuditService.logRecord(actionTitle, targetSid, targetName, detailsPayload);
+			}
+		} catch (err) {
+			if (err.name === 'AbortError') return;
+			isDirty = false;
+			autoSaveDebounceTimer = null;
+			updateSyncStatusIndicator('offline');
+			showMsg("學分資料儲存失敗：" + translateError(err.message), "error");
+		} finally {
+			if (currentExecutionSeq === this.saveSequenceId) {
+				this.activeSaveAbortController = null;
+			}
 		}
-	} catch (err) {
-		isDirty = false;
-		autoSaveDebounceTimer = null;
-		updateSyncStatusIndicator('offline');
-		showMsg("學分資料儲存失敗：" + translateError(err.message), "error");
 	}
-}
+};
+
+window.markDirtyAndTriggerSave = (a, d) => SaveService.markDirty(a, d);
+window.debouncedSaveToCloud = (b) => SaveService.markDirty(b?.actionType || "變更學分紀錄", b?.details || {});
 
 function startApplication() {
 	const client = ensureDbClient();
@@ -821,6 +855,7 @@ function startApplication() {
 	initHelpModalScrollGuard();
 	initBackToTop();
 	initCopyrightYear();
+	ModalService.initAccessibility();
 }
 
 if (document.readyState === 'loading') {

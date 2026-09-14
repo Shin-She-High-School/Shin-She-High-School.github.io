@@ -22,15 +22,24 @@ const CurriculumService = {
 		});
 		return keys;
 	},
+	normalizeCourses(rawCourses) {
+		if (!rawCourses) return [];
+		if (Array.isArray(rawCourses)) return rawCourses;
+		if (typeof rawCourses === 'string') {
+			try {
+				const parsed = JSON.parse(rawCourses);
+				return Array.isArray(parsed) ? parsed : [];
+			} catch (e) {
+				return [];
+			}
+		}
+		return [];
+	},
 	setCurriculums(records) {
 		if (!Array.isArray(records)) return;
 		records.forEach(item => {
-			let parsedCourses = item.courses;
-			if (typeof parsedCourses === 'string') {
-				try { parsedCourses = JSON.parse(parsedCourses); } catch (e) { parsedCourses = []; }
-			}
-			if (item.curriculum_key && Array.isArray(parsedCourses)) {
-				this.data[item.curriculum_key] = parsedCourses;
+			if (item && item.curriculum_key) {
+				this.data[item.curriculum_key] = this.normalizeCourses(item.courses);
 			}
 		});
 	},
@@ -263,7 +272,7 @@ window.renderMobileCards = function(checkedStates) {
 					<div class="mobile-sem-item">
 						<span class="mobile-sem-label">${escapeHtml(semNames[sIdx])}</span>
 						<div class="mobile-score-box">
-							<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); debouncedSaveToCloud();">
+							<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); SaveService.markDirty('變更學分紀錄');">
 							<label for="${escapeHtml(id)}" class="score-label">${c}</label>
 						</div>
 					</div>`;
@@ -343,7 +352,7 @@ window.renderSemesterCards = function(checkedStates) {
 
 				itemsHtml += `
 					<div class="sem-item-row flex items-center justify-between p-2.5 rounded-xl transition-all gap-2 cursor-pointer select-none">
-						<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); debouncedSaveToCloud();">
+						<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); SaveService.markDirty('變更學分紀錄');">
 						<label for="${escapeHtml(id)}" class="sem-label flex items-center justify-between w-full cursor-pointer gap-2 min-w-0">
 							<div class="flex items-center gap-2.5 min-w-0 flex-1">
 								<div class="custom-check-box w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all shrink-0">
@@ -372,7 +381,7 @@ window.renderSemesterCards = function(checkedStates) {
 					<div class="text-xs font-black text-slate-600">取得 <span class="sem-earned-val text-emerald-600 text-sm font-black">${semEarned}</span> / <span>${semMax}</span> 學分</div>
 				</div>
 				<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
-					<div class="sem-progress-bar bg-emerald-500 h-full" style="width: ${Math.min(100, Math.round((semEarned / semMax) * 100))}%;"></div>
+					<div class="sem-progress-bar bg-emerald-500 h-full" style="width: ${Math.min(100, Math.round((semEarned / semMax) * 100)) : 0}%;"></div>
 				</div>
 				<div class="flex gap-2 mb-3 pt-1 border-b border-slate-100 pb-3">
 					<button type="button" class="flex-1 py-1.5 px-2 text-xs font-extrabold text-emerald-700 bg-emerald-50 rounded-lg" onclick="setSemesterStatus(${sIdx}, true)">✔ 本學期全部及格</button>
@@ -419,7 +428,7 @@ window.changeDashCurriculum = function() {
 	sessionStorage.setItem('tempSelectedDept', dept);
 	selectCurriculum(yr, dept);
 	applyLoadedChecks((editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {});
-	markDirtyAndTriggerSave("切換版本", { old_version: `${oldYr}年 ${oldDept}`, new_version: `${yr}年 ${dept}` });
+	SaveService.markDirty("切換版本", { old_version: `${oldYr}年 ${oldDept}`, new_version: `${yr}年 ${dept}` });
 };
 
 window.setLayoutMode = function(mode) {
@@ -432,14 +441,14 @@ window.setLayoutMode = function(mode) {
 	scrollToTop();
 	renderTable();
 	calculate();
-	markDirtyAndTriggerSave("切換版面配置", { mode: mode === 'subject' ? '按科目檢視' : '按學期檢視' });
+	SaveService.markDirty("切換版面配置", { mode: mode === 'subject' ? '按科目檢視' : '按學期檢視' });
 };
 
 window.setAllStatus = function(p) {
 	document.querySelectorAll(".toggle-checkbox").forEach(chk => { chk.checked = p; });
 	calculate();
 	renderTable();
-	markDirtyAndTriggerSave(p ? "批次全部及格" : "批次學分歸零");
+	SaveService.markDirty(p ? "批次全部及格" : "批次學分歸零");
 };
 
 window.setSemesterStatus = function(sIdx, p) {
@@ -456,7 +465,7 @@ window.setSemesterStatus = function(sIdx, p) {
 	calculate();
 	renderTable();
 	showMsg(p ? `已將 ${semNames[sIdx]} 設為全部及格` : `已將 ${semNames[sIdx]} 學分歸零`);
-	markDirtyAndTriggerSave(p ? "單學期全選及格" : "單學期學分歸零", { semester: semNames[sIdx] });
+	SaveService.markDirty(p ? "單學期全選及格" : "單學期學分歸零", { semester: semNames[sIdx] });
 };
 
 window.evaluateStudentStatus = function(s) {
