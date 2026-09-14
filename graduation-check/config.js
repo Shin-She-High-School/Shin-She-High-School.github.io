@@ -67,7 +67,7 @@ let currentUncheckedCredits = [];
 
 let currentYear = "113";
 let currentDept = "普通科(理工生醫群)-1";
-let currentLayoutMode = "subject";
+let currentLayoutMode = "semester";
 let DEPT_THRESHOLD = 0;
 
 let autoSaveDebounceTimer = null;
