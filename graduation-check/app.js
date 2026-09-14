@@ -728,31 +728,24 @@ const SaveService = {
 		let matchedTutor = curRecord?.tutor || (targetRole === 'student' ? await findTutorByYearDept(entryYear, entryDept) : (targetRole === 'admin' ? '管理員免設定' : (targetRole === 'counselor' ? '輔導教師免設定' : '教師帳號免設定')));
 
 		try {
-			let rpcSuccess = false;
-			try {
-				const { error: rpcErr } = await client.rpc('admin_save_student_credits', {
-					target_id: targetId, target_sid: targetSid, target_name: targetName, entry_year: entryYear,
-					entry_dept: entryDept, target_role: targetRole, tutor_name: matchedTutor, credits_data: checks, total_credits_val: res.total || 0
-				});
-				if (!rpcErr) rpcSuccess = true;
-				else throw rpcErr;
-			} catch (e) {
-				const isAbort = e.name === 'AbortError' || String(e.message || '').toLowerCase().includes('abort') || String(e || '').toLowerCase().includes('abort');
-				if (isAbort) return;
-				if (e.message && e.message.includes('權限不足')) throw e;
+			const payload = {
+				student_id: targetSid,
+				full_name: targetName,
+				entry_year: entryYear,
+				entry_dept: entryDept,
+				role: targetRole,
+				tutor: matchedTutor,
+				credits_json: checks,
+				total_credits: res.total || 0,
+				updated_at: new Date().toISOString()
+			};
+
+			if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId)) {
+				payload.id = targetId;
 			}
 
-			if (currentExecutionSeq !== this.saveSequenceId) return;
-
-			if (!rpcSuccess) {
-				const payload = {
-					id: targetId, student_id: targetSid, full_name: targetName, entry_year: entryYear,
-					entry_dept: entryDept, role: targetRole, tutor: matchedTutor, credits_json: checks,
-					total_credits: res.total || 0, updated_at: new Date().toISOString()
-				};
-				const { error } = await client.from('grad_checks').upsert(payload);
-				if (error) throw error;
-			}
+			const { error: upsertErr } = await client.from('grad_checks').upsert(payload, { onConflict: 'student_id' });
+			if (upsertErr) throw upsertErr;
 
 			if (currentExecutionSeq !== this.saveSequenceId) return;
 
