@@ -213,8 +213,14 @@ window.updateUI = function() {
 		layoutSwitcher = document.getElementById('layoutSwitcherArea'), unsetBox = document.getElementById('unsetNoticeBox');
 	if (currentUser) {
 		updateHash();
-		const savedLayout = sessionStorage.getItem('tempLayoutMode');
-		if (savedLayout) currentLayoutMode = savedLayout;
+		const savedLayout = sessionStorage.getItem('tempLayoutMode') || userDBRecord?.credits_json?._layout_mode;
+		currentLayoutMode = savedLayout ? savedLayout : "semester";
+
+		const btnSub = document.getElementById('btnLayoutSubject');
+		const btnSem = document.getElementById('btnLayoutSemester');
+		if (btnSub) btnSub.className = currentLayoutMode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600";
+		if (btnSem) btnSem.className = currentLayoutMode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700";
+
 		if (adminEditBanner) adminEditBanner.style.display = editingStudentId ? 'block' : 'none';
 		document.getElementById('statusHeader').style.display = 'block';
 		const m = currentUser.user_metadata;
