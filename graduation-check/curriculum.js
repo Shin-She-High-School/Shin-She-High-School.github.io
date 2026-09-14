@@ -279,7 +279,7 @@ window.renderMobileCards = function(checkedStates) {
 		const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
 		const noteTagHtml = hasNote ? `
 			<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">
-				<span class="note-icon">ℹ</span>
+				<span class="note-icon">📌</span>
 				<span>備註</span>
 			</button>
 		` : '';
@@ -336,7 +336,7 @@ window.renderSemesterCards = function(checkedStates) {
 				const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
 				const noteTagHtml = hasNote ? `
 					<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">
-						<span class="note-icon">ℹ</span>
+						<span class="note-icon">📌</span>
 						<span>備註</span>
 					</button>
 				` : '';
