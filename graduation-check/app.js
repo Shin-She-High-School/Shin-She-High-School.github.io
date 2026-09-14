@@ -1,12 +1,5 @@
 window.isWebSocketAllowed = function() {
-	if (typeof WebSocket === 'undefined') return false;
-	try {
-		const testWs = new WebSocket('wss://tsavuxtqwfugoraomoyc.supabase.co/realtime/v1/websocket?apikey=' + SB_KEY + '&vsn=2.0.0');
-		testWs.close();
-		return true;
-	} catch (e) {
-		return false;
-	}
+	return typeof WebSocket !== 'undefined';
 };
 
 let realtimeGradChecksChannel = null;
@@ -744,7 +737,8 @@ const SaveService = {
 				if (!rpcErr) rpcSuccess = true;
 				else throw rpcErr;
 			} catch (e) {
-				if (e.name === 'AbortError') return;
+				const isAbort = e.name === 'AbortError' || String(e.message || '').toLowerCase().includes('abort') || String(e || '').toLowerCase().includes('abort');
+				if (isAbort) return;
 				if (e.message && e.message.includes('權限不足')) throw e;
 			}
 
@@ -782,7 +776,9 @@ const SaveService = {
 				await AuditService.logRecord(actionTitle, targetSid, targetName, detailsPayload);
 			}
 		} catch (err) {
-			if (err.name === 'AbortError') return;
+			const isAbort = err.name === 'AbortError' || String(err.message || '').toLowerCase().includes('abort') || String(err || '').toLowerCase().includes('abort');
+			if (isAbort) return;
+
 			isDirty = false;
 			autoSaveDebounceTimer = null;
 			updateSyncStatusIndicator('offline');

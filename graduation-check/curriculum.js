@@ -54,6 +54,8 @@ const CurriculumService = {
 	}
 };
 
+window.CurriculumService = CurriculumService;
+
 let curriculum = [];
 
 window.getTrackType = function(deptName) {
@@ -374,6 +376,7 @@ window.renderSemesterCards = function(checkedStates) {
 		if (semMax === 0) return;
 		const card = document.createElement("div");
 		card.className = "semester-card flex flex-col justify-between";
+		const progressWidth = semMax > 0 ? Math.min(100, Math.round((semEarned / semMax) * 100)) : 0;
 		card.innerHTML = `
 			<div>
 				<div class="flex items-center justify-between mb-2">
@@ -381,7 +384,7 @@ window.renderSemesterCards = function(checkedStates) {
 					<div class="text-xs font-black text-slate-600">取得 <span class="sem-earned-val text-emerald-600 text-sm font-black">${semEarned}</span> / <span>${semMax}</span> 學分</div>
 				</div>
 				<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
-					<div class="sem-progress-bar bg-emerald-500 h-full" style="width: ${Math.min(100, Math.round((semEarned / semMax) * 100)) : 0}%;"></div>
+					<div class="sem-progress-bar bg-emerald-500 h-full" style="width: ${progressWidth}%;"></div>
 				</div>
 				<div class="flex gap-2 mb-3 pt-1 border-b border-slate-100 pb-3">
 					<button type="button" class="flex-1 py-1.5 px-2 text-xs font-extrabold text-emerald-700 bg-emerald-50 rounded-lg" onclick="setSemesterStatus(${sIdx}, true)">✔ 本學期全部及格</button>
@@ -493,7 +496,7 @@ window.evaluateStudentStatus = function(s) {
 					if (item.type === 3) prac += c;
 					if (item.cat === 'dept' || item.cat === 'sch_req') reqEarned += c;
 					if (item.cat === 'sch_opt') optEarned += c;
-					if (item.cat === 'dept' && item.type === 1) deptGenEarned += c;
+					if (item.cat === 'dept' && item.type === 1) deptGenEarned += v = c;
 					if (item.cat === 'dept_sports' || (item.cat === 'dept' && item.type === 2)) deptSportsEarned += c;
 					if (item.cat === 'sch_opt') sportsOptEarned += c;
 				}
