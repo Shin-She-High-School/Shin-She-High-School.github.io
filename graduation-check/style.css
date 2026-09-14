@@ -373,6 +373,36 @@ html, body {
 .bg-sch-req-main { background-color: #dcfce7 !important; color: #14532d !important; border: 1px solid #86efac !important; }
 .bg-sch-opt-main { background-color: #dbeafe !important; color: #1e3a8a !important; border: 1px solid #93c5fd !important; }
 
+.btn-course-note {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	padding: 2px 7px;
+	border-radius: 9999px;
+	background-color: #fffbeb;
+	color: #b45309;
+	border: 1px solid #fcd34d;
+	font-size: 10px;
+	font-weight: 900;
+	line-height: 1.2;
+	cursor: pointer;
+	white-space: nowrap;
+	flex-shrink: 0;
+	transition: all 0.15s ease;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-course-note:hover {
+	background-color: #fef3c7;
+	color: #92400e;
+	border-color: #f59e0b;
+	transform: translateY(-1px);
+}
+
+.btn-course-note:active {
+	transform: translateY(0);
+}
+
 .audit-details-card {
 	display: inline-flex;
 	flex-wrap: wrap;
