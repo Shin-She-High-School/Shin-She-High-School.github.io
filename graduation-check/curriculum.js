@@ -25,8 +25,12 @@ const CurriculumService = {
 	setCurriculums(records) {
 		if (!Array.isArray(records)) return;
 		records.forEach(item => {
-			if (item.curriculum_key && Array.isArray(item.courses)) {
-				this.data[item.curriculum_key] = item.courses;
+			let parsedCourses = item.courses;
+			if (typeof parsedCourses === 'string') {
+				try { parsedCourses = JSON.parse(parsedCourses); } catch (e) { parsedCourses = []; }
+			}
+			if (item.curriculum_key && Array.isArray(parsedCourses)) {
+				this.data[item.curriculum_key] = parsedCourses;
 			}
 		});
 	},
@@ -272,15 +276,16 @@ window.renderMobileCards = function(checkedStates) {
 		});
 		semGridHtml += `</div>`;
 
-		const noteTagHtml = item.note ? `
-			<button type="button" class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-700 hover:text-amber-800 border border-amber-300/80 text-[10px] font-black transition shadow-2xs ml-1 shrink-0 cursor-pointer" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.note)}')">
+		const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
+		const noteTagHtml = hasNote ? `
+			<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.note)}')">
 				<span>📌</span><span>備註</span>
 			</button>
 		` : '';
 
 		card.innerHTML = `
 			<div class="flex items-start justify-between gap-2 mb-3 pb-2 border-b border-slate-100">
-				<div class="flex items-center flex-wrap gap-1 min-w-0 flex-1">
+				<div class="flex items-center flex-wrap gap-1.5 min-w-0 flex-1">
 					<span class="font-extrabold text-sm sm:text-base text-slate-800 break-words leading-snug">${escapeHtml(item.name)}</span>
 					${noteTagHtml}
 				</div>
@@ -327,8 +332,9 @@ window.renderSemesterCards = function(checkedStates) {
 				if (isChecked) semEarned += c;
 				const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700 border border-slate-200" };
 				
-				const noteTagHtml = item.note ? `
-					<button type="button" class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-700 hover:text-amber-800 border border-amber-300/80 text-[10px] font-black transition shadow-2xs shrink-0 cursor-pointer" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.note)}')">
+				const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
+				const noteTagHtml = hasNote ? `
+					<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.note)}')">
 						<span>📌</span><span>備註</span>
 					</button>
 				` : '';
