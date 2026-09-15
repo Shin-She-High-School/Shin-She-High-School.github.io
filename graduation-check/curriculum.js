@@ -414,11 +414,18 @@ window.renderTable = function() {
 
 window.changeDashCurriculum = function() {
 	const yr = document.getElementById('dashSelectYear').value, dept = document.getElementById('dashSelectDept').value;
+	const oldYr = currentYear, oldDept = currentDept;
 	sessionStorage.setItem('tempSelectedYear', yr);
 	sessionStorage.setItem('tempSelectedDept', dept);
 	selectCurriculum(yr, dept);
 	applyLoadedChecks((editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {});
-	debouncedSaveToCloud({ actionType: "切換版本" });
+	debouncedSaveToCloud({ 
+		actionType: "切換版本", 
+		details: { 
+			old_version: `${oldYr}年 ${oldDept}`, 
+			new_version: `${yr}年 ${dept}` 
+		} 
+	});
 };
 
 window.setLayoutMode = function(mode) {
@@ -430,7 +437,12 @@ window.setLayoutMode = function(mode) {
 	if (btnSem) btnSem.className = mode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700";
 	renderTable();
 	calculate();
-	debouncedSaveToCloud({ actionType: "切換版面配置" });
+	debouncedSaveToCloud({ 
+		actionType: "切換版面配置", 
+		details: { 
+			layout_mode: mode === 'subject' ? '按科目檢視' : '按學期檢視' 
+		} 
+	});
 };
 
 window.evaluateStudentStatus = function(s) {

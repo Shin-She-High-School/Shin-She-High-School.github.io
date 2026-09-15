@@ -1097,6 +1097,24 @@ window.resetAuditFilters = function() {
 	renderAuditLogList();
 };
 
+window.toggleAuditLogExpand = function(event, expandId) {
+	if (event) {
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	const el = document.getElementById(expandId);
+	const btn = document.getElementById(`btn-${expandId}`);
+	if (!el) return;
+	const isHidden = el.classList.contains('hidden');
+	if (isHidden) {
+		el.classList.remove('hidden');
+		if (btn) btn.innerText = "▲ 收合明細";
+	} else {
+		el.classList.add('hidden');
+		if (btn) btn.innerText = btn.dataset.defaultText || "▼ 展開更多明細";
+	}
+};
+
 window.renderAuditLogList = function() {
 	const searchTxt = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
 	const filterActions = getMSValues('audit-action');
@@ -1131,107 +1149,134 @@ window.renderAuditLogList = function() {
 	}
 
 	const actionConfig = {
-		'使用者登入': { icon: '🔑', class: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black' },
-		'使用者登出': { icon: '🚪', class: 'bg-gradient-to-r from-slate-500 to-gray-600 text-white font-black' },
-		'使用者註冊': { icon: '✨', class: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-black' },
-		'變更學分紀錄': { icon: '📘', class: 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black' },
-		'切換版本': { icon: '🔄', class: 'bg-gradient-to-r from-sky-500 to-cyan-600 text-white font-black' },
-		'批次全部及格': { icon: '✅', class: 'bg-gradient-to-r from-emerald-600 to-green-700 text-white font-black' },
-		'批次學分歸零': { icon: '🧹', class: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black' },
-		'單學期全選及格': { icon: '✔', class: 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-black' },
-		'單學期學分歸零': { icon: '⚠️', class: 'bg-gradient-to-r from-orange-500 to-red-500 text-white font-black' },
-		'更改帳號資料': { icon: '📝', class: 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black' },
-		'重設帳號密碼': { icon: '⚡', class: 'bg-gradient-to-r from-violet-600 to-indigo-700 text-white font-black' },
-		'刪除帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white font-black' },
-		'刪除學生帳號': { icon: '🗑️', class: 'bg-gradient-to-r from-rose-600 to-red-700 text-white font-black' },
-		'更新個人資料': { icon: '👤', class: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-black' },
-		'更新輔導教師授權': { icon: '🔑', class: 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black' },
-		'送出系統回饋': { icon: '💡', class: 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white font-black' },
-		'發布系統公告': { icon: '📢', class: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black' },
-		'編輯系統公告': { icon: '✏️', class: 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-black' },
-		'更新公告排序': { icon: '↕️', class: 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-black' }
-	};
-	const detailKeyLabels = { role: '身份', year: '入學年', dept: '科別班級', status: '狀態', category: '回饋類別', method: '重設方式', passwordChanged: '密碼變更', fromOrder: '原始順序', toOrder: '新順序', isMarquee: '跑馬燈同步', isActive: '公開狀態', counselorClassesCount: '授權班級數' };
-	const formatDetailValue = (key, val) => {
-		if (key === 'role') return mapping.role[val] || val;
-		if (key === 'year') return val === '未設定' ? '未設定' : `${val} 學年度`;
-		if (key === 'passwordChanged') return val ? '是 (已覆寫)' : '否 (未更改)';
-		if (typeof val === 'boolean') return val ? '是' : '否';
-		return val;
+		'使用者登入': { icon: '🔑', class: 'bg-emerald-600 text-white font-bold' },
+		'使用者登出': { icon: '🚪', class: 'bg-slate-600 text-white font-bold' },
+		'使用者註冊': { icon: '✨', class: 'bg-teal-600 text-white font-bold' },
+		'變更學分紀錄': { icon: '📘', class: 'bg-blue-600 text-white font-bold' },
+		'切換版本': { icon: '🔄', class: 'bg-sky-600 text-white font-bold' },
+		'切換版面配置': { icon: '📌', class: 'bg-slate-700 text-white font-bold' },
+		'批次全部及格': { icon: '✅', class: 'bg-emerald-600 text-white font-bold' },
+		'批次學分歸零': { icon: '🧹', class: 'bg-amber-600 text-white font-bold' },
+		'單學期全選及格': { icon: '✔', class: 'bg-teal-600 text-white font-bold' },
+		'單學期學分歸零': { icon: '⚠️', class: 'bg-orange-600 text-white font-bold' },
+		'更改帳號資料': { icon: '📝', class: 'bg-indigo-600 text-white font-bold' },
+		'重設帳號密碼': { icon: '⚡', class: 'bg-violet-600 text-white font-bold' },
+		'刪除帳號': { icon: '🗑️', class: 'bg-rose-600 text-white font-bold' },
+		'刪除學生帳號': { icon: '🗑️', class: 'bg-rose-600 text-white font-bold' },
+		'更新個人資料': { icon: '👤', class: 'bg-purple-600 text-white font-bold' },
+		'更新輔導教師授權': { icon: '🔑', class: 'bg-violet-600 text-white font-bold' },
+		'送出系統回饋': { icon: '💡', class: 'bg-pink-600 text-white font-bold' },
+		'發布系統公告': { icon: '📢', class: 'bg-amber-600 text-white font-bold' },
+		'編輯系統公告': { icon: '✏️', class: 'bg-blue-600 text-white font-bold' },
+		'更新公告排序': { icon: '↕️', class: 'bg-indigo-600 text-white font-bold' }
 	};
 
-	filtered.forEach(log => {
+	const detailKeyLabels = { 
+		role: '身份', year: '入學年', dept: '科別班級', status: '狀態', 
+		category: '回饋類別', method: '重設方式', passwordChanged: '密碼變更', 
+		fromOrder: '原始順序', toOrder: '新順序', isMarquee: '跑馬燈', 
+		isActive: '公開狀態', counselorClassesCount: '授權班級數', layout_mode: '版面模式' 
+	};
+
+	filtered.forEach((log, logIdx) => {
 		const timeStr = formatDateTime(log.created_at);
 		const [datePart, timePart] = timeStr.includes(' ') ? timeStr.split(' ') : [timeStr, ''];
 		const tr = document.createElement('tr');
 		tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
 		let diffHtml = '';
+
 		if (log.action_type.includes('刪除')) {
 			const d = log.details || {};
-			diffHtml = `<div class="inline-flex flex-wrap items-center gap-2 p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 font-bold text-xs shadow-xs"><span class="px-2 py-0.5 rounded-md bg-rose-600 text-white font-black text-[11px]">🗑️ 被刪除帳號資料</span><span>姓名：<b class="text-rose-950 font-black text-sm">${escapeHtml(d.deleted_name || log.target_student_name || '未知')}</b></span><span class="text-rose-300">|</span><span>帳號：<b class="font-mono text-rose-900 font-extrabold">${escapeHtml(d.deleted_sid || log.target_student_id || '未知')}</b></span></div>`;
+			diffHtml = `<div class="inline-flex items-center gap-2 p-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-xs font-bold"><span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px]">已刪除</span><span>姓名：${escapeHtml(d.deleted_name || log.target_student_name || '未知')}</span><span>帳號：${escapeHtml(d.deleted_sid || log.target_student_id || '未知')}</span></div>`;
+		} else if (log.action_type === '切換版面配置') {
+			const mode = log.details?.layout_mode || '版面配置變更';
+			diffHtml = `<span class="px-2 py-1 rounded bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold">切換版面：<b>${escapeHtml(mode)}</b></span>`;
 		} else if (log.details && typeof log.details === 'object') {
 			const d = log.details;
 			let headerChips = [];
+
 			if (d.old_version && d.new_version) {
-				headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 font-extrabold text-[11px] shadow-xs"><span class="text-slate-500">原版本: ${escapeHtml(d.old_version)}</span> <span class="text-sky-600 font-black">➔</span> <span class="text-indigo-700 font-black">新版本: ${escapeHtml(d.new_version)}</span></div>`);
+				headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-sky-50 border border-sky-200 text-xs font-bold text-slate-700"><span>原版本: <b>${escapeHtml(d.old_version)}</b></span><span class="text-sky-600 font-black">➔</span><span class="text-indigo-700">新版本: <b>${escapeHtml(d.new_version)}</b></span></div>`);
 			}
-			if (d.old_total !== undefined && d.new_total !== undefined) {
+
+			if (log.action_type !== '切換版本' && d.old_total !== undefined && d.new_total !== undefined) {
 				const isIncreased = d.new_total > d.old_total;
-				const totalBadgeColor = isIncreased ? 'bg-emerald-50 border-emerald-200' : (d.new_total < d.old_total ? 'bg-rose-50 border-rose-200' : 'bg-indigo-50 border-indigo-100');
-				headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-extrabold text-[11px] shadow-xs ${totalBadgeColor}"><span class="text-slate-500">舊學分: ${escapeHtml(d.old_total)}</span> <span class="text-slate-400 font-black">➔</span> <span class="${isIncreased ? 'text-emerald-700 font-black' : 'text-indigo-700 font-black'}">新學分: ${escapeHtml(d.new_total)}</span></div>`);
+				const totalBadgeColor = isIncreased ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (d.new_total < d.old_total ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-700');
+				headerChips.push(`<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-bold ${totalBadgeColor}"><span>舊學分: ${escapeHtml(d.old_total)}</span><span class="opacity-60">➔</span><span>新學分: <b>${escapeHtml(d.new_total)}</b></span></div>`);
 			}
+
 			if (d.semester) {
-				headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 font-extrabold text-[11px]"><span class="text-amber-800">📅 ${escapeHtml(d.semester)}</span></div>`);
+				headerChips.push(`<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">📅 ${escapeHtml(d.semester)}</div>`);
 			}
+
 			if (headerChips.length > 0) diffHtml += `<div class="flex flex-wrap gap-1.5 mb-1.5">${headerChips.join('')}</div>`;
+
 			if (d.changed_fields && Array.isArray(d.changed_fields) && d.changed_fields.length > 0) {
-				diffHtml += `<div class="flex flex-wrap gap-1.5">`;
-				d.changed_fields.forEach(f => {
+				const initialLimit = 3;
+				const visibleItems = d.changed_fields.slice(0, initialLimit);
+				const hiddenItems = d.changed_fields.slice(initialLimit);
+				const expandId = `audit-expand-${logIdx}`;
+
+				diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">`;
+				visibleItems.forEach(f => {
 					const isGain = f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格');
 					const badgeStyle = isGain ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-rose-50 text-rose-900 border-rose-300';
-					diffHtml += `<div class="inline-flex items-center gap-1 border px-2 py-0.5 rounded-lg text-[11px] font-bold shadow-xs ${badgeStyle}"><span>${escapeHtml(f.field)}:</span><s class="opacity-60 font-semibold">${escapeHtml(f.oldVal)}</s><span class="font-black opacity-80">➔</span><b class="font-black">${escapeHtml(f.newVal)}</b></div>`;
+					diffHtml += `<div class="inline-flex items-center gap-1 border px-2 py-0.5 rounded text-[11px] font-bold ${badgeStyle}"><span>${escapeHtml(f.field)}:</span><s class="opacity-50 font-normal">${escapeHtml(f.oldVal)}</s><span>➔</span><b>${escapeHtml(f.newVal)}</b></div>`;
 				});
+
+				if (hiddenItems.length > 0) {
+					diffHtml += `<button type="button" id="btn-${expandId}" data-default-text="▼ 還有 ${hiddenItems.length} 項變更 (點擊展開)" class="text-xs font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 px-2 py-0.5 rounded transition cursor-pointer" onclick="toggleAuditLogExpand(event, '${expandId}')">▼ 還有 ${hiddenItems.length} 項變更 (點擊展開)</button>`;
+					diffHtml += `<div id="${expandId}" class="hidden w-full flex flex-wrap gap-1.5 mt-1 pt-1 border-t border-dashed border-slate-200">`;
+					hiddenItems.forEach(f => {
+						const isGain = f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格');
+						const badgeStyle = isGain ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-rose-50 text-rose-900 border-rose-300';
+						diffHtml += `<div class="inline-flex items-center gap-1 border px-2 py-0.5 rounded text-[11px] font-bold ${badgeStyle}"><span>${escapeHtml(f.field)}:</span><s class="opacity-50 font-normal">${escapeHtml(f.oldVal)}</s><span>➔</span><b>${escapeHtml(f.newVal)}</b></div>`;
+					});
+					diffHtml += `</div>`;
+				}
 				diffHtml += `</div>`;
 			} else {
-				if (log.action_type === '使用者登入') {
-					diffHtml = `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-extrabold text-xs shadow-xs"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>登入成功</span></div>`;
-				} else if (log.action_type === '使用者登出') {
-					diffHtml = `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-extrabold text-xs shadow-xs"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span>安全登出</span></div>`;
-				} else if (log.action_type === '使用者註冊') {
-					let r = '🎓 學生';
-					if (d.role === 'counselor') r = '💜 輔導教師';
-					else if (d.role === 'teacher') r = (d.year && d.year !== '未設定') ? '👨‍🏫 導師' : '👨‍🏫 教師';
-					const y = d.year && d.year !== '未設定' ? `${d.year} 學年度` : '未指定學年';
-					const dept = d.dept && d.dept !== '未設定' ? d.dept : (d.role === 'counselor' ? '輔導室(指定班級權限)' : '一般專任(未設定班級)');
-					diffHtml = `<div class="inline-flex flex-wrap items-center gap-2 p-1.5 px-3 rounded-xl bg-teal-50 border border-teal-200 text-teal-950 font-bold text-xs shadow-xs"><span class="px-2 py-0.5 rounded-md bg-teal-700 text-white font-black text-[11px]">${r}</span><span class="text-teal-800 font-extrabold">${escapeHtml(y)}</span><span class="text-teal-300">丨</span><span class="text-teal-900 font-black">${escapeHtml(dept)}</span></div>`;
-				} else {
-					const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode'].includes(k));
-					if (metaKeys.length > 0) {
-						diffHtml += `<div class="audit-details-card">`;
-						metaKeys.forEach(k => {
-							const labelText = detailKeyLabels[k] || k;
-							const rawVal = d[k];
-							const formattedVal = formatDetailValue(k, typeof rawVal === 'object' ? JSON.stringify(rawVal) : rawVal);
-							const isUnset = (formattedVal === '未設定');
-							diffHtml += `<div class="audit-field-pill"><span class="audit-field-label">${escapeHtml(labelText)}:</span><span class="audit-field-val ${isUnset ? 'is-unset' : ''}">${escapeHtml(formattedVal)}</span></div>`;
-						});
-						diffHtml += `</div>`;
-					}
+				const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode', 'layout_mode'].includes(k));
+				if (metaKeys.length > 0) {
+					diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">`;
+					metaKeys.forEach(k => {
+						const labelText = detailKeyLabels[k] || k;
+						let rawVal = d[k];
+
+						const isClassArray = (k === 'dept' || k === 'classes') && (Array.isArray(rawVal) || (typeof rawVal === 'string' && rawVal.startsWith('[')));
+						if (isClassArray) {
+							let parsedClasses = [];
+							try {
+								parsedClasses = Array.isArray(rawVal) ? rawVal : JSON.parse(rawVal);
+							} catch (e) { parsedClasses = []; }
+
+							const expandClassId = `audit-classes-${logIdx}`;
+							diffHtml += `
+								<div class="inline-flex items-center gap-1 border border-violet-200 bg-violet-50 text-violet-900 px-2 py-0.5 rounded text-xs font-bold">
+									<span>授權班級名冊：</span>
+									<button type="button" id="btn-${expandClassId}" data-default-text="查看 ${parsedClasses.length} 個班級" class="text-violet-700 underline font-extrabold hover:text-violet-900 cursor-pointer" onclick="toggleAuditLogExpand(event, '${expandClassId}')">查看 ${parsedClasses.length} 個班級</button>
+								</div>
+								<div id="${expandClassId}" class="hidden w-full p-2 bg-slate-50 border border-slate-200 rounded-lg mt-1 text-xs text-slate-700 leading-relaxed font-semibold break-words">
+									${parsedClasses.map(c => `<span class="inline-block px-1.5 py-0.5 bg-white border border-slate-200 rounded mr-1 mb-1">${escapeHtml(c)}</span>`).join('')}
+								</div>
+							`;
+						} else {
+							let valStr = typeof rawVal === 'boolean' ? (rawVal ? '是' : '否') : String(rawVal || '未設定');
+							diffHtml += `<span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700"><b>${escapeHtml(labelText)}</b>: ${escapeHtml(valStr)}</span>`;
+						}
+					});
+					diffHtml += `</div>`;
 				}
 			}
 		}
+
 		const cfg = actionConfig[log.action_type] || { icon: '📌', class: 'bg-slate-700 text-white font-bold' };
-		let roleBadgeColor = "bg-slate-100 text-slate-600";
-		if (log.operator_role === 'admin') roleBadgeColor = "bg-indigo-100 text-indigo-800";
-		else if (log.operator_role === 'counselor') roleBadgeColor = "bg-purple-100 text-purple-800";
-		else if (log.operator_role === 'teacher') roleBadgeColor = "bg-emerald-100 text-emerald-800";
-		else if (log.operator_role === 'student') roleBadgeColor = "bg-blue-100 text-blue-800";
 		tr.innerHTML = `
-			<td class="p-3 text-slate-500 font-mono text-[11px] leading-tight text-center whitespace-nowrap"><div>${escapeHtml(datePart)}</div><div>${escapeHtml(timePart)}</div></td>
-			<td class="p-3 font-bold"><div class="text-slate-800 flex items-center gap-1"><span>${escapeHtml(log.operator_name || '系統')}</span><span class="text-[9px] px-1.5 py-0.5 rounded font-black ${roleBadgeColor}">${escapeHtml(mapping.role[log.operator_role] || log.operator_role)}</span></div><div class="text-[10px] font-mono text-slate-400 mt-0.5">${escapeHtml(log.ip_address || '未知 IP')}</div></td>
-			<td class="p-3"><div class="text-slate-900 font-black text-xs sm:text-sm truncate max-w-[120px]">${escapeHtml(log.target_student_name || '-')}</div><div class="text-slate-500 font-mono text-[11px] mt-0.5">${escapeHtml(log.target_student_id || '-')}</div></td>
-			<td class="p-3"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] whitespace-nowrap font-black ${cfg.class}"><span>${cfg.icon}</span><span>${escapeHtml(log.action_type)}</span></span></td>
-			<td class="p-3 text-slate-700">${diffHtml}</td>
+			<td class="p-2.5 text-slate-500 font-mono text-[11px] leading-tight text-center whitespace-nowrap"><div>${escapeHtml(datePart)}</div><div>${escapeHtml(timePart)}</div></td>
+			<td class="p-2.5 font-bold text-xs"><div class="text-slate-800">${escapeHtml(log.operator_name || '系統')} <span class="text-[10px] text-slate-400">(${escapeHtml(mapping.role[log.operator_role] || log.operator_role)})</span></div><div class="text-[10px] font-mono text-slate-400 mt-0.5">${escapeHtml(log.ip_address || '未知 IP')}</div></td>
+			<td class="p-2.5 text-xs"><div class="text-slate-900 font-bold truncate max-w-[120px]">${escapeHtml(log.target_student_name || '-')}</div><div class="text-slate-500 font-mono text-[10px] mt-0.5">${escapeHtml(log.target_student_id || '-')}</div></td>
+			<td class="p-2.5"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs whitespace-nowrap ${cfg.class}"><span>${cfg.icon}</span><span>${escapeHtml(log.action_type)}</span></span></td>
+			<td class="p-2.5 text-slate-700 text-xs">${diffHtml}</td>
 		`;
 		listBody.appendChild(tr);
 	});
