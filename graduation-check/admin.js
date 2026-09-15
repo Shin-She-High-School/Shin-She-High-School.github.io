@@ -161,24 +161,24 @@ window.renderAdminTable = function() {
 		let classInfo = `${item.entry_year || '未設定'} / ${item.entry_dept || '未設定'}`;
 		if (role === 'counselor') {
 			const allowedCount = getUserCounselorClasses(item).length;
-			classInfo = `<span class="text-violet-700 font-bold">已授權負責 ${allowedCount} 個班級</span>`;
+			classInfo = `<span class="text-violet-700 font-bold">已授權 ${allowedCount} 個班級</span>`;
+		}
+
+		let editTrialBtn = '';
+		if (role === 'student') {
+			editTrialBtn = `
+				<button type="button" class="btn-mini btn-cloud" onclick="startAdminEditStudent('${item.id}')" title="代為檢核學分">
+					試算
+				</button>
+			`;
 		}
 
 		let counselorScopeBtn = '';
 		if (role === 'counselor') {
 			const allowedCount = getUserCounselorClasses(item).length;
 			counselorScopeBtn = `
-				<button type="button" class="btn-mini btn-scope text-xs font-bold" onclick="openCounselorScopeModal('${item.id}')" title="設定負責檢核班級">
+				<button type="button" class="btn-mini" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="openCounselorScopeModal('${item.id}')" title="設定負責檢核班級">
 					🔑 授權班級 (${allowedCount})
-				</button>
-			`;
-		}
-
-		let editTrialBtn = '';
-		if (role === 'student') {
-			editTrialBtn = `
-				<button type="button" class="btn-mini btn-cloud text-xs font-bold" onclick="startAdminEditStudent('${item.id}')" title="代為檢核學分">
-					📋 試算
 				</button>
 			`;
 		}
@@ -187,11 +187,11 @@ window.renderAdminTable = function() {
 			<div class="flex items-center gap-1.5 flex-wrap">
 				${editTrialBtn}
 				${counselorScopeBtn}
-				<button type="button" class="btn-mini btn-admin text-xs font-bold" onclick="openAdminUserEdit('${item.id}')">
-					✏️ 編輯
+				<button type="button" class="btn-mini btn-admin" onclick="openAdminUserEdit('${item.id}')">
+					編輯
 				</button>
-				<button type="button" class="btn-mini bg-rose-600 hover:bg-rose-700 text-xs font-bold" onclick="confirmDeleteUser('${item.id}')">
-					🗑️
+				<button type="button" class="btn-mini bg-rose-600 hover:bg-rose-700" onclick="confirmDeleteUser('${item.id}')">
+					刪除
 				</button>
 			</div>
 		`;
@@ -237,60 +237,45 @@ window.renderAdminTable = function() {
 
 window.openCounselorScopeModal = function(userId) {
 	const user = adminListData.find(u => u.id === userId);
-	if (!user) {
-		showMsg("找不到該帳號資料", "error");
-		return;
-	}
+	if (!user) return;
 
 	document.getElementById('counselorTargetUserId').value = user.id;
-	const nameBadge = document.getElementById('counselorTargetNameBadge');
-	if (nameBadge) nameBadge.innerText = `${user.full_name} (${user.student_id})`;
+	const allowed = getUserCounselorClasses(user);
 
-	const allowedClasses = getUserCounselorClasses(user);
+	let html = '';
+	CurriculumService.years.forEach(yr => {
+		html += `
+			<div class="p-2.5 bg-white border border-slate-200 rounded-xl mb-2.5">
+				<div class="flex justify-between items-center pb-1 mb-1.5 border-b border-slate-100">
+					<span class="font-black text-xs text-slate-800">${yr} 學年度 (${yr === '113' ? '高三' : (yr === '114' ? '高二' : '高一')})</span>
+					<button type="button" class="text-[11px] font-bold text-violet-600 hover:underline" onclick="toggleYearCounselorClasses('${yr}', true)">本學年全選</button>
+				</div>
+				<div class="grid grid-cols-2 gap-1.5">
+		`;
 
-	const checklistContainer = document.getElementById('counselorClassChecklist');
-	if (checklistContainer) {
-		let html = '';
-		CurriculumService.years.forEach(yr => {
+		CurriculumService.departments.forEach(dept => {
+			const key = `${yr}_${dept}`;
+			const checked = allowed.includes(key) ? 'checked' : '';
 			html += `
-				<div class="counselor-group-box">
-					<div class="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-100">
-						<span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
-							<span class="w-1.5 h-3 bg-violet-500 rounded-full"></span>
-							${yr} 學年度 (${yr === '113' ? '高三' : (yr === '114' ? '高二' : '高一')})
-						</span>
-						<button type="button" class="text-[11px] font-bold text-violet-600 hover:underline" onclick="toggleYearCounselorClasses('${yr}', true)">本學年全選</button>
-					</div>
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+				<label class="text-xs flex items-center gap-1.5 cursor-pointer p-1 rounded hover:bg-slate-50">
+					<input type="checkbox" value="${key}" data-year="${yr}" class="counselor-modal-chk text-violet-600 focus:ring-violet-500 rounded" ${checked} onchange="updateCounselorModalCount()">
+					<span class="truncate font-semibold text-slate-700">${dept}</span>
+				</label>
 			`;
-
-			CurriculumService.departments.forEach(dept => {
-				const classKey = `${yr}_${dept}`;
-				const isChecked = allowedClasses.includes(classKey);
-				html += `
-					<label class="counselor-class-chip">
-						<input type="checkbox" value="${classKey}" data-year="${yr}" class="counselor-modal-chk text-violet-600 focus:ring-violet-500 rounded" ${isChecked ? 'checked' : ''} onchange="updateCounselorModalCount()">
-						<span class="truncate">${dept}</span>
-					</label>
-				`;
-			});
-
-			html += `</div></div>`;
 		});
-		checklistContainer.innerHTML = html;
-	}
 
+		html += `</div></div>`;
+	});
+
+	document.getElementById('counselorClassChecklist').innerHTML = html;
 	updateCounselorModalCount();
 	toggleUIModal(true, 'counselorScopeModal');
 };
 
 window.updateCounselorModalCount = function() {
-	const checked = document.querySelectorAll('.counselor-modal-chk:checked');
-	const all = document.querySelectorAll('.counselor-modal-chk');
+	const count = document.querySelectorAll('.counselor-modal-chk:checked').length;
 	const badge = document.getElementById('counselorModalCountBadge');
-	if (badge) {
-		badge.innerText = `已選取 ${checked.length} / ${all.length} 班`;
-	}
+	if (badge) badge.innerText = `已選取 ${count} 班`;
 };
 
 window.toggleAllCounselorClasses = function(isSelectAll) {
@@ -309,48 +294,38 @@ window.toggleYearCounselorClasses = function(yr, isSelectAll) {
 
 window.saveCounselorScopeSettings = async function() {
 	const client = ensureDbClient();
-	if (!client) return;
+	const uid = document.getElementById('counselorTargetUserId').value;
+	const user = adminListData.find(u => u.id === uid);
+	if (!client || !user) return;
 
-	const targetId = document.getElementById('counselorTargetUserId').value;
-	const user = adminListData.find(u => u.id === targetId);
-	if (!user) {
-		showMsg("操作失敗：找不到目標輔導教師", "error");
-		return;
-	}
-
-	const selectedClasses = Array.from(document.querySelectorAll('.counselor-modal-chk:checked')).map(c => c.value);
+	const selected = Array.from(document.querySelectorAll('.counselor-modal-chk:checked')).map(c => c.value);
 
 	try {
 		updateSyncStatusIndicator('saving');
-
 		const cj = (user.credits_json && typeof user.credits_json === 'object') ? JSON.parse(JSON.stringify(user.credits_json)) : {};
-		cj._counselor_classes = selectedClasses;
+		cj._counselor_classes = selected;
 
 		const payload = {
-			entry_dept: JSON.stringify(selectedClasses),
+			entry_dept: JSON.stringify(selected),
 			credits_json: cj,
 			updated_at: new Date().toISOString()
 		};
 
-		const { error } = await client
-			.from('grad_checks')
-			.update(payload)
-			.eq('id', targetId);
-
+		const { error } = await client.from('grad_checks').update(payload).eq('id', uid);
 		if (error) throw error;
 
 		user.entry_dept = payload.entry_dept;
 		user.credits_json = cj;
 
 		updateSyncStatusIndicator('success');
-		showMsg(`已成功更新 ${user.full_name} 輔導教師授權（共 ${selectedClasses.length} 班）`);
+		showMsg(`已成功更新 ${user.full_name} 輔導教師授權（共 ${selected.length} 班）`);
 		toggleUIModal(false, 'counselorScopeModal');
 
 		AuditService.logRecord(
 			"更新輔導教師授權",
 			user.student_id,
 			user.full_name,
-			{ authorized_count: selectedClasses.length, classes: selectedClasses }
+			{ authorized_count: selected.length, classes: selected }
 		);
 
 		renderAdminTable();

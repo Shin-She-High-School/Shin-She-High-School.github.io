@@ -4,14 +4,11 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 	<title>新社高中畢業自我檢核系統</title>
-	
 	<link rel="icon" type="image/png" href="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png">
-
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	
 	<script>
 		window.tailwind = {
 			theme: {
@@ -239,14 +236,6 @@
 						</div>
 						<div id="adminTableContainer" class="admin-table-container custom-scrollbar">
 							<table class="admin-table">
-								<colgroup>
-									<col style="width: 10%;">
-									<col style="width: 11%;">
-									<col style="width: 8%;">
-									<col style="width: 18%;">
-									<col style="width: 15%;">
-									<col style="width: 38%;">
-								</colgroup>
 								<thead>
 									<tr>
 										<th>姓名</th>
@@ -677,48 +666,26 @@
 		</div>
 	</div>
 
+	<!-- 輔導教師獨立授權班級彈窗 -->
 	<div id="counselorScopeModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-xl !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3">
-				<div class="flex items-center gap-2">
-					<span class="w-2.5 h-6 rounded-full bg-violet-600"></span>
-					<div>
-						<h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-							🔑 輔導教師負責班級授權
-							<span id="counselorTargetNameBadge" class="text-xs font-extrabold text-violet-700 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-md"></span>
-						</h3>
-						<p class="text-xs text-slate-500 font-bold mt-0.5">勾選該教師有權查閱與修改學分之所屬班級</p>
-					</div>
-				</div>
+				<span class="font-black text-slate-800 text-lg">🔑 輔導教師負責班級授權</span>
 				<span class="close-modal-btn" onclick="toggleUIModal(false,'counselorScopeModal')">&times;</span>
 			</div>
-			
 			<input type="hidden" id="counselorTargetUserId" value="">
-			
 			<div class="modal-body space-y-3">
-				<div class="flex items-center justify-between gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl flex-wrap">
-					<span id="counselorModalCountBadge" class="text-xs font-black text-slate-700 px-2.5 py-1 bg-white border border-slate-200 rounded-lg shadow-2xs">
-						已選取 0 / 20 班
-					</span>
-					<div class="flex items-center gap-1.5 text-xs font-extrabold">
-						<button type="button" class="text-violet-600 hover:text-violet-800 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-2.5 py-1 rounded-lg transition" onclick="toggleAllCounselorClasses(true)">
-							✔ 全部勾選
-						</button>
-						<button type="button" class="text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-100 border border-slate-300 px-2.5 py-1 rounded-lg transition" onclick="toggleAllCounselorClasses(false)">
-							✕ 全部清空
-						</button>
+				<div class="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-xl">
+					<span id="counselorModalCountBadge" class="text-xs font-black text-slate-700">已選取 0 班</span>
+					<div class="flex gap-2">
+						<button type="button" class="text-xs text-indigo-600 font-bold" onclick="toggleAllCounselorClasses(true)">全選</button>
+						<button type="button" class="text-xs text-slate-500 font-bold" onclick="toggleAllCounselorClasses(false)">清空</button>
 					</div>
 				</div>
-
-				<div id="counselorClassChecklist" class="space-y-3 max-h-[50dvh] overflow-y-auto custom-scrollbar pr-1 border border-slate-100 rounded-xl p-2 bg-slate-50/50"></div>
-
+				<div id="counselorClassChecklist" class="space-y-3 max-h-[50dvh] overflow-y-auto custom-scrollbar p-2 border border-slate-100 rounded-xl"></div>
 				<div class="pt-3 border-t border-slate-100 flex gap-2">
-					<button type="button" class="flex-1 py-2.5 text-xs sm:text-sm font-extrabold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition" onclick="toggleUIModal(false,'counselorScopeModal')">
-						取消
-					</button>
-					<button type="button" class="flex-1 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 rounded-xl shadow-md transition" onclick="saveCounselorScopeSettings()">
-						儲存授權名冊
-					</button>
+					<button type="button" class="action-btn btn-fail-all flex-1" onclick="toggleUIModal(false,'counselorScopeModal')">取消</button>
+					<button type="button" class="action-btn btn-pass-all flex-1" onclick="saveCounselorScopeSettings()">儲存設定</button>
 				</div>
 			</div>
 		</div>
@@ -890,10 +857,10 @@
 		</div>
 	</div>
 
-	<script src="config.js?v=2026"></script>
-	<script src="curriculum.js?v=2026"></script>
-	<script src="auth.js?v=2026"></script>
-	<script src="admin.js?v=2026"></script>
-	<script src="app.js?v=2026"></script>
+	<script src="config.js?v=202610"></script>
+	<script src="curriculum.js?v=202610"></script>
+	<script src="auth.js?v=202610"></script>
+	<script src="admin.js?v=202610"></script>
+	<script src="app.js?v=202610"></script>
 </body>
 </html>
