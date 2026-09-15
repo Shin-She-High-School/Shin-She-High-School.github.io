@@ -696,7 +696,7 @@
 		</div>
 	</div>
 
-	<!-- 輔導教師專屬授權班級獨立彈窗 (依原樣式追加) -->
+	<!-- 輔導教師專屬授權班級獨立彈窗 (修正 ID 衝突) -->
 	<div id="counselorScopeModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-xl !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3">
@@ -712,14 +712,14 @@
 			<input type="hidden" id="counselorScopeUserId" value="">
 			<div class="modal-body space-y-3">
 				<div class="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-xl">
-					<span id="counselorSelectedCountBadge" class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">已選取 0 / 20 班</span>
+					<span id="counselorScopeCountBadge" class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">已選取 0 / 20 班</span>
 					<div class="flex items-center gap-2 text-xs font-bold">
-						<button type="button" class="text-indigo-600 hover:underline" onclick="toggleAllCounselorClasses(true)">全選</button>
+						<button type="button" class="text-indigo-600 hover:underline cursor-pointer" onclick="toggleAllCounselorClasses(true)">全選</button>
 						<span class="text-slate-300">|</span>
-						<button type="button" class="text-slate-500 hover:underline" onclick="toggleAllCounselorClasses(false)">清空</button>
+						<button type="button" class="text-slate-500 hover:underline cursor-pointer" onclick="toggleAllCounselorClasses(false)">清空</button>
 					</div>
 				</div>
-				<div id="counselorClassChecklist" class="space-y-3 max-h-[50dvh] overflow-y-auto custom-scrollbar pr-1"></div>
+				<div id="counselorScopeModalChecklist" class="space-y-3 max-h-[50dvh] overflow-y-auto custom-scrollbar pr-1"></div>
 				<div class="pt-3 border-t border-slate-100 flex gap-2">
 					<button type="button" class="action-btn btn-fail-all flex-1" onclick="toggleUIModal(false,'counselorScopeModal')">取消</button>
 					<button type="button" class="action-btn flex-1" style="background:#8b5cf6;" onclick="saveCounselorScopeModal()">儲存授權</button>
