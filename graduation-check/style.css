@@ -264,6 +264,44 @@ html, body {
 .btn-cloud { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 .btn-admin { background: linear-gradient(135deg, #4f46e5, #4338ca); }
 
+.btn-scope {
+	background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+	color: #ffffff;
+}
+.btn-scope:hover {
+	filter: brightness(1.08);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+}
+
+.counselor-group-box {
+	background: #ffffff;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 10px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.counselor-class-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 8px;
+	border-radius: 8px;
+	border: 1px solid #cbd5e1;
+	background: #f8fafc;
+	font-size: 11px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	user-select: none;
+}
+.counselor-class-chip:has(input:checked) {
+	background: #ede9fe;
+	border-color: #8b5cf6;
+	color: #5b21b6;
+}
+
 .mobile-cards-grid { 
 	display: grid !important; 
 	grid-template-columns: 1fr; 

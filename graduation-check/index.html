@@ -243,9 +243,9 @@
 									<col style="width: 10%;">
 									<col style="width: 11%;">
 									<col style="width: 8%;">
-									<col style="width: 19%;">
-									<col style="width: 16%;">
-									<col style="width: 36%;">
+									<col style="width: 18%;">
+									<col style="width: 15%;">
+									<col style="width: 38%;">
 								</colgroup>
 								<thead>
 									<tr>
@@ -332,6 +332,7 @@
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更改帳號資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更改帳號資料</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="重設帳號密碼" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 重設帳號密碼</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新個人資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新個人資料</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新輔導教師授權" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新輔導教師授權</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="送出系統回饋" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 送出系統回饋</label>
 
 									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">📢 系統公告</div>
@@ -655,29 +656,6 @@
 				</div>
 			</div>
 
-			<div id="editCounselorScopeGroup" class="input-group" style="display:none;">
-				<div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3">
-					<div class="flex items-center justify-between pb-2 border-b border-slate-200/80 flex-wrap gap-2">
-						<div>
-							<div class="text-xs font-black text-slate-800 flex items-center gap-1.5">
-								<span class="w-2 h-3.5 bg-indigo-600 rounded-full"></span>
-								<span>授權檢核班級</span>
-							</div>
-							<p class="text-[11px] text-slate-500 font-bold mt-0.5">勾選該輔導教師有權查閱與修改學分之班級</p>
-						</div>
-						<div class="flex items-center gap-1.5">
-							<span id="counselorSelectedCountBadge" class="text-[11px] font-black px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">已選取 0 / 20 班</span>
-							<div class="flex items-center gap-1 text-[11px] font-extrabold ml-1">
-								<button type="button" class="text-indigo-600 hover:text-indigo-800 hover:underline px-1" onclick="toggleAllCounselorClasses(true)">全選</button>
-								<span class="text-slate-300">|</span>
-								<button type="button" class="text-slate-500 hover:text-slate-700 hover:underline px-1" onclick="toggleAllCounselorClasses(false)">清空</button>
-							</div>
-						</div>
-					</div>
-					<div id="counselorClassChecklist" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-1"></div>
-				</div>
-			</div>
-
 			<div id="editTutorSection" class="input-group">
 				<label id="editTutorLabel">導師</label>
 				<div id="editTutorWrapper"></div>
@@ -696,6 +674,53 @@
 				<p style="font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.4;">※ 點擊任意重設按鈕後，系統會立即將該使用者的登入密碼覆寫。</p>
 			</div>
 			<button class="action-btn btn-admin" style="width:100%; margin-top: 15px;" onclick="saveAdminUserEdit()">儲存帳號修改</button>
+		</div>
+	</div>
+
+	<div id="counselorScopeModal" class="modal-overlay" onclick="handleOutsideClick(event)">
+		<div class="modal-content !max-w-xl !w-full !p-6" onclick="event.stopPropagation()">
+			<div class="modal-header !mb-3 !pb-3">
+				<div class="flex items-center gap-2">
+					<span class="w-2.5 h-6 rounded-full bg-violet-600"></span>
+					<div>
+						<h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+							🔑 輔導教師負責班級授權
+							<span id="counselorTargetNameBadge" class="text-xs font-extrabold text-violet-700 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-md"></span>
+						</h3>
+						<p class="text-xs text-slate-500 font-bold mt-0.5">勾選該教師有權查閱與修改學分之所屬班級</p>
+					</div>
+				</div>
+				<span class="close-modal-btn" onclick="toggleUIModal(false,'counselorScopeModal')">&times;</span>
+			</div>
+			
+			<input type="hidden" id="counselorTargetUserId" value="">
+			
+			<div class="modal-body space-y-3">
+				<div class="flex items-center justify-between gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl flex-wrap">
+					<span id="counselorModalCountBadge" class="text-xs font-black text-slate-700 px-2.5 py-1 bg-white border border-slate-200 rounded-lg shadow-2xs">
+						已選取 0 / 20 班
+					</span>
+					<div class="flex items-center gap-1.5 text-xs font-extrabold">
+						<button type="button" class="text-violet-600 hover:text-violet-800 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-2.5 py-1 rounded-lg transition" onclick="toggleAllCounselorClasses(true)">
+							✔ 全部勾選
+						</button>
+						<button type="button" class="text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-100 border border-slate-300 px-2.5 py-1 rounded-lg transition" onclick="toggleAllCounselorClasses(false)">
+							✕ 全部清空
+						</button>
+					</div>
+				</div>
+
+				<div id="counselorClassChecklist" class="space-y-3 max-h-[50dvh] overflow-y-auto custom-scrollbar pr-1 border border-slate-100 rounded-xl p-2 bg-slate-50/50"></div>
+
+				<div class="pt-3 border-t border-slate-100 flex gap-2">
+					<button type="button" class="flex-1 py-2.5 text-xs sm:text-sm font-extrabold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition" onclick="toggleUIModal(false,'counselorScopeModal')">
+						取消
+					</button>
+					<button type="button" class="flex-1 py-2.5 text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 rounded-xl shadow-md transition" onclick="saveCounselorScopeSettings()">
+						儲存授權名冊
+					</button>
+				</div>
+			</div>
 		</div>
 	</div>
 
@@ -865,10 +890,10 @@
 		</div>
 	</div>
 
-	<script src="config.js"></script>
-	<script src="curriculum.js"></script>
-	<script src="auth.js"></script>
-	<script src="admin.js"></script>
-	<script src="app.js"></script>
+	<script src="config.js?v=2026"></script>
+	<script src="curriculum.js?v=2026"></script>
+	<script src="auth.js?v=2026"></script>
+	<script src="admin.js?v=2026"></script>
+	<script src="app.js?v=2026"></script>
 </body>
 </html>
