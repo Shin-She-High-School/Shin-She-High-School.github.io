@@ -199,6 +199,73 @@ window.renderUserStatusDisplay = function() {
 		</div>`;
 };
 
+window.applyLoadedChecks = function(checks) {
+	if (!checks) checks = {};
+	const savedLayout = checks._layout_mode || sessionStorage.getItem('tempLayoutMode') || 'semester';
+	currentLayoutMode = savedLayout;
+
+	renderTable();
+
+	document.querySelectorAll(".toggle-checkbox").forEach(c => {
+		if (checks[c.id] !== undefined) {
+			c.checked = Boolean(checks[c.id]);
+		} else {
+			c.checked = !(c.dataset.defaultUnchecked === 'true');
+		}
+	});
+
+	if (currentLayoutMode === 'semester') {
+		for (let s = 0; s < 6; s++) {
+			const dummyInput = document.querySelector(`.toggle-checkbox[data-sem="${s}"]`);
+			if (dummyInput) updateSemesterProgress(dummyInput, s);
+		}
+	}
+
+	calculate();
+};
+
+window.loadFromCloud = async function(targetStudentId = null) {
+	const client = ensureDbClient();
+	if (!client || !currentUser) return;
+	try {
+		updateSyncStatusIndicator('saving');
+		let query = client.from('grad_checks').select('*');
+		
+		if (targetStudentId) {
+			query = query.or(`id.eq.${targetStudentId},student_id.eq.${targetStudentId}`).maybeSingle();
+		} else {
+			query = query.eq('id', currentUser.id).maybeSingle();
+		}
+
+		const { data, error } = await query;
+		if (error && error.code !== 'PGRST116') throw error;
+
+		if (targetStudentId) {
+			activeStudentDBRecord = data || null;
+			lastLoadedStudentId = targetStudentId;
+		} else {
+			userDBRecord = data || null;
+			hasLoadedInitialData = true;
+			lastLoadedStudentId = null;
+		}
+
+		const currentRec = targetStudentId ? activeStudentDBRecord : userDBRecord;
+		const version = determineCurriculumVersion(currentRec);
+		selectCurriculum(version.year, version.dept);
+
+		let checksData = currentRec?.credits_json;
+		if (typeof checksData === 'string') {
+			try { checksData = JSON.parse(checksData); } catch (e) { checksData = {}; }
+		}
+
+		applyLoadedChecks(checksData || {});
+		updateSyncStatusIndicator('success');
+	} catch (err) {
+		updateSyncStatusIndicator('offline');
+		showMsg("載入學分紀錄失敗：" + translateError(err.message), "error");
+	}
+};
+
 window.updateUI = function() {
 	const mobileContainer = document.getElementById('mobileCardsContainer'), adminBackend = document.getElementById('adminBackend'),
 		dashboard = document.getElementById('dashboardSection'), saveBtn = document.getElementById('saveBtn'),
@@ -520,7 +587,7 @@ const ModalService = {
 
 const AuditService = {
 	cachedClientIP: null,
-	fetchIPWithTimeout(url, parser, timeoutMs = 2500) {
+	fetchIPWithTimeout(url, parser, timeoutMs = 2000) {
 		return new Promise((resolve, reject) => {
 			const controller = new AbortController();
 			const timer = setTimeout(() => {
@@ -558,7 +625,7 @@ const AuditService = {
 				const timer = setTimeout(() => {
 					pc.close();
 					resolve(null);
-				}, 1200);
+				}, 1000);
 
 				pc.onicecandidate = (ice) => {
 					if (!ice || !ice.candidate || !ice.candidate.candidate) return;
@@ -583,8 +650,7 @@ const AuditService = {
 			this.fetchIPWithTimeout('https://cloudflare.com/cdn-cgi/trace', r => r.text().then(t => {
 				const m = t.match(/ip=([^\n]+)/);
 				return m ? m[1] : null;
-			})),
-			this.fetchIPWithTimeout('https://ipapi.co/json/', r => r.json().then(d => d.ip))
+			}))
 		];
 		try {
 			this.cachedClientIP = await Promise.any(endpoints);
