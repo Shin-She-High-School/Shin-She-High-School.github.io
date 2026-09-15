@@ -1,275 +1,273 @@
-let isRegisterMode = false;
-
-window.switchAuthMode = function() {
-	isRegisterMode = !isRegisterMode;
-	const titleEl = document.getElementById('authTitle');
-	const regFields = document.getElementById('regFields');
-	const btn = document.querySelector('.auth-btn-primary');
-	const link = document.getElementById('authSwitchLink');
-	const hint = document.getElementById('authRoleHint');
-
-	if (isRegisterMode) {
-		if (titleEl) titleEl.innerText = "註冊帳號";
-		if (regFields) regFields.style.display = "block";
-		if (btn) btn.innerText = "確認註冊";
-		if (link) link.innerText = "已有帳號？點此登入";
-		checkAuthIdRoleHint();
-	} else {
-		if (titleEl) titleEl.innerText = "帳號登入";
-		if (regFields) regFields.style.display = "none";
-		if (btn) btn.innerText = "確認登入";
-		if (link) link.innerText = "尚未有帳號？點此註冊";
-		if (hint) hint.innerText = "";
+window.checkIsTeacherAccount = async function(cleanSid) {
+	if (!cleanSid) return false;
+	const lowerSid = cleanSid.toLowerCase().trim();
+	const cached = teacherCache.get(lowerSid);
+	if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+		return cached.isTeacher;
 	}
-};
-
-window.checkAuthIdRoleHint = function() {
-	if (!isRegisterMode) return;
-	const rawId = (document.getElementById('authID')?.value || '').trim().toLowerCase();
-	const hintEl = document.getElementById('authRoleHint');
-	const teacherRoleGroup = document.getElementById('regTeacherRoleGroup');
-	const yearGroup = document.getElementById('regYearGroup');
-	const deptGroup = document.getElementById('regDeptGroup');
-
-	if (!hintEl) return;
-
-	if (!rawId) {
-		hintEl.innerText = "";
-		if (teacherRoleGroup) teacherRoleGroup.style.display = "none";
-		if (yearGroup) yearGroup.style.display = "block";
-		if (deptGroup) deptGroup.style.display = "block";
-		return;
-	}
-
-	if (rawId.startsWith('t')) {
-		hintEl.innerText = "識別身分：教職員";
-		hintEl.className = "text-xs font-black text-indigo-600";
-		if (teacherRoleGroup) teacherRoleGroup.style.display = "block";
-		handleTeacherTypeChange();
-	} else if (rawId.startsWith('c')) {
-		hintEl.innerText = "識別身分：輔導教師";
-		hintEl.className = "text-xs font-black text-violet-600";
-		if (teacherRoleGroup) teacherRoleGroup.style.display = "none";
-		if (yearGroup) yearGroup.style.display = "none";
-		if (deptGroup) deptGroup.style.display = "none";
-	} else if (rawId.startsWith('a')) {
-		hintEl.innerText = "識別身分：管理員";
-		hintEl.className = "text-xs font-black text-slate-800";
-		if (teacherRoleGroup) teacherRoleGroup.style.display = "none";
-		if (yearGroup) yearGroup.style.display = "none";
-		if (deptGroup) deptGroup.style.display = "none";
-	} else {
-		hintEl.innerText = "識別身分：學生";
-		hintEl.className = "text-xs font-black text-emerald-600";
-		if (teacherRoleGroup) teacherRoleGroup.style.display = "none";
-		if (yearGroup) yearGroup.style.display = "block";
-		if (deptGroup) deptGroup.style.display = "block";
+	const client = ensureDbClient();
+	if (!client) return false;
+	try {
+		const { data, error } = await client
+			.from('teacher_whitelist')
+			.select('teacher_id')
+			.ilike('teacher_id', lowerSid)
+			.maybeSingle();
+		const isTeacher = !!(!error && data);
+		teacherCache.set(lowerSid, { isTeacher, timestamp: Date.now() });
+		return isTeacher;
+	} catch (e) {
+		return false;
 	}
 };
 
 window.handleTeacherTypeChange = function() {
-	const tType = document.getElementById('authTeacherType')?.value;
-	const yearGroup = document.getElementById('regYearGroup');
-	const deptGroup = document.getElementById('regDeptGroup');
-
-	if (tType === 'tutor') {
-		if (yearGroup) yearGroup.style.display = "block";
-		if (deptGroup) deptGroup.style.display = "block";
+	const teacherType = document.getElementById('authTeacherType')?.value;
+	const regYearGroup = document.getElementById('regYearGroup');
+	const regDeptGroup = document.getElementById('regDeptGroup');
+	if (teacherType === 'tutor') {
+		if (regYearGroup) regYearGroup.style.display = 'block';
+		if (regDeptGroup) regDeptGroup.style.display = 'block';
 	} else {
-		if (yearGroup) yearGroup.style.display = "none";
-		if (deptGroup) deptGroup.style.display = "none";
+		if (regYearGroup) regYearGroup.style.display = 'none';
+		if (regDeptGroup) regDeptGroup.style.display = 'none';
 	}
+};
+
+let checkHintDebounceTimer = null;
+window.checkAuthIdRoleHint = function() {
+	clearTimeout(checkHintDebounceTimer);
+	checkHintDebounceTimer = setTimeout(async () => {
+		const isReg = document.getElementById('regFields')?.style.display === 'block';
+		const hintEl = document.getElementById('authRoleHint');
+		const regTeacherRoleGroup = document.getElementById('regTeacherRoleGroup');
+		const regYearGroup = document.getElementById('regYearGroup');
+		const regDeptGroup = document.getElementById('regDeptGroup');
+
+		if (!isReg) {
+			if (hintEl) hintEl.textContent = '';
+			return;
+		}
+
+		const sidInput = document.getElementById('authID')?.value.trim();
+		if (!sidInput) {
+			if (hintEl) hintEl.textContent = '';
+			if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'none';
+			if (regYearGroup) regYearGroup.style.display = 'block';
+			if (regDeptGroup) regDeptGroup.style.display = 'block';
+			return;
+		}
+		const cleanSid = sidInput.split('@')[0].toLowerCase().trim();
+		const isTeacher = await checkIsTeacherAccount(cleanSid);
+		const currentCleanSid = document.getElementById('authID')?.value.trim().split('@')[0].toLowerCase().trim();
+		if (currentCleanSid !== cleanSid) return;
+		if (isTeacher) {
+			if (hintEl) hintEl.textContent = '👨‍🏫 教師帳號';
+			if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'block';
+			handleTeacherTypeChange();
+		} else {
+			if (hintEl) hintEl.textContent = '';
+			if (regTeacherRoleGroup) regTeacherRoleGroup.style.display = 'none';
+			if (regYearGroup) regYearGroup.style.display = 'block';
+			if (regDeptGroup) regDeptGroup.style.display = 'block';
+		}
+	}, 200);
+};
+
+window.switchAuthMode = function() {
+	const regFields = document.getElementById('regFields');
+	const authTitle = document.getElementById('authTitle');
+	const authSwitchLink = document.getElementById('authSwitchLink');
+	const authBtn = document.querySelector('#authWorkspace .auth-btn-primary');
+	if (regFields.style.display === 'none') {
+		regFields.style.display = 'block';
+		authTitle.innerText = '帳號註冊';
+		authSwitchLink.innerText = '已有帳號？點此登入';
+		if (authBtn) authBtn.innerText = '確認註冊';
+		initDropdowns(false);
+	} else {
+		regFields.style.display = 'none';
+		authTitle.innerText = '帳號登入';
+		authSwitchLink.innerText = '尚未有帳號？點此註冊';
+		if (authBtn) authBtn.innerText = '確認登入';
+	}
+	checkAuthIdRoleHint();
 };
 
 window.handleAuth = async function() {
 	const client = ensureDbClient();
-	if (!client) {
-		showMsg("資料庫連線初始化失敗", "error");
-		return;
-	}
+	if (!client) { showMsg("無法進行登入 or 註冊！請聯絡管理員。", "error"); return; }
+	const sid = document.getElementById('authID').value.trim(), pwd = document.getElementById('authPassword').value;
+	if (!sid) { showMsg("請輸入帳號！", "error"); return; }
+	const cleanSid = sid.split('@')[0].toLowerCase().trim(), email = `${cleanSid}${EMAIL_DOMAIN}`;
+	const isReg = document.getElementById('regFields').style.display === 'block';
 
-	const rawId = (document.getElementById('authID')?.value || '').trim().toLowerCase();
-	const pwd = document.getElementById('authPassword')?.value || '';
-
-	if (!rawId || !pwd) {
-		showMsg("請填寫完整帳號與密碼！", "error");
-		return;
-	}
-
-	const email = `${rawId}${EMAIL_DOMAIN}`;
-
-	if (!isRegisterMode) {
-		try {
-			updateSyncStatusIndicator('saving');
-			const { data, error } = await client.auth.signInWithPassword({ email, password: pwd });
-			if (error) throw error;
-
-			updateSyncStatusIndicator('success');
-			showMsg("登入成功！");
-			AuditService.logRecord("使用者登入", rawId, data?.user?.user_metadata?.full_name || rawId, {});
-		} catch (err) {
-			updateSyncStatusIndicator('offline');
-			showMsg(translateError(err.message), "error");
-		}
-	} else {
-		const name = (document.getElementById('authName')?.value || '').trim();
-		if (!name) {
-			showMsg("請填寫姓名！", "error");
+	if (isReg) {
+		if (!pwd || pwd.length < 6) {
+			showMsg("密碼強度不足：長度至少需 6 個字元！", "error");
 			return;
 		}
+	}
 
-		let role = 'student';
-		let year = '未設定';
-		let dept = '未設定';
-
-		if (rawId.startsWith('t')) {
-			const tType = document.getElementById('authTeacherType')?.value;
-			if (!tType) {
-				showMsg("請選擇教師身份（導師／科任教師）！", "error");
-				return;
+	try {
+		updateSyncStatusIndicator('saving');
+		if (isReg) {
+			const isTeacher = await checkIsTeacherAccount(cleanSid);
+			const name = document.getElementById('authName').value.trim();
+			if (!name) throw new Error("請輸入姓名！");
+			let role = isTeacher ? 'teacher' : 'student';
+			let entryYear = '未設定';
+			let entryDept = '未設定';
+			let matchedTutor = '教師帳號免設定';
+			if (isTeacher) {
+				const teacherType = document.getElementById('authTeacherType')?.value;
+				if (!teacherType) {
+					throw new Error("請選擇您的教師身份（專任教師或導師）！");
+				}
+				if (teacherType === 'tutor') {
+					entryYear = document.getElementById('authEntryYear').value;
+					entryDept = document.getElementById('authEntryDept').value;
+					if (!entryYear || !entryDept || entryYear.includes('請選擇') || entryDept.includes('請選擇')) {
+						throw new Error("擔任導師請務必選擇負責的入學年與科別班級！");
+					}
+				} else {
+					entryYear = '未設定';
+					entryDept = '未設定';
+				}
+			} else {
+				entryYear = document.getElementById('authEntryYear').value;
+				entryDept = document.getElementById('authEntryDept').value;
+				if (!entryYear || !entryDept || entryYear.includes('請選擇') || entryDept.includes('請選擇')) {
+					throw new Error("學生註冊請務必選擇正確的入學年與科別！");
+				}
+				matchedTutor = await findTutorByYearDept(entryYear, entryDept);
 			}
-			role = 'teacher';
-			if (tType === 'tutor') {
-				year = document.getElementById('authEntryYear')?.value || '';
-				dept = document.getElementById('authEntryDept')?.value || '';
-				if (!year || !dept) {
-					showMsg("導師請選擇負責入學年與班級！", "error");
-					return;
+			const { data: signUpData, error } = await client.auth.signUp({
+				email, password: pwd, options: { 
+					data: { 
+						full_name: name, 
+						student_id: cleanSid, 
+						role: role, 
+						tutor: matchedTutor, 
+						entry_year: entryYear, 
+						entry_dept: entryDept 
+					} 
+				}
+			});
+			if (error) throw error;
+			const newUserId = signUpData?.user?.id;
+			if (newUserId) {
+				try {
+					await client.from('grad_checks').upsert({
+						id: newUserId, 
+						student_id: cleanSid, 
+						full_name: name, 
+						entry_year: entryYear,
+						entry_dept: entryDept, 
+						role: role, 
+						tutor: matchedTutor, 
+						credits_json: {}, 
+						total_credits: 0, 
+						updated_at: new Date().toISOString()
+					});
+				} catch (upsertErr) {}
+			}
+			updateSyncStatusIndicator('success');
+			let successMsg = "學生帳號註冊成功！";
+			if (role === 'teacher') successMsg = (entryYear !== '未設定' ? "導師帳號註冊成功！" : "教師帳號註冊成功！");
+			showMsg(successMsg);
+			switchAuthMode();
+			document.getElementById('authID').value = cleanSid;
+			logAuditRecord("使用者註冊", cleanSid, name, { role, year: entryYear, dept: entryDept });
+		} else {
+			if (!pwd) {
+				let accountExists = false;
+				try {
+					const { data } = await client.from('grad_checks').select('student_id').eq('student_id', cleanSid).maybeSingle();
+					if (data) accountExists = true;
+				} catch (e) {}
+				if (!accountExists) {
+					updateSyncStatusIndicator('offline'); showMsg("查無此帳號資料，請先註冊！"); switchAuthMode();
+					document.getElementById('authID').value = cleanSid; return;
+				} else {
+					updateSyncStatusIndicator('offline'); showMsg("請輸入密碼！", "error"); return;
 				}
 			}
-		} else if (rawId.startsWith('c')) {
-			role = 'counselor';
-			dept = '[]';
-		} else if (rawId.startsWith('a')) {
-			role = 'admin';
-		} else {
-			role = 'student';
-			year = document.getElementById('authEntryYear')?.value || '';
-			dept = document.getElementById('authEntryDept')?.value || '';
-			if (!year || !dept) {
-				showMsg("學生請完整填寫入學年與科別班級！", "error");
-				return;
+			const { data: authResult, error } = await client.auth.signInWithPassword({ email, password: pwd });
+			if (error) {
+				let accountExists = false;
+				try {
+					const { data } = await client.from('grad_checks').select('student_id').eq('student_id', cleanSid).maybeSingle();
+					if (data) accountExists = true;
+				} catch (e) {}
+				if (!accountExists) {
+					updateSyncStatusIndicator('offline'); showMsg("查無此帳號資料，請先註冊！"); switchAuthMode();
+					document.getElementById('authID').value = cleanSid; return;
+				}
+				throw error;
 			}
+			let loginDisplayName = cleanSid;
+			if (authResult?.user?.user_metadata?.full_name) loginDisplayName = authResult.user.user_metadata.full_name;
+			updateSyncStatusIndicator('success'); showMsg("登入成功！");
+			document.getElementById('authWorkspace').style.display = 'none'; document.getElementById('appWorkspace').style.display = 'flex';
+			hasLoadedInitialData = false; updateUI();
+			logAuditRecord("使用者登入", cleanSid, loginDisplayName, { status: "登入成功" });
 		}
-
-		try {
-			updateSyncStatusIndicator('saving');
-			const meta = {
-				full_name: name,
-				student_id: rawId,
-				role: role,
-				entry_year: year,
-				entry_dept: dept
-			};
-
-			const { data, error } = await client.auth.signUp({
-				email,
-				password: pwd,
-				options: { data: meta }
-			});
-
-			if (error) throw error;
-
-			const uid = data?.user?.id;
-			if (uid) {
-				const tutorName = (role === 'student') ? await findTutorByYearDept(year, dept) : (role === 'admin' ? '管理員免設定' : (role === 'counselor' ? '輔導教師免設定' : '教師免設定'));
-				
-				const initialCredits = {
-					_view_year: year !== '未設定' ? year : '113',
-					_view_dept: dept !== '未設定' && !dept.startsWith('[') ? dept : '普通科(理工生醫群)-1',
-					_layout_mode: 'semester'
-				};
-
-				await client.from('grad_checks').upsert({
-					id: uid,
-					student_id: rawId,
-					full_name: name,
-					entry_year: year,
-					entry_dept: dept,
-					role: role,
-					tutor: tutorName,
-					credits_json: initialCredits,
-					total_credits: 0,
-					updated_at: new Date().toISOString()
-				}, { onConflict: 'student_id' });
-			}
-
-			updateSyncStatusIndicator('success');
-			showMsg("註冊成功，正在進入系統...");
-			AuditService.logRecord("使用者註冊", rawId, name, { role, year, dept });
-		} catch (err) {
-			updateSyncStatusIndicator('offline');
-			showMsg("註冊失敗：" + translateError(err.message), "error");
-		}
-	}
+	} catch (e) { updateSyncStatusIndicator('offline'); showMsg(translateError(e.message), 'error'); }
 };
 
-window.handleLogout = async function() {
-	const client = ensureDbClient();
-	if (currentUser) {
-		AuditService.logRecord("使用者登出", userDBRecord?.student_id || currentUser.id, userDBRecord?.full_name || '使用者', {});
-	}
-	cleanupRealtimeSubscriptions();
-	clearAppRuntimeState();
-	if (client) {
-		await client.auth.signOut();
-	}
-	window.location.hash = '';
-	window.location.reload();
+window.handleLogout = async function() { 
+	try { 
+		if (currentUser) {
+			const curRec = userDBRecord || currentUser?.user_metadata || {};
+			const curSid = (curRec.student_id || currentUser.email?.split('@')[0] || '未知帳號').toLowerCase().trim();
+			const curName = curRec.full_name || curSid;
+			await logAuditRecord("使用者登出", curSid, curName, { status: "登出成功" });
+		}
+		cleanupRealtimeSubscriptions();
+		window.clearAppRuntimeState();
+		const client = ensureDbClient();
+		if (client) await client.auth.signOut(); 
+		window.location.hash = ''; 
+		window.location.reload(); 
+	} catch (e) { showMsg("登出失敗", 'error'); } 
 };
 
 window.openProfile = function() {
-	const cur = userDBRecord || currentUser?.user_metadata || {};
-	document.getElementById('profAccount').value = cur.student_id || (currentUser?.email || '').split('@')[0];
-	document.getElementById('profName').value = cur.full_name || '';
-	
-	initDropdowns(false);
-	
-	const yEl = document.getElementById('profEntryYear');
-	const dEl = document.getElementById('profEntryDept');
-	if (yEl) yEl.value = cur.entry_year || '未設定';
-	if (dEl) dEl.value = String(cur.entry_dept).startsWith('[') ? '未設定' : (cur.entry_dept || '未設定');
-	
-	const tutorBox = document.getElementById('profStudentTutorArea');
-	const tEl = document.getElementById('profTutor');
-	if (cur.role === 'student') {
-		if (tutorBox) tutorBox.style.display = 'block';
-		if (tEl) tEl.value = cur.tutor || '系統自動對應中';
-	} else {
-		if (tutorBox) tutorBox.style.display = 'none';
-	}
-
+	if (!currentUser) return;
+	const curData = userDBRecord || currentUser.user_metadata, role = curData.role || 'student';
+	initDropdowns(role === 'admin');
+	document.getElementById('profAccount').value = curData.student_id || '';
+	document.getElementById('profName').value = curData.full_name || '';
+	document.getElementById('profEntryYear').value = curData.entry_year || '未設定';
+	const isCounselorDept = String(curData.entry_dept || '').startsWith('[');
+	document.getElementById('profEntryDept').value = isCounselorDept ? '未設定' : (curData.entry_dept || '未設定');
+	document.getElementById('profStudentTutorArea').style.display = role === 'student' ? 'block' : 'none';
+	if (role === 'student') document.getElementById('profTutor').value = curData.tutor || '未設定';
 	document.getElementById('profPassword').value = '';
 	toggleUIModal(true, 'profileModal');
 };
 
 window.updateProfile = async function() {
+	const n = document.getElementById('profName').value, p = document.getElementById('profPassword').value, d = { data: { full_name: n } };
+	if (p) {
+		if (p.length < 6) {
+			showMsg("密碼長度至少需 6 個字元！", "error");
+			return;
+		}
+		d.password = p;
+	}
 	const client = ensureDbClient();
-	if (!client || !currentUser) return;
-
-	const newPwd = document.getElementById('profPassword')?.value.trim();
-	if (!newPwd) {
-		toggleUIModal(false, 'profileModal');
-		showMsg("未修改任何資料");
-		return;
-	}
-
-	if (newPwd.length < 6) {
-		showMsg("密碼長度至少需 6 個字元以上", "error");
-		return;
-	}
-
+	if (!client) return;
 	try {
+		const curData = userDBRecord || currentUser.user_metadata;
 		updateSyncStatusIndicator('saving');
-		const { error } = await client.auth.updateUser({ password: newPwd });
-		if (error) throw error;
-
+		await client.auth.updateUser(d);
 		updateSyncStatusIndicator('success');
-		showMsg("密碼修改成功！");
+		showMsg("個人資料已更新！");
+		logAuditRecord("更新個人資料", curData.student_id, curData.full_name, { passwordChanged: !!p });
 		toggleUIModal(false, 'profileModal');
-		AuditService.logRecord("更新個人資料", userDBRecord?.student_id || currentUser.id, userDBRecord?.full_name || '', { updated_field: "密碼" });
 	} catch (err) {
-		updateSyncStatusIndicator('offline');
-		showMsg("更新失敗：" + translateError(err.message), "error");
+		updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error');
 	}
 };

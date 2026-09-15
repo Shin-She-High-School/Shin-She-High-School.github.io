@@ -4,13 +4,13 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 	<title>新社高中畢業自我檢核系統</title>
-	<link rel="icon" type="image/png" href="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<script src="https://cdn.tailwindcss.com"></script>
 	<script>
-		window.tailwind = {
+		tailwind.config = {
 			theme: {
 				extend: {
 					fontFamily: {
@@ -18,9 +18,8 @@
 					}
 				}
 			}
-		};
+		}
 	</script>
-	<script src="https://cdn.tailwindcss.com"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 	<link rel="stylesheet" href="style.css">
 </head>
@@ -144,10 +143,10 @@
 				<div id="layoutSwitcherArea" class="app-container mt-3 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
 					<span class="text-sm font-extrabold text-slate-700 shrink-0 text-center md:text-left">檢視版面切換：</span>
 					<div class="inline-flex rounded-xl p-1 bg-slate-200 border border-slate-300">
-						<button id="btnLayoutSubject" onclick="setLayoutMode('subject')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900">
+						<button id="btnLayoutSubject" onclick="setLayoutMode('subject')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md">
 							按科目檢視
 						</button>
-						<button id="btnLayoutSemester" onclick="setLayoutMode('semester')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md">
+						<button id="btnLayoutSemester" onclick="setLayoutMode('semester')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900">
 							按學期檢視
 						</button>
 					</div>
@@ -236,6 +235,14 @@
 						</div>
 						<div id="adminTableContainer" class="admin-table-container custom-scrollbar">
 							<table class="admin-table">
+								<colgroup>
+									<col style="width: 10%;">
+									<col style="width: 11%;">
+									<col style="width: 8%;">
+									<col style="width: 19%;">
+									<col style="width: 16%;">
+									<col style="width: 36%;">
+								</colgroup>
 								<thead>
 									<tr>
 										<th>姓名</th>
@@ -645,6 +652,29 @@
 				</div>
 			</div>
 
+			<div id="editCounselorScopeGroup" class="input-group" style="display:none;">
+				<div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3">
+					<div class="flex items-center justify-between pb-2 border-b border-slate-200/80 flex-wrap gap-2">
+						<div>
+							<div class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+								<span class="w-2 h-3.5 bg-indigo-600 rounded-full"></span>
+								<span>授權檢核班級</span>
+							</div>
+							<p class="text-[11px] text-slate-500 font-bold mt-0.5">勾選該輔導教師有權查閱與修改學分之班級</p>
+						</div>
+						<div class="flex items-center gap-1.5">
+							<span id="counselorSelectedCountBadge" class="text-[11px] font-black px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">已選取 0 / 20 班</span>
+							<div class="flex items-center gap-1 text-[11px] font-extrabold ml-1">
+								<button type="button" class="text-indigo-600 hover:text-indigo-800 hover:underline px-1" onclick="toggleAllCounselorClasses(true)">全選</button>
+								<span class="text-slate-300">|</span>
+								<button type="button" class="text-slate-500 hover:text-slate-700 hover:underline px-1" onclick="toggleAllCounselorClasses(false)">清空</button>
+							</div>
+						</div>
+					</div>
+					<div id="counselorClassChecklist" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-1"></div>
+				</div>
+			</div>
+
 			<div id="editTutorSection" class="input-group">
 				<label id="editTutorLabel">導師</label>
 				<div id="editTutorWrapper"></div>
@@ -666,26 +696,33 @@
 		</div>
 	</div>
 
-	<!-- 輔導教師獨立授權班級彈窗 -->
+	<!-- 輔導教師獨立授權班級彈窗 (依原樣式追加) -->
 	<div id="counselorScopeModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-xl !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3">
-				<span class="font-black text-slate-800 text-lg">🔑 輔導教師負責班級授權</span>
+				<div>
+					<span class="font-black text-slate-800 text-lg flex items-center gap-2">
+						<span class="w-2.5 h-5 rounded-full bg-violet-600"></span>
+						🔑 輔導教師負責班級授權
+					</span>
+					<div id="counselorScopeUserName" class="text-xs font-bold text-violet-700 mt-1"></div>
+				</div>
 				<span class="close-modal-btn" onclick="toggleUIModal(false,'counselorScopeModal')">&times;</span>
 			</div>
-			<input type="hidden" id="counselorTargetUserId" value="">
+			<input type="hidden" id="counselorScopeUserId" value="">
 			<div class="modal-body space-y-3">
 				<div class="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-xl">
-					<span id="counselorModalCountBadge" class="text-xs font-black text-slate-700">已選取 0 班</span>
-					<div class="flex gap-2">
-						<button type="button" class="text-xs text-indigo-600 font-bold" onclick="toggleAllCounselorClasses(true)">全選</button>
-						<button type="button" class="text-xs text-slate-500 font-bold" onclick="toggleAllCounselorClasses(false)">清空</button>
+					<span id="counselorSelectedCountBadge" class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">已選取 0 / 20 班</span>
+					<div class="flex items-center gap-2 text-xs font-bold">
+						<button type="button" class="text-indigo-600 hover:underline" onclick="toggleAllCounselorClasses(true)">全選</button>
+						<span class="text-slate-300">|</span>
+						<button type="button" class="text-slate-500 hover:underline" onclick="toggleAllCounselorClasses(false)">清空</button>
 					</div>
 				</div>
-				<div id="counselorClassChecklist" class="space-y-3 max-h-[50dvh] overflow-y-auto custom-scrollbar p-2 border border-slate-100 rounded-xl"></div>
+				<div id="counselorClassChecklist" class="space-y-3 max-h-[50dvh] overflow-y-auto custom-scrollbar pr-1"></div>
 				<div class="pt-3 border-t border-slate-100 flex gap-2">
 					<button type="button" class="action-btn btn-fail-all flex-1" onclick="toggleUIModal(false,'counselorScopeModal')">取消</button>
-					<button type="button" class="action-btn btn-pass-all flex-1" onclick="saveCounselorScopeSettings()">儲存設定</button>
+					<button type="button" class="action-btn flex-1" style="background:#8b5cf6;" onclick="saveCounselorScopeModal()">儲存授權</button>
 				</div>
 			</div>
 		</div>
@@ -857,10 +894,10 @@
 		</div>
 	</div>
 
-	<script src="config.js?v=202610"></script>
-	<script src="curriculum.js?v=202610"></script>
-	<script src="auth.js?v=202610"></script>
-	<script src="admin.js?v=202610"></script>
-	<script src="app.js?v=202610"></script>
+	<script src="config.js"></script>
+	<script src="curriculum.js"></script>
+	<script src="auth.js"></script>
+	<script src="admin.js"></script>
+	<script src="app.js"></script>
 </body>
 </html>

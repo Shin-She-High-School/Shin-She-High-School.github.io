@@ -22,24 +22,15 @@ const CurriculumService = {
 		});
 		return keys;
 	},
-	normalizeCourses(rawCourses) {
-		if (!rawCourses) return [];
-		if (Array.isArray(rawCourses)) return rawCourses;
-		if (typeof rawCourses === 'string') {
-			try {
-				const parsed = JSON.parse(rawCourses);
-				return Array.isArray(parsed) ? parsed : [];
-			} catch (e) {
-				return [];
-			}
-		}
-		return [];
-	},
 	setCurriculums(records) {
 		if (!Array.isArray(records)) return;
 		records.forEach(item => {
-			if (item && item.curriculum_key) {
-				this.data[item.curriculum_key] = this.normalizeCourses(item.courses);
+			let parsedCourses = item.courses;
+			if (typeof parsedCourses === 'string') {
+				try { parsedCourses = JSON.parse(parsedCourses); } catch (e) { parsedCourses = []; }
+			}
+			if (item.curriculum_key && Array.isArray(parsedCourses)) {
+				this.data[item.curriculum_key] = parsedCourses;
 			}
 		});
 	},
@@ -53,8 +44,6 @@ const CurriculumService = {
 		return 'vocational';
 	}
 };
-
-window.CurriculumService = CurriculumService;
 
 let curriculum = [];
 
@@ -262,6 +251,7 @@ window.renderMobileCards = function(checkedStates) {
 	container.innerHTML = "";
 	const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
 	curriculum.forEach(item => {
+		const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700 border border-slate-200" };
 		const card = document.createElement("div");
 		card.className = "mobile-card";
 		let semGridHtml = `<div class="mobile-semesters-grid">`;
@@ -273,7 +263,7 @@ window.renderMobileCards = function(checkedStates) {
 					<div class="mobile-sem-item">
 						<span class="mobile-sem-label">${escapeHtml(semNames[sIdx])}</span>
 						<div class="mobile-score-box">
-							<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); SaveService.markDirty('變更學分紀錄');">
+							<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); debouncedSaveToCloud();">
 							<label for="${escapeHtml(id)}" class="score-label">${c}</label>
 						</div>
 					</div>`;
@@ -287,17 +277,23 @@ window.renderMobileCards = function(checkedStates) {
 		semGridHtml += `</div>`;
 
 		const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
-		const noteBtnHtml = hasNote ? `
-			<button type="button" class="text-[11px] font-bold text-amber-600 underline ml-1 cursor-pointer" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">備註</button>
+		const noteTagHtml = hasNote ? `
+			<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">
+				<span class="note-icon">📌</span>
+				<span>備註</span>
+			</button>
 		` : '';
 
 		card.innerHTML = `
-			<div class="flex items-start justify-between gap-2 mb-2 pb-1 border-b border-slate-100">
-				<div class="flex items-center gap-1 font-bold text-sm text-slate-800">
-					<span>${escapeHtml(item.name)}</span>
-					${noteBtnHtml}
+			<div class="flex items-start justify-between gap-2 mb-3 pb-2 border-b border-slate-100">
+				<div class="flex items-center flex-wrap gap-1.5 min-w-0 flex-1">
+					<span class="font-extrabold text-sm sm:text-base text-slate-800 break-words leading-snug">${escapeHtml(item.name)}</span>
+					${noteTagHtml}
 				</div>
-				<span class="text-xs text-slate-500 font-semibold">${escapeHtml(mapping.type[item.type] || "一般")}</span>
+				<div class="flex items-center gap-1.5 shrink-0 pt-0.5">
+					<span class="mobile-badge ${catInfo.class}">${escapeHtml(catInfo.text)}</span>
+					<span class="mobile-badge bg-slate-100 text-slate-600 border border-slate-200">${escapeHtml(mapping.type[item.type] || "一般")}</span>
+				</div>
 			</div>
 			${semGridHtml}
 		`;
@@ -323,7 +319,7 @@ window.updateSemesterProgress = function(input, sIdx) {
 window.renderSemesterCards = function(checkedStates) {
 	const container = document.getElementById("mobileCardsContainer");
 	if (!container) return;
-	container.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 my-3";
+	container.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 my-4";
 	container.innerHTML = "";
 	const semNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
 	semNames.forEach((semTitle, sIdx) => {
@@ -335,20 +331,32 @@ window.renderSemesterCards = function(checkedStates) {
 				const id = getChkId(item.name, sIdx);
 				const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (!item.defaultUnchecked);
 				if (isChecked) semEarned += c;
+				const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700 border border-slate-200" };
 				
 				const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
-				const noteBtnHtml = hasNote ? `
-					<button type="button" class="text-[11px] font-bold text-amber-600 underline ml-1 cursor-pointer" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">備註</button>
+				const noteTagHtml = hasNote ? `
+					<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">
+						<span class="note-icon">📌</span>
+						<span>備註</span>
+					</button>
 				` : '';
 
 				itemsHtml += `
-					<div class="sem-item-row flex items-center justify-between p-2 rounded transition-all gap-2 cursor-pointer select-none mb-1">
-						<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); SaveService.markDirty('變更學分紀錄');">
+					<div class="sem-item-row flex items-center justify-between p-2.5 rounded-xl transition-all gap-2 cursor-pointer select-none">
+						<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); debouncedSaveToCloud();">
 						<label for="${escapeHtml(id)}" class="sem-label flex items-center justify-between w-full cursor-pointer gap-2 min-w-0">
-							<div class="flex items-center gap-2 min-w-0 flex-1">
-								<span class="sub-name text-xs font-bold text-slate-800">${escapeHtml(item.name)}</span>
-								<span class="text-[10px] font-semibold text-slate-500">${c}學分</span>
-								${noteBtnHtml}
+							<div class="flex items-center gap-2.5 min-w-0 flex-1">
+								<div class="custom-check-box w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all shrink-0">
+									<i class="fa-solid fa-check text-[10px] text-white opacity-0 transform scale-50 transition-all"></i>
+								</div>
+								<div class="flex items-center flex-wrap gap-1.5 min-w-0 flex-1">
+									<span class="sub-name text-xs sm:text-sm font-extrabold text-slate-800 break-words leading-snug">${escapeHtml(item.name)}</span>
+									<span class="credit-badge text-[10px] font-black px-1.5 py-0.5 rounded-md bg-slate-200/80 text-slate-700 shrink-0">${c} 學分</span>
+									${noteTagHtml}
+								</div>
+							</div>
+							<div class="flex items-center gap-1 shrink-0 pt-0.5">
+								<span class="mobile-badge text-[10px] py-0.5 px-1.5 ${catInfo.class}">${catInfo.text}</span>
 							</div>
 						</label>
 					</div>`;
@@ -356,21 +364,22 @@ window.renderSemesterCards = function(checkedStates) {
 		});
 		if (semMax === 0) return;
 		const card = document.createElement("div");
-		card.className = "semester-card";
-		const progressWidth = semMax > 0 ? Math.min(100, Math.round((semEarned / semMax) * 100)) : 0;
+		card.className = "semester-card flex flex-col justify-between";
 		card.innerHTML = `
-			<div class="flex items-center justify-between mb-2">
-				<h4 class="text-sm font-bold text-slate-800">${escapeHtml(semTitle)}</h4>
-				<div class="text-xs text-slate-600">取得 <span class="sem-earned-val font-bold text-emerald-600">${semEarned}</span> / <span>${semMax}</span> 學分</div>
+			<div>
+				<div class="flex items-center justify-between mb-2">
+					<h4 class="text-sm sm:text-base font-black text-slate-800 flex items-center gap-2"><span class="w-2 h-4 bg-emerald-500 rounded-full"></span>${escapeHtml(semTitle)}</h4>
+					<div class="text-xs font-black text-slate-600">取得 <span class="sem-earned-val text-emerald-600 text-sm font-black">${semEarned}</span> / <span>${semMax}</span> 學分</div>
+				</div>
+				<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
+					<div class="sem-progress-bar bg-emerald-500 h-full" style="width: ${Math.min(100, Math.round((semEarned / semMax) * 100))}%;"></div>
+				</div>
+				<div class="flex gap-2 mb-3 pt-1 border-b border-slate-100 pb-3">
+					<button type="button" class="flex-1 py-1.5 px-2 text-xs font-extrabold text-emerald-700 bg-emerald-50 rounded-lg" onclick="setSemesterStatus(${sIdx}, true)">✔ 本學期全部及格</button>
+					<button type="button" class="flex-1 py-1.5 px-2 text-xs font-extrabold text-slate-600 bg-slate-100 rounded-lg" onclick="setSemesterStatus(${sIdx}, false)">✕ 本學期學分歸零</button>
+				</div>
+				<div class="space-y-2">${itemsHtml}</div>
 			</div>
-			<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2.5">
-				<div class="sem-progress-bar bg-emerald-500 h-full" style="width: ${progressWidth}%;"></div>
-			</div>
-			<div class="flex gap-2 mb-2 pb-2 border-b border-slate-100">
-				<button type="button" class="flex-1 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 rounded" onclick="setSemesterStatus(${sIdx}, true)">✔ 全部及格</button>
-				<button type="button" class="flex-1 py-1 text-xs font-bold text-slate-600 bg-slate-100 rounded" onclick="setSemesterStatus(${sIdx}, false)">✕ 學分歸零</button>
-			</div>
-			<div>${itemsHtml}</div>
 		`;
 		container.appendChild(card);
 	});
@@ -405,12 +414,10 @@ window.renderTable = function() {
 
 window.changeDashCurriculum = function() {
 	const yr = document.getElementById('dashSelectYear').value, dept = document.getElementById('dashSelectDept').value;
-	const oldYr = currentYear, oldDept = currentDept;
 	sessionStorage.setItem('tempSelectedYear', yr);
 	sessionStorage.setItem('tempSelectedDept', dept);
 	selectCurriculum(yr, dept);
 	applyLoadedChecks((editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {});
-	SaveService.markDirty("切換版本", { old_version: `${oldYr}年 ${oldDept}`, new_version: `${yr}年 ${dept}` });
 };
 
 window.setLayoutMode = function(mode) {
@@ -418,36 +425,11 @@ window.setLayoutMode = function(mode) {
 	sessionStorage.setItem('tempLayoutMode', mode);
 	const btnSub = document.getElementById('btnLayoutSubject');
 	const btnSem = document.getElementById('btnLayoutSemester');
-	if (btnSub) btnSub.className = mode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-bold rounded-lg transition-all bg-white text-slate-800 shadow" : "flex-1 md:flex-none px-6 py-2 text-xs font-bold rounded-lg transition-all text-slate-600";
-	if (btnSem) btnSem.className = mode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-bold rounded-lg transition-all bg-white text-slate-800 shadow" : "flex-1 md:flex-none px-6 py-2 text-xs font-bold rounded-lg transition-all text-slate-600";
+	if (btnSub) btnSub.className = mode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600";
+	if (btnSem) btnSem.className = mode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700";
 	scrollToTop();
 	renderTable();
 	calculate();
-	SaveService.markDirty("切換版面配置", { mode: mode === 'subject' ? '按科目檢視' : '按學期檢視' });
-};
-
-window.setAllStatus = function(p) {
-	document.querySelectorAll(".toggle-checkbox").forEach(chk => { chk.checked = p; });
-	calculate();
-	renderTable();
-	SaveService.markDirty(p ? "批次全部及格" : "批次學分歸零");
-};
-
-window.setSemesterStatus = function(sIdx, p) {
-	if (curriculum.length === 0) return;
-	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
-	if ((role === 'teacher' || role === 'counselor') && editingStudentId) {
-		if (activeStudentDBRecord && !isUserAuthorizedForStudent(activeStudentDBRecord)) {
-			showMsg("超出管理權限：您未被授權管理該學生學分！", "error");
-			return;
-		}
-	}
-	const semNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
-	document.querySelectorAll(`.toggle-checkbox[data-sem="${sIdx}"]`).forEach(chk => { chk.checked = p; });
-	calculate();
-	renderTable();
-	showMsg(p ? `已將 ${semNames[sIdx]} 設為全部及格` : `已將 ${semNames[sIdx]} 學分歸零`);
-	SaveService.markDirty(p ? "單學期全選及格" : "單學期學分歸零", { semester: semNames[sIdx] });
 };
 
 window.evaluateStudentStatus = function(s) {
@@ -487,7 +469,7 @@ window.evaluateStudentStatus = function(s) {
 	if (trackType === 'academic') pass = (total >= 150 && reqEarned >= 102 && optEarned >= 40);
 	else if (trackType === 'sports') pass = (total >= 150 && deptGenEarned >= Math.ceil(deptGenMax * 0.8) && deptSportsEarned >= Math.ceil(deptSportsMax * 0.85) && sportsOptEarned >= Math.ceil(sportsOptMax * 0.7));
 	else pass = (total >= 160 && dept >= deptThreshold && prof >= 60 && prac >= 45);
-	if (pass) return { status: 'pass', total, statusText: '🎓 符合畢業門檻', badgeClass: 'bg-emerald-100 text-emerald-800' };
-	else if (total >= 120) return { status: 'completion', total, statusText: '📜 修業證明資格', badgeClass: 'bg-amber-100 text-amber-800' };
-	else return { status: 'fail', total, statusText: '⚠️ 需重補修/成績證明', badgeClass: 'bg-rose-100 text-rose-800' };
+	if (pass) return { status: 'pass', total, statusText: '🎓 符合畢業門檻', badgeClass: 'bg-emerald-100 text-emerald-800 border border-emerald-300' };
+	else if (total >= 120) return { status: 'completion', total, statusText: '📜 修業證明資格', badgeClass: 'bg-amber-100 text-amber-800 border border-amber-300' };
+	else return { status: 'fail', total, statusText: '⚠️ 需重補修/成績證明', badgeClass: 'bg-rose-100 text-rose-800 border border-rose-300' };
 };
