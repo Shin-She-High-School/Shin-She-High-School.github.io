@@ -108,21 +108,21 @@ window.renderAdminStats = function() {
 	});
 
 	panel.innerHTML = `
-		<div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 text-center">
+		<div class="bg-indigo-50 border border-indigo-200 rounded p-2 text-center">
 			<div class="text-[11px] font-bold text-indigo-700">學生總人數</div>
-			<div class="text-xl font-black text-indigo-900 mt-0.5">${students.length} 人</div>
+			<div class="text-lg font-black text-indigo-900">${students.length} 人</div>
 		</div>
-		<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+		<div class="bg-emerald-50 border border-emerald-200 rounded p-2 text-center">
 			<div class="text-[11px] font-bold text-emerald-700">符合畢業資格</div>
-			<div class="text-xl font-black text-emerald-900 mt-0.5">${passCount} 人</div>
+			<div class="text-lg font-black text-emerald-900">${passCount} 人</div>
 		</div>
-		<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+		<div class="bg-amber-50 border border-amber-200 rounded p-2 text-center">
 			<div class="text-[11px] font-bold text-amber-700">符合修業證明</div>
-			<div class="text-xl font-black text-amber-900 mt-0.5">${completionCount} 人</div>
+			<div class="text-lg font-black text-amber-900">${completionCount} 人</div>
 		</div>
-		<div class="bg-rose-50 border border-rose-200 rounded-xl p-3 text-center">
+		<div class="bg-rose-50 border border-rose-200 rounded p-2 text-center">
 			<div class="text-[11px] font-bold text-rose-700">未達標 / 成績證明</div>
-			<div class="text-xl font-black text-rose-900 mt-0.5">${failCount} 人</div>
+			<div class="text-lg font-black text-rose-900">${failCount} 人</div>
 		</div>
 	`;
 };
@@ -136,72 +136,50 @@ window.renderAdminTable = function() {
 	if (cardsContainer) cardsContainer.innerHTML = '';
 
 	if (filteredAdminList.length === 0) {
-		const emptyRow = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-bold">查無符合條件的帳號資料</td></tr>`;
+		const emptyRow = `<tr><td colspan="6" class="text-center py-6 text-slate-400">查無符合條件的帳號資料</td></tr>`;
 		tbody.innerHTML = emptyRow;
-		if (cardsContainer) cardsContainer.innerHTML = `<div class="text-center py-8 text-slate-400 font-bold">查無符合條件的帳號資料</div>`;
+		if (cardsContainer) cardsContainer.innerHTML = `<div class="text-center py-6 text-slate-400">查無符合條件的帳號資料</div>`;
 		return;
 	}
 
 	filteredAdminList.forEach(item => {
 		const role = item.role || 'student';
-		let roleBadge = '<span class="role-badge badge-student">學生</span>';
-		if (role === 'admin') roleBadge = '<span class="role-badge badge-admin">管理員</span>';
-		else if (role === 'counselor') roleBadge = '<span class="role-badge badge-counselor">輔導教師</span>';
-		else if (role === 'teacher') {
+		let roleTitle = mapping.role[role] || '使用者';
+		if (role === 'teacher') {
 			const isTutor = (item.entry_year && item.entry_dept && item.entry_year !== '未設定' && item.entry_dept !== '未設定');
-			roleBadge = isTutor ? '<span class="role-badge badge-tutor">導師</span>' : '<span class="role-badge badge-teacher">教師</span>';
-		}
-
-		let statusBadge = '-';
-		if (role === 'student') {
-			const st = evaluateStudentStatus(item);
-			statusBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-black ${st.badgeClass}">${st.statusText} (${item.total_credits || 0}學分)</span>`;
+			roleTitle = isTutor ? '導師' : '教師';
 		}
 
 		let classInfo = `${item.entry_year || '未設定'} / ${item.entry_dept || '未設定'}`;
 		if (role === 'counselor') {
 			const allowedCount = getUserCounselorClasses(item).length;
-			classInfo = `<span class="text-violet-700 font-bold">已授權 ${allowedCount} 個班級</span>`;
+			classInfo = `已授權 ${allowedCount} 班`;
 		}
 
-		let editTrialBtn = '';
+		let statusBadge = '-';
 		if (role === 'student') {
-			editTrialBtn = `
-				<button type="button" class="btn-mini btn-cloud" onclick="startAdminEditStudent('${item.id}')" title="代為檢核學分">
-					試算
-				</button>
-			`;
+			const st = evaluateStudentStatus(item);
+			statusBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold ${st.badgeClass}">${st.statusText} (${item.total_credits || 0}分)</span>`;
 		}
 
-		let counselorScopeBtn = '';
-		if (role === 'counselor') {
-			const allowedCount = getUserCounselorClasses(item).length;
-			counselorScopeBtn = `
-				<button type="button" class="btn-mini" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="openCounselorScopeModal('${item.id}')" title="設定負責檢核班級">
-					🔑 授權班級 (${allowedCount})
-				</button>
-			`;
-		}
+		let editTrialBtn = (role === 'student') ? `<button type="button" class="btn-mini btn-cloud" onclick="startAdminEditStudent('${item.id}')">試算</button>` : '';
+		let counselorScopeBtn = (role === 'counselor') ? `<button type="button" class="btn-mini" style="background:#8b5cf6;" onclick="openCounselorScopeModal('${item.id}')">🔑 授權班級</button>` : '';
 
 		const actionsHtml = `
 			<div class="flex items-center gap-1.5 flex-wrap">
 				${editTrialBtn}
 				${counselorScopeBtn}
-				<button type="button" class="btn-mini btn-admin" onclick="openAdminUserEdit('${item.id}')">
-					編輯
-				</button>
-				<button type="button" class="btn-mini bg-rose-600 hover:bg-rose-700" onclick="confirmDeleteUser('${item.id}')">
-					刪除
-				</button>
+				<button type="button" class="btn-mini btn-admin" onclick="openAdminUserEdit('${item.id}')">編輯</button>
+				<button type="button" class="btn-mini bg-rose-600 hover:bg-rose-700" onclick="confirmDeleteUser('${item.id}')">刪除</button>
 			</div>
 		`;
 
 		const tr = document.createElement('tr');
 		tr.innerHTML = `
-			<td><span class="font-extrabold text-slate-800">${escapeHtml(item.full_name || '無')}</span></td>
-			<td><span class="font-mono text-xs font-bold text-slate-600">${escapeHtml(item.student_id || '-')}</span></td>
-			<td>${roleBadge}</td>
-			<td><span class="text-xs font-semibold text-slate-700">${classInfo}</span></td>
+			<td class="font-bold">${escapeHtml(item.full_name || '無')}</td>
+			<td class="font-mono text-xs">${escapeHtml(item.student_id || '-')}</td>
+			<td>${roleTitle}</td>
+			<td>${classInfo}</td>
 			<td>${statusBadge}</td>
 			<td>${actionsHtml}</td>
 		`;
@@ -209,26 +187,15 @@ window.renderAdminTable = function() {
 
 		if (cardsContainer) {
 			const card = document.createElement('div');
-			card.className = "bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2.5";
+			card.className = "bg-white border border-slate-200 rounded-lg p-3 mb-2";
 			card.innerHTML = `
-				<div class="flex items-center justify-between border-b border-slate-100 pb-2">
-					<div class="flex items-center gap-2">
-						<span class="font-black text-slate-800 text-sm">${escapeHtml(item.full_name || '無')}</span>
-						${roleBadge}
-					</div>
-					<span class="font-mono text-xs text-slate-500 font-bold">${escapeHtml(item.student_id || '-')}</span>
+				<div class="flex items-center justify-between pb-2 border-b border-slate-100">
+					<span class="font-bold text-slate-800">${escapeHtml(item.full_name || '無')} (${roleTitle})</span>
+					<span class="text-xs text-slate-500 font-mono">${escapeHtml(item.student_id || '-')}</span>
 				</div>
-				<div class="text-xs text-slate-600 flex justify-between items-center">
-					<span>所屬/負責班級:</span>
-					<span class="font-bold text-slate-800">${classInfo}</span>
-				</div>
-				<div class="text-xs text-slate-600 flex justify-between items-center">
-					<span>畢業資格判定:</span>
-					<div>${statusBadge}</div>
-				</div>
-				<div class="pt-2 border-t border-slate-100 flex justify-end">
-					${actionsHtml}
-				</div>
+				<div class="text-xs text-slate-600 my-1">負責/就讀：${classInfo}</div>
+				<div class="text-xs my-1">門檻狀態：${statusBadge}</div>
+				<div class="pt-2 border-t border-slate-100 flex justify-end">${actionsHtml}</div>
 			`;
 			cardsContainer.appendChild(card);
 		}
@@ -245,21 +212,21 @@ window.openCounselorScopeModal = function(userId) {
 	let html = '';
 	CurriculumService.years.forEach(yr => {
 		html += `
-			<div class="p-2.5 bg-white border border-slate-200 rounded-xl mb-2.5">
-				<div class="flex justify-between items-center pb-1 mb-1.5 border-b border-slate-100">
-					<span class="font-black text-xs text-slate-800">${yr} 學年度 (${yr === '113' ? '高三' : (yr === '114' ? '高二' : '高一')})</span>
-					<button type="button" class="text-[11px] font-bold text-violet-600 hover:underline" onclick="toggleYearCounselorClasses('${yr}', true)">本學年全選</button>
+			<div class="p-2.5 bg-slate-50 border border-slate-200 rounded mb-2">
+				<div class="flex justify-between items-center pb-1 mb-1 border-b border-slate-200">
+					<span class="font-bold text-xs text-slate-800">${yr} 學年度</span>
+					<button type="button" class="text-[11px] text-violet-600 font-bold" onclick="toggleYearCounselorClasses('${yr}', true)">本年全選</button>
 				</div>
-				<div class="grid grid-cols-2 gap-1.5">
+				<div class="grid grid-cols-2 gap-1">
 		`;
 
 		CurriculumService.departments.forEach(dept => {
 			const key = `${yr}_${dept}`;
 			const checked = allowed.includes(key) ? 'checked' : '';
 			html += `
-				<label class="text-xs flex items-center gap-1.5 cursor-pointer p-1 rounded hover:bg-slate-50">
-					<input type="checkbox" value="${key}" data-year="${yr}" class="counselor-modal-chk text-violet-600 focus:ring-violet-500 rounded" ${checked} onchange="updateCounselorModalCount()">
-					<span class="truncate font-semibold text-slate-700">${dept}</span>
+				<label class="text-xs flex items-center gap-1 cursor-pointer">
+					<input type="checkbox" value="${key}" data-year="${yr}" class="counselor-modal-chk" ${checked} onchange="updateCounselorModalCount()">
+					<span class="truncate">${dept}</span>
 				</label>
 			`;
 		});
@@ -278,17 +245,13 @@ window.updateCounselorModalCount = function() {
 	if (badge) badge.innerText = `已選取 ${count} 班`;
 };
 
-window.toggleAllCounselorClasses = function(isSelectAll) {
-	document.querySelectorAll('.counselor-modal-chk').forEach(chk => {
-		chk.checked = isSelectAll;
-	});
+window.toggleAllCounselorClasses = function(isAll) {
+	document.querySelectorAll('.counselor-modal-chk').forEach(c => c.checked = isAll);
 	updateCounselorModalCount();
 };
 
-window.toggleYearCounselorClasses = function(yr, isSelectAll) {
-	document.querySelectorAll(`.counselor-modal-chk[data-year="${yr}"]`).forEach(chk => {
-		chk.checked = isSelectAll;
-	});
+window.toggleYearCounselorClasses = function(yr, isAll) {
+	document.querySelectorAll(`.counselor-modal-chk[data-year="${yr}"]`).forEach(c => c.checked = isAll);
 	updateCounselorModalCount();
 };
 
@@ -318,16 +281,10 @@ window.saveCounselorScopeSettings = async function() {
 		user.credits_json = cj;
 
 		updateSyncStatusIndicator('success');
-		showMsg(`已成功更新 ${user.full_name} 輔導教師授權（共 ${selected.length} 班）`);
+		showMsg(`已更新輔導教師授權（共 ${selected.length} 班）`);
 		toggleUIModal(false, 'counselorScopeModal');
 
-		AuditService.logRecord(
-			"更新輔導教師授權",
-			user.student_id,
-			user.full_name,
-			{ authorized_count: selected.length, classes: selected }
-		);
-
+		AuditService.logRecord("更新輔導教師授權", user.student_id, user.full_name, { authorized_count: selected.length, classes: selected });
 		renderAdminTable();
 	} catch (err) {
 		updateSyncStatusIndicator('offline');
