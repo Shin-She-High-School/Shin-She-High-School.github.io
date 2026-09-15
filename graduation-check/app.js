@@ -207,7 +207,16 @@ window.updateUI = function() {
 	if (currentUser) {
 		updateHash();
 		const savedLayout = sessionStorage.getItem('tempLayoutMode') || userDBRecord?.credits_json?._layout_mode;
-		if (savedLayout) currentLayoutMode = savedLayout;
+		currentLayoutMode = savedLayout ? savedLayout : "semester";
+
+		const btnSub = document.getElementById('btnLayoutSubject');
+		const btnSem = document.getElementById('btnLayoutSemester');
+		const activeClass = "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md";
+		const inactiveClass = "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900";
+
+		if (btnSub) btnSub.className = (currentLayoutMode === 'subject') ? activeClass : inactiveClass;
+		if (btnSem) btnSem.className = (currentLayoutMode === 'semester') ? activeClass : inactiveClass;
+
 		if (adminEditBanner) adminEditBanner.style.display = editingStudentId ? 'block' : 'none';
 		document.getElementById('statusHeader').style.display = 'block';
 		const m = currentUser.user_metadata;
