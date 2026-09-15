@@ -1,12 +1,5 @@
 window.isWebSocketAllowed = function() {
-	if (typeof WebSocket === 'undefined') return false;
-	try {
-		const testWs = new WebSocket('wss://tsavuxtqwfugoraomoyc.supabase.co/realtime/v1/websocket?apikey=' + SB_KEY + '&vsn=2.0.0');
-		testWs.close();
-		return true;
-	} catch (e) {
-		return false;
-	}
+	return typeof WebSocket !== 'undefined';
 };
 
 let realtimeGradChecksChannel = null;

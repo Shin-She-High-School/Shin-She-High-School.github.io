@@ -1101,6 +1101,179 @@ window.resetAuditFilters = function() {
 	renderAuditLogList();
 };
 
+window.toggleAuditLogExpand = function(event, expandId) {
+	if (event) {
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	const el = document.getElementById(expandId);
+	const btn = document.getElementById(`btn-${expandId}`);
+	if (!el) return;
+	const isHidden = el.classList.contains('hidden');
+	if (isHidden) {
+		el.classList.remove('hidden');
+		if (btn) btn.innerText = "▲ (點擊收合)";
+	} else {
+		el.classList.add('hidden');
+		if (btn) btn.innerText = "▼ (點擊展開)";
+	}
+};
+
+window.renderAuditLogList = function() {
+	const searchTxt = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
+	const filterActions = getMSValues('audit-action');
+	const roleFilter = document.getElementById('auditFilterOperatorRole')?.value || 'all';
+	const startDate = document.getElementById('auditStartDate')?.value;
+	const endDate = document.getElementById('auditEndDate')?.value;
+	const listBody = document.getElementById('auditLogListBody');
+	const countText = document.getElementById('auditCountText');
+	if (!listBody) return;
+	let filtered = [...auditLogsData];
+
+	if (searchTxt) {
+		filtered = filtered.filter(l => (l.operator_name && l.operator_name.toLowerCase().includes(searchTxt)) || (l.target_student_name && l.target_student_name.toLowerCase().includes(searchTxt)) || (l.target_student_id && l.target_student_id.toLowerCase().includes(searchTxt)) || (l.action_type && l.action_type.toLowerCase().includes(searchTxt)) || (l.ip_address && l.ip_address.toLowerCase().includes(searchTxt)));
+	}
+	if (filterActions.length > 0 && !filterActions.includes('all')) {
+		filtered = filtered.filter(l => filterActions.includes(l.action_type));
+	}
+	if (roleFilter !== 'all') filtered = filtered.filter(l => l.operator_role === roleFilter);
+	if (startDate) {
+		const startMs = new Date(startDate + 'T00:00:00').getTime();
+		filtered = filtered.filter(l => new Date(l.created_at).getTime() >= startMs);
+	}
+	if (endDate) {
+		const endMs = new Date(endDate + 'T23:59:59').getTime();
+		filtered = filtered.filter(l => new Date(l.created_at).getTime() <= endMs);
+	}
+	if (countText) countText.innerText = `共 ${filtered.length} 筆紀錄`;
+	listBody.innerHTML = '';
+	if (filtered.length === 0) {
+		listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 font-bold">目前資料庫尚無符合條件的稽核異動紀錄</td></tr>`;
+		return;
+	}
+
+	const actionConfig = {
+		'使用者登入': { icon: '🔑', class: 'bg-emerald-600 text-white font-bold' },
+		'使用者登出': { icon: '🚪', class: 'bg-slate-600 text-white font-bold' },
+		'使用者註冊': { icon: '✨', class: 'bg-teal-600 text-white font-bold' },
+		'變更學分紀錄': { icon: '📘', class: 'bg-blue-600 text-white font-bold' },
+		'切換版本': { icon: '🔄', class: 'bg-sky-600 text-white font-bold' },
+		'切換版面配置': { icon: '📌', class: 'bg-slate-700 text-white font-bold' },
+		'批次全部及格': { icon: '✅', class: 'bg-emerald-600 text-white font-bold' },
+		'批次學分歸零': { icon: '🧹', class: 'bg-amber-600 text-white font-bold' },
+		'單學期全選及格': { icon: '✔', class: 'bg-teal-600 text-white font-bold' },
+		'單學期學分歸零': { icon: '⚠️', class: 'bg-orange-600 text-white font-bold' },
+		'更改帳號資料': { icon: '📝', class: 'bg-indigo-600 text-white font-bold' },
+		'重設帳號密碼': { icon: '⚡', class: 'bg-violet-600 text-white font-bold' },
+		'刪除帳號': { icon: '🗑️', class: 'bg-rose-600 text-white font-bold' },
+		'刪除學生帳號': { icon: '🗑️', class: 'bg-rose-600 text-white font-bold' },
+		'更新個人資料': { icon: '👤', class: 'bg-purple-600 text-white font-bold' },
+		'更新輔導教師授權': { icon: '🔑', class: 'bg-violet-600 text-white font-bold' },
+		'送出系統回饋': { icon: '💡', class: 'bg-pink-600 text-white font-bold' },
+		'發布系統公告': { icon: '📢', class: 'bg-amber-600 text-white font-bold' },
+		'編輯系統公告': { icon: '✏️', class: 'bg-blue-600 text-white font-bold' },
+		'更新公告排序': { icon: '↕️', class: 'bg-indigo-600 text-white font-bold' }
+	};
+
+	const detailKeyLabels = { 
+		role: '身份', year: '入學年', dept: '科別班級', status: '狀態', 
+		category: '回饋類別', method: '重設方式', passwordChanged: '密碼變更', 
+		fromOrder: '原始順序', toOrder: '新順序', isMarquee: '跑馬燈', 
+		isActive: '公開狀態', counselorClassesCount: '授權班級數', layout_mode: '版面模式' 
+	};
+
+	filtered.forEach((log, logIdx) => {
+		const timeStr = formatDateTime(log.created_at);
+		const [datePart, timePart] = timeStr.includes(' ') ? timeStr.split(' ') : [timeStr, ''];
+		const tr = document.createElement('tr');
+		tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
+		let diffHtml = '';
+
+		if (log.action_type.includes('刪除')) {
+			const d = log.details || {};
+			diffHtml = `<div class="inline-flex items-center gap-2 p-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-xs font-bold"><span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px]">已刪除</span><span>姓名：${escapeHtml(d.deleted_name || log.target_student_name || '未知')}</span><span>帳號：${escapeHtml(d.deleted_sid || log.target_student_id || '未知')}</span></div>`;
+		} else if (log.action_type === '切換版面配置') {
+			const mode = log.details?.layout_mode || '版面配置變更';
+			diffHtml = `<span class="px-2 py-1 rounded bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold">切換版面：<b>${escapeHtml(mode)}</b></span>`;
+		} else if (log.details && typeof log.details === 'object') {
+			const d = log.details;
+			let headerChips = [];
+
+			if (d.old_version && d.new_version) {
+				headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-sky-50 border border-sky-200 text-xs font-bold text-slate-700"><span>原版本: <b>${escapeHtml(d.old_version)}</b></span><span class="text-sky-600 font-black">➔</span><span class="text-indigo-700">新版本: <b>${escapeHtml(d.new_version)}</b></span></div>`);
+			}
+
+			if (log.action_type !== '切換版本' && d.old_total !== undefined && d.new_total !== undefined) {
+				const isIncreased = d.new_total > d.old_total;
+				const totalBadgeColor = isIncreased ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (d.new_total < d.old_total ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-700');
+				headerChips.push(`<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-bold ${totalBadgeColor}"><span>舊學分: ${escapeHtml(d.old_total)}</span><span class="opacity-60">➔</span><span>新學分: <b>${escapeHtml(d.new_total)}</b></span></div>`);
+			}
+
+			if (d.semester) {
+				headerChips.push(`<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">📅 ${escapeHtml(d.semester)}</div>`);
+			}
+
+			if (headerChips.length > 0) diffHtml += `<div class="flex flex-wrap gap-1.5 mb-1.5">${headerChips.join('')}</div>`;
+
+			if (d.changed_fields && Array.isArray(d.changed_fields) && d.changed_fields.length > 0) {
+				const expandId = `audit-expand-${logIdx}`;
+				diffHtml += `
+					<button type="button" id="btn-${expandId}" class="text-xs font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 px-2 py-0.5 rounded transition cursor-pointer" onclick="toggleAuditLogExpand(event, '${expandId}')">▼ (點擊展開)</button>
+					<div id="${expandId}" class="hidden w-full flex flex-wrap gap-1.5 mt-1.5 pt-1.5 border-t border-dashed border-slate-200">
+				`;
+				d.changed_fields.forEach(f => {
+					const isGain = f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格');
+					const badgeStyle = isGain ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-rose-50 text-rose-900 border-rose-300';
+					diffHtml += `<div class="inline-flex items-center gap-1 border px-2 py-0.5 rounded text-[11px] font-bold ${badgeStyle}"><span>${escapeHtml(f.field)}:</span><s class="opacity-50 font-normal">${escapeHtml(f.oldVal)}</s><span>➔</span><b>${escapeHtml(f.newVal)}</b></div>`;
+				});
+				diffHtml += `</div>`;
+			} else {
+				const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode', 'layout_mode'].includes(k));
+				if (metaKeys.length > 0) {
+					diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">`;
+					metaKeys.forEach(k => {
+						const labelText = detailKeyLabels[k] || k;
+						let rawVal = d[k];
+
+						const isClassArray = (k === 'dept' || k === 'classes') && (Array.isArray(rawVal) || (typeof rawVal === 'string' && rawVal.startsWith('[')));
+						if (isClassArray) {
+							let parsedClasses = [];
+							try {
+								parsedClasses = Array.isArray(rawVal) ? rawVal : JSON.parse(rawVal);
+							} catch (e) { parsedClasses = []; }
+
+							const expandClassId = `audit-classes-${logIdx}`;
+							diffHtml += `
+								<div class="inline-flex items-center gap-1 border border-violet-200 bg-violet-50 text-violet-900 px-2 py-0.5 rounded text-xs font-bold">
+									<span>授權班級名冊：</span>
+									<button type="button" id="btn-${expandClassId}" class="text-violet-700 underline font-extrabold hover:text-violet-900 cursor-pointer" onclick="toggleAuditLogExpand(event, '${expandClassId}')">▼ (點擊展開)</button>
+								</div>
+								<div id="${expandClassId}" class="hidden w-full p-2 bg-slate-50 border border-slate-200 rounded-lg mt-1 text-xs text-slate-700 leading-relaxed font-semibold break-words">
+									${parsedClasses.map(c => `<span class="inline-block px-1.5 py-0.5 bg-white border border-slate-200 rounded mr-1 mb-1">${escapeHtml(c)}</span>`).join('')}
+								</div>
+							`;
+						} else {
+							let valStr = typeof rawVal === 'boolean' ? (rawVal ? '是' : '否') : String(rawVal || '未設定');
+							diffHtml += `<span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700"><b>${escapeHtml(labelText)}</b>: ${escapeHtml(valStr)}</span>`;
+						}
+					});
+					diffHtml += `</div>`;
+				}
+			}
+		}
+
+		const cfg = actionConfig[log.action_type] || { icon: '📌', class: 'bg-slate-700 text-white font-bold' };
+		tr.innerHTML = `
+			<td class="p-2.5 text-slate-500 font-mono text-[11px] leading-tight text-center whitespace-nowrap"><div>${escapeHtml(datePart)}</div><div>${escapeHtml(timePart)}</div></td>
+			<td class="p-2.5 font-bold text-xs"><div class="text-slate-800">${escapeHtml(log.operator_name || '系統')} <span class="text-[10px] text-slate-400">(${escapeHtml(mapping.role[log.operator_role] || log.operator_role)})</span></div><div class="text-[10px] font-mono text-slate-400 mt-0.5">${escapeHtml(log.ip_address || '未知 IP')}</div></td>
+			<td class="p-2.5 text-xs"><div class="text-slate-900 font-bold truncate max-w-[120px]">${escapeHtml(log.target_student_name || '-')}</div><div class="text-slate-500 font-mono text-[10px] mt-0.5">${escapeHtml(log.target_student_id || '-')}</div></td>
+			<td class="p-2.5"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs whitespace-nowrap ${cfg.class}"><span>${cfg.icon}</span><span>${escapeHtml(log.action_type)}</span></span></td>
+			<td class="p-2.5 text-slate-700 text-xs">${diffHtml}</td>
+		`;
+		listBody.appendChild(tr);
+	});
+};
+
 window.confirmSetAllStatus = function(p) {
 	if (curriculum.length === 0) { showMsg("目前版本的課表尚未建置！", "error"); return; }
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
