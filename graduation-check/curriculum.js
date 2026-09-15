@@ -431,10 +431,15 @@ window.changeDashCurriculum = function() {
 window.setLayoutMode = function(mode) {
 	currentLayoutMode = mode;
 	sessionStorage.setItem('tempLayoutMode', mode);
+	
 	const btnSub = document.getElementById('btnLayoutSubject');
 	const btnSem = document.getElementById('btnLayoutSemester');
-	if (btnSub) btnSub.className = mode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600";
-	if (btnSem) btnSem.className = mode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700";
+	const activeClass = "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md";
+	const inactiveClass = "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900";
+
+	if (btnSub) btnSub.className = (mode === 'subject') ? activeClass : inactiveClass;
+	if (btnSem) btnSem.className = (mode === 'semester') ? activeClass : inactiveClass;
+
 	renderTable();
 	calculate();
 	debouncedSaveToCloud({ 

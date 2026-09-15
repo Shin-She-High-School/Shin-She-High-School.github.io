@@ -144,10 +144,10 @@
 				<div id="layoutSwitcherArea" class="app-container mt-3 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
 					<span class="text-sm font-extrabold text-slate-700 shrink-0 text-center md:text-left">檢視版面切換：</span>
 					<div class="inline-flex rounded-xl p-1 bg-slate-200 border border-slate-300">
-						<button id="btnLayoutSubject" onclick="setLayoutMode('subject')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md">
+						<button id="btnLayoutSubject" onclick="setLayoutMode('subject')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900">
 							按科目檢視
 						</button>
-						<button id="btnLayoutSemester" onclick="setLayoutMode('semester')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900">
+						<button id="btnLayoutSemester" onclick="setLayoutMode('semester')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md">
 							按學期檢視
 						</button>
 					</div>
@@ -329,6 +329,7 @@
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更改帳號資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更改帳號資料</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="重設帳號密碼" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 重設帳號密碼</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新個人資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新個人資料</label>
+									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新輔導教師授權" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新輔導教師授權</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="送出系統回饋" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 送出系統回饋</label>
 
 									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">📢 系統公告</div>
@@ -696,7 +697,7 @@
 		</div>
 	</div>
 
-	<!-- 輔導教師專屬授權班級獨立彈窗 (修正 ID 衝突) -->
+	<!-- 輔導教師專屬授權班級獨立彈窗 -->
 	<div id="counselorScopeModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-xl !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3">
@@ -894,10 +895,10 @@
 		</div>
 	</div>
 
-	<script src="config.js?v=202611"></script>
-	<script src="curriculum.js?v=202611"></script>
-	<script src="auth.js?v=202611"></script>
-	<script src="admin.js?v=202611"></script>
-	<script src="app.js?v=202611"></script>
+	<script src="config.js?v=202612"></script>
+	<script src="curriculum.js?v=202612"></script>
+	<script src="auth.js?v=202612"></script>
+	<script src="admin.js?v=202612"></script>
+	<script src="app.js?v=202612"></script>
 </body>
 </html>
