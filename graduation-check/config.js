@@ -30,7 +30,7 @@ const ANNOUNCE_STATUS_FILTERS = [
 
 const AUDIT_ACTION_OPTIONS = [
 	{ group: "📘 學分與課綱類", items: ["變更學分紀錄", "切換版本", "批次全部及格", "批次學分歸零", "單學期全選及格", "單學期學分歸零"] },
-	{ group: "📝 帳號與個人資料", items: ["更改帳號資料", "重設帳號密碼", "更新個人資料", "送出系統回饋"] },
+	{ group: "📝 帳號與個人資料", items: ["更改帳號資料", "重設帳號密碼", "更新個人資料", "更新輔導教師授權", "送出系統回饋"] },
 	{ group: "📢 系統公告", items: ["發布系統公告", "編輯系統公告", "更新公告排序"] },
 	{ group: "🔑 系統登入與安全", items: ["使用者登入", "使用者登出", "使用者註冊"] },
 	{ group: "⚠️ 刪除與警示", items: ["刪除帳號", "刪除學生帳號"] }
@@ -67,7 +67,7 @@ let currentUncheckedCredits = [];
 
 let currentYear = "113";
 let currentDept = "普通科(理工生醫群)-1";
-let currentLayoutMode = "subject";
+let currentLayoutMode = "semester";
 let DEPT_THRESHOLD = 0;
 
 let autoSaveDebounceTimer = null;

@@ -1,12 +1,5 @@
 window.isWebSocketAllowed = function() {
-	if (typeof WebSocket === 'undefined') return false;
-	try {
-		const testWs = new WebSocket('wss://tsavuxtqwfugoraomoyc.supabase.co/realtime/v1/websocket?apikey=' + SB_KEY + '&vsn=2.0.0');
-		testWs.close();
-		return true;
-	} catch (e) {
-		return false;
-	}
+	return typeof WebSocket !== 'undefined';
 };
 
 let realtimeGradChecksChannel = null;
@@ -213,8 +206,14 @@ window.updateUI = function() {
 		layoutSwitcher = document.getElementById('layoutSwitcherArea'), unsetBox = document.getElementById('unsetNoticeBox');
 	if (currentUser) {
 		updateHash();
-		const savedLayout = sessionStorage.getItem('tempLayoutMode');
+		const savedLayout = sessionStorage.getItem('tempLayoutMode') || userDBRecord?.credits_json?._layout_mode;
 		if (savedLayout) currentLayoutMode = savedLayout;
+
+		const btnSub = document.getElementById('btnLayoutSubject');
+		const btnSem = document.getElementById('btnLayoutSemester');
+		if (btnSub) btnSub.className = currentLayoutMode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600";
+		if (btnSem) btnSem.className = currentLayoutMode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700";
+
 		if (adminEditBanner) adminEditBanner.style.display = editingStudentId ? 'block' : 'none';
 		document.getElementById('statusHeader').style.display = 'block';
 		const m = currentUser.user_metadata;

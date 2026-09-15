@@ -1324,7 +1324,7 @@ async function executeDeferredSave(bulkActionInfo = null) {
 	saveBaselineChecks = null;
 	saveBaselineTotal = null;
 
-	const checks = {};
+	const checks = (curRecord && curRecord.credits_json) ? JSON.parse(JSON.stringify(curRecord.credits_json)) : {};
 	const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
 	const changedFields = [];
 	document.querySelectorAll(".toggle-checkbox").forEach(c => {
@@ -1345,32 +1345,30 @@ async function executeDeferredSave(bulkActionInfo = null) {
 	const newViewDept = version.locked ? entryDept : currentDept;
 	checks['_view_year'] = newViewYr;
 	checks['_view_dept'] = newViewDept;
+	checks['_layout_mode'] = currentLayoutMode;
 
 	const res = calculateStats();
 	let matchedTutor = curRecord?.tutor || (targetRole === 'student' ? await findTutorByYearDept(entryYear, entryDept) : (targetRole === 'admin' ? '管理員免設定' : (targetRole === 'counselor' ? '輔導教師免設定' : '教師帳號免設定')));
 
 	try {
-		let rpcSuccess = false;
-		try {
-			const { error: rpcErr } = await client.rpc('admin_save_student_credits', {
-				target_id: targetId, target_sid: targetSid, target_name: targetName, entry_year: entryYear,
-				entry_dept: entryDept, target_role: targetRole, tutor_name: matchedTutor, credits_data: checks, total_credits_val: res.total || 0
-			});
-			if (!rpcErr) rpcSuccess = true;
-			else throw rpcErr;
-		} catch (e) {
-			if (e.message && e.message.includes('權限不足')) throw e;
+		const payload = {
+			student_id: targetSid,
+			full_name: targetName,
+			entry_year: entryYear,
+			entry_dept: entryDept,
+			role: targetRole,
+			tutor: matchedTutor,
+			credits_json: checks,
+			total_credits: res.total || 0,
+			updated_at: new Date().toISOString()
+		};
+
+		if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId)) {
+			payload.id = targetId;
 		}
 
-		if (!rpcSuccess) {
-			const payload = {
-				id: targetId, student_id: targetSid, full_name: targetName, entry_year: entryYear,
-				entry_dept: entryDept, role: targetRole, tutor: matchedTutor, credits_json: checks,
-				total_credits: res.total || 0, updated_at: new Date().toISOString()
-			};
-			const { error } = await client.from('grad_checks').upsert(payload);
-			if (error) throw error;
-		}
+		const { error: upsertErr } = await client.from('grad_checks').upsert(payload, { onConflict: 'student_id' });
+		if (upsertErr) throw upsertErr;
 
 		isDirty = false;
 		autoSaveDebounceTimer = null;

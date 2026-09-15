@@ -418,6 +418,7 @@ window.changeDashCurriculum = function() {
 	sessionStorage.setItem('tempSelectedDept', dept);
 	selectCurriculum(yr, dept);
 	applyLoadedChecks((editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {});
+	debouncedSaveToCloud({ actionType: "切換版本" });
 };
 
 window.setLayoutMode = function(mode) {
@@ -430,6 +431,7 @@ window.setLayoutMode = function(mode) {
 	scrollToTop();
 	renderTable();
 	calculate();
+	debouncedSaveToCloud({ actionType: "切換版面配置" });
 };
 
 window.evaluateStudentStatus = function(s) {

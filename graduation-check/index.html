@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 	<title>新社高中畢業自我檢核系統</title>
+	<link rel="icon" type="image/png" href="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -328,7 +329,6 @@
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更改帳號資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更改帳號資料</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="重設帳號密碼" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 重設帳號密碼</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新個人資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新個人資料</label>
-									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新輔導教師授權" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新輔導教師授權</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="送出系統回饋" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 送出系統回饋</label>
 
 									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">📢 系統公告</div>
@@ -696,7 +696,7 @@
 		</div>
 	</div>
 
-	<!-- 輔導教師獨立授權班級彈窗 (依原樣式追加) -->
+	<!-- 輔導教師專屬授權班級獨立彈窗 (依原樣式追加) -->
 	<div id="counselorScopeModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-xl !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3">
