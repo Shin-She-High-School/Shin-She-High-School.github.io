@@ -428,7 +428,6 @@ window.setLayoutMode = function(mode) {
 	const btnSem = document.getElementById('btnLayoutSemester');
 	if (btnSub) btnSub.className = mode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600";
 	if (btnSem) btnSem.className = mode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700";
-	scrollToTop();
 	renderTable();
 	calculate();
 	debouncedSaveToCloud({ actionType: "切換版面配置" });

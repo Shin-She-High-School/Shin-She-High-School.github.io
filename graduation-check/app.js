@@ -1,5 +1,12 @@
 window.isWebSocketAllowed = function() {
-	return typeof WebSocket !== 'undefined';
+	if (typeof WebSocket === 'undefined') return false;
+	try {
+		const testWs = new WebSocket('wss://tsavuxtqwfugoraomoyc.supabase.co/realtime/v1/websocket?apikey=' + SB_KEY + '&vsn=2.0.0');
+		testWs.close();
+		return true;
+	} catch (e) {
+		return false;
+	}
 };
 
 let realtimeGradChecksChannel = null;
@@ -208,12 +215,6 @@ window.updateUI = function() {
 		updateHash();
 		const savedLayout = sessionStorage.getItem('tempLayoutMode') || userDBRecord?.credits_json?._layout_mode;
 		if (savedLayout) currentLayoutMode = savedLayout;
-
-		const btnSub = document.getElementById('btnLayoutSubject');
-		const btnSem = document.getElementById('btnLayoutSemester');
-		if (btnSub) btnSub.className = currentLayoutMode === 'subject' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-600";
-		if (btnSem) btnSem.className = currentLayoutMode === 'semester' ? "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-800 shadow-md" : "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700";
-
 		if (adminEditBanner) adminEditBanner.style.display = editingStudentId ? 'block' : 'none';
 		document.getElementById('statusHeader').style.display = 'block';
 		const m = currentUser.user_metadata;
@@ -457,19 +458,23 @@ window.handleHashRouting = function() {
 
 window.initBackToTop = function() {
 	const sc = document.getElementById('scrollContainer');
+	const btn = document.getElementById('backToTopBtn');
+	if (!btn) return;
+
+	const handleScroll = (top) => {
+		if (top > 250) {
+			btn.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+			btn.classList.add('opacity-100', 'translate-y-0');
+		} else {
+			btn.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+			btn.classList.remove('opacity-100', 'translate-y-0');
+		}
+	};
+
 	if (sc) {
-		sc.addEventListener('scroll', () => {
-			const btn = document.getElementById('backToTopBtn');
-			if (!btn) return;
-			if (sc.scrollTop > 300) {
-				btn.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
-				btn.classList.add('opacity-100', 'translate-y-0');
-			} else {
-				btn.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
-				btn.classList.remove('opacity-100', 'translate-y-0');
-			}
-		});
+		sc.addEventListener('scroll', () => handleScroll(sc.scrollTop));
 	}
+	window.addEventListener('scroll', () => handleScroll(window.scrollY));
 };
 
 window.initHelpModalScrollGuard = function() {

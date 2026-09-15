@@ -613,7 +613,6 @@ window.openIndependentPage = function(pageType) {
 		renderAdminAnnounceList();
 	}
 	updateHash();
-	scrollToTop();
 };
 
 window.closeIndependentPage = function() {
@@ -629,7 +628,6 @@ window.closeIndependentPage = function() {
 	if (mainDashboard) mainDashboard.classList.remove('hidden');
 	currentIndependentPage = null;
 	updateHash();
-	scrollToTop();
 };
 
 window.renderIndependentAnnouncements = function() {
@@ -682,8 +680,6 @@ window.openEditAnnouncement = function(id) {
 	const formCard = document.getElementById('announceFormCard');
 	if (formCard) {
 		formCard.classList.add('ring-4', 'ring-amber-400/80', 'shadow-md');
-		const scrollBox = document.getElementById('scrollContainer');
-		if (scrollBox) scrollBox.scrollTo({ top: formCard.offsetTop - 16, behavior: 'smooth' });
 	}
 };
 
@@ -1324,7 +1320,7 @@ async function executeDeferredSave(bulkActionInfo = null) {
 	saveBaselineChecks = null;
 	saveBaselineTotal = null;
 
-	const checks = (curRecord && curRecord.credits_json) ? JSON.parse(JSON.stringify(curRecord.credits_json)) : {};
+	const checks = {};
 	const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
 	const changedFields = [];
 	document.querySelectorAll(".toggle-checkbox").forEach(c => {
@@ -1443,12 +1439,12 @@ window.enterAdminEditMode = function(id, name) {
 	editingStudentId = id; isViewingClassList = false;
 	const targetEl = document.getElementById('targetStudentName');
 	if (targetEl) targetEl.innerText = `${name || '學生'} (資料讀取中...)`;
-	scrollToTop(); updateUI(); loadFromCloud(id);
+	updateUI(); loadFromCloud(id);
 };
 
 window.exitAdminEditMode = function() {
 	editingStudentId = null; activeStudentDBRecord = null; lastLoadedStudentId = null; isViewingClassList = true;
-	scrollToTop(); updateUI();
+	updateUI();
 };
 
 window.handleMainAction = function() {
@@ -1456,7 +1452,7 @@ window.handleMainAction = function() {
 	if (role === 'admin' || role === 'teacher' || role === 'counselor') {
 		if (currentIndependentPage) closeIndependentPage();
 		isViewingClassList = true; editingStudentId = null;
-		scrollToTop(); updateUI();
+		updateUI();
 	}
 };
 
@@ -1465,7 +1461,7 @@ window.handleReturnToTrial = function() {
 	isViewingClassList = false;
 	const version = determineCurriculumVersion(userDBRecord);
 	selectCurriculum(version.year, version.dept);
-	scrollToTop(); updateUI(); loadFromCloud();
+	updateUI(); loadFromCloud();
 };
 
 window.showMissingCreditsModal = function() {
