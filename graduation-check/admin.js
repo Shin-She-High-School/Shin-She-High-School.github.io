@@ -7,7 +7,6 @@ window.getDeptBadgeInfo = function(deptName) {
 
 window.renderCounselorClassCheckboxes = function(selectedClassKeys = [], containerId = 'counselorScopeModalChecklist') {
 	let container = document.getElementById(containerId);
-	if (!container) container = document.getElementById('counselorClassChecklist');
 	if (!container) return;
 
 	const selectedSet = new Set(selectedClassKeys);
@@ -59,19 +58,17 @@ window.renderCounselorClassCheckboxes = function(selectedClassKeys = [], contain
 
 window.updateCounselorSelectedCounter = function() {
 	const checkedCount = document.querySelectorAll('.counselor-class-item:checked').length;
-	['counselorScopeCountBadge', 'counselorSelectedCountBadge'].forEach(id => {
-		const badge = document.getElementById(id);
-		if (badge) {
-			badge.innerText = `已選取 ${checkedCount} / 20 班`;
-			if (checkedCount === 20) {
-				badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300";
-			} else if (checkedCount === 0) {
-				badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-300";
-			} else {
-				badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200";
-			}
+	const badge = document.getElementById('counselorScopeCountBadge');
+	if (badge) {
+		badge.innerText = `已選取 ${checkedCount} / 20 班`;
+		if (checkedCount === 20) {
+			badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300";
+		} else if (checkedCount === 0) {
+			badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-300";
+		} else {
+			badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200";
 		}
-	});
+	}
 };
 
 window.handleCounselorItemCheckboxChange = function(inputEl) {
@@ -416,19 +413,15 @@ window.deleteStudentData = function(id, name) {
 	}, "確認刪除資料", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
 
-window.toggleAdminUserRoleFields = function(roleVal, preSelectedClasses = []) {
+window.toggleAdminUserRoleFields = function(roleVal) {
 	const standardGroup = document.getElementById('editUserStandardClassGroup');
-	const counselorScopeGroup = document.getElementById('editCounselorScopeGroup');
 	const yrLabel = document.getElementById('editUserEntryYearLabel');
 	const deptLabel = document.getElementById('editUserEntryDeptLabel');
 
 	if (roleVal === 'counselor') {
 		if (standardGroup) standardGroup.style.display = 'none';
-		if (counselorScopeGroup) counselorScopeGroup.style.display = 'block';
-		renderCounselorClassCheckboxes(preSelectedClasses, 'counselorClassChecklist');
 	} else {
 		if (standardGroup) standardGroup.style.display = 'block';
-		if (counselorScopeGroup) counselorScopeGroup.style.display = 'none';
 		if (roleVal === 'student') {
 			if (yrLabel) yrLabel.innerText = "入學年 (高三113、高二114、高一115)";
 			if (deptLabel) deptLabel.innerText = "科別-班級 (數字代表目前班級)";
@@ -457,8 +450,7 @@ window.openAdminUserEdit = function(index) {
 		roleSelect.appendChild(opt);
 	}
 	roleSelect.value = s.role || 'student';
-	const assignedClasses = getUserCounselorClasses(s);
-	toggleAdminUserRoleFields(s.role || 'student', assignedClasses);
+	toggleAdminUserRoleFields(s.role || 'student');
 	document.getElementById('editUserCustomPassword').value = '';
 	toggleUIModal(true, 'adminUserModal');
 };
@@ -486,18 +478,18 @@ window.saveAdminUserEdit = async function() {
 	const name = document.getElementById('editUserName').value.trim();
 	const role = document.getElementById('editUserRole').value;
 
+	const targetRecord = adminListData.find(item => item.id === id);
+
 	let year = document.getElementById('editUserEntryYear').value;
 	let dept = document.getElementById('editUserEntryDept').value;
 	let tutor = (role === 'student') ? (document.getElementById('editUserTutor')?.value || '未設定') : '免設定';
 
 	if (!sid || !name) { showMsg("請填寫完整帳號與姓名", "error"); return; }
-	const targetRecord = adminListData.find(item => item.id === id);
 
-	let counselorClasses = [];
 	if (role === 'counselor') {
-		counselorClasses = getCounselorSelectedClasses();
 		year = '未設定';
-		dept = JSON.stringify(counselorClasses);
+		dept = targetRecord?.entry_dept || '[]';
+		if (!String(dept).startsWith('[')) dept = '[]';
 	}
 
 	try {
@@ -513,32 +505,9 @@ window.saveAdminUserEdit = async function() {
 		});
 		if (error) throw error;
 
-		if (role === 'counselor') {
-			let currentJson = targetRecord?.credits_json || {};
-			if (typeof currentJson === 'string') {
-				try { currentJson = JSON.parse(currentJson); } catch (e) { currentJson = {}; }
-			}
-			currentJson._counselor_classes = counselorClasses;
-
-			await client.from('grad_checks').update({
-				credits_json: currentJson,
-				entry_dept: JSON.stringify(counselorClasses),
-				updated_at: new Date().toISOString()
-			}).eq('id', id);
-
-			if (targetRecord) {
-				targetRecord.credits_json = currentJson;
-				targetRecord.entry_dept = JSON.stringify(counselorClasses);
-			}
-			if (userDBRecord && userDBRecord.id === id) {
-				userDBRecord.credits_json = currentJson;
-				userDBRecord.entry_dept = JSON.stringify(counselorClasses);
-			}
-		}
-
 		updateSyncStatusIndicator('success');
 		showMsg("帳號資料修改成功！");
-		logAuditRecord("更改帳號資料", sid, name, { year, dept, role, counselorClassesCount: counselorClasses.length });
+		logAuditRecord("更改帳號資料", sid, name, { year, dept, role });
 		toggleUIModal(false, 'adminUserModal');
 		fetchAdminList();
 	} catch (err) {
