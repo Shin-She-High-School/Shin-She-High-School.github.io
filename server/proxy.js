@@ -1,9 +1,18 @@
 const express = require('express');
 const cors = require('cors');
+const https = require('https');
+const http = require('http');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const TARGET_ORIGIN = 'https://tchs.mlife.org.tw';
+const TARGET_HOST = 'tchs.mlife.org.tw';
+
+// 建立寬鬆相容的 HTTPS Agent（忽略過期憑證、停用嚴格檢查）
+const agent = new https.Agent({
+    rejectUnauthorized: false,
+    checkServerIdentity: () => undefined,
+    keepAlive: true
+});
 
 app.use(cors({
     origin: '*',
@@ -44,89 +53,96 @@ window.addEventListener('message', function(event) {
 </script>
 `;
 
-app.use(async (req, res) => {
-    const targetUrl = TARGET_ORIGIN + req.originalUrl;
+app.use((req, res) => {
+    const headers = { ...req.headers };
+    delete headers.host;
+    delete headers.connection;
+    delete headers['content-length'];
+    delete headers['accept-encoding']; // 避免 gzip 壓縮導致難以注入腳本
 
-    try {
-        const forwardHeaders = {};
-        for (const [key, value] of Object.entries(req.headers)) {
-            if (!['host', 'connection', 'content-length'].includes(key.toLowerCase())) {
-                forwardHeaders[key] = value;
-            }
+    headers['Host'] = TARGET_HOST;
+    headers['Referer'] = `https://${TARGET_HOST}/Login.action?schNo=064328`;
+    headers['Origin'] = `https://${TARGET_HOST}`;
+    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+
+    const options = {
+        hostname: TARGET_HOST,
+        port: 443,
+        path: req.originalUrl,
+        method: req.method,
+        headers: headers,
+        agent: agent,
+        timeout: 25000
+    };
+
+    const proxyReq = https.request(options, (proxyRes) => {
+        // 重寫重導向 Location
+        if (proxyRes.headers.location) {
+            proxyRes.headers.location = proxyRes.headers.location.replace(`https://${TARGET_HOST}`, '');
         }
-        forwardHeaders['host'] = 'tchs.mlife.org.tw';
-        forwardHeaders['referer'] = `${TARGET_ORIGIN}/Login.action?schNo=064328`;
-        forwardHeaders['origin'] = TARGET_ORIGIN;
-        forwardHeaders['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
 
-        let bodyData = null;
-        if (!['GET', 'HEAD'].includes(req.method)) {
-            const chunks = [];
-            for await (const chunk of req) {
-                chunks.push(chunk);
-            }
-            bodyData = Buffer.concat(chunks);
-        }
+        // 移除安全標頭以允許 iframe 嵌入
+        delete proxyRes.headers['x-frame-options'];
+        delete proxyRes.headers['content-security-policy'];
 
-        const response = await fetch(targetUrl, {
-            method: req.method,
-            headers: forwardHeaders,
-            body: bodyData,
-            redirect: 'manual'
-        });
-
-        res.status(response.status);
-
-        response.headers.forEach((val, key) => {
-            const lKey = key.toLowerCase();
-            if (['x-frame-options', 'content-security-policy', 'content-encoding', 'transfer-encoding'].includes(lKey)) {
-                return;
-            }
-            if (lKey === 'location') {
-                const rewritten = val.replace(TARGET_ORIGIN, '');
-                res.setHeader('location', rewritten);
-                return;
-            }
-            if (lKey === 'set-cookie') {
-                return;
-            }
-            res.setHeader(key, val);
-        });
-
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('X-Frame-Options', 'ALLOWALL');
-
-        const rawCookies = response.headers.getSetCookie ? response.headers.getSetCookie() : [];
-        if (rawCookies.length > 0) {
-            const fixedCookies = rawCookies.map(c => {
+        // 調整 Set-Cookie 屬性相容 iframe
+        if (proxyRes.headers['set-cookie']) {
+            proxyRes.headers['set-cookie'] = proxyRes.headers['set-cookie'].map(c => {
                 return c.replace(/;\s*Secure/gi, '')
                         .replace(/;\s*SameSite=(Lax|Strict)/gi, '; SameSite=None');
             });
-            res.setHeader('set-cookie', fixedCookies);
         }
 
-        const contentType = response.headers.get('content-type') || '';
-        if (contentType.includes('text/html')) {
-            let html = await response.text();
-            if (html.includes('</body>')) {
-                html = html.replace('</body>', `${INJECTED_SCRIPT}</body>`);
-            } else {
-                html += INJECTED_SCRIPT;
+        const contentType = proxyRes.headers['content-type'] || '';
+        const isHtml = contentType.includes('text/html');
+
+        res.status(proxyRes.statusCode);
+
+        Object.keys(proxyRes.headers).forEach(key => {
+            if (!['content-length', 'transfer-encoding', 'content-encoding'].includes(key.toLowerCase())) {
+                res.setHeader(key, proxyRes.headers[key]);
             }
-            res.setHeader('content-length', Buffer.byteLength(html));
-            res.send(html);
-        } else {
-            const arrayBuffer = await response.arrayBuffer();
-            res.send(Buffer.from(arrayBuffer));
-        }
+        });
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('X-Frame-Options', 'ALLOWALL');
 
-    } catch (err) {
-        if (!res.headersSent) {
-            res.status(502).send('連線至成績系統伺服器失敗，請確認該系統服務正常。');
+        if (isHtml) {
+            let body = [];
+            proxyRes.on('data', chunk => body.push(chunk));
+            proxyRes.on('end', () => {
+                let html = Buffer.concat(body).toString('utf-8');
+                if (html.includes('</body>')) {
+                    html = html.replace('</body>', `${INJECTED_SCRIPT}</body>`);
+                } else {
+                    html += INJECTED_SCRIPT;
+                }
+                res.setHeader('Content-Length', Buffer.byteLength(html));
+                res.end(html);
+            });
+        } else {
+            proxyRes.pipe(res);
         }
-    }
+    });
+
+    proxyReq.on('timeout', () => {
+        proxyReq.destroy();
+        console.error('[Proxy Error] 連線逾時 (Timeout)：學校伺服器未於 25 秒內回應');
+        if (!res.headersSent) {
+            res.status(504).send('連線逾時：學校成績系統伺服器無回應，可能是學校防火牆阻擋了海外雲端主機連線。');
+        }
+    });
+
+    proxyReq.on('error', (err) => {
+        console.error('[Proxy Request Error Details]:', err.code, err.message);
+        if (!res.headersSent) {
+            res.status(502).send(`連線至成績系統伺服器失敗 [${err.code || 'UNKNOWN'}]：${err.message}`);
+        }
+    });
+
+    // 轉發 POST 資料流
+    req.pipe(proxyReq);
 });
 
 app.listen(PORT, () => {
-    console.log(`[Proxy Server] Port ${PORT}`);
+    console.log(`[Proxy Server] Running on Port ${PORT}`);
 });
