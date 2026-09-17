@@ -365,7 +365,7 @@ window.renderAdminTable = function() {
 			}
 			btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-indigo-600" onclick="openAuditLogModal('${escapeHtml(s.student_id)}')">📜 歷程</button>`;
 			btnsMobile += `<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-blue-500" onclick="openAdminUserEdit(${i})">帳號設定</button>
-						   <button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-red-500" onclick="deleteStudentData('${escapeHtml(s.id)}','${escapeHtml(s.full_name)}')">刪除</button>`;
+							<button class="flex-auto min-w-0 py-2 px-2 text-[11px] rounded-lg font-bold text-white bg-red-500" onclick="deleteStudentData('${escapeHtml(s.id)}','${escapeHtml(s.full_name)}')">刪除</button>`;
 		}
 		card.innerHTML = `
 			<div class="flex justify-between items-start border-b border-slate-100 pb-2">
@@ -556,14 +556,19 @@ window.directResetPasswordToSid = async function() {
 		showMsg(`無法直接重設：帳號「${sid}」長度小於 6 碼，不符系統密碼規定，請改用左側「自訂新密碼」！`, "error");
 		return;
 	}
-	showConfirmModal(`您確定要將「${name}」的登入密碼立即重設為其帳號「${sid}」嗎？`, "確認重設密碼", async () => {
+	showConfirmModal(`您確定要將「${name}」的登入密碼立即重設為其帳號「${sid}」嗎？（使用者首次登入時將被強制要求設定新密碼）`, "確認重設密碼", async () => {
 		try {
 			updateSyncStatusIndicator('saving');
 			const { error } = await client.rpc('admin_reset_user_password', { target_user_id: id, new_password: sid });
 			if (error) throw error;
+			
+			await client.from('grad_checks').update({ must_change_password: true, updated_at: new Date().toISOString() }).eq('id', id);
+			const rec = adminListData.find(s => s.id === id);
+			if (rec) rec.must_change_password = true;
+
 			updateSyncStatusIndicator('success');
 			showMsg(`已成功將「${name}」的密碼重置為「${sid}」！`);
-			logAuditRecord("重設帳號密碼", sid, name, { method: "一鍵重設為帳號" });
+			logAuditRecord("重設帳號密碼", sid, name, { method: "一鍵重設為帳號", must_change_password: true });
 			toggleUIModal(false, 'confirmModal'); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
 		} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
 	});
@@ -576,14 +581,19 @@ window.customResetPassword = async function() {
 	const newPwd = document.getElementById('editUserCustomPassword').value.trim();
 	if (!newPwd) { showMsg("請輸入自訂新密碼！", "error"); return; }
 	if (newPwd.length < 6) { showMsg("密碼長度至少需 6 個字元！", "error"); return; }
-	showConfirmModal(`您確定要將「${name}」的登入密碼重設為「${newPwd}」嗎？`, "確認自訂重設密碼", async () => {
+	showConfirmModal(`您確定要將「${name}」的登入密碼重設為「${newPwd}」嗎？（使用者首次登入時將被強制要求設定新密碼）`, "確認自訂重設密碼", async () => {
 		try {
 			updateSyncStatusIndicator('saving');
 			const { error } = await client.rpc('admin_reset_user_password', { target_user_id: id, new_password: newPwd });
 			if (error) throw error;
+			
+			await client.from('grad_checks').update({ must_change_password: true, updated_at: new Date().toISOString() }).eq('id', id);
+			const rec = adminListData.find(s => s.id === id);
+			if (rec) rec.must_change_password = true;
+
 			updateSyncStatusIndicator('success');
 			showMsg(`已成功將「${name}」的密碼重置！`);
-			logAuditRecord("重設帳號密碼", sid, name, { method: "自訂密碼" });
+			logAuditRecord("重設帳號密碼", sid, name, { method: "自訂密碼", must_change_password: true });
 			document.getElementById('editUserCustomPassword').value = '';
 			toggleUIModal(false, 'confirmModal'); toggleUIModal(false, 'adminUserModal'); fetchAdminList();
 		} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
@@ -1165,6 +1175,7 @@ window.renderAuditLogList = function() {
 		'單學期學分歸零': { icon: '⚠️', class: 'bg-orange-600 text-white font-bold' },
 		'更改帳號資料': { icon: '📝', class: 'bg-indigo-600 text-white font-bold' },
 		'重設帳號密碼': { icon: '⚡', class: 'bg-violet-600 text-white font-bold' },
+		'強制首次更改密碼': { icon: '🔒', class: 'bg-amber-600 text-white font-bold' },
 		'刪除帳號': { icon: '🗑️', class: 'bg-rose-600 text-white font-bold' },
 		'刪除學生帳號': { icon: '🗑️', class: 'bg-rose-600 text-white font-bold' },
 		'更新個人資料': { icon: '👤', class: 'bg-purple-600 text-white font-bold' },
@@ -1450,12 +1461,17 @@ window.loadFromCloud = async function(tid = null) {
 				id: currentUser.id, student_id: currentUser.user_metadata?.student_id,
 				full_name: currentUser.user_metadata?.full_name, entry_year: currentUser.user_metadata?.entry_year || '未設定',
 				entry_dept: currentUser.user_metadata?.entry_dept || '未設定', role: currentUser.user_metadata?.role || 'student',
-				tutor: currentUser.user_metadata?.tutor || '未設定'
+				tutor: currentUser.user_metadata?.tutor || '未設定',
+				must_change_password: false
 			};
 			hasLoadedInitialData = true;
 			const version = determineCurriculumVersion(userDBRecord);
 			selectCurriculum(version.year, version.dept);
 			applyLoadedChecks(userDBRecord.credits_json || {});
+
+			if (userDBRecord?.must_change_password) {
+				toggleUIModal(true, 'forceChangePasswordModal');
+			}
 		}
 		renderUserStatusDisplay();
 		updateHelpModalDetails();

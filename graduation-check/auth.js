@@ -168,6 +168,7 @@ window.handleAuth = async function() {
 						tutor: matchedTutor, 
 						credits_json: {}, 
 						total_credits: 0, 
+						must_change_password: false,
 						updated_at: new Date().toISOString()
 					});
 				} catch (upsertErr) {}
@@ -269,5 +270,57 @@ window.updateProfile = async function() {
 		toggleUIModal(false, 'profileModal');
 	} catch (err) {
 		updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error');
+	}
+};
+
+window.submitForceChangePassword = async function() {
+	const client = ensureDbClient();
+	if (!client || !currentUser) return;
+
+	const newPwd = document.getElementById('forceNewPassword')?.value.trim();
+	const confirmPwd = document.getElementById('forceConfirmPassword')?.value.trim();
+
+	if (!newPwd || !confirmPwd) {
+		showMsg("請填寫新密碼與確認密碼！", "error");
+		return;
+	}
+	if (newPwd.length < 6) {
+		showMsg("密碼長度需至少 6 碼！", "error");
+		return;
+	}
+	if (newPwd !== confirmPwd) {
+		showMsg("兩次輸入的密碼不相符！", "error");
+		return;
+	}
+
+	try {
+		updateSyncStatusIndicator('saving');
+
+		const { error: authErr } = await client.auth.updateUser({ password: newPwd });
+		if (authErr) throw authErr;
+
+		const { error: dbErr } = await client.from('grad_checks').update({
+			must_change_password: false,
+			updated_at: new Date().toISOString()
+		}).eq('id', currentUser.id);
+		if (dbErr) throw dbErr;
+
+		if (userDBRecord) {
+			userDBRecord.must_change_password = false;
+		}
+
+		updateSyncStatusIndicator('success');
+		showMsg("密碼修改成功！已解除鎖定。");
+		toggleUIModal(false, 'forceChangePasswordModal');
+
+		document.getElementById('forceNewPassword').value = '';
+		document.getElementById('forceConfirmPassword').value = '';
+
+		const curRec = userDBRecord || currentUser?.user_metadata || {};
+		logAuditRecord("強制首次更改密碼", curRec.student_id, curRec.full_name, { status: "修改成功" });
+
+	} catch (err) {
+		updateSyncStatusIndicator('offline');
+		showMsg("密碼修改失敗：" + translateError(err.message), "error");
 	}
 };

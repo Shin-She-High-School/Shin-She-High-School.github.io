@@ -550,6 +550,33 @@
 		</button>
 	</div>
 
+	<div id="forceChangePasswordModal" class="modal-overlay" style="display: none; z-index: 999999 !important;">
+		<div class="modal-content !max-w-md !w-full !p-6" onclick="event.stopPropagation()">
+			<div class="modal-header !mb-3 !pb-3 border-b border-amber-200">
+				<span class="font-black text-slate-800 text-lg flex items-center gap-2">
+					<span class="w-2.5 h-5 rounded-full bg-amber-500"></span>
+					⚠️ 請立即設定新密碼
+				</span>
+			</div>
+			<div class="modal-body space-y-4">
+				<p class="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed">
+					您的帳號密碼已被管理員重設，為保障個人資料安全，<b class="text-amber-700">首次登入必須設定新密碼</b>後方可繼續使用系統。
+				</p>
+				<div class="input-group mb-2">
+					<label class="text-xs font-black text-slate-700 mb-1">新密碼 (至少 6 碼)</label>
+					<input type="password" id="forceNewPassword" placeholder="請輸入新密碼" class="w-full">
+				</div>
+				<div class="input-group mb-4">
+					<label class="text-xs font-black text-slate-700 mb-1">確認新密碼</label>
+					<input type="password" id="forceConfirmPassword" placeholder="請再次輸入新密碼" class="w-full">
+				</div>
+				<button type="button" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-sm shadow-md transition" onclick="submitForceChangePassword()">
+					確認修改並進入系統
+				</button>
+			</div>
+		</div>
+	</div>
+
 	<div id="courseNoteModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-md !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3">
@@ -691,13 +718,12 @@
 						⚡ 重設為「帳號」
 					</button>
 				</div>
-				<p style="font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.4;">※ 點擊任意重設按鈕後，系統會立即將該使用者的登入密碼覆寫。</p>
+				<p style="font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.4;">※ 點擊任意重設按鈕後，系統會立即將該使用者的登入密碼覆寫，並要求其下次登入時強制更改密碼。</p>
 			</div>
 			<button class="action-btn btn-admin" style="width:100%; margin-top: 15px;" onclick="saveAdminUserEdit()">儲存帳號修改</button>
 		</div>
 	</div>
 
-	<!-- 輔導教師專屬授權班級獨立彈窗 (修正 ID 衝突) -->
 	<div id="counselorScopeModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-xl !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3">

@@ -507,6 +507,47 @@ window.initCopyrightYear = function() {
 	});
 };
 
+window.addEventListener('message', function(event) {
+	if (event.data && event.data.type === 'RESPONSE_SCORES') {
+		const { scoreMap, rawFound, isLoginPage } = event.data;
+
+		if (isLoginPage) {
+			showMsg("請先在下方視窗完成登入，並進入成績查詢頁面！", "error");
+			return;
+		}
+
+		if (rawFound === 0) {
+			showMsg("未在畫面偵測到成績表格，請進入「成績查詢」或「歷年成績」頁面再點擊！", "error");
+			return;
+		}
+
+		let matchedCount = 0;
+		document.querySelectorAll('.toggle-checkbox').forEach(chk => {
+			const courseName = (chk.dataset.name || '').replace(/\s+/g, '');
+			if (courseName && scoreMap[courseName] !== undefined) {
+				chk.checked = scoreMap[courseName];
+				matchedCount++;
+			}
+		});
+
+		calculate();
+		renderTable();
+		debouncedSaveToCloud({ actionType: "自動匯入成績系統紀錄" });
+
+		showMsg(`已成功比對並更新 ${matchedCount} 門科目學分狀態！`);
+		toggleUIModal(false, 'scoreImportModal');
+	}
+});
+
+window.extractScoresFromProxyFrame = function() {
+	const frame = document.getElementById('scoreProxyFrame');
+	if (!frame || !frame.contentWindow) {
+		showMsg("無法連線至成績視窗，請確認代理服務運作正常！", "error");
+		return;
+	}
+	frame.contentWindow.postMessage({ type: 'REQUEST_SCORES' }, '*');
+};
+
 function startApplication() {
 	const client = ensureDbClient();
 	if (client) {
