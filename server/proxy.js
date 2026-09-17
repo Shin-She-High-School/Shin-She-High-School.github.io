@@ -7,7 +7,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const TARGET_HOST = 'tchs.mlife.org.tw';
 
-// 建立寬鬆相容的 HTTPS Agent（忽略過期憑證、停用嚴格檢查）
 const agent = new https.Agent({
     rejectUnauthorized: false,
     checkServerIdentity: () => undefined,
