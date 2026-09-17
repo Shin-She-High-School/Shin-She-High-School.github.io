@@ -1,92 +1,132 @@
 const express = require('express');
 const cors = require('cors');
-const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const TARGET_HOST = 'https://tchs.mlife.org.tw';
+const TARGET_ORIGIN = 'https://tchs.mlife.org.tw';
 
-<<<<<<< HEAD
-// 允許跨來源請求
-=======
-// 啟用 CORS
->>>>>>> a8c092c (update: auto sync project files 2026/09/17  2:16:36.29)
 app.use(cors({
     origin: '*',
     credentials: true
 }));
 
-<<<<<<< HEAD
-// 設定中繼轉發路由
-=======
-// ----------------------------------------------------
-// 【關鍵修正】：/ping 必須放在代理中繼前面！
-// 這樣呼叫 /ping 時會直接本地回應 200，不會轉發給學校網站
-// ----------------------------------------------------
-app.get('/ping', (req, res) => {
-    res.status(200).send('OK - Server is awake!');
-});
+const INJECTED_SCRIPT = `
+<script>
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'REQUEST_SCORES') {
+        const scoreMap = {};
+        const rows = document.querySelectorAll('table tr');
+        let rawFound = 0;
 
-// 伺服器自我保活定時器 (每 14 分鐘請求一次自身 /ping)
-const SERVER_URL = process.env.RENDER_EXTERNAL_URL || `https://shin-she-high-school-github-io.onrender.com`;
-setInterval(async () => {
-    try {
-        const response = await fetch(`${SERVER_URL}/ping`);
-        console.log(`[Self-Ping] 保活成功: ${response.status} (${new Date().toLocaleTimeString()})`);
-    } catch (err) {
-        console.warn('[Self-Ping] 請求失敗:', err.message);
+        rows.forEach(r => {
+            const cols = r.querySelectorAll('td');
+            if (cols.length >= 4) {
+                const rawName = cols[1]?.innerText?.trim() || "";
+                const statusText = cols[3]?.innerText?.trim() || cols[2]?.innerText?.trim() || "";
+                const isPass = statusText.includes('及格') || statusText.includes('✔') || (parseFloat(statusText) >= 60);
+
+                if (rawName && rawName.length > 1) {
+                    const cleanName = rawName.replace(/\\s+/g, '');
+                    scoreMap[cleanName] = isPass;
+                    rawFound++;
+                }
+            }
+        });
+
+        window.parent.postMessage({
+            type: 'RESPONSE_SCORES',
+            scoreMap: scoreMap,
+            rawFound: rawFound,
+            isLoginPage: !!document.querySelector('input[type="password"]')
+        }, '*');
     }
-}, 14 * 60 * 1000);
+});
+</script>
+`;
 
-// ----------------------------------------------------
-// 其他所有請求才轉發給成績系統
-// ----------------------------------------------------
->>>>>>> a8c092c (update: auto sync project files 2026/09/17  2:16:36.29)
-app.use('/', createProxyMiddleware({
-    target: TARGET_HOST,
-    changeOrigin: true,
-    secure: false,
-    cookieDomainRewrite: "",
-    on: {
-        proxyReq: (proxyReq, req, res) => {
-<<<<<<< HEAD
-            // 偽裝來源標頭，防止目標主機防盜連阻擋
-=======
->>>>>>> a8c092c (update: auto sync project files 2026/09/17  2:16:36.29)
-            proxyReq.setHeader('Referer', `${TARGET_HOST}/Login.action?schNo=064328`);
-            proxyReq.setHeader('Origin', TARGET_HOST);
-        },
-        proxyRes: (proxyRes, req, res) => {
-<<<<<<< HEAD
-            // 移除限制 iframe 嵌入的安全標頭
-=======
->>>>>>> a8c092c (update: auto sync project files 2026/09/17  2:16:36.29)
-            delete proxyRes.headers['x-frame-options'];
-            delete proxyRes.headers['content-security-policy'];
+app.use(async (req, res) => {
+    const targetUrl = TARGET_ORIGIN + req.originalUrl;
 
-            res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader('X-Frame-Options', 'ALLOWALL');
-
-<<<<<<< HEAD
-            // 調整 Cookie 屬性以維持登入 Session
-=======
->>>>>>> a8c092c (update: auto sync project files 2026/09/17  2:16:36.29)
-            if (proxyRes.headers['set-cookie']) {
-                proxyRes.headers['set-cookie'] = proxyRes.headers['set-cookie'].map(cookie => {
-                    return cookie
-                        .replace(/;\s*Secure/gi, '')
-                        .replace(/;\s*SameSite=Lax/gi, '; SameSite=None')
-                        .replace(/;\s*SameSite=Strict/gi, '; SameSite=None');
-                });
+    try {
+        const forwardHeaders = {};
+        for (const [key, value] of Object.entries(req.headers)) {
+            if (!['host', 'connection', 'content-length'].includes(key.toLowerCase())) {
+                forwardHeaders[key] = value;
             }
         }
+        forwardHeaders['host'] = 'tchs.mlife.org.tw';
+        forwardHeaders['referer'] = `${TARGET_ORIGIN}/Login.action?schNo=064328`;
+        forwardHeaders['origin'] = TARGET_ORIGIN;
+        forwardHeaders['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+
+        let bodyData = null;
+        if (!['GET', 'HEAD'].includes(req.method)) {
+            const chunks = [];
+            for await (const chunk of req) {
+                chunks.push(chunk);
+            }
+            bodyData = Buffer.concat(chunks);
+        }
+
+        const response = await fetch(targetUrl, {
+            method: req.method,
+            headers: forwardHeaders,
+            body: bodyData,
+            redirect: 'manual'
+        });
+
+        res.status(response.status);
+
+        response.headers.forEach((val, key) => {
+            const lKey = key.toLowerCase();
+            if (['x-frame-options', 'content-security-policy', 'content-encoding', 'transfer-encoding'].includes(lKey)) {
+                return;
+            }
+            if (lKey === 'location') {
+                const rewritten = val.replace(TARGET_ORIGIN, '');
+                res.setHeader('location', rewritten);
+                return;
+            }
+            if (lKey === 'set-cookie') {
+                return;
+            }
+            res.setHeader(key, val);
+        });
+
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('X-Frame-Options', 'ALLOWALL');
+
+        const rawCookies = response.headers.getSetCookie ? response.headers.getSetCookie() : [];
+        if (rawCookies.length > 0) {
+            const fixedCookies = rawCookies.map(c => {
+                return c.replace(/;\s*Secure/gi, '')
+                        .replace(/;\s*SameSite=(Lax|Strict)/gi, '; SameSite=None');
+            });
+            res.setHeader('set-cookie', fixedCookies);
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+            let html = await response.text();
+            if (html.includes('</body>')) {
+                html = html.replace('</body>', `${INJECTED_SCRIPT}</body>`);
+            } else {
+                html += INJECTED_SCRIPT;
+            }
+            res.setHeader('content-length', Buffer.byteLength(html));
+            res.send(html);
+        } else {
+            const arrayBuffer = await response.arrayBuffer();
+            res.send(Buffer.from(arrayBuffer));
+        }
+
+    } catch (err) {
+        if (!res.headersSent) {
+            res.status(502).send('連線至成績系統伺服器失敗，請確認該系統服務正常。');
+        }
     }
-}));
+});
 
 app.listen(PORT, () => {
-    console.log(`[Proxy Server] 伺服器啟動於連接埠 ${PORT}`);
-<<<<<<< HEAD
+    console.log(`[Proxy Server] Port ${PORT}`);
 });
-=======
-});
->>>>>>> a8c092c (update: auto sync project files 2026/09/17  2:16:36.29)
