@@ -37,14 +37,21 @@
             font-weight: 800;
         }
         .sync-success { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .sync-saving { background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-        .sync-offline { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
     </style>
 </head>
 <body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col font-sans">
 
     <div id="msgBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl hidden transition-all duration-300"></div>
 
+    <!-- 圖片燈箱放大彈窗 -->
+    <div id="imageLightboxModal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeLightbox()">
+        <div class="relative max-w-3xl max-h-[85vh] bg-transparent flex flex-col items-center" onclick="event.stopPropagation()">
+            <img id="lightboxImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/20">
+            <button onclick="closeLightbox()" class="mt-4 px-5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs transition">關閉預覽</button>
+        </div>
+    </div>
+
+    <!-- 登入視窗 -->
     <div id="authWorkspace" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
         <div class="relative w-full max-w-[390px] bg-white rounded-3xl p-8 shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-4">
@@ -82,6 +89,7 @@
         </div>
     </div>
 
+    <!-- 主頁面 -->
     <div id="appWorkspace" class="hidden flex-grow flex flex-col h-full overflow-hidden">
         
         <header class="bg-[#1e1b4b] text-white shrink-0 py-2.5 px-4 shadow-md z-40">
@@ -102,6 +110,7 @@
         <main id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar p-4 sm:p-6 pb-20">
             <div class="max-w-6xl mx-auto space-y-6">
 
+                <!-- 儀表板 -->
                 <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                         <span class="font-black text-slate-800 text-base sm:text-lg flex items-center gap-2">
@@ -115,10 +124,10 @@
                         </div>
                     </div>
 
-                    <div id="statCardsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-                    </div>
+                    <div id="statCardsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3.5"></div>
                 </section>
 
+                <!-- 教職員選購專區 -->
                 <section id="staffView" class="hidden space-y-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
@@ -127,16 +136,16 @@
                         <span class="text-xs font-bold text-slate-500" id="productCountBadge">共 0 項商品</span>
                     </div>
 
-                    <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    </div>
+                    <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
                 </section>
 
+                <!-- 學生組別商品管理後台 -->
                 <section id="studentView" class="hidden space-y-6">
                     <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                         <h3 class="text-sm font-black text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center gap-1.5">
-                            <span>📦</span> 新增上架實作商品
+                            <span>📦</span> 新增上架實作商品（直接上傳照片檔案）
                         </h3>
-                        <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                        <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                             <div>
                                 <label class="block text-xs font-extrabold text-slate-600 mb-1">商品名稱</label>
                                 <input type="text" id="newProdName" required placeholder="例如：手作點心禮盒" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-emerald-500">
@@ -146,11 +155,19 @@
                                 <input type="number" id="newProdPrice" min="1" required placeholder="例如：35" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-emerald-500">
                             </div>
                             <div>
-                                <label class="block text-xs font-extrabold text-slate-600 mb-1">商品圖片連結 (URL)</label>
-                                <input type="url" id="newProdImg" placeholder="https://..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                <label class="block text-xs font-extrabold text-slate-600 mb-1">上傳商品照片 (支援多選)</label>
+                                <input type="file" id="newProdFiles" accept="image/*" multiple onchange="handleImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
                             </div>
-                            <div class="sm:col-span-3 text-right">
-                                <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs transition shadow-md shadow-emerald-600/20">
+                            
+                            <!-- 圖片即時縮圖預覽區 -->
+                            <div class="sm:col-span-3">
+                                <div id="selectedImagePreviews" class="flex flex-wrap gap-2.5 pt-1 min-h-[50px] p-2 bg-slate-50 border border-dashed border-slate-200 rounded-xl items-center">
+                                    <span class="text-xs text-slate-400 font-bold px-2">尚未選擇照片，可一次選取多張照片直接上傳。</span>
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-3 text-right pt-2 border-t border-slate-100">
+                                <button type="submit" id="submitProductBtn" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs transition shadow-md shadow-emerald-600/20">
                                     確認發布上架
                                 </button>
                             </div>
@@ -163,7 +180,7 @@
                             <table class="w-full text-xs text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 text-slate-600 font-extrabold border-b border-slate-200">
-                                        <th class="p-3 w-16">預覽</th>
+                                        <th class="p-3 w-28">圖片預覽</th>
                                         <th class="p-3">商品名稱</th>
                                         <th class="p-3 w-28">單價</th>
                                         <th class="p-3 w-40">上架時間</th>
@@ -176,6 +193,7 @@
                     </div>
                 </section>
 
+                <!-- 任課教師全覽 -->
                 <section id="teacherView" class="hidden space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
@@ -233,6 +251,7 @@
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentAuth = null;
+        let selectedBase64Images = [];
 
         function showMsg(txt, isError = false) {
             const b = document.getElementById('msgBox');
@@ -253,6 +272,105 @@
             const errEl = document.getElementById('loginErrorMsg');
             errEl.innerText = '';
             errEl.classList.add('hidden');
+        }
+
+        // 解析多圖字串 (支援逗號與換行分隔)
+        function parseImages(rawUrl) {
+            if (!rawUrl) return [];
+            return rawUrl.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
+        }
+
+        function switchMainImage(prodId, targetUrl) {
+            const mainImg = document.getElementById(`main-img-${prodId}`);
+            if (mainImg) mainImg.src = targetUrl;
+        }
+
+        function openLightbox(url) {
+            const modal = document.getElementById('imageLightboxModal');
+            const img = document.getElementById('lightboxImg');
+            if (modal && img) {
+                img.src = url;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('imageLightboxModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // 圖片自動等比壓縮轉 Base64
+        function compressImage(file, maxWidth = 800, quality = 0.75) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        resolve(dataUrl);
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        }
+
+        // 處理使用者選取的多張照片檔案
+        async function handleImageFilesSelected(input) {
+            if (!input.files || input.files.length === 0) return;
+            const previewContainer = document.getElementById('selectedImagePreviews');
+            previewContainer.innerHTML = '<span class="text-xs text-emerald-600 font-bold px-2">🔄 正在處理並壓縮圖片中...</span>';
+
+            try {
+                for (let i = 0; i < input.files.length; i++) {
+                    const file = input.files[i];
+                    if (file.type.startsWith('image/')) {
+                        const b64 = await compressImage(file);
+                        selectedBase64Images.push(b64);
+                    }
+                }
+                renderSelectedImagePreviews();
+            } catch (err) {
+                showMsg("圖片讀取或壓縮失敗：" + err.message, true);
+            }
+        }
+
+        function removeSelectedImage(index) {
+            selectedBase64Images.splice(index, 1);
+            renderSelectedImagePreviews();
+        }
+
+        function renderSelectedImagePreviews() {
+            const previewContainer = document.getElementById('selectedImagePreviews');
+            if (!previewContainer) return;
+
+            if (selectedBase64Images.length === 0) {
+                previewContainer.innerHTML = '<span class="text-xs text-slate-400 font-bold px-2">尚未選擇照片，可一次選取多張照片直接上傳。</span>';
+                return;
+            }
+
+            previewContainer.innerHTML = selectedBase64Images.map((b64, idx) => `
+                <div class="relative group">
+                    <img src="${b64}" class="w-14 h-14 object-cover rounded-xl border border-slate-200 shadow-sm">
+                    <button type="button" onclick="removeSelectedImage(${idx})" class="absolute -top-1.5 -right-1.5 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-black shadow hover:bg-rose-700 transition">✕</button>
+                </div>
+            `).join('') + `<span class="text-xs font-black text-emerald-700 ml-2">已選取 ${selectedBase64Images.length} 張照片</span>`;
         }
 
         async function handleUnifiedLogin(e) {
@@ -320,6 +438,7 @@
 
         function handleLogout() {
             currentAuth = null;
+            selectedBase64Images = [];
             document.getElementById('loginAccount').value = '';
             document.getElementById('loginPassword').value = '';
             clearLoginError();
@@ -358,7 +477,6 @@
                 staffSec.classList.remove('hidden');
             } else if (currentAuth.role === 'student') {
                 studentSec.classList.remove('hidden');
-                document.getElementById('studentGroupNameHeader').innerText = `第 ${currentAuth.group_no} 組 商品管理後台`;
             } else if (currentAuth.role === 'teacher' || currentAuth.role === 'admin') {
                 teacherSec.classList.remove('hidden');
                 if (currentAuth.role === 'admin') {
@@ -430,13 +548,33 @@
             }
 
             listArea.innerHTML = products.map(p => {
-                const imgTag = p.image_url 
-                    ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-40 object-cover rounded-t-2xl" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=商品圖片';">`
-                    : `<div class="w-full h-40 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-2xl">暫無圖片</div>`;
+                const images = parseImages(p.image_url);
+                const firstImg = images.length > 0 ? images[0] : '';
+                
+                let imgHeaderHtml = '';
+                if (images.length > 0) {
+                    imgHeaderHtml = `
+                        <div class="relative group bg-slate-100 flex items-center justify-center">
+                            <img id="main-img-${p.id}" src="${firstImg}" alt="${p.name}" class="w-full h-44 object-cover rounded-t-2xl cursor-pointer" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">
+                            ${images.length > 1 ? `<span class="absolute bottom-2 right-2 bg-slate-900/70 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">共 ${images.length} 張圖</span>` : ''}
+                        </div>
+                    `;
+                    if (images.length > 1) {
+                        imgHeaderHtml += `
+                            <div class="flex gap-1.5 p-2 bg-slate-50 border-b border-slate-100 overflow-x-auto custom-scrollbar">
+                                ${images.map((img, idx) => `
+                                    <img src="${img}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 cursor-pointer hover:border-emerald-500 transition shrink-0" onclick="switchMainImage('${p.id}', '${img}')">
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+                } else {
+                    imgHeaderHtml = `<div class="w-full h-44 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-2xl">暫無圖片</div>`;
+                }
 
                 return `
                     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col justify-between overflow-hidden hover:border-slate-300 transition">
-                        ${imgTag}
+                        ${imgHeaderHtml}
                         <div class="p-4 flex-1 flex flex-col justify-between">
                             <div>
                                 <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-black border border-emerald-200 mb-1.5">第 ${p.group_no} 組</span>
@@ -506,45 +644,62 @@
                 return;
             }
 
-            tbody.innerHTML = prods.map(p => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-3 border-b border-slate-100">
-                        ${p.image_url ? `<img src="${p.image_url}" class="w-10 h-10 object-cover rounded-lg">` : `<span class="text-slate-300 font-normal">無</span>`}
-                    </td>
-                    <td class="p-3 border-b border-slate-100 font-extrabold text-slate-800">${p.name}</td>
-                    <td class="p-3 border-b border-slate-100 text-rose-600 font-black">${p.price} 幣</td>
-                    <td class="p-3 border-b border-slate-100 text-slate-400 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
-                    <td class="p-3 border-b border-slate-100 text-center">
-                        <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = prods.map(p => {
+                const images = parseImages(p.image_url);
+                const firstImg = images.length > 0 ? images[0] : '';
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 border-b border-slate-100">
+                            ${firstImg ? `<div class="relative inline-block"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-lg cursor-pointer" onclick="openLightbox('${firstImg}')">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">無</span>`}
+                        </td>
+                        <td class="p-3 border-b border-slate-100 font-extrabold text-slate-800">${p.name}</td>
+                        <td class="p-3 border-b border-slate-100 text-rose-600 font-black">${p.price} 幣</td>
+                        <td class="p-3 border-b border-slate-100 text-slate-400 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
+                        <td class="p-3 border-b border-slate-100 text-center">
+                            <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         async function handleCreateProduct(e) {
             e.preventDefault();
             const name = document.getElementById('newProdName').value.trim();
             const price = parseInt(document.getElementById('newProdPrice').value, 10);
-            const img = document.getElementById('newProdImg').value.trim();
+            const submitBtn = document.getElementById('submitProductBtn');
 
-            const { error } = await client.from('products').insert({
-                group_no: currentAuth.group_no,
-                name: name,
-                price: price,
-                image_url: img || null
-            });
+            submitBtn.disabled = true;
+            submitBtn.innerText = "發布中...";
 
-            if (error) {
-                showMsg("商品上架失敗：" + error.message, true);
-                return;
+            try {
+                // 將所有選取的 Base64 圖片以換行拼接存入
+                const joinedImages = selectedBase64Images.join('\n');
+
+                const { error } = await client.from('products').insert({
+                    group_no: currentAuth.group_no,
+                    name: name,
+                    price: price,
+                    image_url: joinedImages || null
+                });
+
+                if (error) throw error;
+
+                showMsg("✅ 商品上架成功！");
+                document.getElementById('newProdName').value = '';
+                document.getElementById('newProdPrice').value = '';
+                document.getElementById('newProdFiles').value = '';
+                selectedBase64Images = [];
+                renderSelectedImagePreviews();
+                loadStudentProducts();
+                loadGlobalStats();
+
+            } catch (err) {
+                showMsg("商品上架失敗：" + err.message, true);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "確認發布上架";
             }
-
-            showMsg("✅ 商品上架成功！");
-            document.getElementById('newProdName').value = '';
-            document.getElementById('newProdPrice').value = '';
-            document.getElementById('newProdImg').value = '';
-            loadStudentProducts();
-            loadGlobalStats();
         }
 
         async function deleteProduct(productId) {
