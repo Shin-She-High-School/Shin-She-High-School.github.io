@@ -485,18 +485,30 @@
             authWorkspace.style.display = 'none';
             appWorkspace.classList.remove('hidden');
 
-            let roleTitle = "使用者";
-            if (currentAuth.role === 'staff') roleTitle = "教職員";
-            else if (currentAuth.role === 'student') roleTitle = `第 ${currentAuth.group_no || currentAuth.account} 組`;
-            else if (currentAuth.role === 'teacher') roleTitle = "任課教師";
-            else if (currentAuth.role === 'admin') roleTitle = "系統管理員";
+            let roleTitle = "";
+            let nameTag = currentAuth.name;
 
-            userStatusDisplay.innerHTML = `您好，<b class="text-amber-300">${currentAuth.name}</b> ｜ ${roleTitle} <span class="text-slate-400 text-xs">(${currentAuth.account})</span>`;
+            if (currentAuth.role === 'staff') {
+                roleTitle = `教職員 (${currentAuth.account})`;
+                nameTag = `${currentAuth.name} 老師`;
+            } else if (currentAuth.role === 'student') {
+                roleTitle = "學生團隊";
+                nameTag = currentAuth.name;
+            } else if (currentAuth.role === 'teacher') {
+                roleTitle = "課程指導";
+                nameTag = "任課教師";
+            } else if (currentAuth.role === 'admin') {
+                roleTitle = "總控管理";
+                nameTag = "系統管理員";
+            }
+
+            userStatusDisplay.innerHTML = `您好，<b class="text-amber-300">${nameTag}</b> ｜ ${roleTitle}`;
 
             if (currentAuth.role === 'staff') {
                 staffSec.classList.remove('hidden');
             } else if (currentAuth.role === 'student') {
                 studentSec.classList.remove('hidden');
+                document.getElementById('studentGroupNameHeader').innerText = `${currentAuth.name} 商品管理後台`;
             } else if (currentAuth.role === 'teacher' || currentAuth.role === 'admin') {
                 teacherSec.classList.remove('hidden');
                 if (currentAuth.role === 'admin') {
