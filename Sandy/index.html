@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>新社高中商城下單系統</title>
+    <title>商城下單系統</title>
     <link rel="icon" type="image/png" href="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,12 +54,11 @@
         <div class="relative w-full max-w-[390px] bg-white rounded-3xl p-8 shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-4">
                 <div class="p-3 bg-white rounded-full shadow-lg border border-slate-100">
-                    <img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="新社高中校徽" class="h-16 w-16 object-contain" onerror="this.src='https://placehold.co/100x100?text=校徽';">
+                    <img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="校徽" class="h-16 w-16 object-contain" onerror="this.src='https://placehold.co/100x100?text=校徽';">
                 </div>
             </div>
             
-            <h2 class="text-2xl font-black text-center text-slate-800 tracking-tight mb-1">帳號登入</h2>
-            <p class="text-xs font-bold text-center text-slate-400 mb-6 tracking-wide">新社高中商城下單系統</p>
+            <h2 class="text-2xl font-black text-center text-slate-800 tracking-tight mb-6">帳號登入</h2>
 
             <form onsubmit="handleUnifiedLogin(event)" class="space-y-4">
                 <div>
@@ -111,7 +110,7 @@
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                         <span class="font-black text-slate-800 text-base sm:text-lg flex items-center gap-2">
                             <span class="w-2.5 h-5 rounded-full bg-emerald-500"></span>
-                            商城實作即時儀表板
+                            即時儀表板
                         </span>
                         <div id="teacherActionGroup" class="hidden flex items-center gap-2">
                             <button onclick="resetAllBalances()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-black transition">
@@ -126,7 +125,7 @@
                 <section id="staffView" class="hidden space-y-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
-                            <span>🛒</span> 各組實作商品瀏覽
+                            <span>🛒</span> 各組商品瀏覽
                         </h3>
                         <span class="text-xs font-bold text-slate-500" id="productCountBadge">共 0 項商品</span>
                     </div>
@@ -137,7 +136,7 @@
                 <section id="studentView" class="hidden space-y-6">
                     <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                         <h3 class="text-sm font-black text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center gap-1.5">
-                            <span>📦</span> 新增上架實作商品（直接上傳照片檔案）
+                            <span>📦</span> 新增上架商品
                         </h3>
                         <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                             <div>
@@ -149,7 +148,7 @@
                                 <input type="number" id="newProdPrice" min="1" required placeholder="例如：35" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-emerald-500">
                             </div>
                             <div>
-                                <label class="block text-xs font-extrabold text-slate-600 mb-1">上傳商品照片 (支援多選)</label>
+                                <label class="block text-xs font-extrabold text-slate-600 mb-1">上傳商品照片</label>
                                 <input type="file" id="newProdFiles" accept="image/*" multiple onchange="handleImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
                             </div>
                             
@@ -190,7 +189,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                             <h3 class="text-sm font-black text-slate-800 mb-3 flex items-center gap-1.5">
-                                <span>📦</span> 各組實作商品上架紀錄
+                                <span>📦</span> 各組商品上架紀錄
                             </h3>
                             <div class="overflow-x-auto max-h-96 custom-scrollbar">
                                 <table class="w-full text-xs text-left border-collapse">
