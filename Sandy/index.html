@@ -119,7 +119,9 @@
                         </div>
                     </div>
 
-                    <div id="statCardsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3.5"></div>
+                    <div id="statCardsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                        <div class="col-span-full py-4 text-center text-xs text-slate-400 font-bold">正在讀取儀表板數據...</div>
+                    </div>
                 </section>
 
                 <section id="staffView" class="hidden space-y-4">
@@ -522,45 +524,65 @@
             const grid = document.getElementById('statCardsGrid');
             if (!grid) return;
 
-            const { data: staffData } = await client.from('users').select('balance').eq('account', currentAuth.account).maybeSingle();
-            const myBalance = staffData ? staffData.balance : (currentAuth.balance || 0);
+            try {
+                let myBalance = 0;
+                let balanceLabel = "我的虛擬幣餘額";
 
-            const { count: productCount } = await client.from('products').select('*', { count: 'exact', head: true });
-            const { data: allOrders } = await client.from('orders').select('total_amount, quantity');
+                if (currentAuth.role === 'staff') {
+                    const { data: staffData } = await client.from('users').select('balance').eq('account', currentAuth.account).maybeSingle();
+                    myBalance = staffData ? staffData.balance : (currentAuth.balance || 0);
+                } else if (currentAuth.role === 'student') {
+                    balanceLabel = "本組收益額";
+                    const { data: groupOrders } = await client.from('orders').select('total_amount').eq('group_no', currentAuth.group_no || parseInt(currentAuth.account, 10));
+                    myBalance = groupOrders ? groupOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0) : 0;
+                } else {
+                    balanceLabel = "管理額度";
+                    myBalance = 0;
+                }
 
-            const orderCount = allOrders ? allOrders.length : 0;
-            const totalTurnover = allOrders ? allOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0) : 0;
+                const { count: productCount } = await client.from('products').select('*', { count: 'exact', head: true });
+                const { data: allOrders } = await client.from('orders').select('total_amount, quantity');
 
-            grid.innerHTML = `
-                <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex flex-col justify-between">
-                    <span class="text-[11px] font-bold text-slate-500">我的虛擬幣餘額</span>
-                    <div class="text-xl font-black text-emerald-600 my-1">${myBalance} <span class="text-xs font-bold text-slate-400">幣</span></div>
-                    <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-emerald-500 h-full" style="width: ${Math.min(100, Math.round((myBalance / 300) * 100))}%"></div>
+                const orderCount = allOrders ? allOrders.length : 0;
+                const totalTurnover = allOrders ? allOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0) : 0;
+
+                const balancePercent = currentAuth.role === 'staff' 
+                    ? Math.min(100, Math.round((myBalance / 300) * 100))
+                    : (myBalance > 0 ? 100 : 0);
+
+                grid.innerHTML = `
+                    <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex flex-col justify-between">
+                        <span class="text-[11px] font-bold text-slate-500">${balanceLabel}</span>
+                        <div class="text-xl font-black text-emerald-600 my-1">${myBalance} <span class="text-xs font-bold text-slate-400">幣</span></div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full" style="width: ${balancePercent}%"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex flex-col justify-between">
-                    <span class="text-[11px] font-bold text-slate-500">上架商品總數</span>
-                    <div class="text-xl font-black text-indigo-600 my-1">${productCount || 0} <span class="text-xs font-bold text-slate-400">項</span></div>
-                    <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-indigo-500 h-full" style="width: 100%"></div>
+                    <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex flex-col justify-between">
+                        <span class="text-[11px] font-bold text-slate-500">上架商品總數</span>
+                        <div class="text-xl font-black text-indigo-600 my-1">${productCount || 0} <span class="text-xs font-bold text-slate-400">項</span></div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-indigo-500 h-full" style="width: ${productCount ? 100 : 0}%"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex flex-col justify-between">
-                    <span class="text-[11px] font-bold text-slate-500">全校下單成交筆數</span>
-                    <div class="text-xl font-black text-amber-600 my-1">${orderCount} <span class="text-xs font-bold text-slate-400">筆</span></div>
-                    <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-amber-500 h-full" style="width: 100%"></div>
+                    <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex flex-col justify-between">
+                        <span class="text-[11px] font-bold text-slate-500">全校下單成交筆數</span>
+                        <div class="text-xl font-black text-amber-600 my-1">${orderCount} <span class="text-xs font-bold text-slate-400">筆</span></div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-amber-500 h-full" style="width: ${orderCount ? 100 : 0}%"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex flex-col justify-between">
-                    <span class="text-[11px] font-bold text-slate-500">累積總交易虛擬幣</span>
-                    <div class="text-xl font-black text-rose-600 my-1">${totalTurnover} <span class="text-xs font-bold text-slate-400">幣</span></div>
-                    <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-rose-500 h-full" style="width: 100%"></div>
+                    <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex flex-col justify-between">
+                        <span class="text-[11px] font-bold text-slate-500">累積總交易虛擬幣</span>
+                        <div class="text-xl font-black text-rose-600 my-1">${totalTurnover} <span class="text-xs font-bold text-slate-400">幣</span></div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-rose-500 h-full" style="width: ${totalTurnover ? 100 : 0}%"></div>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            } catch (err) {
+                console.error("Dashboard calculation error:", err);
+            }
         }
 
         async function loadStaffMall() {
