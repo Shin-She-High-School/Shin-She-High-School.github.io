@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商城下單系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🛍️</span>
+                <h1 class="text-lg font-black tracking-wide">商城下單系統</h1>
+            </div>
+            <div id="navUserArea" class="flex items-center gap-3 text-sm"></div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6">
+
+        <section id="loginSection" class="max-w-md mx-auto mt-8 bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-200">
+            <h2 class="text-xl font-black text-center text-slate-800 mb-6">系統身分驗證</h2>
+
+            <div class="flex border-b border-slate-200 mb-6">
+                <button type="button" onclick="switchLoginTab('staff')" id="tabStaff" class="flex-1 py-2 font-bold text-sm text-indigo-600 border-b-2 border-indigo-600 text-center">教職員</button>
+                <button type="button" onclick="switchLoginTab('student')" id="tabStudent" class="flex-1 py-2 font-bold text-sm text-slate-500 hover:text-slate-700 text-center">學生組別</button>
+                <button type="button" onclick="switchLoginTab('teacher')" id="tabTeacher" class="flex-1 py-2 font-bold text-sm text-slate-500 hover:text-slate-700 text-center">任課老師</button>
+            </div>
+
+            <form id="formStaffLogin" onsubmit="handleStaffLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-600 mb-1">教職員編號 (staff_no)</label>
+                    <input type="text" id="inputStaffNo" required placeholder="例如：t218" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                </div>
+                
+                <div id="newStaffExtraFields" class="space-y-3 pt-2 border-t border-dashed border-slate-200 hidden">
+                    <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-200 text-[11px] text-amber-800 font-bold">
+                        首次登入！請填寫姓名與郵件，開通後即贈送 300 點虛擬幣。
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-600 mb-1">姓名 (name)</label>
+                        <input type="text" id="inputStaffName" placeholder="例如：王小明" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-600 mb-1">學校電子郵件 (email)</label>
+                        <input type="email" id="inputStaffEmail" placeholder="例如：teacher@school.edu.tw" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                    </div>
+                </div>
+
+                <p class="text-xs text-slate-500">※ 每位教職員享有 300 點虛擬幣額度可選購學生作品。</p>
+                <button type="submit" id="btnStaffLoginSubmit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-lg shadow transition text-sm">以教職員身分登入</button>
+            </form>
+
+            <form id="formStudentLogin" onsubmit="handleStudentLogin(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-600 mb-1">選擇學生組別</label>
+                    <select id="selectStudentGroup" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold">
+                        <option value="1">第 1 組</option>
+                        <option value="2">第 2 組</option>
+                        <option value="3">第 3 組</option>
+                        <option value="4">第 4 組</option>
+                        <option value="5">第 5 組</option>
+                        <option value="6">第 6 組</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-600 mb-1">組別密碼</label>
+                    <input type="password" id="inputStudentPass" required placeholder="例如：group1pass" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-lg shadow transition text-sm">進入組別上架後台</button>
+            </form>
+
+            <form id="formTeacherLogin" onsubmit="handleTeacherLogin(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-600 mb-1">任課老師管理通行碼</label>
+                    <input type="password" id="inputTeacherPass" required placeholder="請輸入管理通關碼" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                </div>
+                <p class="text-xs text-slate-500">※ 預設通關碼：<code>admin888</code></p>
+                <button type="submit" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-extrabold rounded-lg shadow transition text-sm">進入監控儀表板</button>
+            </form>
+        </section>
+
+        <section id="staffView" class="hidden space-y-6">
+            <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-black text-indigo-900" id="staffWelcomeTitle">教職員選購專區</h2>
+                    <p class="text-xs text-indigo-700" id="staffInfoSubtitle">選購學生實作作品，使用虛擬幣進行下單。</p>
+                </div>
+                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-indigo-200 shadow-sm">
+                    <span class="text-sm font-bold text-slate-600">剩餘虛擬幣：</span>
+                    <span id="staffBalanceDisplay" class="text-xl font-black text-indigo-600">300</span>
+                    <span class="text-xs font-bold text-indigo-600">幣</span>
+                </div>
+            </div>
+
+            <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+        </section>
+
+        <section id="studentView" class="hidden space-y-6">
+            <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-black text-emerald-900" id="studentGroupNameHeader">學生組別上架後台</h2>
+                    <p class="text-xs text-emerald-700">請設定自家組別之商品名稱、價格與圖片網址。</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-black text-slate-800 mb-4 pb-2 border-b border-slate-100">新增上架商品</h3>
+                <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">商品名稱</label>
+                        <input type="text" id="newProdName" required placeholder="例如：手作點心禮盒" class="w-full px-3 py-2 border rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">單價 (虛擬幣)</label>
+                        <input type="number" id="newProdPrice" min="1" required placeholder="例如：35" class="w-full px-3 py-2 border rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">商品圖片連結 (URL)</label>
+                        <input type="url" id="newProdImg" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm">
+                    </div>
+                    <div class="sm:col-span-3 text-right">
+                        <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-lg text-sm transition">確認發布上架</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-black text-slate-800 mb-4">本組目前已上架商品</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left border-collapse border border-slate-200">
+                        <thead class="bg-slate-100 text-slate-700 font-extrabold">
+                            <tr>
+                                <th class="p-2.5 border border-slate-200 w-16">預覽</th>
+                                <th class="p-2.5 border border-slate-200">商品名稱</th>
+                                <th class="p-2.5 border border-slate-200 w-24">單價</th>
+                                <th class="p-2.5 border border-slate-200 w-36">上架時間</th>
+                                <th class="p-2.5 border border-slate-200 w-20 text-center">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentProductTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="teacherView" class="hidden space-y-6">
+            <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl">
+                <h2 class="text-lg font-black text-amber-900">任課老師實作全覽儀表板</h2>
+                <p class="text-xs text-amber-700">即時監控全班各組上架進度與教職員下單採購明細。</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-sm font-black text-slate-800 mb-3 flex items-center gap-1.5">
+                        <span>📦</span> 學生商品上架紀錄 (含時間)
+                    </h3>
+                    <div class="overflow-x-auto max-h-96">
+                        <table class="w-full text-xs text-left border-collapse border border-slate-200">
+                            <thead class="bg-slate-100 text-slate-700 font-extrabold sticky top-0">
+                                <tr>
+                                    <th class="p-2 border border-slate-200">組別</th>
+                                    <th class="p-2 border border-slate-200">商品名稱</th>
+                                    <th class="p-2 border border-slate-200">單價</th>
+                                    <th class="p-2 border border-slate-200">上架時間</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacherProductTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-sm font-black text-slate-800 mb-3 flex items-center gap-1.5">
+                        <span>📋</span> 教職員下單紀錄 (姓名、編號、數量、金額、時間)
+                    </h3>
+                    <div class="overflow-x-auto max-h-96">
+                        <table class="w-full text-xs text-left border-collapse border border-slate-200">
+                            <thead class="bg-slate-100 text-slate-700 font-extrabold sticky top-0">
+                                <tr>
+                                    <th class="p-2 border border-slate-200">教職員 (staff_no)</th>
+                                    <th class="p-2 border border-slate-200">商品 (組別)</th>
+                                    <th class="p-2 border border-slate-200 text-center">數量</th>
+                                    <th class="p-2 border border-slate-200">總金額</th>
+                                    <th class="p-2 border border-slate-200">下單時間</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacherOrderTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const SUPABASE_URL = "https://dhmbxkswwjzsflwcjpiz.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_HUfSJgvMX0iYCoZ6AUlF1Q_VewS2O2p";
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentAuth = null;
+
+        function switchLoginTab(type) {
+            ['Staff', 'Student', 'Teacher'].forEach(t => {
+                const form = document.getElementById(`form${t}Login`);
+                const tab = document.getElementById(`tab${t}`);
+                if (t.toLowerCase() === type) {
+                    form.classList.remove('hidden');
+                    tab.className = "flex-1 py-2 font-bold text-sm text-indigo-600 border-b-2 border-indigo-600 text-center";
+                } else {
+                    form.classList.add('hidden');
+                    tab.className = "flex-1 py-2 font-bold text-sm text-slate-500 hover:text-slate-700 text-center";
+                }
+            });
+        }
+
+        async function handleStaffLogin(e) {
+            e.preventDefault();
+            const staffNo = document.getElementById('inputStaffNo').value.trim();
+            const extraFields = document.getElementById('newStaffExtraFields');
+            const submitBtn = document.getElementById('btnStaffLoginSubmit');
+            if (!staffNo) return;
+
+            let { data: staff, error } = await client.from('staff_users').select('id, staff_no, name, email, balance').eq('staff_no', staffNo).maybeSingle();
+
+            if (!staff) {
+                if (extraFields.classList.contains('hidden')) {
+                    extraFields.classList.remove('hidden');
+                    submitBtn.innerText = "完成開通並登入";
+                    return;
+                }
+
+                const name = document.getElementById('inputStaffName').value.trim() || '未命名老師';
+                const email = document.getElementById('inputStaffEmail').value.trim() || '';
+
+                const { data: newStaff, error: insertErr } = await client.from('staff_users').insert({
+                    staff_no: staffNo,
+                    name: name,
+                    email: email,
+                    balance: 300
+                }).select('id, staff_no, name, email, balance').single();
+
+                if (insertErr) {
+                    alert("開通帳戶失敗：" + insertErr.message);
+                    return;
+                }
+                staff = newStaff;
+            }
+
+            currentAuth = { role: 'staff', data: staff };
+            renderAuthViews();
+            loadStaffMall();
+        }
+
+        async function handleStudentLogin(e) {
+            e.preventDefault();
+            const groupNo = parseInt(document.getElementById('selectStudentGroup').value, 10);
+            const pass = document.getElementById('inputStudentPass').value.trim();
+
+            const { data: grp, error } = await client.from('student_groups').select('*').eq('group_no', groupNo).eq('password', pass).maybeSingle();
+            if (!grp) {
+                alert("組別密碼錯誤，請確認後重新輸入！");
+                return;
+            }
+
+            currentAuth = { role: 'student', data: grp };
+            renderAuthViews();
+            loadStudentProducts();
+        }
+
+        function handleTeacherLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('inputTeacherPass').value.trim();
+            if (pass !== 'admin888') {
+                alert("任課老師通關碼錯誤！");
+                return;
+            }
+
+            currentAuth = { role: 'teacher', data: { name: '任課老師' } };
+            renderAuthViews();
+            loadTeacherDashboard();
+        }
+
+        function handleLogout() {
+            currentAuth = null;
+            document.getElementById('newStaffExtraFields').classList.add('hidden');
+            document.getElementById('btnStaffLoginSubmit').innerText = "以教職員身分登入";
+            renderAuthViews();
+        }
+
+        function renderAuthViews() {
+            const loginSec = document.getElementById('loginSection');
+            const staffSec = document.getElementById('staffView');
+            const studentSec = document.getElementById('studentView');
+            const teacherSec = document.getElementById('teacherView');
+            const navUser = document.getElementById('navUserArea');
+
+            [loginSec, staffSec, studentSec, teacherSec].forEach(el => el.classList.add('hidden'));
+
+            if (!currentAuth) {
+                loginSec.classList.remove('hidden');
+                navUser.innerHTML = `<span class="text-xs text-slate-400">請先登入系統</span>`;
+                return;
+            }
+
+            let roleName = "";
+            if (currentAuth.role === 'staff') {
+                roleName = `${currentAuth.data.name} 老師 (${currentAuth.data.staff_no})`;
+                staffSec.classList.remove('hidden');
+                document.getElementById('staffWelcomeTitle').innerText = `${currentAuth.data.name} 老師的選購專區`;
+                document.getElementById('staffInfoSubtitle').innerText = `編號：${currentAuth.data.staff_no} ｜ 郵件：${currentAuth.data.email || '未設定'}`;
+            } else if (currentAuth.role === 'student') {
+                roleName = `第 ${currentAuth.data.group_no} 組 後台`;
+                studentSec.classList.remove('hidden');
+                document.getElementById('studentGroupNameHeader').innerText = `第 ${currentAuth.data.group_no} 組 商品管理後台`;
+            } else if (currentAuth.role === 'teacher') {
+                roleName = `任課老師 監控模式`;
+                teacherSec.classList.remove('hidden');
+            }
+
+            navUser.innerHTML = `
+                <span class="font-bold text-indigo-300">${roleName}</span>
+                <button type="button" onclick="handleLogout()" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 rounded text-xs font-bold transition">登出</button>
+            `;
+        }
+
+        async function loadStaffMall() {
+            const { data: staff } = await client.from('staff_users').select('id, staff_no, name, email, balance').eq('staff_no', currentAuth.data.staff_no).single();
+            if (staff) {
+                currentAuth.data = staff;
+                document.getElementById('staffBalanceDisplay').innerText = staff.balance;
+            }
+
+            const { data: products } = await client.from('products').select('*').order('created_at', { ascending: false });
+            const listArea = document.getElementById('productListArea');
+
+            if (!products || products.length === 0) {
+                listArea.innerHTML = `<div class="col-span-full p-8 text-center text-slate-400 font-bold">目前尚無學生上架任何商品。</div>`;
+                return;
+            }
+
+            listArea.innerHTML = products.map(p => {
+                const imgTag = p.image_url 
+                    ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-36 object-cover rounded-t-xl" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">`
+                    : `<div class="w-full h-36 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-xl">無圖片</div>`;
+
+                return `
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
+                        ${imgTag}
+                        <div class="p-3.5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <span class="inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-black mb-1">第 ${p.group_no} 組</span>
+                                <h3 class="font-black text-sm text-slate-800">${p.name}</h3>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <span class="text-base font-black text-rose-600">${p.price} <span class="text-xs">幣</span></span>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" id="qty-${p.id}" min="1" value="1" class="w-12 px-1 py-1 border rounded text-xs text-center">
+                                    <button type="button" onclick="purchaseProduct('${p.id}', '${p.name}', ${p.group_no}, ${p.price})" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-bold transition">下單</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function purchaseProduct(productId, prodName, groupNo, price) {
+            const qty = parseInt(document.getElementById(`qty-${productId}`).value, 10);
+            if (!qty || qty <= 0) {
+                alert("請填寫正確的購買數量！");
+                return;
+            }
+
+            const total = price * qty;
+            if (currentAuth.data.balance < total) {
+                alert(`虛擬幣不足！需花費 ${total} 幣，目前僅剩餘 ${currentAuth.data.balance} 幣。`);
+                return;
+            }
+
+            if (!confirm(`確定要花費 ${total} 幣購買【${prodName}】共 ${qty} 件嗎？`)) return;
+
+            const newBal = currentAuth.data.balance - total;
+            const { error: balErr } = await client.from('staff_users').update({ balance: newBal }).eq('staff_no', currentAuth.data.staff_no);
+            if (balErr) {
+                alert("扣款失敗：" + balErr.message);
+                return;
+            }
+
+            const { error: orderErr } = await client.from('orders').insert({
+                staff_no: currentAuth.data.staff_no,
+                product_id: productId,
+                product_name: prodName,
+                group_no: groupNo,
+                unit_price: price,
+                quantity: qty,
+                total_amount: total
+            });
+
+            if (orderErr) {
+                alert("下單失敗：" + orderErr.message);
+                return;
+            }
+
+            alert("🎉 下單成功！已成功扣除 " + total + " 個虛擬幣。");
+            loadStaffMall();
+        }
+
+        async function loadStudentProducts() {
+            const { data: prods } = await client.from('products').select('*').eq('group_no', currentAuth.data.group_no).order('created_at', { ascending: false });
+            const tbody = document.getElementById('studentProductTableBody');
+
+            if (!prods || prods.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">目前尚無上架商品。</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = prods.map(p => `
+                <tr class="border-b border-slate-200">
+                    <td class="p-2 border border-slate-200">
+                        ${p.image_url ? `<img src="${p.image_url}" class="w-10 h-10 object-cover rounded">` : `<span class="text-slate-300">無</span>`}
+                    </td>
+                    <td class="p-2 border border-slate-200 font-bold">${p.name}</td>
+                    <td class="p-2 border border-slate-200 text-rose-600 font-extrabold">${p.price} 幣</td>
+                    <td class="p-2 border border-slate-200 text-slate-500">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
+                    <td class="p-2 border border-slate-200 text-center">
+                        <button type="button" onclick="deleteProduct('${p.id}')" class="px-2 py-1 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded font-bold transition">下架</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function handleCreateProduct(e) {
+            e.preventDefault();
+            const name = document.getElementById('newProdName').value.trim();
+            const price = parseInt(document.getElementById('newProdPrice').value, 10);
+            const img = document.getElementById('newProdImg').value.trim();
+
+            const { error } = await client.from('products').insert({
+                group_no: currentAuth.data.group_no,
+                name: name,
+                price: price,
+                image_url: img || null
+            });
+
+            if (error) {
+                alert("商品上架失敗：" + error.message);
+                return;
+            }
+
+            alert("✅ 商品上架成功！");
+            document.getElementById('newProdName').value = '';
+            document.getElementById('newProdPrice').value = '';
+            document.getElementById('newProdImg').value = '';
+            loadStudentProducts();
+        }
+
+        async function deleteProduct(productId) {
+            if (!confirm("確定要下架此項商品嗎？")) return;
+            const { error } = await client.from('products').delete().eq('id', productId);
+            if (error) {
+                alert("下架失敗：" + error.message);
+                return;
+            }
+            loadStudentProducts();
+        }
+
+        async function loadTeacherDashboard() {
+            const { data: prods } = await client.from('products').select('*').order('created_at', { ascending: false });
+            const pTbody = document.getElementById('teacherProductTableBody');
+            if (prods && prods.length > 0) {
+                pTbody.innerHTML = prods.map(p => `
+                    <tr class="border-b border-slate-200">
+                        <td class="p-2 border border-slate-200 font-black text-indigo-600">第 ${p.group_no} 組</td>
+                        <td class="p-2 border border-slate-200 font-bold">${p.name}</td>
+                        <td class="p-2 border border-slate-200 text-rose-600 font-bold">${p.price} 幣</td>
+                        <td class="p-2 border border-slate-200 text-slate-500">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
+                    </tr>
+                `).join('');
+            } else {
+                pTbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400">目前尚無商品上架。</td></tr>`;
+            }
+
+            const { data: orders } = await client.from('orders').select('*').order('created_at', { ascending: false });
+            const { data: staffList } = await client.from('staff_users').select('id, staff_no, name, email, balance');
+            const staffMap = {};
+            if (staffList) {
+                staffList.forEach(s => { staffMap[s.staff_no] = s; });
+            }
+
+            const oTbody = document.getElementById('teacherOrderTableBody');
+            if (orders && orders.length > 0) {
+                oTbody.innerHTML = orders.map(o => {
+                    const staff = staffMap[o.staff_no] || { name: '未知老師', email: '' };
+                    return `
+                        <tr class="border-b border-slate-200">
+                            <td class="p-2 border border-slate-200">
+                                <div class="font-bold text-slate-800">${staff.name}</div>
+                                <div class="text-[10px] text-slate-400">${o.staff_no} ｜ ${staff.email || '無Email'}</div>
+                            </td>
+                            <td class="p-2 border border-slate-200 font-bold">${o.product_name} <span class="text-[10px] text-slate-400">(第${o.group_no}組)</span></td>
+                            <td class="p-2 border border-slate-200 text-center font-bold">${o.quantity}</td>
+                            <td class="p-2 border border-slate-200 text-rose-600 font-black">${o.total_amount} 幣</td>
+                            <td class="p-2 border border-slate-200 text-slate-500">${new Date(o.created_at).toLocaleString('zh-TW')}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                oTbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">目前尚無下單紀錄。</td></tr>`;
+            }
+        }
+
+        renderAuthViews();
+    </script>
+</body>
+</html>
