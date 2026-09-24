@@ -37,37 +37,26 @@
                         🔐
                     </div>
                     <h2 class="text-2xl font-black tracking-tight text-white">帳號登入</h2>
-                    <p class="text-xs text-slate-400 mt-1 font-medium">請選擇身分並輸入對應帳號密碼</p>
                 </div>
 
                 <form onsubmit="handleUnifiedLogin(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1.5 tracking-wide">選擇登入身份</label>
-                        <select id="loginRoleSelect" onchange="handleRoleChange()" class="w-full px-3.5 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition font-bold">
-                            <option value="student">🎓 各組</option>
-                            <option value="staff">👨‍🏫 教職員</option>
-                            <option value="teacher">👩‍🏫 任課教師</option>
-                            <option value="admin">👑 管理員</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label id="accountLabel" class="block text-xs font-bold text-slate-300 mb-1.5 tracking-wide">組別代號</label>
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5 tracking-wide">帳號</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
                                 👤
                             </span>
-                            <input type="text" id="loginAccount" required placeholder="請輸入組別代號 (1~6)" class="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                            <input type="text" id="loginAccount" required placeholder="請輸入帳號" class="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
                         </div>
                     </div>
 
-                    <div id="passwordArea">
+                    <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1.5 tracking-wide">密碼</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
                                 🔑
                             </span>
-                            <input type="password" id="loginPassword" placeholder="請輸入組別密碼" class="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                            <input type="password" id="loginPassword" placeholder="請輸入密碼" class="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
                         </div>
                     </div>
 
@@ -78,20 +67,14 @@
                         <span>→</span>
                     </button>
                 </form>
-
-                <div class="mt-6 pt-4 border-t border-slate-700/60 text-center">
-                    <p id="roleHelpText" class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                        • 各組：帳號輸入 <code>1</code> ~ <code>6</code> ｜ 密碼輸入 <code>group1pass</code> ~ <code>group6pass</code>
-                    </p>
-                </div>
             </div>
         </section>
 
         <section id="staffView" class="hidden max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
             <div class="bg-indigo-950/60 border border-indigo-800/50 p-5 rounded-2xl flex flex-wrap items-center justify-between gap-4 text-white">
                 <div>
-                    <h2 class="text-xl font-black text-white" id="staffWelcomeTitle">教職員選購專區</h2>
-                    <p class="text-xs text-indigo-300 mt-0.5" id="staffInfoSubtitle">選購學生實作作品，使用虛擬幣進行下單。</p>
+                    <h2 class="text-xl font-black text-white" id="staffWelcomeTitle">選購專區</h2>
+                    <p class="text-xs text-indigo-300 mt-0.5" id="staffInfoSubtitle"></p>
                 </div>
                 <div class="flex items-center gap-2.5 bg-slate-900/80 px-4 py-2.5 rounded-xl border border-indigo-500/30 shadow-inner">
                     <span class="text-xs font-bold text-slate-400">剩餘虛擬幣：</span>
@@ -106,8 +89,7 @@
         <section id="studentView" class="hidden max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
             <div class="bg-emerald-950/60 border border-emerald-800/50 p-5 rounded-2xl flex items-center justify-between text-white">
                 <div>
-                    <h2 class="text-xl font-black text-white" id="studentGroupNameHeader">各組商品管理後台</h2>
-                    <p class="text-xs text-emerald-300 mt-0.5">請設定自家組別之商品名稱、價格與圖片網址。</p>
+                    <h2 class="text-xl font-black text-white" id="studentGroupNameHeader">商品管理後台</h2>
                 </div>
             </div>
 
@@ -116,11 +98,11 @@
                 <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1.5">商品名稱</label>
-                        <input type="text" id="newProdName" required placeholder="例如：手作點心禮盒" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <input type="text" id="newProdName" required placeholder="請輸入商品名稱" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1.5">單價 (虛擬幣)</label>
-                        <input type="number" id="newProdPrice" min="1" required placeholder="例如：35" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <input type="number" id="newProdPrice" min="1" required placeholder="請輸入單價" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1.5">商品圖片連結 (URL)</label>
@@ -133,7 +115,7 @@
             </div>
 
             <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl text-white">
-                <h3 class="text-sm font-black mb-4">本組目前已上架商品</h3>
+                <h3 class="text-sm font-black mb-4">目前已上架商品</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left border-collapse border border-slate-700">
                         <thead class="bg-slate-900/80 text-slate-300 font-extrabold">
@@ -154,8 +136,7 @@
         <section id="teacherView" class="hidden max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
             <div class="bg-amber-950/60 border border-amber-800/50 p-5 rounded-2xl text-white flex flex-wrap justify-between items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-black text-white" id="monitorTitle">任課教師全覽儀表板</h2>
-                    <p class="text-xs text-amber-300 mt-0.5">即時監控全班各組上架進度與教職員下單採購明細。</p>
+                    <h2 class="text-xl font-black text-white" id="monitorTitle">全覽儀表板</h2>
                 </div>
                 <div id="adminActionBtnArea" class="hidden">
                     <button type="button" onclick="resetAllBalances()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 rounded-xl text-xs font-black transition shadow-lg shadow-rose-600/30">重置全體教職員額度 (300)</button>
@@ -165,7 +146,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl text-white">
                     <h3 class="text-sm font-black mb-3 flex items-center gap-1.5 text-white">
-                        <span>📦</span> 各組商品上架紀錄 (含時間)
+                        <span>📦</span> 各組商品上架紀錄
                     </h3>
                     <div class="overflow-x-auto max-h-96">
                         <table class="w-full text-xs text-left border-collapse border border-slate-700">
@@ -184,13 +165,13 @@
 
                 <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl text-white">
                     <h3 class="text-sm font-black mb-3 flex items-center gap-1.5 text-white">
-                        <span>📋</span> 教職員下單紀錄 (姓名、帳號、數量、金額、時間)
+                        <span>📋</span> 下單紀錄
                     </h3>
                     <div class="overflow-x-auto max-h-96">
                         <table class="w-full text-xs text-left border-collapse border border-slate-700">
                             <thead class="bg-slate-900/80 text-slate-300 font-extrabold sticky top-0">
                                 <tr>
-                                    <th class="p-2.5 border border-slate-700">教職員</th>
+                                    <th class="p-2.5 border border-slate-700">訂購人</th>
                                     <th class="p-2.5 border border-slate-700">商品 (組別)</th>
                                     <th class="p-2.5 border border-slate-700 text-center">數量</th>
                                     <th class="p-2.5 border border-slate-700">總金額</th>
@@ -213,45 +194,6 @@
 
         let currentAuth = null;
 
-        function handleRoleChange() {
-            const role = document.getElementById('loginRoleSelect').value;
-            const accInput = document.getElementById('loginAccount');
-            const passArea = document.getElementById('passwordArea');
-            const passInput = document.getElementById('loginPassword');
-            const helpText = document.getElementById('roleHelpText');
-            clearLoginError();
-
-            if (role === 'student') {
-                document.getElementById('accountLabel').innerText = "組別代號";
-                accInput.placeholder = "請輸入組別代號 (1~6)";
-                passArea.classList.remove('hidden');
-                passInput.required = true;
-                passInput.placeholder = "請輸入該組密碼";
-                helpText.innerHTML = "• 各組：帳號輸入 <code>1</code> ~ <code>6</code> ｜ 密碼輸入 <code>group1pass</code> ~ <code>group6pass</code>";
-            } else if (role === 'staff') {
-                document.getElementById('accountLabel').innerText = "教職員帳號/編號";
-                accInput.placeholder = "例如：t218、t053、principallin";
-                passArea.classList.add('hidden');
-                passInput.required = false;
-                passInput.value = "";
-                helpText.innerHTML = "• 教職員：輸入帳號/編號即可直接驗證登入<br>• 每位老師享有專屬 300 點虛擬幣額度";
-            } else if (role === 'teacher') {
-                document.getElementById('accountLabel').innerText = "任課教師帳號";
-                accInput.placeholder = "帳號：teacher";
-                passArea.classList.remove('hidden');
-                passInput.required = true;
-                passInput.placeholder = "密碼：teacher";
-                helpText.innerHTML = "• 任課教師：帳號 <code>teacher</code> ｜ 密碼 <code>teacher</code>";
-            } else if (role === 'admin') {
-                document.getElementById('accountLabel').innerText = "管理員帳號";
-                accInput.placeholder = "請輸入管理員帳號";
-                passArea.classList.remove('hidden');
-                passInput.required = true;
-                passInput.placeholder = "請輸入管理員密碼";
-                helpText.innerHTML = "";
-            }
-        }
-
         function showLoginError(msg) {
             const errEl = document.getElementById('loginErrorMsg');
             errEl.innerText = msg;
@@ -268,7 +210,6 @@
             e.preventDefault();
             clearLoginError();
 
-            const role = document.getElementById('loginRoleSelect').value;
             const account = document.getElementById('loginAccount').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
 
@@ -286,20 +227,19 @@
                     .from('users')
                     .select('*')
                     .eq('account', account.toLowerCase())
-                    .eq('role', role)
                     .maybeSingle();
 
                 if (error) {
-                    showLoginError("查詢錯誤：" + error.message);
+                    showLoginError("系統錯誤：" + error.message);
                     return;
                 }
 
                 if (!user) {
-                    showLoginError("查無此身分之帳號，請確認身分選擇與帳號是否正確！");
+                    showLoginError("查無此帳號，請重新輸入！");
                     return;
                 }
 
-                if (role !== 'staff') {
+                if (user.role !== 'staff') {
                     if (user.password !== password) {
                         showLoginError("密碼錯誤，請重新輸入！");
                         return;
@@ -309,12 +249,12 @@
                 currentAuth = user;
                 renderAuthViews();
 
-                if (role === 'student') {
+                if (user.role === 'student') {
                     currentAuth.group_no = parseInt(user.account, 10);
                     loadStudentProducts();
-                } else if (role === 'staff') {
+                } else if (user.role === 'staff') {
                     loadStaffMall();
-                } else if (role === 'teacher' || role === 'admin') {
+                } else if (user.role === 'teacher' || user.role === 'admin') {
                     loadTeacherDashboard();
                 }
 
@@ -358,22 +298,22 @@
 
             let roleName = "";
             if (currentAuth.role === 'staff') {
-                roleName = `${currentAuth.name} 老師 (${currentAuth.account})`;
+                roleName = `${currentAuth.name} (${currentAuth.account})`;
                 staffSec.classList.remove('hidden');
-                document.getElementById('staffWelcomeTitle').innerText = `${currentAuth.name} 老師的選購專區`;
+                document.getElementById('staffWelcomeTitle').innerText = `${currentAuth.name} 的選購專區`;
                 document.getElementById('staffInfoSubtitle').innerText = `帳號：${currentAuth.account} ｜ 郵件：${currentAuth.email}`;
             } else if (currentAuth.role === 'student') {
-                roleName = `第 ${currentAuth.group_no} 組 後台`;
+                roleName = `第 ${currentAuth.group_no} 組`;
                 studentSec.classList.remove('hidden');
                 document.getElementById('studentGroupNameHeader').innerText = `第 ${currentAuth.group_no} 組 商品管理後台`;
             } else if (currentAuth.role === 'teacher') {
-                roleName = `任課教師 監控模式`;
+                roleName = `任課教師`;
                 monitorTitle.innerText = "任課教師全覽儀表板";
                 adminBtnArea.classList.add('hidden');
                 teacherSec.classList.remove('hidden');
             } else if (currentAuth.role === 'admin') {
-                roleName = `系統管理員 總控模式`;
-                monitorTitle.innerText = "系統管理員儀表板 (含全體重置功能)";
+                roleName = `系統管理員`;
+                monitorTitle.innerText = "全覽儀表板";
                 adminBtnArea.classList.remove('hidden');
                 teacherSec.classList.remove('hidden');
             }
@@ -395,7 +335,7 @@
             const listArea = document.getElementById('productListArea');
 
             if (!products || products.length === 0) {
-                listArea.innerHTML = `<div class="col-span-full p-12 text-center text-slate-500 font-bold bg-slate-800/40 border border-slate-800 rounded-2xl">目前尚無各組學生上架任何商品。</div>`;
+                listArea.innerHTML = `<div class="col-span-full p-12 text-center text-slate-500 font-bold bg-slate-800/40 border border-slate-800 rounded-2xl">目前尚無上架商品。</div>`;
                 return;
             }
 
@@ -462,7 +402,7 @@
                 return;
             }
 
-            alert("🎉 下單成功！已成功扣除 " + total + " 個虛擬幣。");
+            alert("🎉 下單成功！已扣除 " + total + " 個虛擬幣。");
             loadStaffMall();
         }
 
@@ -571,17 +511,16 @@
         }
 
         async function resetAllBalances() {
-            if (!confirm("⚠️ 確定要將全體教職員的虛擬幣餘額全數重置為 300 點嗎？此動作無法復原！")) return;
+            if (!confirm("確定要將全體教職員的虛擬幣餘額重置為 300 點嗎？")) return;
             const { error } = await client.from('users').update({ balance: 300 }).eq('role', 'staff');
             if (error) {
                 alert("重置失敗：" + error.message);
                 return;
             }
-            alert("✅ 全體教職員虛擬幣額度已全數重置為 300 點！");
+            alert("✅ 全體教職員虛擬幣額度已重置為 300 點！");
             loadTeacherDashboard();
         }
 
-        handleRoleChange();
         renderAuthViews();
     </script>
 </body>
