@@ -52,7 +52,7 @@
                     </div>
 
                     <div>
-                        <label id="accountLabel" class="block text-xs font-bold text-slate-300 mb-1.5 tracking-wide">帳號</label>
+                        <label id="accountLabel" class="block text-xs font-bold text-slate-300 mb-1.5 tracking-wide">組別代號</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
                                 👤
@@ -244,11 +244,11 @@
                 helpText.innerHTML = "• 任課教師：帳號 <code>teacher</code> ｜ 密碼 <code>teacher</code>";
             } else if (role === 'admin') {
                 document.getElementById('accountLabel').innerText = "管理員帳號";
-                accInput.placeholder = "帳號：admin";
+                accInput.placeholder = "請輸入管理員帳號";
                 passArea.classList.remove('hidden');
                 passInput.required = true;
-                passInput.placeholder = "密碼：Ap960523";
-                helpText.innerHTML = "• 管理員：帳號 <code>admin</code> ｜ 密碼 <code>Ap960523</code><br>• 具備數據全覽與額度重置權限";
+                passInput.placeholder = "請輸入管理員密碼";
+                helpText.innerHTML = "";
             }
         }
 
@@ -289,8 +289,13 @@
                     .eq('role', role)
                     .maybeSingle();
 
-                if (error || !user) {
-                    showLoginError("查無此身分之帳號，請重新確認！");
+                if (error) {
+                    showLoginError("查詢錯誤：" + error.message);
+                    return;
+                }
+
+                if (!user) {
+                    showLoginError("查無此身分之帳號，請確認身分選擇與帳號是否正確！");
                     return;
                 }
 
