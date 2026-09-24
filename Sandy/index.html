@@ -43,7 +43,6 @@
 
     <div id="msgBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl hidden transition-all duration-300"></div>
 
-    <!-- 圖片燈箱放大彈窗 -->
     <div id="imageLightboxModal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeLightbox()">
         <div class="relative max-w-3xl max-h-[85vh] bg-transparent flex flex-col items-center" onclick="event.stopPropagation()">
             <img id="lightboxImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/20">
@@ -51,7 +50,6 @@
         </div>
     </div>
 
-    <!-- 登入視窗 -->
     <div id="authWorkspace" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
         <div class="relative w-full max-w-[390px] bg-white rounded-3xl p-8 shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-4">
@@ -89,7 +87,6 @@
         </div>
     </div>
 
-    <!-- 主頁面 -->
     <div id="appWorkspace" class="hidden flex-grow flex flex-col h-full overflow-hidden">
         
         <header class="bg-[#1e1b4b] text-white shrink-0 py-2.5 px-4 shadow-md z-40">
@@ -110,7 +107,6 @@
         <main id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar p-4 sm:p-6 pb-20">
             <div class="max-w-6xl mx-auto space-y-6">
 
-                <!-- 儀表板 -->
                 <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                         <span class="font-black text-slate-800 text-base sm:text-lg flex items-center gap-2">
@@ -127,7 +123,6 @@
                     <div id="statCardsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3.5"></div>
                 </section>
 
-                <!-- 教職員選購專區 -->
                 <section id="staffView" class="hidden space-y-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
@@ -139,7 +134,6 @@
                     <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
                 </section>
 
-                <!-- 學生組別商品管理後台 -->
                 <section id="studentView" class="hidden space-y-6">
                     <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                         <h3 class="text-sm font-black text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center gap-1.5">
@@ -159,7 +153,6 @@
                                 <input type="file" id="newProdFiles" accept="image/*" multiple onchange="handleImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
                             </div>
                             
-                            <!-- 圖片即時縮圖預覽區 -->
                             <div class="sm:col-span-3">
                                 <div id="selectedImagePreviews" class="flex flex-wrap gap-2.5 pt-1 min-h-[50px] p-2 bg-slate-50 border border-dashed border-slate-200 rounded-xl items-center">
                                     <span class="text-xs text-slate-400 font-bold px-2">尚未選擇照片，可一次選取多張照片直接上傳。</span>
@@ -193,7 +186,6 @@
                     </div>
                 </section>
 
-                <!-- 任課教師全覽 -->
                 <section id="teacherView" class="hidden space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
@@ -249,6 +241,7 @@
         const SUPABASE_URL = "https://dhmbxkswwjzsflwcjpiz.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_HUfSJgvMX0iYCoZ6AUlF1Q_VewS2O2p";
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const AUTH_STORAGE_KEY = 'sshs_mall_auth_user';
 
         let currentAuth = null;
         let selectedBase64Images = [];
@@ -274,7 +267,6 @@
             errEl.classList.add('hidden');
         }
 
-        // 解析多圖字串 (支援逗號與換行分隔)
         function parseImages(rawUrl) {
             if (!rawUrl) return [];
             return rawUrl.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
@@ -299,7 +291,6 @@
             if (modal) modal.classList.add('hidden');
         }
 
-        // 圖片自動等比壓縮轉 Base64
         function compressImage(file, maxWidth = 800, quality = 0.75) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -331,7 +322,6 @@
             });
         }
 
-        // 處理使用者選取的多張照片檔案
         async function handleImageFilesSelected(input) {
             if (!input.files || input.files.length === 0) return;
             const previewContainer = document.getElementById('selectedImagePreviews');
@@ -371,6 +361,47 @@
                     <button type="button" onclick="removeSelectedImage(${idx})" class="absolute -top-1.5 -right-1.5 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-black shadow hover:bg-rose-700 transition">✕</button>
                 </div>
             `).join('') + `<span class="text-xs font-black text-emerald-700 ml-2">已選取 ${selectedBase64Images.length} 張照片</span>`;
+        }
+
+        function activateUserSession(user) {
+            currentAuth = user;
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+            renderAuthViews();
+
+            if (user.role === 'student') {
+                currentAuth.group_no = parseInt(user.account, 10);
+                loadStudentProducts();
+            } else if (user.role === 'staff') {
+                loadStaffMall();
+            } else if (user.role === 'teacher' || user.role === 'admin') {
+                loadTeacherDashboard();
+            }
+
+            loadGlobalStats();
+        }
+
+        async function restoreSession() {
+            const savedUserStr = localStorage.getItem(AUTH_STORAGE_KEY);
+            if (!savedUserStr) return;
+
+            try {
+                const localUser = JSON.parse(savedUserStr);
+                if (!localUser || !localUser.account) return;
+
+                const { data: dbUser, error } = await client
+                    .from('users')
+                    .select('*')
+                    .eq('account', localUser.account)
+                    .maybeSingle();
+
+                if (!error && dbUser) {
+                    activateUserSession(dbUser);
+                } else {
+                    localStorage.removeItem(AUTH_STORAGE_KEY);
+                }
+            } catch (e) {
+                localStorage.removeItem(AUTH_STORAGE_KEY);
+            }
         }
 
         async function handleUnifiedLogin(e) {
@@ -414,19 +445,7 @@
                     }
                 }
 
-                currentAuth = user;
-                renderAuthViews();
-
-                if (user.role === 'student') {
-                    currentAuth.group_no = parseInt(user.account, 10);
-                    loadStudentProducts();
-                } else if (user.role === 'staff') {
-                    loadStaffMall();
-                } else if (user.role === 'teacher' || user.role === 'admin') {
-                    loadTeacherDashboard();
-                }
-
-                loadGlobalStats();
+                activateUserSession(user);
 
             } catch (err) {
                 showLoginError("系統發生未預期錯誤：" + err.message);
@@ -439,6 +458,7 @@
         function handleLogout() {
             currentAuth = null;
             selectedBase64Images = [];
+            localStorage.removeItem(AUTH_STORAGE_KEY);
             document.getElementById('loginAccount').value = '';
             document.getElementById('loginPassword').value = '';
             clearLoginError();
@@ -673,7 +693,6 @@
             submitBtn.innerText = "發布中...";
 
             try {
-                // 將所有選取的 Base64 圖片以換行拼接存入
                 const joinedImages = selectedBase64Images.join('\n');
 
                 const { error } = await client.from('products').insert({
@@ -770,7 +789,7 @@
             loadGlobalStats();
         }
 
-        renderAuthViews();
+        restoreSession();
     </script>
 </body>
 </html>
