@@ -51,11 +51,11 @@
         <section id="pane_draw" class="route-pane hidden space-y-6">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高一總人數</span>
+                    <span class="text-xs text-slate-400 font-bold">高一總人數 (402~404)</span>
                     <div id="statG1Count" class="text-2xl font-black text-slate-800 mt-1">0</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高二總人數</span>
+                    <span class="text-xs text-slate-400 font-bold">高二總人數 (502~504)</span>
                     <div id="statG2Count" class="text-2xl font-black text-slate-800 mt-1">0</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
@@ -63,9 +63,18 @@
                     <div id="statPairedCount" class="text-2xl font-black text-emerald-600 mt-1">0</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高二剩餘未配對</span>
+                    <span class="text-xs text-slate-400 font-bold">高二待抽剩餘名額</span>
                     <div id="statG2Remaining" class="text-2xl font-black text-amber-600 mt-1">0</div>
                 </div>
+            </div>
+
+            <!-- 抽籤階段狀態提示 -->
+            <div id="stageNoticeBox" class="p-4 rounded-2xl border bg-blue-50 border-blue-200 text-blue-900 text-xs font-bold flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-blue-600"></span>
+                    <span id="stageNoticeText">目前階段：第一階段（402~404 班每位高一各抽一位直屬）</span>
+                </div>
+                <span id="stageG1RemainingText" class="text-blue-700 font-black">402~404 班尚有 0 人未抽到第一位直屬</span>
             </div>
 
             <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
@@ -75,7 +84,7 @@
                             <span class="w-2.5 h-5 bg-blue-600 rounded-full"></span>
                             現場抽籤配對
                         </h2>
-                        <p class="text-xs text-slate-400 font-bold mt-1">規則：優先 1 對 1 配對。當高一全數配完但高二尚有餘額時，自動進入加抽機制（使高一抽得第 2 位直屬）</p>
+                        <p class="text-xs text-slate-400 font-bold mt-1">流程：先把 402~404 全數抽完 1 對 1 直屬，若高二仍有超額學生，再隨機加抽分派給高一同學！</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <label class="text-xs font-black text-slate-600">指定高一班級：</label>
@@ -96,10 +105,10 @@
 
                 <div class="flex flex-wrap gap-3 justify-end pt-2">
                     <button type="button" onclick="startSingleDraw()" id="btnSingleDraw" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black transition shadow-md shadow-blue-600/20">
-                        🎲 抽一位直屬
+                        🎲 抽一位高一學生直屬
                     </button>
                     <button type="button" onclick="startBatchDraw()" id="btnBatchDraw" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition shadow-md shadow-indigo-600/20">
-                        ⚡ 一鍵自動抽配（含超額加抽）
+                        ⚡ 當前班級全班自動抽配
                     </button>
                 </div>
             </div>
@@ -114,7 +123,7 @@
                             <span class="w-2.5 h-5 bg-emerald-600 rounded-full"></span>
                             已成立之直屬配對名冊
                         </h2>
-                        <p class="text-xs text-slate-400 font-bold mt-0.5">可依照高一或高二個別班級獨立篩選與匯出（高一人員若有多位直屬會標示提示）</p>
+                        <p class="text-xs text-slate-400 font-bold mt-0.5">排序規則：選擇單一班級依「座號」排序；全部班級依「班級」再依「座號」排序</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2.5">
@@ -145,11 +154,11 @@
                     <table class="w-full text-left text-xs border-collapse">
                         <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
                             <tr>
-                                <th class="p-3">高一學生 (學弟妹)</th>
                                 <th class="p-3">高一班級</th>
                                 <th class="p-3 w-16">座號</th>
+                                <th class="p-3">高一姓名</th>
                                 <th class="p-3 text-center">關係</th>
-                                <th class="p-3">高二直屬 (學長姐)</th>
+                                <th class="p-3">高二直屬姓名</th>
                                 <th class="p-3">高二班級</th>
                                 <th class="p-3 w-16">座號</th>
                                 <th class="p-3">配對時間</th>
@@ -172,7 +181,7 @@
                             <span class="w-2.5 h-5 bg-amber-500 rounded-full"></span>
                             未被抽取學生即時名冊
                         </h2>
-                        <p class="text-xs text-slate-400 font-bold mt-0.5">列出高一尚未有直屬者，以及高二尚未被抽中之剩餘學生名單</p>
+                        <p class="text-xs text-slate-400 font-bold mt-0.5">排序規則：選擇單一班級依「座號」排序；全部班級依「班級」再依「座號」排序</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2.5">
@@ -181,7 +190,7 @@
                             <select id="filterUnpairedGrade" onchange="renderUnpairedTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-amber-500">
                                 <option value="ALL">高一與高二 全部顯示</option>
                                 <option value="G1">僅顯示 高一 (尚無直屬)</option>
-                                <option value="G2">僅顯示 高二 (尚未被抽)</option>
+                                <option value="G2">僅顯示 高二 (待抽籤池)</option>
                             </select>
                         </div>
 
@@ -211,13 +220,13 @@
                     <table class="w-full text-left text-xs border-collapse">
                         <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
                             <tr>
-                                <th class="p-3 w-20">年級</th>
                                 <th class="p-3">班級</th>
-                                <th class="p-3 w-20">座號</th>
-                                <th class="p-3">學號</th>
+                                <th class="p-3 w-16">座號</th>
+                                <th class="p-3 w-20">年級</th>
                                 <th class="p-3">姓名</th>
+                                <th class="p-3">學號</th>
                                 <th class="p-3 w-20">性別</th>
-                                <th class="p-3">配對狀態</th>
+                                <th class="p-3">抽籤狀態</th>
                             </tr>
                         </thead>
                         <tbody id="unpairedTableBody" class="divide-y divide-slate-100 font-bold text-slate-700">
@@ -250,7 +259,13 @@
             t.innerText = msg;
             t.className = `fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl transition-all duration-300 ${isError ? 'bg-rose-500' : 'bg-emerald-600'}`;
             t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 2600);
+            setTimeout(() => { t.style.display = 'none'; }, 2800);
+        }
+
+        async function logAudit(actionType, details = {}) {
+            try {
+                await client.from('audit_logs').insert([{ action_type: actionType, details }]);
+            } catch (e) {}
         }
 
         function setRoute(r) {
@@ -273,27 +288,18 @@
             const activeBtn = document.getElementById(`tabBtn_${current}`);
             if (activeBtn) activeBtn.className = "px-4 py-1.5 rounded-xl text-xs font-black bg-blue-600 text-white shadow transition";
 
-            const headerTitle = document.getElementById('headerTitle');
-            const headerIcon = document.getElementById('headerIcon');
-
             if (current === 'draw') {
-                headerTitle.innerText = "新社高中直屬抽籤系統";
-                headerIcon.innerText = "🎯";
                 updateDrawDashboard();
             } else if (current === 'paired') {
-                headerTitle.innerText = "新社高中直屬抽籤系統 - 已配對名單";
-                headerIcon.innerText = "📋";
                 renderPairingsTable();
             } else if (current === 'unpaired') {
-                headerTitle.innerText = "新社高中直屬抽籤系統 - 未抽取名單";
-                headerIcon.innerText = "⏳";
                 renderUnpairedTable();
             }
         }
 
         async function loadData() {
             try {
-                const { data: stData } = await client.from('students').select('*').order('class_name').order('seat_no');
+                const { data: stData } = await client.from('students').select('*');
                 allStudents = stData || [];
 
                 const { data: pairData } = await client.from('pairings').select('*').order('paired_at', { ascending: false });
@@ -305,17 +311,49 @@
             }
         }
 
+        function checkPhaseOneCompletion() {
+            // 檢查 402, 403, 404 所有學生是否都至少有 1 位直屬
+            const targetClasses = ['402', '403', '404'];
+            const allTargetG1 = allStudents.filter(s => s.grade === 'G1' && targetClasses.some(c => s.class_name.includes(c)));
+            const pairedG1Set = new Set(allPairings.map(p => p.g1_student_no));
+
+            const uncompletedG1 = allTargetG1.filter(s => !pairedG1Set.has(s.student_no));
+            return {
+                isCompleted: uncompletedG1.length === 0,
+                uncompletedCount: uncompletedG1.length,
+                totalTargetG1: allTargetG1.length
+            };
+        }
+
         function updateDrawDashboard() {
-            const g1Total = allStudents.filter(s => s.grade === 'G1').length;
-            const g2Total = allStudents.filter(s => s.grade === 'G2').length;
+            const targetClassesG1 = ['402', '403', '404'];
+            const targetClassesG2 = ['502', '503', '504'];
+
+            const g1Total = allStudents.filter(s => s.grade === 'G1' && targetClassesG1.some(c => s.class_name.includes(c))).length;
+            const g2Total = allStudents.filter(s => s.grade === 'G2' && targetClassesG2.some(c => s.class_name.includes(c))).length;
             const pairedCount = allPairings.length;
             const pairedG2Set = new Set(allPairings.map(p => p.g2_student_no));
-            const g2Remaining = allStudents.filter(s => s.grade === 'G2' && !pairedG2Set.has(s.student_no)).length;
+            const g2Remaining = allStudents.filter(s => s.grade === 'G2' && targetClassesG2.some(c => s.class_name.includes(c)) && !pairedG2Set.has(s.student_no)).length;
 
             document.getElementById('statG1Count').innerText = g1Total;
             document.getElementById('statG2Count').innerText = g2Total;
             document.getElementById('statPairedCount').innerText = pairedCount;
             document.getElementById('statG2Remaining').innerText = g2Remaining;
+
+            const check = checkPhaseOneCompletion();
+            const stageBox = document.getElementById('stageNoticeBox');
+            const stageText = document.getElementById('stageNoticeText');
+            const stageRemText = document.getElementById('stageG1RemainingText');
+
+            if (!check.isCompleted) {
+                stageBox.className = "p-4 rounded-2xl border bg-blue-50 border-blue-200 text-blue-900 text-xs font-bold flex items-center justify-between";
+                stageText.innerText = "目前階段：第一階段（402~404 班每位高一各抽一位直屬）";
+                stageRemText.innerText = `402~404 班尚有 ${check.uncompletedCount} 人未抽到第一位直屬`;
+            } else {
+                stageBox.className = "p-4 rounded-2xl border bg-purple-50 border-purple-200 text-purple-900 text-xs font-bold flex items-center justify-between";
+                stageText.innerText = "目前階段：第二階段（第一輪已全數完成！高二超額多出學生加抽）";
+                stageRemText.innerText = `高二待抽剩餘 ${g2Remaining} 人，分派後部分高一將擁有兩位直屬`;
+            }
         }
 
         function getEligibleG2Students() {
@@ -328,7 +366,7 @@
             const selectedClass = document.getElementById('drawClassSelect').value;
             const classG1 = allStudents.filter(s => s.grade === 'G1' && s.class_name.includes(selectedClass));
             if (classG1.length === 0) {
-                showToast(`高一 ${selectedClass} 班尚未匯入學生資料！`, true);
+                showToast(`高一 ${selectedClass} 班尚未匯入學生名單！`, true);
                 return;
             }
 
@@ -338,30 +376,39 @@
                 return;
             }
 
-            // 計算每位高一已擁有的直屬數量
-            const g1PairCounts = {};
-            classG1.forEach(s => { g1PairCounts[s.student_no] = 0; });
-            allPairings.forEach(p => {
-                if (g1PairCounts[p.g1_student_no] !== undefined) {
-                    g1PairCounts[p.g1_student_no]++;
-                }
-            });
+            const phaseOne = checkPhaseOneCompletion();
 
-            // 優先選擇直屬數量最少的高一同學（例如 0 位者優先；若大家都已有 1 位，則從 1 位者中隨機抽）
-            let minCount = Math.min(...Object.values(g1PairCounts));
-            const candidateG1List = classG1.filter(s => g1PairCounts[s.student_no] === minCount);
-            const targetG1 = candidateG1List[Math.floor(Math.random() * candidateG1List.length)];
+            // 若第一階段尚未完成，且當前選擇的班級已經全員有直屬，強制提示前往尚未抽完的班級
+            const pairedG1Set = new Set(allPairings.map(p => p.g1_student_no));
+            const unpairedInThisClass = classG1.filter(s => !pairedG1Set.has(s.student_no));
+
+            if (!phaseOne.isCompleted && unpairedInThisClass.length === 0) {
+                showToast(`【第一階段進行中】${selectedClass} 班高一已全員擁有第一位直屬！請先將其他班級抽完再進入加抽階段！`, true);
+                return;
+            }
+
+            let targetG1 = null;
+            let isSecondRound = false;
+
+            if (unpairedInThisClass.length > 0) {
+                // 第一階段：優先從未擁有直屬的名單中抽
+                targetG1 = unpairedInThisClass[0];
+            } else {
+                // 第二階段：402~404 全員已有第一位直屬，高二多出的學生進入加抽
+                isSecondRound = true;
+                // 從該班高一中隨機指派一位
+                targetG1 = classG1[Math.floor(Math.random() * classG1.length)];
+            }
+
             const chosenG2 = availableG2[Math.floor(Math.random() * availableG2.length)];
-
-            const isSecondRound = minCount >= 1;
 
             document.getElementById('btnSingleDraw').disabled = true;
             document.getElementById('btnBatchDraw').disabled = true;
 
             const displayEl = document.getElementById('drawDisplayBox');
             const statusEl = document.getElementById('drawStatusText');
-            statusEl.innerText = isSecondRound 
-                ? `⚡ [超額加抽] 為 ${targetG1.class_name} 班 ${targetG1.name} 抽選第 ${minCount + 1} 位直屬學長姐...`
+            statusEl.innerText = isSecondRound
+                ? `⚡ [超額加抽] 為 ${targetG1.class_name} 班 ${targetG1.name} 抽選第 2 位直屬學長姐...`
                 : `正在為 ${targetG1.class_name} 班 ${targetG1.name} 抽選直屬學長姐...`;
 
             let counter = 0;
@@ -371,12 +418,12 @@
                 counter++;
                 if (counter > 16) {
                     clearInterval(interval);
-                    saveSinglePairing(targetG1, chosenG2, isSecondRound, minCount + 1);
+                    saveSinglePairing(targetG1, chosenG2, isSecondRound);
                 }
             }, 60);
         }
 
-        async function saveSinglePairing(g1Student, g2Student, isSecondRound, roundCount) {
+        async function saveSinglePairing(g1Student, g2Student, isSecondRound) {
             try {
                 const { error } = await client.from('pairings').insert({
                     g1_student_no: g1Student.student_no,
@@ -386,11 +433,15 @@
 
                 document.getElementById('drawDisplayBox').innerHTML = `
                     <span class="text-blue-600">${g1Student.name}</span>
-                    <span class="text-xs text-slate-400 mx-2">${isSecondRound ? `獲第 ${roundCount} 位直屬 ➔` : '配對 ➔'}</span>
+                    <span class="text-xs text-slate-400 mx-2">${isSecondRound ? '喜獲第 2 位直屬 ➔' : '配對 ➔'}</span>
                     <span class="text-emerald-600">${g2Student.class_name} ${g2Student.name}</span>
                 `;
-                document.getElementById('drawStatusText').innerText = isSecondRound ? `🎉 超額加抽成功！${g1Student.name} 喜獲第 ${roundCount} 位直屬！` : "🎉 抽選配對成功！";
+                document.getElementById('drawStatusText').innerText = isSecondRound ? `🎉 超額加抽成功！${g1Student.name} 獲得兩位直屬！` : "🎉 抽選配對成功！";
                 showToast(`🎉 配對成功：${g1Student.name} ➔ ${g2Student.name}！`);
+                await logAudit(isSecondRound ? "現場單人超額加抽" : "現場單人抽取直屬", {
+                    g1: `${g1Student.class_name} ${g1Student.name} (${g1Student.student_no})`,
+                    g2: `${g2Student.class_name} ${g2Student.name} (${g2Student.student_no})`
+                });
                 await loadData();
             } catch (err) {
                 showToast("配對儲存失敗：" + err.message, true);
@@ -404,41 +455,47 @@
             const selectedClass = document.getElementById('drawClassSelect').value;
             const classG1 = allStudents.filter(s => s.grade === 'G1' && s.class_name.includes(selectedClass));
             if (classG1.length === 0) {
-                showToast(`高一 ${selectedClass} 班尚未匯入學生名單！`, true);
+                showToast(`高一 ${selectedClass} 班尚未匯入學生名冊！`, true);
                 return;
             }
 
             const availableG2 = getEligibleG2Students();
             if (availableG2.length === 0) {
-                showToast(`502~504 班高二學長姐已全數配對完畢，無剩餘名單！`, true);
+                showToast(`502~504 班高二學長姐已全數配對完畢，無剩餘名額！`, true);
                 return;
             }
 
-            // 洗牌高二候選池
+            const pairedG1Set = new Set(allPairings.map(p => p.g1_student_no));
+            const unpairedInThisClass = classG1.filter(s => !pairedG1Set.has(s.student_no));
+            const phaseOne = checkPhaseOneCompletion();
+
+            // 若該班已全數配對第一位，但其他班級還沒抽完，阻擋提前加抽
+            if (!phaseOne.isCompleted && unpairedInThisClass.length === 0) {
+                showToast(`【第一階段進行中】${selectedClass} 班高一已全數配對！請先至其他尚未抽完的班級進行抽籤！`, true);
+                return;
+            }
+
+            // 打亂高二順序
             for (let i = availableG2.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [availableG2[i], availableG2[j]] = [availableG2[j], availableG2[i]];
             }
 
-            const pairedG1Set = new Set(allPairings.map(p => p.g1_student_no));
-            const unpairedG1 = classG1.filter(s => !pairedG1Set.has(s.student_no));
-
             const pairingsPayload = [];
             let g2Idx = 0;
 
-            // 第一輪：先補齊該班尚未有任何直屬的高一學生
-            for (let i = 0; i < unpairedG1.length && g2Idx < availableG2.length; i++) {
-                pairingsPayload.push({
-                    g1_student_no: unpairedG1[i].student_no,
-                    g2_student_no: availableG2[g2Idx].student_no
-                });
-                g2Idx++;
-            }
-
-            // 第二輪：若高二名額仍有剩餘，則進入超額加抽，隨機分配給高一學生，形成兩位直屬
-            let extraCount = 0;
-            if (g2Idx < availableG2.length) {
-                // 將高一名單隨機打亂進行多抽分配
+            if (unpairedInThisClass.length > 0) {
+                // 第一階段：只把本班尚未抽到的學生補齊（一人抽一位）
+                const limit = Math.min(unpairedInThisClass.length, availableG2.length);
+                for (let i = 0; i < limit; i++) {
+                    pairingsPayload.push({
+                        g1_student_no: unpairedInThisClass[i].student_no,
+                        g2_student_no: availableG2[g2Idx].student_no
+                    });
+                    g2Idx++;
+                }
+            } else {
+                // 第二階段：全員皆已抽過第一位，將多出來的高二隨機分配給本班高一，形成兩位直屬
                 const shuffledG1 = [...classG1].sort(() => Math.random() - 0.5);
                 let g1Idx = 0;
                 while (g2Idx < availableG2.length) {
@@ -449,7 +506,6 @@
                     });
                     g2Idx++;
                     g1Idx++;
-                    extraCount++;
                 }
             }
 
@@ -460,13 +516,15 @@
                 const { error } = await client.from('pairings').insert(pairingsPayload);
                 if (error) throw error;
 
-                const msg = extraCount > 0 
-                    ? `🎉 ${selectedClass} 班完成批次配對（含 ${extraCount} 位獲得第 2 位直屬）！`
-                    : `🎉 ${selectedClass} 班共完成 ${pairingsPayload.length} 組配對！`;
+                const isExtra = unpairedInThisClass.length === 0;
+                const msg = isExtra 
+                    ? `🎉 ${selectedClass} 班完成批次超額加抽（共 ${pairingsPayload.length} 位獲得第 2 位直屬）！`
+                    : `🎉 ${selectedClass} 班完成批次第一輪抽配（共 ${pairingsPayload.length} 組）！`;
 
                 showToast(msg);
                 document.getElementById('drawStatusText').innerText = `已完成 ${selectedClass} 班自動抽配作業`;
-                document.getElementById('drawDisplayBox').innerText = `共成立 ${pairingsPayload.length} 組直屬關係`;
+                document.getElementById('drawDisplayBox').innerText = `共完成 ${pairingsPayload.length} 組配對`;
+                await logAudit(isExtra ? "批次超額加抽" : "班級批次抽直屬", { class: selectedClass, count: pairingsPayload.length });
                 await loadData();
             } catch (err) {
                 showToast("批次配對失敗：" + err.message, true);
@@ -476,7 +534,7 @@
             }
         }
 
-        // ================= 已配對名單表格 =================
+        // ================= 已配對清冊（排序：選班級按座號；全部按班級再座號） =================
         function renderPairingsTable() {
             const tbody = document.getElementById('pairingsTableBody');
             const countBadge = document.getElementById('pairedCountBadge');
@@ -487,7 +545,6 @@
             const studentMap = {};
             allStudents.forEach(s => { studentMap[s.student_no] = s; });
 
-            // 統計各高一擁有的學長姐數
             const g1Counts = {};
             allPairings.forEach(p => {
                 g1Counts[p.g1_student_no] = (g1Counts[p.g1_student_no] || 0) + 1;
@@ -499,6 +556,22 @@
                 if (g1Filter !== 'ALL' && !String(g1.class_name || '').includes(g1Filter)) return false;
                 if (g2Filter !== 'ALL' && !String(g2.class_name || '').includes(g2Filter)) return false;
                 return true;
+            });
+
+            // 排序規則實作
+            currentFilteredPairings.sort((a, b) => {
+                const g1A = studentMap[a.g1_student_no] || { class_name: '', seat_no: 0 };
+                const g1B = studentMap[b.g1_student_no] || { class_name: '', seat_no: 0 };
+
+                if (g1Filter !== 'ALL') {
+                    // 選擇特定班級時，單純依照座號由小至大排序
+                    return (g1A.seat_no || 0) - (g1B.seat_no || 0);
+                } else {
+                    // 全部顯示時，先按照班級排序，再按照座號排序
+                    const classCompare = String(g1A.class_name || '').localeCompare(String(g1B.class_name || ''));
+                    if (classCompare !== 0) return classCompare;
+                    return (g1A.seat_no || 0) - (g1B.seat_no || 0);
+                }
             });
 
             if (countBadge) countBadge.innerText = `共 ${currentFilteredPairings.length} 組關係`;
@@ -515,17 +588,17 @@
 
                 return `
                     <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold">${g1.class_name} 班</td>
+                        <td class="p-3 font-mono text-slate-800">${g1.seat_no ? `${g1.seat_no}號` : '-'}</td>
                         <td class="p-3 font-black text-slate-900">
                             ${g1.name} 
                             <span class="text-slate-400 font-mono text-[11px]">(${p.g1_student_no})</span>
                             ${hasTwoMentors ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[10px] bg-purple-100 text-purple-700 font-black">2位直屬</span>' : ''}
                         </td>
-                        <td class="p-3 font-bold">${g1.class_name} 班</td>
-                        <td class="p-3 font-mono">${g1.seat_no ? `${g1.seat_no}號` : '-'}</td>
                         <td class="p-3 text-center text-blue-600 font-black">➔</td>
                         <td class="p-3 font-black text-slate-900">${g2.name} <span class="text-slate-400 font-mono text-[11px]">(${p.g2_student_no})</span></td>
                         <td class="p-3 font-bold">${g2.class_name} 班</td>
-                        <td class="p-3 font-mono">${g2.seat_no ? `${g2.seat_no}號` : '-'}</td>
+                        <td class="p-3 font-mono text-slate-800">${g2.seat_no ? `${g2.seat_no}號` : '-'}</td>
                         <td class="p-3 font-mono text-slate-400 text-[11px]">${new Date(p.paired_at).toLocaleString('zh-TW')}</td>
                     </tr>
                 `;
@@ -546,12 +619,12 @@
                 return {
                     "高一班級": g1.class_name || '',
                     "高一座號": g1.seat_no || '',
-                    "高一學號": p.g1_student_no,
                     "高一姓名": g1.name || '',
+                    "高一學號": p.g1_student_no,
+                    "高二直屬姓名": g2.name || '',
                     "高二直屬班級": g2.class_name || '',
                     "高二直屬座號": g2.seat_no || '',
                     "高二直屬學號": p.g2_student_no,
-                    "高二直屬姓名": g2.name || '',
                     "配對時間": new Date(p.paired_at).toLocaleString('zh-TW')
                 };
             });
@@ -562,7 +635,7 @@
             XLSX.writeFile(wb, `直屬配對清冊_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
 
-        // ================= 未被抽取名單表格 =================
+        // ================= 未被抽取名單表格（排序：選班級按座號；全部按班級再座號） =================
         function renderUnpairedTable() {
             const tbody = document.getElementById('unpairedTableBody');
             const countBadge = document.getElementById('unpairedCountBadge');
@@ -582,11 +655,24 @@
             if (gradeFilter !== 'ALL') list = list.filter(s => s.grade === gradeFilter);
             if (classFilter !== 'ALL') list = list.filter(s => s.class_name.includes(classFilter));
 
+            // 排序規則實作
+            list.sort((a, b) => {
+                if (classFilter !== 'ALL') {
+                    // 選擇特定班級時，依座號由小至大排序
+                    return (a.seat_no || 0) - (b.seat_no || 0);
+                } else {
+                    // 全部顯示時，先按照班級排序，再按照座號排序
+                    const classCompare = String(a.class_name || '').localeCompare(String(b.class_name || ''));
+                    if (classCompare !== 0) return classCompare;
+                    return (a.seat_no || 0) - (b.seat_no || 0);
+                }
+            });
+
             currentFilteredUnpaired = list;
-            if (countBadge) countBadge.innerText = `共 ${currentFilteredUnpaired.length} 人未配對`;
+            if (countBadge) countBadge.innerText = `共 ${currentFilteredUnpaired.length} 人`;
 
             if (currentFilteredUnpaired.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">目前沒有符合條件之未配對學生！</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">目前沒有尚未配對之學生！</td></tr>`;
                 return;
             }
 
@@ -594,15 +680,15 @@
                 const isG1 = s.grade === 'G1';
                 const statusTag = isG1 
                     ? '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">高一 ｜ 尚無直屬</span>'
-                    : '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200">高二 ｜ 仍在待抽籤池</span>';
+                    : '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200">高二 ｜ 待抽籤池</span>';
 
                 return `
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-black ${isG1 ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}">${isG1 ? '高一' : '高二'}</span></td>
                         <td class="p-3 font-bold text-slate-800">${s.class_name} 班</td>
                         <td class="p-3 font-mono">${s.seat_no ? `${s.seat_no}號` : '-'}</td>
-                        <td class="p-3 font-mono text-slate-500">${s.student_no}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-black ${isG1 ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}">${isG1 ? '高一' : '高二'}</span></td>
                         <td class="p-3 font-black text-slate-900">${s.name}</td>
+                        <td class="p-3 font-mono text-slate-500">${s.student_no}</td>
                         <td class="p-3">${s.gender || '-'}</td>
                         <td class="p-3">${statusTag}</td>
                     </tr>
@@ -616,11 +702,11 @@
                 return;
             }
             const rows = currentFilteredUnpaired.map(s => ({
-                "年級": s.grade === 'G1' ? '高一' : '高二',
                 "班級": s.class_name,
                 "座號": s.seat_no || '',
-                "學號": s.student_no,
+                "年級": s.grade === 'G1' ? '高一' : '高二',
                 "姓名": s.name,
+                "學號": s.student_no,
                 "性別": s.gender || '',
                 "狀態": s.grade === 'G1' ? '尚無直屬' : '待抽籤池'
             }));
