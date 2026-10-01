@@ -38,9 +38,9 @@
                 <span class="text-lg font-black tracking-wide">新社高中直屬抽籤系統管理後台</span>
             </div>
             <nav class="flex flex-wrap gap-1.5 text-xs font-black">
-                <button type="button" onclick="setAdminRoute('students')" id="tabBtn_students" class="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow transition">👥 學生名冊與匯入管理</button>
+                <button type="button" onclick="setAdminRoute('students')" id="tabBtn_students" class="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow transition">👥 學生名冊管理</button>
                 <button type="button" onclick="setAdminRoute('paired')" id="tabBtn_paired" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">📋 已配對名冊</button>
-                <button type="button" onclick="setAdminRoute('unpaired')" id="tabBtn_unpaired" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">⏳ 未抽取名冊</button>
+                <button type="button" onclick="setAdminRoute('unpaired')" id="tabBtn_unpaired" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">⏳ 未配對名冊</button>
                 <button type="button" onclick="setAdminRoute('audit')" id="tabBtn_audit" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">📜 操作日誌</button>
             </nav>
         </div>
@@ -123,21 +123,19 @@
 
                     <div class="flex flex-wrap items-center gap-2.5">
                         <div class="flex items-center gap-1.5">
-                            <label class="text-xs font-black text-slate-600">高一：</label>
-                            <select id="filterG1Class" onchange="renderPairingsTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none">
-                                <option value="ALL">全部高一</option>
-                                <option value="402">402 班</option>
-                                <option value="403">403 班</option>
-                                <option value="404">404 班</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <label class="text-xs font-black text-slate-600">高二：</label>
-                            <select id="filterG2Class" onchange="renderPairingsTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none">
-                                <option value="ALL">全部高二</option>
-                                <option value="502">502 班</option>
-                                <option value="503">503 班</option>
-                                <option value="504">504 班</option>
+                            <label class="text-xs font-black text-slate-600">班級：</label>
+                            <select id="filterPairingClass" onchange="renderPairingsTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none">
+                                <option value="ALL">全部班級</option>
+                                <optgroup label="高一班級">
+                                    <option value="402">402 班</option>
+                                    <option value="403">403 班</option>
+                                    <option value="404">404 班</option>
+                                </optgroup>
+                                <optgroup label="高二班級">
+                                    <option value="502">502 班</option>
+                                    <option value="503">503 班</option>
+                                    <option value="504">504 班</option>
+                                </optgroup>
                             </select>
                         </div>
                         <span id="pairedCountBadge" class="text-xs font-black px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200">共 0 組</span>
@@ -150,17 +148,20 @@
                         <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
                             <tr>
                                 <th class="p-3">高一班級</th>
-                                <th class="p-3 w-16">座號</th>
-                                <th class="p-3">高一學生 (學弟妹)</th>
-                                <th class="p-3 text-center">配對</th>
-                                <th class="p-3">高二直屬 (學長姐)</th>
+                                <th class="p-3 w-16">高一座號</th>
+                                <th class="p-3">高一姓名</th>
+                                <th class="p-3">高一學號</th>
+                                <th class="p-3 w-20">性別</th>
+                                <th class="p-3 text-center">關係</th>
                                 <th class="p-3">高二班級</th>
-                                <th class="p-3 w-16">座號</th>
-                                <th class="p-3">配對時間</th>
+                                <th class="p-3 w-16">高二座號</th>
+                                <th class="p-3">高二直屬姓名</th>
+                                <th class="p-3">高二學號</th>
+                                <th class="p-3 w-20">性別</th>
                             </tr>
                         </thead>
                         <tbody id="pairingsTableBody" class="divide-y divide-slate-100 font-bold text-slate-700">
-                            <tr><td colspan="8" class="p-6 text-center text-slate-400">目前尚無配對資料。</td></tr>
+                            <tr><td colspan="11" class="p-6 text-center text-slate-400">目前尚無配對資料。</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -173,7 +174,7 @@
                     <div>
                         <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
                             <span class="w-2.5 h-5 bg-amber-500 rounded-full"></span>
-                            未被抽取學生名冊
+                            尚未分配學生名冊
                         </h2>
                     </div>
 
@@ -217,7 +218,7 @@
                                 <th class="p-3">姓名</th>
                                 <th class="p-3">學號</th>
                                 <th class="p-3 w-20">性別</th>
-                                <th class="p-3">狀態</th>
+                                <th class="p-3">抽籤狀態</th>
                             </tr>
                         </thead>
                         <tbody id="unpairedTableBody" class="divide-y divide-slate-100 font-bold text-slate-700">
@@ -246,13 +247,14 @@
                     <table class="w-full text-left text-xs border-collapse">
                         <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
                             <tr>
-                                <th class="p-3 w-36">時間</th>
-                                <th class="p-3 w-36">操作動作</th>
+                                <th class="p-3 w-40">時間</th>
+                                <th class="p-3 w-44">操作動作</th>
+                                <th class="p-3 w-36">操作 IP</th>
                                 <th class="p-3">詳細內容</th>
                             </tr>
                         </thead>
                         <tbody id="auditLogTableBody" class="divide-y divide-slate-100 font-bold text-slate-700">
-                            <tr><td colspan="3" class="p-4 text-center text-slate-400">尚無日誌記錄。</td></tr>
+                            <tr><td colspan="4" class="p-4 text-center text-slate-400">尚無日誌記錄。</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -269,6 +271,7 @@
         const SUPABASE_URL = "https://qpqtiavufscdfwhabnod.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_ehTz6hW_jpdiO7Ht3Xq-yw_UoRl7F6M";
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let clientIpPromise;
 
         let allStudents = [];
         let allPairings = [];
@@ -285,10 +288,59 @@
             setTimeout(() => { t.style.display = 'none'; }, 2600);
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        async function getClientIp() {
+            if (!clientIpPromise) {
+                clientIpPromise = (async () => {
+                    const services = [
+                        'https://api.ipify.org?format=json',
+                        'https://api64.ipify.org?format=json',
+                        'https://ifconfig.co/json',
+                        'https://ipapi.co/json/',
+                        'https://ipwho.is/'
+                    ];
+                    while (true) {
+                        for (const service of services) {
+                            try {
+                                const response = await fetch(service, {
+                                    headers: { Accept: 'application/json' },
+                                    cache: 'no-store'
+                                });
+                                if (!response.ok) continue;
+                                const result = await response.json();
+                                if (result.ip) return String(result.ip);
+                            } catch (error) {
+                                console.warn('IP service unavailable:', service, error);
+                            }
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                })();
+            }
+            return clientIpPromise;
+        }
+
         async function logAudit(actionType, details = {}) {
             try {
-                await client.from('audit_logs').insert([{ action_type: actionType, details }]);
-            } catch (e) {}
+                const ipAddress = await getClientIp();
+                const { error } = await client.from('audit_logs').insert([{
+                    action_type: actionType,
+                    details,
+                    ip_address: ipAddress
+                }]);
+                if (error) throw error;
+            } catch (error) {
+                console.error('Audit log failed:', error);
+            }
         }
 
         function setAdminRoute(r) {
@@ -355,17 +407,21 @@
 
             tbody.innerHTML = list.map(s => `
                 <tr class="hover:bg-slate-50 transition">
-                    <td class="p-3 font-bold">${s.class_name} 班</td>
-                    <td class="p-3 font-mono text-slate-800">${s.seat_no ? `${s.seat_no}號` : '-'}</td>
+                    <td class="p-3 font-bold">${escapeHtml(s.class_name)} 班</td>
+                    <td class="p-3 font-mono text-slate-800">${s.seat_no ? `${escapeHtml(s.seat_no)}號` : '-'}</td>
                     <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-black ${s.grade === 'G1' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}">${s.grade === 'G1' ? '高一' : '高二'}</span></td>
-                    <td class="p-3 font-black text-slate-900">${s.name}</td>
-                    <td class="p-3 font-mono text-slate-500">${s.student_no}</td>
-                    <td class="p-3">${s.gender || '-'}</td>
+                    <td class="p-3 font-black text-slate-900">${escapeHtml(s.name)}</td>
+                    <td class="p-3 font-mono text-slate-500">${escapeHtml(s.student_no)}</td>
+                    <td class="p-3">${escapeHtml(s.gender || '-')}</td>
                     <td class="p-3 text-center">
-                        <button type="button" onclick="deleteSingleStudent('${s.student_no}', '${s.name}')" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-xs font-bold transition">刪除</button>
+                        <button type="button" data-student-no="${escapeHtml(s.student_no)}" data-student-name="${escapeHtml(s.name)}" class="delete-student-button px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-xs font-bold transition">刪除</button>
                     </td>
                 </tr>
             `).join('');
+            tbody.onclick = event => {
+                const button = event.target.closest('.delete-student-button');
+                if (button) deleteSingleStudent(button.dataset.studentNo, button.dataset.studentName);
+            };
         }
 
         async function deleteSingleStudent(studentNo, name) {
@@ -450,8 +506,10 @@
         async function clearAllStudents() {
             if (!confirm("⚠ 確定要清空所有學生名單與配對紀錄嗎？此動作無法復原！")) return;
             try {
-                await client.from('pairings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                await client.from('students').delete().neq('student_no', '___');
+                const { error: pairingsError } = await client.from('pairings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                if (pairingsError) throw pairingsError;
+                const { error: studentsError } = await client.from('students').delete().neq('student_no', '___');
+                if (studentsError) throw studentsError;
                 showToast("已清空學生資料庫！");
                 await logAudit("清空學生資料庫", { status: "全數清除" });
                 await loadAdminData();
@@ -476,8 +534,7 @@
         function renderPairingsTable() {
             const tbody = document.getElementById('pairingsTableBody');
             const countBadge = document.getElementById('pairedCountBadge');
-            const g1Filter = document.getElementById('filterG1Class')?.value || 'ALL';
-            const g2Filter = document.getElementById('filterG2Class')?.value || 'ALL';
+            const classFilter = document.getElementById('filterPairingClass')?.value || 'ALL';
             if (!tbody) return;
 
             const studentMap = {};
@@ -491,52 +548,52 @@
             currentFilteredPairings = allPairings.filter(p => {
                 const g1 = studentMap[p.g1_student_no] || {};
                 const g2 = studentMap[p.g2_student_no] || {};
-                if (g1Filter !== 'ALL' && !String(g1.class_name || '').includes(g1Filter)) return false;
-                if (g2Filter !== 'ALL' && !String(g2.class_name || '').includes(g2Filter)) return false;
+                if (classFilter !== 'ALL' &&
+                    !String(g1.class_name || '').includes(classFilter) &&
+                    !String(g2.class_name || '').includes(classFilter)) return false;
                 return true;
             });
 
             currentFilteredPairings.sort((a, b) => {
                 const g1A = studentMap[a.g1_student_no] || { class_name: '', seat_no: 0 };
                 const g1B = studentMap[b.g1_student_no] || { class_name: '', seat_no: 0 };
-                const seatA = parseInt(g1A.seat_no, 10) || 0;
-                const seatB = parseInt(g1B.seat_no, 10) || 0;
+                const g2A = studentMap[a.g2_student_no] || { class_name: '', seat_no: 0 };
+                const g2B = studentMap[b.g2_student_no] || { class_name: '', seat_no: 0 };
 
-                if (g1Filter !== 'ALL') {
-                    return seatA - seatB;
-                } else {
-                    const classCompare = String(g1A.class_name || '').localeCompare(String(g1B.class_name || ''), undefined, { numeric: true });
-                    if (classCompare !== 0) return classCompare;
-                    return seatA - seatB;
-                }
+                const selectedA = classFilter !== 'ALL' && String(g1A.class_name || '').includes(classFilter) ? g1A : g2A;
+                const selectedB = classFilter !== 'ALL' && String(g1B.class_name || '').includes(classFilter) ? g1B : g2B;
+                const classA = classFilter === 'ALL' ? g1A.class_name : selectedA.class_name;
+                const classB = classFilter === 'ALL' ? g1B.class_name : selectedB.class_name;
+                const classCompare = String(classA || '').localeCompare(String(classB || ''), undefined, { numeric: true });
+                if (classCompare !== 0) return classCompare;
+                const sortSeatA = parseInt((classFilter === 'ALL' ? g1A : selectedA).seat_no, 10) || 0;
+                const sortSeatB = parseInt((classFilter === 'ALL' ? g1B : selectedB).seat_no, 10) || 0;
+                return sortSeatA - sortSeatB;
             });
 
             if (countBadge) countBadge.innerText = `共 ${currentFilteredPairings.length} 組`;
 
             if (currentFilteredPairings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">目前無符合條件之配對記錄。</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">目前無符合條件之配對記錄。</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = currentFilteredPairings.map(p => {
                 const g1 = studentMap[p.g1_student_no] || { name: '未知', class_name: '-', seat_no: '-' };
                 const g2 = studentMap[p.g2_student_no] || { name: '未知', class_name: '-', seat_no: '-' };
-                const hasTwoMentors = (g1Counts[p.g1_student_no] || 0) > 1;
-
                 return `
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold">${g1.class_name} 班</td>
-                        <td class="p-3 font-mono text-slate-800">${g1.seat_no ? `${g1.seat_no}號` : '-'}</td>
-                        <td class="p-3 font-black text-slate-900">
-                            ${g1.name} 
-                            <span class="text-slate-400 font-mono text-[11px]">(${p.g1_student_no})</span>
-                            ${hasTwoMentors ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[10px] bg-purple-100 text-purple-700 font-black">2位直屬</span>' : ''}
-                        </td>
+                        <td class="p-3 font-bold">${escapeHtml(g1.class_name)} 班</td>
+                        <td class="p-3 font-mono text-slate-800">${g1.seat_no ? `${escapeHtml(g1.seat_no)}號` : '-'}</td>
+                        <td class="p-3 font-black text-slate-900">${escapeHtml(g1.name)}</td>
+                        <td class="p-3 font-mono text-slate-500">${escapeHtml(p.g1_student_no)}</td>
+                        <td class="p-3">${escapeHtml(g1.gender || '-')}</td>
                         <td class="p-3 text-center text-blue-600 font-black">➔</td>
-                        <td class="p-3 font-black text-slate-900">${g2.name} <span class="text-slate-400 font-mono text-[11px]">(${p.g2_student_no})</span></td>
-                        <td class="p-3 font-bold">${g2.class_name} 班</td>
-                        <td class="p-3 font-mono text-slate-800">${g2.seat_no ? `${g2.seat_no}號` : '-'}</td>
-                        <td class="p-3 font-mono text-slate-400 text-[11px]">${new Date(p.paired_at).toLocaleString('zh-TW')}</td>
+                        <td class="p-3 font-bold">${escapeHtml(g2.class_name)} 班</td>
+                        <td class="p-3 font-mono text-slate-800">${g2.seat_no ? `${escapeHtml(g2.seat_no)}號` : '-'}</td>
+                        <td class="p-3 font-black text-slate-900">${escapeHtml(g2.name)}</td>
+                        <td class="p-3 font-mono text-slate-500">${escapeHtml(p.g2_student_no)}</td>
+                        <td class="p-3">${escapeHtml(g2.gender || '-')}</td>
                     </tr>
                 `;
             }).join('');
@@ -558,11 +615,14 @@
                     "高一座號": g1.seat_no || '',
                     "高一姓名": g1.name || '',
                     "高一學號": p.g1_student_no,
+                    "高一年級": g1.grade || '',
+                    "高一性別": g1.gender || '',
                     "高二直屬姓名": g2.name || '',
                     "高二直屬班級": g2.class_name || '',
                     "高二直屬座號": g2.seat_no || '',
                     "高二直屬學號": p.g2_student_no,
-                    "配對時間": new Date(p.paired_at).toLocaleString('zh-TW')
+                    "高二年級": g2.grade || '',
+                    "高二性別": g2.gender || ''
                 };
             });
 
@@ -620,12 +680,12 @@
 
                 return `
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold text-slate-800">${s.class_name} 班</td>
-                        <td class="p-3 font-mono text-slate-800">${s.seat_no ? `${s.seat_no}號` : '-'}</td>
+                        <td class="p-3 font-bold text-slate-800">${escapeHtml(s.class_name)} 班</td>
+                        <td class="p-3 font-mono text-slate-800">${s.seat_no ? `${escapeHtml(s.seat_no)}號` : '-'}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-black ${isG1 ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}">${isG1 ? '高一' : '高二'}</span></td>
-                        <td class="p-3 font-black text-slate-900">${s.name}</td>
-                        <td class="p-3 font-mono text-slate-500">${s.student_no}</td>
-                        <td class="p-3">${s.gender || '-'}</td>
+                        <td class="p-3 font-black text-slate-900">${escapeHtml(s.name)}</td>
+                        <td class="p-3 font-mono text-slate-500">${escapeHtml(s.student_no)}</td>
+                        <td class="p-3">${escapeHtml(s.gender || '-')}</td>
                         <td class="p-3">${statusTag}</td>
                     </tr>
                 `;
@@ -665,10 +725,10 @@
                     allLogs = data;
                     renderAuditLogs(allLogs);
                 } else {
-                    renderAuditLogs([]);
+                    showToast(`載入操作日誌失敗：${error?.message || '未知錯誤'}`, true);
                 }
             } catch (e) {
-                renderAuditLogs([]);
+                showToast(`載入操作日誌失敗：${e.message}`, true);
             }
         }
 
@@ -677,23 +737,61 @@
             if (!tbody) return;
 
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400">尚無操作日誌。</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">尚無操作日誌。</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = logs.map(l => {
-                let detailStr = '';
-                try {
-                    detailStr = typeof l.details === 'object' ? JSON.stringify(l.details, null, 2) : String(l.details);
-                } catch (e) { detailStr = '-'; }
+                const details = l.details && typeof l.details === 'object' ? l.details : {};
+                const recordedIp = l.ip_address || details.ip_address || '';
+                const ipAddress = recordedIp === '未知' ? 'IP取得失敗' : (recordedIp || 'IP取得失敗');
+                const actionType = String(l.action_type || '未命名操作');
+                const actionClass = actionType.includes('刪除') || actionType.includes('清空') || actionType.includes('重置')
+                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                    : actionType.includes('匯入')
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                const detailLabels = {
+                        g1: '高一學生',
+                        g2: '高二直屬',
+                        class: '班級',
+                        count: '筆數',
+                        name: '姓名',
+                        student_no: '學號',
+                        status: '狀態'
+                };
+                const detailEntries = Object.entries(details)
+                        .filter(([key]) => key !== 'ip_address')
+                        .map(([key, value]) => {
+                            let displayValue = value;
+                            if (value && typeof value === 'object') {
+                                try {
+                                    displayValue = JSON.stringify(value);
+                                } catch (error) {
+                                    displayValue = '-';
+                                }
+                            }
+                            return `
+                                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-50 border border-slate-200">
+                                    <span class="text-[10px] font-black text-slate-400">${escapeHtml(detailLabels[key] || key)}</span>
+                                    <span class="text-[11px] font-bold text-slate-700 break-all">${escapeHtml(displayValue)}</span>
+                                </span>
+                            `;
+                        }).join('');
+                const detailContent = detailEntries || '<span class="text-slate-400">無詳細內容</span>';
 
                 return `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 border-b border-slate-100 font-mono text-[11px] text-slate-400">${new Date(l.created_at).toLocaleString('zh-TW')}</td>
+                        <tr class="hover:bg-blue-50/40 transition align-top">
+                            <td class="p-3 border-b border-slate-100 font-mono text-[11px] text-slate-500 whitespace-nowrap">${escapeHtml(new Date(l.created_at).toLocaleString('zh-TW'))}</td>
                         <td class="p-3 border-b border-slate-100">
-                            <span class="px-2 py-0.5 rounded-md font-extrabold text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200">${l.action_type}</span>
+                            <span class="inline-flex px-2.5 py-1 rounded-lg font-extrabold text-[10px] ${actionClass} border">${escapeHtml(actionType)}</span>
                         </td>
-                        <td class="p-3 border-b border-slate-100 text-[11px] font-mono text-slate-600 break-all">${detailStr}</td>
+                        <td class="p-3 border-b border-slate-100">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-slate-600 font-mono text-[11px]">${escapeHtml(ipAddress)}</span>
+                        </td>
+                        <td class="p-3 border-b border-slate-100">
+                            <div class="flex flex-wrap gap-1.5">${detailContent}</div>
+                        </td>
                     </tr>
                 `;
             }).join('');
@@ -707,7 +805,8 @@
             }
             const filtered = allLogs.filter(l => 
                 (l.action_type && l.action_type.toLowerCase().includes(keyword)) ||
-                (JSON.stringify(l.details || {}).toLowerCase().includes(keyword))
+                (JSON.stringify(l.details || {}).toLowerCase().includes(keyword)) ||
+                String(l.ip_address || l.details?.ip_address || '').toLowerCase().includes(keyword)
             );
             renderAuditLogs(filtered);
         }

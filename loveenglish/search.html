@@ -36,12 +36,12 @@
         <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
             <div class="text-center space-y-1">
                 <h2 class="text-2xl font-black text-slate-900">🔍 查詢我的直屬</h2>
-                <p class="text-xs text-slate-400 font-bold">輸入學號即可查詢對應之直屬</p>
+                <p class="text-xs text-slate-400 font-bold">輸入學號即可查詢直屬配對結果</p>
             </div>
 
             <form onsubmit="handleQueryStudent(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-black text-slate-700 mb-1.5">學生學號</label>
+                    <label class="block text-xs font-black text-slate-700 mb-1.5">學號</label>
                     <input type="text" id="queryStudentNo" required placeholder="請輸入學號 (如: 410001 或 510001)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition">
                 </div>
                 <button type="submit" id="btnQuerySubmit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-sm transition shadow-md shadow-blue-600/30">
@@ -49,7 +49,12 @@
                 </button>
             </form>
 
+            <div id="queryPendingState" class="pt-5 border-t border-slate-100 text-center text-sm text-slate-400 font-bold">
+                尚未查詢
+            </div>
+
             <div id="queryResultArea" class="hidden pt-5 border-t border-slate-100 space-y-4">
+                <h3 class="text-lg font-black text-slate-900">查詢結果</h3>
                 <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-1 text-xs">
                     <span class="text-blue-600 font-black" id="querySelfRoleTag">查詢本人</span>
                     <div class="text-lg font-black text-slate-900" id="querySelfName">-</div>
@@ -81,6 +86,16 @@
             setTimeout(() => { t.style.display = 'none'; }, 2600);
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
         async function handleQueryStudent(e) {
             e.preventDefault();
             const sid = document.getElementById('queryStudentNo').value.trim();
@@ -98,11 +113,12 @@
                     .maybeSingle();
 
                 if (selfErr || !selfStudent) {
-                    showToast("查無此學號之學生資料，請確認輸入是否正確！", true);
+                    showToast("查無此學生資料", true);
                     return;
                 }
 
                 const resArea = document.getElementById('queryResultArea');
+                document.getElementById('queryPendingState').classList.add('hidden');
                 const targetContainer = document.getElementById('targetListContainer');
                 resArea.classList.remove('hidden');
                 targetContainer.innerHTML = '';
@@ -110,7 +126,7 @@
                 const isG1 = selfStudent.grade === 'G1';
                 document.getElementById('querySelfRoleTag').innerText = isG1 ? "查詢本人 (高一)" : "查詢本人 (高二)";
                 document.getElementById('querySelfName').innerText = selfStudent.name;
-                document.getElementById('querySelfInfo').innerText = `${selfStudent.class_name} 班 ｜ 座號 ${selfStudent.seat_no || '-'} ｜ 學號 ${selfStudent.student_no}`;
+                document.getElementById('querySelfInfo').innerText = `${selfStudent.class_name} 班 ｜ 座號 ${selfStudent.seat_no || '-'} ｜ 學號 ${selfStudent.student_no} ｜ 性別 ${selfStudent.gender || '未註記'}`;
 
                 const queryColumn = isG1 ? 'g1_student_no' : 'g2_student_no';
                 const { data: pairRows, error: pairErr } = await client
@@ -122,7 +138,7 @@
                     targetContainer.innerHTML = `
                         <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1 text-xs">
                             <span class="text-amber-800 font-black">${isG1 ? '直屬學長姐' : '直屬學弟妹'}</span>
-                            <div class="text-lg font-black text-slate-800">尚未完成配對</div>
+                        <div class="text-lg font-black text-slate-800">目前尚未建立直屬配對</div>
                             <div class="text-slate-500 font-bold">請靜候學生會完成抽籤程序。</div>
                         </div>
                     `;
@@ -145,8 +161,8 @@
                         return `
                             <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1 text-xs">
                                 <span class="text-emerald-700 font-black">${label}</span>
-                                <div class="text-lg font-black text-slate-900">${t.name}</div>
-                                <div class="text-slate-600 font-bold">${t.class_name} 班 ｜ 座號 ${t.seat_no || '-'} ｜ 學號 ${t.student_no} ｜ 性別: ${t.gender || '未註記'}</div>
+                                <div class="text-lg font-black text-slate-900">${escapeHtml(t.name)}</div>
+                                <div class="text-slate-600 font-bold">${escapeHtml(t.class_name)} 班 ｜ 座號 ${escapeHtml(t.seat_no || '-')} ｜ 學號 ${escapeHtml(t.student_no)} ｜ 性別 ${escapeHtml(t.gender || '未註記')}</div>
                             </div>
                         `;
                     } else {
@@ -154,7 +170,7 @@
                             <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1 text-xs">
                                 <span class="text-emerald-700 font-black">${label}</span>
                                 <div class="text-lg font-black text-slate-900">已配對 (學生資料不存在)</div>
-                                <div class="text-slate-600 font-bold">學號: ${tSid}</div>
+                                <div class="text-slate-600 font-bold">學號: ${escapeHtml(tSid)}</div>
                             </div>
                         `;
                     }
