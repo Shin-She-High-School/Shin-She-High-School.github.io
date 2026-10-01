@@ -38,7 +38,7 @@
                 <span class="text-lg font-black tracking-wide" id="headerTitle">新社高中直屬抽籤系統</span>
             </div>
             <nav class="flex gap-2">
-                <button type="button" onclick="setRoute('draw')" id="tabBtn_draw" class="px-4 py-1.5 rounded-xl text-xs font-black bg-blue-600 text-white shadow transition">🎯 現場抽籤</button>
+                <button type="button" onclick="setRoute('draw')" id="tabBtn_draw" class="px-4 py-1.5 rounded-xl text-xs font-black bg-blue-600 text-white shadow transition">🎯 抽籤</button>
                 <button type="button" onclick="setRoute('paired')" id="tabBtn_paired" class="px-4 py-1.5 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:text-white transition">📋 已配對名單</button>
                 <button type="button" onclick="setRoute('unpaired')" id="tabBtn_unpaired" class="px-4 py-1.5 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:text-white transition">⏳ 未抽取名單</button>
             </nav>
@@ -50,19 +50,19 @@
         <section id="pane_draw" class="route-pane hidden space-y-6">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高一總人數 (402~404)</span>
+                    <span class="text-xs text-slate-400 font-bold">高一總人數</span>
                     <div id="statG1Count" class="text-2xl font-black text-slate-800 mt-1">0</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高二總人數 (502~504)</span>
+                    <span class="text-xs text-slate-400 font-bold">高二總人數</span>
                     <div id="statG2Count" class="text-2xl font-black text-slate-800 mt-1">0</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">已配對關係組數</span>
+                    <span class="text-xs text-slate-400 font-bold">高一已配對</span>
                     <div id="statPairedCount" class="text-2xl font-black text-emerald-600 mt-1">0</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高二待抽剩餘名額</span>
+                    <span class="text-xs text-slate-400 font-bold">高二未配對</span>
                     <div id="statG2Remaining" class="text-2xl font-black text-amber-600 mt-1">0</div>
                 </div>
             </div>
@@ -70,9 +70,9 @@
             <div id="stageNoticeBox" class="p-4 rounded-2xl border bg-blue-50 border-blue-200 text-blue-900 text-xs font-bold flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-blue-600"></span>
-                    <span id="stageNoticeText">目前階段：第一階段（402~404 班每位高一各抽一位直屬）</span>
+                    <span id="stageNoticeText">目前階段：高一各班各抽一位高二直屬</span>
                 </div>
-                <span id="stageG1RemainingText" class="text-blue-700 font-black">402~404 班尚有 0 人未抽到第一位直屬</span>
+                <span id="stageG1RemainingText" class="text-blue-700 font-black">高一尚有 0 人未抽到直屬</span>
             </div>
 
             <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
@@ -84,11 +84,11 @@
                         </h2>
                     </div>
                     <div class="flex items-center gap-3">
-                        <label class="text-xs font-black text-slate-600">指定高一班級：</label>
+                        <label class="text-xs font-black text-slate-600">請選擇高一班級：</label>
                         <select id="drawClassSelect" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="402">402 班 (對應 502~504)</option>
-                            <option value="403">403 班 (對應 502~504)</option>
-                            <option value="404">404 班 (對應 502~504)</option>
+                            <option value="402">402 班</option>
+                            <option value="403">403 班</option>
+                            <option value="404">404 班</option>
                         </select>
                     </div>
                 </div>
@@ -101,11 +101,8 @@
                 </div>
 
                 <div class="flex flex-wrap gap-3 justify-end pt-2">
-                    <button type="button" onclick="startSingleDraw()" id="btnSingleDraw" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black transition shadow-md shadow-blue-600/20">
-                        🎲 抽一位高一學生直屬
-                    </button>
                     <button type="button" onclick="startBatchDraw()" id="btnBatchDraw" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition shadow-md shadow-indigo-600/20">
-                        ⚡ 當前班級全班自動抽配
+                        ⚡ 開始抽籤
                     </button>
                 </div>
             </div>
@@ -117,7 +114,7 @@
                     <div>
                         <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
                             <span class="w-2.5 h-5 bg-emerald-600 rounded-full"></span>
-                            已成立之直屬配對名冊
+                            直屬配對名冊
                         </h2>
                     </div>
 
@@ -125,7 +122,7 @@
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-black text-slate-600">高一：</label>
                             <select id="filterG1Class" onchange="renderPairingsTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="ALL">全部高一班級</option>
+                                <option value="ALL">高一</option>
                                 <option value="402">402 班</option>
                                 <option value="403">403 班</option>
                                 <option value="404">404 班</option>
@@ -134,7 +131,7 @@
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-black text-slate-600">高二：</label>
                             <select id="filterG2Class" onchange="renderPairingsTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="ALL">全部高二班級</option>
+                                <option value="ALL">高二</option>
                                 <option value="502">502 班</option>
                                 <option value="503">503 班</option>
                                 <option value="504">504 班</option>
@@ -173,7 +170,7 @@
                     <div>
                         <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
                             <span class="w-2.5 h-5 bg-amber-500 rounded-full"></span>
-                            未被抽取學生即時名冊
+                            尚未分配學生名冊
                         </h2>
                     </div>
 
@@ -181,9 +178,9 @@
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-black text-slate-600">年級：</label>
                             <select id="filterUnpairedGrade" onchange="renderUnpairedTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-amber-500">
-                                <option value="ALL">高一與高二 全部顯示</option>
-                                <option value="G1">僅顯示 高一 (尚無直屬)</option>
-                                <option value="G2">僅顯示 高二 (待抽籤池)</option>
+                                <option value="ALL">全部</option>
+                                <option value="G1">高一</option>
+                                <option value="G2">高二</option>
                             </select>
                         </div>
 
@@ -339,11 +336,11 @@
 
             if (!check.isCompleted) {
                 stageBox.className = "p-4 rounded-2xl border bg-blue-50 border-blue-200 text-blue-900 text-xs font-bold flex items-center justify-between";
-                stageText.innerText = "目前階段：第一階段（402~404 班每位高一各抽一位直屬）";
-                stageRemText.innerText = `402~404 班尚有 ${check.uncompletedCount} 人未抽到第一位直屬`;
+                stageText.innerText = "目前階段：高一各班各抽一位直屬";
+                stageRemText.innerText = `尚有 ${check.uncompletedCount} 人未抽到直屬`;
             } else {
                 stageBox.className = "p-4 rounded-2xl border bg-purple-50 border-purple-200 text-purple-900 text-xs font-bold flex items-center justify-between";
-                stageText.innerText = "目前階段：第二階段（第一輪已全數完成！高二超額多出學生加抽）";
+                stageText.innerText = "目前階段：高一全數分配完成！高二超額多出學生加抽";
                 stageRemText.innerText = `高二待抽剩餘 ${g2Remaining} 人，分派後部分高一將擁有兩位直屬`;
             }
         }
@@ -364,7 +361,7 @@
 
             const availableG2 = getEligibleG2Students();
             if (availableG2.length === 0) {
-                showToast(`502~504 班高二學長姐已全數配對完畢，無剩餘名額！`, true);
+                showToast(`高二已配對完畢，無剩餘名額！`, true);
                 return;
             }
 
@@ -373,7 +370,7 @@
             const unpairedInThisClass = classG1.filter(s => !pairedG1Set.has(s.student_no));
 
             if (!phaseOne.isCompleted && unpairedInThisClass.length === 0) {
-                showToast(`【第一階段進行中】${selectedClass} 班高一已全員擁有第一位直屬！請先將其他班級抽完再進入加抽階段！`, true);
+                showToast(`【第一階段進行中】${selectedClass} 班已分配直屬！請先將其他班級抽完再進入加抽階段！`, true);
                 return;
             }
 
@@ -460,7 +457,7 @@
 
             const availableG2 = getEligibleG2Students();
             if (availableG2.length === 0) {
-                showToast(`502~504 班高二學長姐已全數配對完畢，無剩餘名額！`, true);
+                showToast(`高二已配對完畢，無剩餘名額！`, true);
                 return;
             }
 

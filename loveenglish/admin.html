@@ -53,24 +53,24 @@
                 <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
                     <div class="border-b border-slate-100 pb-2">
                         <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
-                            <span>🌱</span> 高一名單匯入 (402, 403, 404 等)
+                            <span>🌱</span> 高一名單匯入
                         </h3>
                     </div>
                     <input type="file" id="fileInputG1" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                     <button type="button" onclick="importStudents('G1')" id="btnImportG1" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black transition shadow">
-                        確認解析並匯入高一
+                        確認並匯入
                     </button>
                 </div>
 
                 <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
                     <div class="border-b border-slate-100 pb-2">
                         <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
-                            <span>🌿</span> 高二名單匯入 (502, 503, 504 等)
+                            <span>🌿</span> 高二名單匯入
                         </h3>
                     </div>
                     <input type="file" id="fileInputG2" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
                     <button type="button" onclick="importStudents('G2')" id="btnImportG2" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition shadow">
-                        確認解析並匯入高二
+                        確認並匯入
                     </button>
                 </div>
             </div>
@@ -83,11 +83,11 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <select id="filterStudentGradeAdmin" onchange="renderStudentsAdminTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-black outline-none">
                             <option value="ALL">全部年級</option>
-                            <option value="G1">僅高一</option>
-                            <option value="G2">僅高二</option>
+                            <option value="G1">高一</option>
+                            <option value="G2">高二</option>
                         </select>
-                        <button type="button" onclick="resetAllPairings()" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-black transition">⚡ 重置配對紀錄</button>
-                        <button type="button" onclick="clearAllStudents()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-black transition">🗑 清空學生資料庫</button>
+                        <button type="button" onclick="resetAllPairings()" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-black transition">⚡ 重置直屬配對</button>
+                        <button type="button" onclick="clearAllStudents()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-black transition">🗑 清空學生資料</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto max-h-[60vh] custom-scrollbar border border-slate-100 rounded-xl">
@@ -117,7 +117,7 @@
                     <div>
                         <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
                             <span class="w-2.5 h-5 bg-emerald-600 rounded-full"></span>
-                            已成立直屬配對名冊
+                            已建立直屬名冊
                         </h2>
                     </div>
 
@@ -125,7 +125,7 @@
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-black text-slate-600">高一：</label>
                             <select id="filterG1Class" onchange="renderPairingsTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none">
-                                <option value="ALL">全部高一班級</option>
+                                <option value="ALL">全部高一</option>
                                 <option value="402">402 班</option>
                                 <option value="403">403 班</option>
                                 <option value="404">404 班</option>
@@ -134,7 +134,7 @@
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-black text-slate-600">高二：</label>
                             <select id="filterG2Class" onchange="renderPairingsTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none">
-                                <option value="ALL">全部高二班級</option>
+                                <option value="ALL">全部高二</option>
                                 <option value="502">502 班</option>
                                 <option value="503">503 班</option>
                                 <option value="504">504 班</option>
@@ -173,7 +173,7 @@
                     <div>
                         <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
                             <span class="w-2.5 h-5 bg-amber-500 rounded-full"></span>
-                            未被抽取學生即時名冊
+                            未被抽取學生名冊
                         </h2>
                     </div>
 
@@ -181,9 +181,9 @@
                         <div class="flex items-center gap-1.5">
                             <label class="text-xs font-black text-slate-600">年級：</label>
                             <select id="filterUnpairedGrade" onchange="renderUnpairedTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none">
-                                <option value="ALL">高一與高二 全部顯示</option>
-                                <option value="G1">僅顯示 高一 (等待被抽)</option>
-                                <option value="G2">僅顯示 高二 (待抽籤池)</option>
+                                <option value="ALL">全部</option>
+                                <option value="G1">高一</option>
+                                <option value="G2">高二</option>
                             </select>
                         </div>
                         <div class="flex items-center gap-1.5">
@@ -393,7 +393,7 @@
             }
 
             btn.disabled = true;
-            btn.innerText = "解析上傳中...";
+            btn.innerText = "上傳中...";
 
             const file = fileInput.files[0];
             const reader = new FileReader();
