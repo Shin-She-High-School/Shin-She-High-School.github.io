@@ -389,11 +389,13 @@
 
         async function loadAdminData() {
             try {
-                const { data: stData } = await client.from('students').select('*');
-                allStudents = stData || [];
+                const { data: stData, error: studentsError } = await client.from('students').select('*');
+                if (studentsError) throw studentsError;
+                allStudents = stData;
 
-                const { data: pairData } = await client.from('pairings').select('*').order('paired_at', { ascending: false });
-                allPairings = pairData || [];
+                const { data: pairData, error: pairingsError } = await client.from('pairings').select('*').order('paired_at', { ascending: false });
+                if (pairingsError) throw pairingsError;
+                allPairings = pairData;
 
                 handleAdminHashRouting();
             } catch (err) {
@@ -444,6 +446,12 @@
         async function deleteSingleStudent(studentNo, name) {
             if (!confirm(`確定要刪除學生【${name} (${studentNo})】嗎？`)) return;
             try {
+                const { error: pairingsError } = await client
+                    .from('pairings')
+                    .delete()
+                    .or(`g1_student_no.eq.${studentNo},g2_student_no.eq.${studentNo}`);
+                if (pairingsError) throw pairingsError;
+
                 const { error } = await client.from('students').delete().eq('student_no', studentNo);
                 if (error) throw error;
                 showToast(`已刪除 ${name}！`);
