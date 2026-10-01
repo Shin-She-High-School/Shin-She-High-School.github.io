@@ -76,6 +76,7 @@
         const SUPABASE_URL = "https://qpqtiavufscdfwhabnod.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_ehTz6hW_jpdiO7Ht3Xq-yw_UoRl7F6M";
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let clientIpPromise;
 
         function showToast(msg, isError = false) {
             const t = document.getElementById('toast');
@@ -96,6 +97,68 @@
             }[char]));
         }
 
+        async function getClientIp() {
+            if (!clientIpPromise) {
+                clientIpPromise = (async () => {
+                    const services = [
+                        { url: 'https://api.ipify.org?format=json', json: true },
+                        { url: 'https://api64.ipify.org?format=json', json: true },
+                        { url: 'https://ifconfig.co/json', json: true },
+                        { url: 'https://ipapi.co/json/', json: true },
+                        { url: 'https://ipwho.is/', json: true },
+                        { url: 'https://api.myip.com/', json: true },
+                        { url: 'https://ipinfo.io/json', json: true },
+                        { url: 'https://icanhazip.com/', json: false },
+                        { url: 'https://checkip.amazonaws.com/', json: false },
+                        { url: 'https://ifconfig.me/ip', json: false },
+                        { url: 'https://ident.me/', json: false },
+                        { url: 'https://www.cloudflare.com/cdn-cgi/trace', json: false, trace: true }
+                    ];
+                    while (true) {
+                        for (const service of services) {
+                            const controller = new AbortController();
+                            const timeout = setTimeout(() => controller.abort(), 3000);
+                            try {
+                                const response = await fetch(service.url, {
+                                    headers: { Accept: 'application/json' },
+                                    cache: 'no-store',
+                                    signal: controller.signal
+                                });
+                                if (!response.ok) continue;
+                                const body = service.json ? await response.json() : await response.text();
+                                const value = service.trace
+                                    ? String(body).match(/(?:^|\n)ip=([^\r\n]+)/)?.[1]
+                                    : (service.json ? (body.ip || body.ipAddress) : String(body).trim());
+                                if (value && /^(?:\d{1,3}\.){3}\d{1,3}$|^[0-9a-f:]+$/i.test(String(value))) {
+                                    return String(value);
+                                }
+                            } catch (error) {
+                                console.warn('IP service unavailable:', service.url, error);
+                            } finally {
+                                clearTimeout(timeout);
+                            }
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                })();
+            }
+            return clientIpPromise;
+        }
+
+        async function logAudit(actionType, details = {}) {
+            try {
+                const ipAddress = await getClientIp();
+                const { error } = await client.from('audit_logs').insert([{
+                    action_type: actionType,
+                    details,
+                    ip_address: ipAddress
+                }]);
+                if (error) throw error;
+            } catch (error) {
+                console.error('Audit log failed:', error);
+            }
+        }
+
         async function handleQueryStudent(e) {
             e.preventDefault();
             const sid = document.getElementById('queryStudentNo').value.trim();
@@ -113,6 +176,7 @@
                     .maybeSingle();
 
                 if (selfErr || !selfStudent) {
+                    await logAudit("查詢學生", { student_no: sid, status: "查無學生資料" });
                     showToast("查無此學生資料", true);
                     return;
                 }
@@ -135,6 +199,10 @@
                     .eq(queryColumn, sid);
 
                 if (pairErr || !pairRows || pairRows.length === 0) {
+                    await logAudit("查詢學生", {
+                        student_no: sid,
+                        status: pairErr ? "查詢配對失敗" : "尚未建立直屬配對"
+                    });
                     targetContainer.innerHTML = `
                         <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1 text-xs">
                             <span class="text-amber-800 font-black">${isG1 ? '直屬學長姐' : '直屬學弟妹'}</span>
@@ -175,8 +243,14 @@
                         `;
                     }
                 }).join('');
+                await logAudit("查詢學生", {
+                    student_no: sid,
+                    status: "查詢成功",
+                    pairing_count: targetSids.length
+                });
 
             } catch (err) {
+                await logAudit("查詢學生", { student_no: sid, status: "查詢失敗", error: err.message });
                 showToast("查詢失敗：" + err.message, true);
             } finally {
                 btn.disabled = false;
