@@ -302,24 +302,41 @@
             if (!clientIpPromise) {
                 clientIpPromise = (async () => {
                     const services = [
-                        'https://api.ipify.org?format=json',
-                        'https://api64.ipify.org?format=json',
-                        'https://ifconfig.co/json',
-                        'https://ipapi.co/json/',
-                        'https://ipwho.is/'
+                        { url: 'https://api.ipify.org?format=json', json: true },
+                        { url: 'https://api64.ipify.org?format=json', json: true },
+                        { url: 'https://ifconfig.co/json', json: true },
+                        { url: 'https://ipapi.co/json/', json: true },
+                        { url: 'https://ipwho.is/', json: true },
+                        { url: 'https://api.myip.com/', json: true },
+                        { url: 'https://ipinfo.io/json', json: true },
+                        { url: 'https://icanhazip.com/', json: false },
+                        { url: 'https://checkip.amazonaws.com/', json: false },
+                        { url: 'https://ifconfig.me/ip', json: false },
+                        { url: 'https://ident.me/', json: false },
+                        { url: 'https://www.cloudflare.com/cdn-cgi/trace', json: false, trace: true }
                     ];
                     while (true) {
                         for (const service of services) {
+                            const controller = new AbortController();
+                            const timeout = setTimeout(() => controller.abort(), 3000);
                             try {
-                                const response = await fetch(service, {
+                                const response = await fetch(service.url, {
                                     headers: { Accept: 'application/json' },
-                                    cache: 'no-store'
+                                    cache: 'no-store',
+                                    signal: controller.signal
                                 });
                                 if (!response.ok) continue;
-                                const result = await response.json();
-                                if (result.ip) return String(result.ip);
+                                const body = service.json ? await response.json() : await response.text();
+                                const value = service.trace
+                                    ? String(body).match(/(?:^|\n)ip=([^\r\n]+)/)?.[1]
+                                    : (service.json ? (body.ip || body.ipAddress) : String(body).trim());
+                                if (value && /^(?:\d{1,3}\.){3}\d{1,3}$|^[0-9a-f:]+$/i.test(String(value))) {
+                                    return String(value);
+                                }
                             } catch (error) {
                                 console.warn('IP service unavailable:', service, error);
+                            } finally {
+                                clearTimeout(timeout);
                             }
                         }
                         await new Promise(resolve => setTimeout(resolve, 1000));
