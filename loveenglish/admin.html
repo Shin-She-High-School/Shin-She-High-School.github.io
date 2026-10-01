@@ -27,7 +27,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col justify-between font-sans">
+<body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col font-sans">
 
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl hidden transition-all duration-300"></div>
 
@@ -38,26 +38,23 @@
                 <span class="text-lg font-black tracking-wide">新社高中直屬抽籤系統管理後台</span>
             </div>
             <nav class="flex flex-wrap gap-1.5 text-xs font-black">
-                <button type="button" onclick="switchAdminTab('students')" id="tabBtn_students" class="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow transition">👥 學生名冊與匯入管理</button>
-                <button type="button" onclick="switchAdminTab('paired')" id="tabBtn_paired" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">📋 已配對名冊</button>
-                <button type="button" onclick="switchAdminTab('unpaired')" id="tabBtn_unpaired" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">⏳ 未抽取名冊</button>
-                <button type="button" onclick="switchAdminTab('audit')" id="tabBtn_audit" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">📜 操作日誌</button>
+                <button type="button" onclick="setAdminRoute('students')" id="tabBtn_students" class="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow transition">👥 學生名冊與匯入管理</button>
+                <button type="button" onclick="setAdminRoute('paired')" id="tabBtn_paired" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">📋 已配對名冊</button>
+                <button type="button" onclick="setAdminRoute('unpaired')" id="tabBtn_unpaired" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">⏳ 未抽取名冊</button>
+                <button type="button" onclick="setAdminRoute('audit')" id="tabBtn_audit" class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">📜 操作日誌</button>
             </nav>
         </div>
     </header>
 
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
-        <!-- ================= 區塊 1: 學生名冊與匯入管理 (合併面板) ================= -->
         <section id="panel_students" class="admin-panel space-y-6">
-            <!-- 匯入卡片 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
                     <div class="border-b border-slate-100 pb-2">
                         <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
                             <span>🌱</span> 高一名單匯入 (402, 403, 404 等)
                         </h3>
-                        <p class="text-[11px] text-slate-400 font-bold mt-0.5">欄位需包含：學號、班級、座號、姓名、性別</p>
                     </div>
                     <input type="file" id="fileInputG1" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                     <button type="button" onclick="importStudents('G1')" id="btnImportG1" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black transition shadow">
@@ -70,7 +67,6 @@
                         <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
                             <span>🌿</span> 高二名單匯入 (502, 503, 504 等)
                         </h3>
-                        <p class="text-[11px] text-slate-400 font-bold mt-0.5">欄位需包含：學號、班級、座號、姓名、性別</p>
                     </div>
                     <input type="file" id="fileInputG2" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
                     <button type="button" onclick="importStudents('G2')" id="btnImportG2" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition shadow">
@@ -79,12 +75,10 @@
                 </div>
             </div>
 
-            <!-- 學生庫總覽表格與全域重置功能 -->
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
                     <div>
                         <h3 class="text-sm font-black text-slate-800">👥 全體學生名冊</h3>
-                        <p class="text-xs text-slate-400 font-bold mt-0.5">排序依班級再依座號排列</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <select id="filterStudentGradeAdmin" onchange="renderStudentsAdminTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-black outline-none">
@@ -105,7 +99,7 @@
                                 <th class="p-3">年級</th>
                                 <th class="p-3">姓名</th>
                                 <th class="p-3">學號</th>
-                                <th class="p-3">性別</th>
+                                <th class="p-3 w-20">性別</th>
                                 <th class="p-3 text-center">操作</th>
                             </tr>
                         </thead>
@@ -117,7 +111,6 @@
             </div>
         </section>
 
-        <!-- ================= 區塊 2: 已配對名冊 ================= -->
         <section id="panel_paired" class="admin-panel hidden space-y-6">
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
@@ -126,7 +119,6 @@
                             <span class="w-2.5 h-5 bg-emerald-600 rounded-full"></span>
                             已成立直屬配對名冊
                         </h2>
-                        <p class="text-xs text-slate-400 font-bold mt-0.5">選擇班級依座號排序；全部顯示依班級再依座號排序</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2.5">
@@ -175,7 +167,6 @@
             </div>
         </section>
 
-        <!-- ================= 區塊 3: 未被抽取名冊 ================= -->
         <section id="panel_unpaired" class="admin-panel hidden space-y-6">
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
@@ -184,7 +175,6 @@
                             <span class="w-2.5 h-5 bg-amber-500 rounded-full"></span>
                             未被抽取學生即時名冊
                         </h2>
-                        <p class="text-xs text-slate-400 font-bold mt-0.5">選擇班級依座號排序；全部顯示依班級再依座號排序</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2.5">
@@ -238,7 +228,6 @@
             </div>
         </section>
 
-        <!-- ================= 區塊 4: 操作日誌 (Audit Log) ================= -->
         <section id="panel_audit" class="admin-panel hidden space-y-6">
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
@@ -246,7 +235,6 @@
                         <h2 class="text-base font-black text-slate-800 flex items-center gap-2">
                             <span>📜</span> 系統操作日誌紀錄 (Audit Log)
                         </h2>
-                        <p class="text-xs text-slate-400 font-bold mt-0.5">完整記錄每次抽籤、批次抽籤、資料匯入與重置作業</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="text" id="auditSearchInput" oninput="filterAuditLogs()" placeholder="搜尋動作或關鍵字..." class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none">
@@ -303,21 +291,31 @@
             } catch (e) {}
         }
 
-        function switchAdminTab(tabKey) {
+        function setAdminRoute(r) {
+            window.location.hash = `#${r}`;
+        }
+
+        function handleAdminHashRouting() {
+            const rawHash = (window.location.hash || '').replace('#', '').replace('/', '');
+            let current = 'students';
+            if (['students', 'paired', 'unpaired', 'audit'].includes(rawHash)) {
+                current = rawHash;
+            }
+
             document.querySelectorAll('.admin-panel').forEach(p => p.classList.add('hidden'));
             ['students', 'paired', 'unpaired', 'audit'].forEach(k => {
                 const btn = document.getElementById(`tabBtn_${k}`);
                 if (btn) btn.className = "px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition";
             });
 
-            document.getElementById(`panel_${tabKey}`)?.classList.remove('hidden');
-            const activeBtn = document.getElementById(`tabBtn_${tabKey}`);
+            document.getElementById(`panel_${current}`)?.classList.remove('hidden');
+            const activeBtn = document.getElementById(`tabBtn_${current}`);
             if (activeBtn) activeBtn.className = "px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow transition";
 
-            if (tabKey === 'students') renderStudentsAdminTable();
-            if (tabKey === 'paired') renderPairingsTable();
-            if (tabKey === 'unpaired') renderUnpairedTable();
-            if (tabKey === 'audit') loadAuditLogs();
+            if (current === 'students') renderStudentsAdminTable();
+            if (current === 'paired') renderPairingsTable();
+            if (current === 'unpaired') renderUnpairedTable();
+            if (current === 'audit') loadAuditLogs();
         }
 
         async function loadAdminData() {
@@ -328,15 +326,12 @@
                 const { data: pairData } = await client.from('pairings').select('*').order('paired_at', { ascending: false });
                 allPairings = pairData || [];
 
-                renderStudentsAdminTable();
-                renderPairingsTable();
-                renderUnpairedTable();
+                handleAdminHashRouting();
             } catch (err) {
                 showToast("載入資料失敗：" + err.message, true);
             }
         }
 
-        // ================= 學生庫表格 =================
         function renderStudentsAdminTable() {
             const tbody = document.getElementById('studentsAdminTableBody');
             const gradeFilter = document.getElementById('filterStudentGradeAdmin')?.value || 'ALL';
@@ -346,9 +341,11 @@
             if (gradeFilter !== 'ALL') list = list.filter(s => s.grade === gradeFilter);
 
             list.sort((a, b) => {
-                const classCompare = String(a.class_name || '').localeCompare(String(b.class_name || ''));
+                const classCompare = String(a.class_name || '').localeCompare(String(b.class_name || ''), undefined, { numeric: true });
                 if (classCompare !== 0) return classCompare;
-                return (a.seat_no || 0) - (b.seat_no || 0);
+                const seatA = parseInt(a.seat_no, 10) || 0;
+                const seatB = parseInt(b.seat_no, 10) || 0;
+                return seatA - seatB;
             });
 
             if (list.length === 0) {
@@ -476,7 +473,6 @@
             }
         }
 
-        // ================= 已配對表格 =================
         function renderPairingsTable() {
             const tbody = document.getElementById('pairingsTableBody');
             const countBadge = document.getElementById('pairedCountBadge');
@@ -500,17 +496,18 @@
                 return true;
             });
 
-            // 排序：選擇單一班級依座號排序；全部顯示先依班級再依座號排序
             currentFilteredPairings.sort((a, b) => {
                 const g1A = studentMap[a.g1_student_no] || { class_name: '', seat_no: 0 };
                 const g1B = studentMap[b.g1_student_no] || { class_name: '', seat_no: 0 };
+                const seatA = parseInt(g1A.seat_no, 10) || 0;
+                const seatB = parseInt(g1B.seat_no, 10) || 0;
 
                 if (g1Filter !== 'ALL') {
-                    return (g1A.seat_no || 0) - (g1B.seat_no || 0);
+                    return seatA - seatB;
                 } else {
-                    const classCompare = String(g1A.class_name || '').localeCompare(String(g1B.class_name || ''));
+                    const classCompare = String(g1A.class_name || '').localeCompare(String(g1B.class_name || ''), undefined, { numeric: true });
                     if (classCompare !== 0) return classCompare;
-                    return (g1A.seat_no || 0) - (g1B.seat_no || 0);
+                    return seatA - seatB;
                 }
             });
 
@@ -529,7 +526,7 @@
                 return `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 font-bold">${g1.class_name} 班</td>
-                        <td class="p-3 font-mono">${g1.seat_no ? `${g1.seat_no}號` : '-'}</td>
+                        <td class="p-3 font-mono text-slate-800">${g1.seat_no ? `${g1.seat_no}號` : '-'}</td>
                         <td class="p-3 font-black text-slate-900">
                             ${g1.name} 
                             <span class="text-slate-400 font-mono text-[11px]">(${p.g1_student_no})</span>
@@ -538,7 +535,7 @@
                         <td class="p-3 text-center text-blue-600 font-black">➔</td>
                         <td class="p-3 font-black text-slate-900">${g2.name} <span class="text-slate-400 font-mono text-[11px]">(${p.g2_student_no})</span></td>
                         <td class="p-3 font-bold">${g2.class_name} 班</td>
-                        <td class="p-3 font-mono">${g2.seat_no ? `${g2.seat_no}號` : '-'}</td>
+                        <td class="p-3 font-mono text-slate-800">${g2.seat_no ? `${g2.seat_no}號` : '-'}</td>
                         <td class="p-3 font-mono text-slate-400 text-[11px]">${new Date(p.paired_at).toLocaleString('zh-TW')}</td>
                     </tr>
                 `;
@@ -575,7 +572,6 @@
             XLSX.writeFile(wb, `直屬配對清冊_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
 
-        // ================= 未被抽取表格 =================
         function renderUnpairedTable() {
             const tbody = document.getElementById('unpairedTableBody');
             const countBadge = document.getElementById('unpairedCountBadge');
@@ -595,14 +591,16 @@
             if (gradeFilter !== 'ALL') list = list.filter(s => s.grade === gradeFilter);
             if (classFilter !== 'ALL') list = list.filter(s => s.class_name.includes(classFilter));
 
-            // 排序：選擇班級依座號排序；全部顯示先依班級再依座號排序
             list.sort((a, b) => {
+                const seatA = parseInt(a.seat_no, 10) || 0;
+                const seatB = parseInt(b.seat_no, 10) || 0;
+
                 if (classFilter !== 'ALL') {
-                    return (a.seat_no || 0) - (b.seat_no || 0);
+                    return seatA - seatB;
                 } else {
-                    const classCompare = String(a.class_name || '').localeCompare(String(b.class_name || ''));
+                    const classCompare = String(a.class_name || '').localeCompare(String(b.class_name || ''), undefined, { numeric: true });
                     if (classCompare !== 0) return classCompare;
-                    return (a.seat_no || 0) - (b.seat_no || 0);
+                    return seatA - seatB;
                 }
             });
 
@@ -623,7 +621,7 @@
                 return `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 font-bold text-slate-800">${s.class_name} 班</td>
-                        <td class="p-3 font-mono">${s.seat_no ? `${s.seat_no}號` : '-'}</td>
+                        <td class="p-3 font-mono text-slate-800">${s.seat_no ? `${s.seat_no}號` : '-'}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-black ${isG1 ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}">${isG1 ? '高一' : '高二'}</span></td>
                         <td class="p-3 font-black text-slate-900">${s.name}</td>
                         <td class="p-3 font-mono text-slate-500">${s.student_no}</td>
@@ -651,11 +649,10 @@
 
             const ws = XLSX.utils.json_to_sheet(rows);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "未被抽取學生");
+            XLSX.utils.book_append_sheet(wb, ws, "未被抽取名冊");
             XLSX.writeFile(wb, `未被抽取學生名冊_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
 
-        // ================= 操作日誌 (Audit Log) =================
         async function loadAuditLogs() {
             try {
                 const { data, error } = await client
@@ -715,6 +712,7 @@
             renderAuditLogs(filtered);
         }
 
+        window.addEventListener('hashchange', handleAdminHashRouting);
         window.addEventListener('DOMContentLoaded', loadAdminData);
     </script>
 </body>
