@@ -357,11 +357,13 @@
 
         async function loadData() {
             try {
-                const { data: stData } = await client.from('students').select('*');
-                allStudents = stData || [];
+                const { data: stData, error: studentsError } = await client.from('students').select('*');
+                if (studentsError) throw studentsError;
+                allStudents = stData;
 
-                const { data: pairData } = await client.from('pairings').select('*').order('paired_at', { ascending: false });
-                allPairings = pairData || [];
+                const { data: pairData, error: pairingsError } = await client.from('pairings').select('*').order('paired_at', { ascending: false });
+                if (pairingsError) throw pairingsError;
+                allPairings = pairData;
 
                 handleHashRouting();
             } catch (err) {
