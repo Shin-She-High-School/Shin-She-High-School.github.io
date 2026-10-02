@@ -18,57 +18,57 @@
                     }
                 }
             }
-        }
+        };
     </script>
 </head>
-<body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col justify-between font-sans">
+<body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col justify-between font-sans w-full max-w-full overflow-x-hidden">
 
-    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl hidden transition-all duration-300"></div>
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl text-white font-extrabold text-xs sm:text-sm shadow-xl hidden transition-all duration-300"></div>
 
-    <header class="bg-[#0f172a] text-white py-4 px-4 shadow-md">
-        <div class="max-w-xl mx-auto flex items-center justify-center gap-2.5">
-            <span class="text-2xl">🤝</span>
-            <span class="text-lg font-black tracking-wide">新社高中直屬抽籤系統結果查詢</span>
+    <header class="bg-[#0f172a] text-white py-3.5 px-4 shadow-md w-full">
+        <div class="max-w-xl mx-auto flex items-center justify-center gap-2">
+            <span class="text-xl sm:text-2xl">🤝</span>
+            <span class="text-base sm:text-lg font-black tracking-wide">新社高中直屬抽籤系統結果查詢</span>
         </div>
     </header>
 
-    <main class="flex-1 max-w-xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
-        <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+    <main class="flex-1 max-w-xl w-full mx-auto p-3.5 sm:p-6 flex flex-col justify-center overflow-x-hidden">
+        <div class="bg-white p-4 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4 sm:space-y-6 w-full">
             <div class="text-center space-y-1">
-                <h2 class="text-2xl font-black text-slate-900">🔍 查詢我的直屬</h2>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900">🔍 查詢我的直屬</h2>
                 <p class="text-xs text-slate-400 font-bold">輸入學號即可查詢直屬配對結果</p>
             </div>
 
-            <form onsubmit="handleQueryStudent(event)" class="space-y-4">
+            <form onsubmit="handleQueryStudent(event)" class="space-y-3 sm:space-y-4 w-full">
                 <div>
-                    <label class="block text-xs font-black text-slate-700 mb-1.5">學號</label>
-                    <input type="text" id="queryStudentNo" required placeholder="請輸入學號 (如: 410001 或 510001)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition">
+                    <label class="block text-xs font-black text-slate-700 mb-1">學號</label>
+                    <input type="text" id="queryStudentNo" required placeholder="請輸入學號 (如: 410001 或 510001)" class="w-full px-3.5 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition">
                 </div>
-                <button type="submit" id="btnQuerySubmit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-sm transition shadow-md shadow-blue-600/30">
+                <button type="submit" id="btnQuerySubmit" class="w-full py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-sm transition shadow-md shadow-blue-600/30">
                     立即查詢
                 </button>
             </form>
 
-            <div id="queryPendingState" class="pt-5 border-t border-slate-100 text-center text-sm text-slate-400 font-bold">
+            <div id="queryPendingState" class="pt-4 border-t border-slate-100 text-center text-sm text-slate-400 font-bold">
                 尚未查詢
             </div>
 
-            <div id="queryResultArea" class="hidden pt-5 border-t border-slate-100 space-y-4">
-                <h3 class="text-lg font-black text-slate-900">查詢結果</h3>
-                <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-1 text-xs">
+            <div id="queryResultArea" class="hidden pt-4 border-t border-slate-100 space-y-3 sm:space-y-4 w-full">
+                <h3 class="text-base sm:text-lg font-black text-slate-900">查詢結果</h3>
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-1 text-xs w-full overflow-hidden">
                     <span class="text-blue-600 font-black" id="querySelfRoleTag">查詢本人</span>
-                    <div class="text-lg font-black text-slate-900" id="querySelfName">-</div>
-                    <div class="text-slate-500 font-bold" id="querySelfInfo">-</div>
+                    <div class="text-base sm:text-lg font-black text-slate-900 break-all" id="querySelfName">-</div>
+                    <div class="text-slate-600 font-bold break-all" id="querySelfInfo">-</div>
                 </div>
 
-                <div class="text-center text-xl font-black text-blue-600 my-1">↕ 直屬配對 ↕</div>
+                <div class="text-center text-lg sm:text-xl font-black text-blue-600 my-1">↕ 直屬配對 ↕</div>
 
-                <div id="targetListContainer" class="space-y-3"></div>
+                <div id="targetListContainer" class="space-y-2.5 sm:space-y-3 w-full"></div>
             </div>
         </div>
     </main>
 
-    <footer class="py-4 text-center text-xs text-slate-400 font-semibold border-t border-slate-200/60">
+    <footer class="py-3 text-center text-xs text-slate-400 font-semibold border-t border-slate-200/60 w-full">
         © 臺中市立新社高級中學學生會 ＆ 開發團隊 版權所有
     </footer>
 
@@ -78,28 +78,29 @@
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let clientIpPromise;
 
-        function showToast(msg, isError = false) {
+        function showToast(msg, isError) {
             const t = document.getElementById('toast');
             if (!t) return;
             t.innerText = msg;
-            t.className = `fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl transition-all duration-300 ${isError ? 'bg-rose-500' : 'bg-emerald-600'}`;
+            t.className = 'fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl text-white font-extrabold text-xs sm:text-sm shadow-xl transition-all duration-300 ' + (isError ? 'bg-rose-500' : 'bg-emerald-600');
             t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 2600);
+            setTimeout(function() { t.style.display = 'none'; }, 2600);
         }
 
         function escapeHtml(value) {
-            return String(value ?? '').replace(/[&<>"']/g, char => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
-            }[char]));
+            return String(value == null ? '' : value).replace(/[&<>"']/g, function(char) {
+                if (char === '&') return '&amp;';
+                if (char === '<') return '&lt;';
+                if (char === '>') return '&gt;';
+                if (char === '"') return '&quot;';
+                if (char === "'") return '&#39;';
+                return char;
+            });
         }
 
         async function getClientIp() {
             if (!clientIpPromise) {
-                clientIpPromise = (async () => {
+                clientIpPromise = (async function() {
                     const services = [
                         { url: 'https://api.ipify.org?format=json', json: true },
                         { url: 'https://api64.ipify.org?format=json', json: true },
@@ -112,12 +113,13 @@
                         { url: 'https://checkip.amazonaws.com/', json: false },
                         { url: 'https://ifconfig.me/ip', json: false },
                         { url: 'https://ident.me/', json: false },
-                        { url: 'https://www.cloudflare.com/cdn-cgi/trace', json: false, trace: true }
+                        { url: 'https://cloudflare.com/cdn-cgi/trace', json: false, trace: true }
                     ];
-                    while (true) {
-                        for (const service of services) {
+                    for (let attempt = 0; attempt < 2; attempt++) {
+                        for (let i = 0; i < services.length; i++) {
+                            const service = services[i];
                             const controller = new AbortController();
-                            const timeout = setTimeout(() => controller.abort(), 3000);
+                            const timeout = setTimeout(function() { controller.abort(); }, 2000);
                             try {
                                 const response = await fetch(service.url, {
                                     headers: { Accept: 'application/json' },
@@ -126,135 +128,129 @@
                                 });
                                 if (!response.ok) continue;
                                 const body = service.json ? await response.json() : await response.text();
-                                const value = service.trace
-                                    ? String(body).match(/(?:^|\n)ip=([^\r\n]+)/)?.[1]
-                                    : (service.json ? (body.ip || body.ipAddress) : String(body).trim());
+                                let value = '';
+                                if (service.trace) {
+                                    const match = String(body).match(/(?:^|\n)ip=([^\r\n]+)/);
+                                    value = match ? match[1] : '';
+                                } else if (service.json) {
+                                    value = body.ip || body.ipAddress || '';
+                                } else {
+                                    value = String(body).trim();
+                                }
                                 if (value && /^(?:\d{1,3}\.){3}\d{1,3}$|^[0-9a-f:]+$/i.test(String(value))) {
                                     return String(value);
                                 }
-                            } catch (error) {
-                                console.warn('IP service unavailable:', service.url, error);
+                            } catch (e) {
                             } finally {
                                 clearTimeout(timeout);
                             }
                         }
-                        await new Promise(resolve => setTimeout(resolve, 1000));
                     }
+                    return '未知';
                 })();
             }
             return clientIpPromise;
         }
 
-        async function logAudit(actionType, details = {}) {
+        async function logAudit(actionType, details) {
             try {
                 const ipAddress = await getClientIp();
-                const { error } = await client.from('audit_logs').insert([{
+                await client.from('audit_logs').insert([{
                     action_type: actionType,
-                    details,
+                    details: details || {},
                     ip_address: ipAddress
                 }]);
-                if (error) throw error;
             } catch (error) {
-                console.error('Audit log failed:', error);
             }
         }
 
         async function handleQueryStudent(e) {
             e.preventDefault();
-            const sid = document.getElementById('queryStudentNo').value.trim();
+            const sidInput = document.getElementById('queryStudentNo');
+            const sid = sidInput ? sidInput.value.trim() : '';
             if (!sid) return;
 
             const btn = document.getElementById('btnQuerySubmit');
-            btn.disabled = true;
-            btn.innerText = "查詢中...";
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "查詢中...";
+            }
 
             try {
-                const { data: selfStudent, error: selfErr } = await client
-                    .from('students')
-                    .select('*')
-                    .eq('student_no', sid)
-                    .maybeSingle();
-
-                if (selfErr || !selfStudent) {
+                const resStudent = await client.from('students').select('*').eq('student_no', sid).maybeSingle();
+                if (resStudent.error || !resStudent.data) {
                     await logAudit("查詢學生", { student_no: sid, status: "查無學生資料" });
                     showToast("查無此學生資料", true);
                     return;
                 }
+                const selfStudent = resStudent.data;
 
                 const resArea = document.getElementById('queryResultArea');
-                document.getElementById('queryPendingState').classList.add('hidden');
+                const pendingState = document.getElementById('queryPendingState');
                 const targetContainer = document.getElementById('targetListContainer');
-                resArea.classList.remove('hidden');
-                targetContainer.innerHTML = '';
+                if (pendingState) pendingState.classList.add('hidden');
+                if (resArea) resArea.classList.remove('hidden');
+                if (targetContainer) targetContainer.innerHTML = '';
 
                 const isG1 = selfStudent.grade === 'G1';
                 document.getElementById('querySelfRoleTag').innerText = isG1 ? "查詢本人 (高一)" : "查詢本人 (高二)";
                 document.getElementById('querySelfName').innerText = selfStudent.name;
-                document.getElementById('querySelfInfo').innerText = `${selfStudent.class_name} 班 ｜ 座號 ${selfStudent.seat_no || '-'} ｜ 學號 ${selfStudent.student_no} ｜ 性別 ${selfStudent.gender || '未註記'}`;
+                document.getElementById('querySelfInfo').innerText = selfStudent.class_name + ' 班 ｜ 座號 ' + (selfStudent.seat_no || '-') + ' ｜ 學號 ' + selfStudent.student_no + ' ｜ 性別 ' + (selfStudent.gender || '未註記');
 
                 const queryColumn = isG1 ? 'g1_student_no' : 'g2_student_no';
-                const { data: pairRows, error: pairErr } = await client
-                    .from('pairings')
-                    .select('*')
-                    .eq(queryColumn, sid);
+                const resPairs = await client.from('pairings').select('*').eq(queryColumn, sid);
 
-                if (pairErr || !pairRows || pairRows.length === 0) {
-                    await logAudit("查詢學生", {
-                        student_no: sid,
-                        status: pairErr ? "查詢配對失敗" : "尚未建立直屬配對"
-                    });
-                    targetContainer.innerHTML = `
-                        <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1 text-xs">
-                            <span class="text-amber-800 font-black">${isG1 ? '直屬學長姐' : '直屬學弟妹'}</span>
-                        <div class="text-lg font-black text-slate-800">目前尚未建立直屬配對</div>
-                            <div class="text-slate-500 font-bold">請靜候學生會完成抽籤程序。</div>
-                        </div>
-                    `;
+                if (resPairs.error || !resPairs.data || resPairs.data.length === 0) {
+                    await logAudit("查詢學生", { student_no: sid, status: "尚未建立直屬配對" });
+                    if (targetContainer) {
+                        targetContainer.innerHTML = '<div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1 text-xs w-full overflow-hidden">' +
+                            '<span class="text-amber-800 font-black">' + (isG1 ? '直屬學長姐' : '直屬學弟妹') + '</span>' +
+                            '<div class="text-base sm:text-lg font-black text-slate-800">目前尚未建立直屬配對</div>' +
+                            '<div class="text-slate-500 font-bold">請靜候學生會完成抽籤程序。</div>' +
+                            '</div>';
+                    }
                     return;
                 }
 
-                const targetSids = pairRows.map(p => isG1 ? p.g2_student_no : p.g1_student_no);
-                const { data: targetStudents } = await client
-                    .from('students')
-                    .select('*')
-                    .in('student_no', targetSids);
-
+                const targetSids = resPairs.data.map(function(p) { return isG1 ? p.g2_student_no : p.g1_student_no; });
+                const resTargets = await client.from('students').select('*').in('student_no', targetSids);
                 const studentMap = {};
-                (targetStudents || []).forEach(s => { studentMap[s.student_no] = s; });
+                const list = resTargets.data || [];
+                for (let i = 0; i < list.length; i++) {
+                    studentMap[list[i].student_no] = list[i];
+                }
 
-                targetContainer.innerHTML = targetSids.map((tSid, idx) => {
+                let html = '';
+                for (let i = 0; i < targetSids.length; i++) {
+                    const tSid = targetSids[i];
                     const t = studentMap[tSid];
-                    const label = isG1 ? (targetSids.length > 1 ? `直屬學長姐 #${idx + 1} (高二)` : '直屬學長姐 (高二)') : '直屬學弟妹 (高一)';
+                    const label = isG1 ? (targetSids.length > 1 ? '直屬學長姐 #' + (i + 1) + ' (高二)' : '直屬學長姐 (高二)') : '直屬學弟妹 (高一)';
                     if (t) {
-                        return `
-                            <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1 text-xs">
-                                <span class="text-emerald-700 font-black">${label}</span>
-                                <div class="text-lg font-black text-slate-900">${escapeHtml(t.name)}</div>
-                                <div class="text-slate-600 font-bold">${escapeHtml(t.class_name)} 班 ｜ 座號 ${escapeHtml(t.seat_no || '-')} ｜ 學號 ${escapeHtml(t.student_no)} ｜ 性別 ${escapeHtml(t.gender || '未註記')}</div>
-                            </div>
-                        `;
+                        html += '<div class="p-3.5 sm:p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1 text-xs w-full overflow-hidden">' +
+                            '<span class="text-emerald-700 font-black">' + label + '</span>' +
+                            '<div class="text-base sm:text-lg font-black text-slate-900 break-all">' + escapeHtml(t.name) + '</div>' +
+                            '<div class="text-slate-600 font-bold break-all">' + escapeHtml(t.class_name) + ' 班 ｜ 座號 ' + escapeHtml(t.seat_no || '-') + ' ｜ 學號 ' + escapeHtml(t.student_no) + ' ｜ 性別 ' + escapeHtml(t.gender || '未註記') + '</div>' +
+                            '</div>';
                     } else {
-                        return `
-                            <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1 text-xs">
-                                <span class="text-emerald-700 font-black">${label}</span>
-                                <div class="text-lg font-black text-slate-900">已配對 (學生資料不存在)</div>
-                                <div class="text-slate-600 font-bold">學號: ${escapeHtml(tSid)}</div>
-                            </div>
-                        `;
+                        html += '<div class="p-3.5 sm:p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1 text-xs w-full overflow-hidden">' +
+                            '<span class="text-emerald-700 font-black">' + label + '</span>' +
+                            '<div class="text-base sm:text-lg font-black text-slate-900">已配對 (學生資料不存在)</div>' +
+                            '<div class="text-slate-600 font-bold break-all">學號: ' + escapeHtml(tSid) + '</div>' +
+                            '</div>';
                     }
-                }).join('');
-                await logAudit("查詢學生", {
-                    student_no: sid,
-                    status: "查詢成功",
-                    pairing_count: targetSids.length
-                });
+                }
+                if (targetContainer) targetContainer.innerHTML = html;
+
+                await logAudit("查詢學生", { student_no: sid, status: "查詢成功", pairing_count: targetSids.length });
 
             } catch (err) {
                 await logAudit("查詢學生", { student_no: sid, status: "查詢失敗", error: err.message });
                 showToast("查詢失敗：" + err.message, true);
             } finally {
-                btn.disabled = false;
-                btn.innerText = "立即查詢";
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = "立即查詢";
+                }
             }
         }
     </script>
