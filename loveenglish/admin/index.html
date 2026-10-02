@@ -85,7 +85,6 @@
                             <option value="G2">高二</option>
                         </select>
                         <button type="button" onclick="resetAllPairings()" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-black transition">⚡ 重置配對</button>
-                        <button type="button" onclick="clearAllStudents()" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-black transition">🗑 清空資料</button>
                     </div>
                 </div>
 
@@ -93,17 +92,16 @@
                     <table class="w-full text-left text-xs border-collapse table-fixed">
                         <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
                             <tr>
-                                <th class="p-2.5 w-[14%]">班級</th>
-                                <th class="p-2.5 w-[10%]">座號</th>
-                                <th class="p-2.5 w-[12%]">年級</th>
-                                <th class="p-2.5 w-[20%]">姓名</th>
-                                <th class="p-2.5 w-[20%]">學號</th>
-                                <th class="p-2.5 w-[10%]">性別</th>
-                                <th class="p-2.5 w-[14%] text-center">操作</th>
+                                <th class="p-2.5 w-[16%]">班級</th>
+                                <th class="p-2.5 w-[12%]">座號</th>
+                                <th class="p-2.5 w-[14%]">年級</th>
+                                <th class="p-2.5 w-[22%]">姓名</th>
+                                <th class="p-2.5 w-[24%]">學號</th>
+                                <th class="p-2.5 w-[12%]">性別</th>
                             </tr>
                         </thead>
                         <tbody id="studentsAdminTableBody" class="divide-y divide-slate-100 font-bold text-slate-700">
-                            <tr><td colspan="7" class="p-4 text-center text-slate-400">目前尚無學生資料。</td></tr>
+                            <tr><td colspan="6" class="p-4 text-center text-slate-400">目前尚無學生資料。</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -452,7 +450,7 @@
             });
 
             if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">目前尚無學生資料。</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">目前尚無學生資料。</td></tr>';
                 cardList.innerHTML = '<div class="p-4 text-center text-xs text-slate-400">目前尚無學生資料。</div>';
                 return;
             }
@@ -468,7 +466,6 @@
                 tableHtml += '<td class="p-2.5 font-black text-slate-900 break-all">' + escapeHtml(s.name) + '</td>';
                 tableHtml += '<td class="p-2.5 font-mono text-slate-500 break-all">' + escapeHtml(s.student_no) + '</td>';
                 tableHtml += '<td class="p-2.5">' + escapeHtml(s.gender || '-') + '</td>';
-                tableHtml += '<td class="p-2.5 text-center"><button type="button" data-student-no="' + escapeHtml(s.student_no) + '" data-student-name="' + escapeHtml(s.name) + '" class="delete-student-button px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-xs font-bold transition">刪除</button></td>';
                 tableHtml += '</tr>';
 
                 cardHtml += '<div class="p-2.5 rounded-xl border border-slate-200 bg-white shadow-xs flex items-center justify-between text-xs gap-2 w-full">';
@@ -478,35 +475,10 @@
                 cardHtml += '</div>';
                 cardHtml += '<div class="shrink-0 flex items-center gap-1.5">';
                 cardHtml += '<span class="px-1.5 py-0.5 rounded text-[10px] font-black ' + (s.grade === 'G1' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700') + '">' + (s.grade === 'G1' ? '高一' : '高二') + '</span>';
-                cardHtml += '<button type="button" data-student-no="' + escapeHtml(s.student_no) + '" data-student-name="' + escapeHtml(s.name) + '" class="delete-student-button px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-xs font-bold transition">刪除</button>';
                 cardHtml += '</div></div>';
             }
             tbody.innerHTML = tableHtml;
             cardList.innerHTML = cardHtml;
-
-            const handleDel = function(event) {
-                const button = event.target.closest('.delete-student-button');
-                if (button) deleteSingleStudent(button.dataset.studentNo, button.dataset.studentName);
-            };
-            tbody.onclick = handleDel;
-            cardList.onclick = handleDel;
-        }
-
-        async function deleteSingleStudent(studentNo, name) {
-            if (!confirm('確定要刪除學生【' + name + ' (' + studentNo + ')】嗎？')) return;
-            try {
-                const resPairings = await client.from('pairings').delete().or('g1_student_no.eq.' + studentNo + ',g2_student_no.eq.' + studentNo);
-                if (resPairings.error) throw resPairings.error;
-
-                const resStudent = await client.from('students').delete().eq('student_no', studentNo);
-                if (resStudent.error) throw resStudent.error;
-
-                showToast('已刪除 ' + name + '！');
-                await logAudit("刪除學生", { student_no: studentNo, name: name });
-                await loadAdminData();
-            } catch (e) {
-                showToast("刪除失敗：" + e.message, true);
-            }
         }
 
         async function importStudents(targetGrade) {
@@ -541,12 +513,12 @@
                         const gender = String(r['性別'] || r['gender'] || '').trim();
 
                         return {
-                            student_no,
+                            student_no: student_no,
                             grade: targetGrade,
-                            class_name,
-                            seat_no,
-                            name,
-                            gender
+                            class_name: class_name,
+                            seat_no: seat_no,
+                            name: name,
+                            gender: gender
                         };
                     }).filter(function(s) { return s.student_no && s.name && s.class_name; });
 
@@ -573,23 +545,6 @@
                 }
             };
             reader.readAsArrayBuffer(file);
-        }
-
-        async function clearAllStudents() {
-            if (!confirm("⚠ 確定要清空所有學生名單與配對紀錄嗎？此動作無法復原！")) return;
-            try {
-                const resPairings = await client.from('pairings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                if (resPairings.error) throw resPairings.error;
-
-                const resStudents = await client.from('students').delete().neq('student_no', '___');
-                if (resStudents.error) throw resStudents.error;
-
-                showToast("已清空學生資料庫！");
-                await logAudit("清空學生資料庫", { status: "全數清除" });
-                await loadAdminData();
-            } catch (err) {
-                showToast("清除失敗：" + err.message, true);
-            }
         }
 
         async function resetAllPairings() {
@@ -859,7 +814,7 @@
                 const recordedIp = l.ip_address || details.ip_address || '';
                 const ipAddress = recordedIp === '未知' ? 'IP取得失敗' : (recordedIp || 'IP取得失敗');
                 const actionType = String(l.action_type || '未命名操作');
-                const actionClass = (actionType.indexOf('刪除') !== -1 || actionType.indexOf('清空') !== -1 || actionType.indexOf('重置') !== -1)
+                const actionClass = (actionType.indexOf('重置') !== -1)
                     ? 'bg-rose-50 text-rose-700 border-rose-200'
                     : (actionType.indexOf('匯入') !== -1
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
@@ -930,8 +885,6 @@
 
         window.setAdminRoute = setAdminRoute;
         window.importStudents = importStudents;
-        window.deleteSingleStudent = deleteSingleStudent;
-        window.clearAllStudents = clearAllStudents;
         window.resetAllPairings = resetAllPairings;
         window.renderStudentsAdminTable = renderStudentsAdminTable;
         window.renderPairingsTable = renderPairingsTable;
