@@ -98,6 +98,16 @@
             });
         }
 
+        function maskName(name) {
+            const str = String(name == null ? '' : name).trim();
+            if (!str) return '-';
+            const len = str.length;
+            if (len === 1) return str;
+            if (len === 2) return str[0] + '○';
+            if (len === 3) return str[0] + '○' + str[2];
+            return str[0] + '○'.repeat(len - 2) + str[len - 1];
+        }
+
         async function getClientIp() {
             if (!clientIpPromise) {
                 clientIpPromise = (async function() {
@@ -194,7 +204,7 @@
 
                 const isG1 = selfStudent.grade === 'G1';
                 document.getElementById('querySelfRoleTag').innerText = isG1 ? "查詢本人 (高一)" : "查詢本人 (高二)";
-                document.getElementById('querySelfName').innerText = selfStudent.name;
+                document.getElementById('querySelfName').innerText = maskName(selfStudent.name);
                 document.getElementById('querySelfInfo').innerText = selfStudent.class_name + ' 班 ｜ 座號 ' + (selfStudent.seat_no || '-') + ' ｜ 學號 ' + selfStudent.student_no + ' ｜ 性別 ' + (selfStudent.gender || '未註記');
 
                 const queryColumn = isG1 ? 'g1_student_no' : 'g2_student_no';
@@ -228,7 +238,7 @@
                     if (t) {
                         html += '<div class="p-3.5 sm:p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1 text-xs w-full overflow-hidden">' +
                             '<span class="text-emerald-700 font-black">' + label + '</span>' +
-                            '<div class="text-base sm:text-lg font-black text-slate-900 break-all">' + escapeHtml(t.name) + '</div>' +
+                            '<div class="text-base sm:text-lg font-black text-slate-900 break-all">' + escapeHtml(maskName(t.name)) + '</div>' +
                             '<div class="text-slate-600 font-bold break-all">' + escapeHtml(t.class_name) + ' 班 ｜ 座號 ' + escapeHtml(t.seat_no || '-') + ' ｜ 學號 ' + escapeHtml(t.student_no) + ' ｜ 性別 ' + escapeHtml(t.gender || '未註記') + '</div>' +
                             '</div>';
                     } else {
