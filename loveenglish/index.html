@@ -19,73 +19,71 @@
                     }
                 }
             }
-        }
+        };
     </script>
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col justify-between font-sans">
+<body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col justify-between font-sans w-full max-w-full overflow-x-hidden">
 
-    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl hidden transition-all duration-300"></div>
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl text-white font-extrabold text-xs sm:text-sm shadow-xl hidden transition-all duration-300"></div>
 
-    <header class="bg-[#0f172a] text-white py-3.5 px-4 shadow-md sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-3">
-            <div class="flex items-center gap-2.5">
-                <span class="text-2xl" id="headerIcon">🎯</span>
-                <span class="text-lg font-black tracking-wide" id="headerTitle">新社高中直屬抽籤系統</span>
+    <header class="bg-[#0f172a] text-white py-3 px-3 sm:px-4 shadow-md sticky top-0 z-40 w-full">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2.5">
+            <div class="flex items-center gap-2">
+                <span class="text-xl sm:text-2xl" id="headerIcon">🎯</span>
+                <span class="text-base sm:text-lg font-black tracking-wide" id="headerTitle">新社高中直屬抽籤系統</span>
             </div>
-            <nav class="flex gap-2">
-                <button type="button" onclick="setRoute('draw')" id="tabBtn_draw" class="px-4 py-1.5 rounded-xl text-xs font-black bg-blue-600 text-white shadow transition">🎯 開始抽籤</button>
-                <button type="button" onclick="setRoute('paired')" id="tabBtn_paired" class="px-4 py-1.5 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:text-white transition">📋 已配對名單</button>
-                <button type="button" onclick="setRoute('unpaired')" id="tabBtn_unpaired" class="px-4 py-1.5 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:text-white transition">⏳ 未配對名單</button>
+            <nav class="grid grid-cols-3 gap-1.5 w-full sm:w-auto">
+                <button type="button" onclick="setRoute('draw')" id="tabBtn_draw" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-blue-600 text-white shadow transition text-center">🎯 開始抽籤</button>
+                <button type="button" onclick="setRoute('paired')" id="tabBtn_paired" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:text-white transition text-center">📋 已配對名單</button>
+                <button type="button" onclick="setRoute('unpaired')" id="tabBtn_unpaired" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:text-white transition text-center">⏳ 未配對名單</button>
             </nav>
         </div>
     </header>
 
-    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6">
+    <main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 space-y-4 overflow-x-hidden">
 
-        <section id="pane_draw" class="route-pane hidden space-y-6">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高一總人數</span>
-                    <div id="statG1Count" class="text-2xl font-black text-slate-800 mt-1">0</div>
+        <section id="pane_draw" class="route-pane hidden space-y-4 sm:space-y-6 w-full">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 w-full">
+                <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <span class="text-[11px] sm:text-xs text-slate-400 font-bold">高一總人數</span>
+                    <div id="statG1Count" class="text-xl sm:text-2xl font-black text-slate-800 mt-0.5">0</div>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高二總人數</span>
-                    <div id="statG2Count" class="text-2xl font-black text-slate-800 mt-1">0</div>
+                <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <span class="text-[11px] sm:text-xs text-slate-400 font-bold">高二總人數</span>
+                    <div id="statG2Count" class="text-xl sm:text-2xl font-black text-slate-800 mt-0.5">0</div>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高一已配對</span>
-                    <div id="statPairedCount" class="text-2xl font-black text-emerald-600 mt-1">0</div>
+                <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <span class="text-[11px] sm:text-xs text-slate-400 font-bold">高一已配對</span>
+                    <div id="statPairedCount" class="text-xl sm:text-2xl font-black text-emerald-600 mt-0.5">0</div>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                    <span class="text-xs text-slate-400 font-bold">高二未配對</span>
-                    <div id="statG2Remaining" class="text-2xl font-black text-amber-600 mt-1">0</div>
+                <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <span class="text-[11px] sm:text-xs text-slate-400 font-bold">高二未配對</span>
+                    <div id="statG2Remaining" class="text-xl sm:text-2xl font-black text-amber-600 mt-0.5">0</div>
                 </div>
             </div>
 
-            <div id="stageNoticeBox" class="p-4 rounded-2xl border bg-blue-50 border-blue-200 text-blue-900 text-xs font-bold flex items-center justify-between">
+            <div id="stageNoticeBox" class="p-3 sm:p-4 rounded-2xl border bg-blue-50 border-blue-200 text-blue-900 text-xs font-bold flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 w-full">
                 <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-blue-600"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0"></span>
                     <span id="stageNoticeText">目前階段：高一各班各抽一位高二直屬</span>
                 </div>
                 <span id="stageG1RemainingText" class="text-blue-700 font-black">已完成</span>
             </div>
 
-            <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
-                            <span class="w-2.5 h-5 bg-blue-600 rounded-full"></span>
-                            抽籤配對
-                        </h2>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <label class="text-xs font-black text-slate-600">請選擇班級：</label>
-                        <select id="drawClassSelect" onchange="updateDrawSelection()" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="bg-white p-4 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4 sm:space-y-6 w-full">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                    <h2 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+                        <span class="w-2 h-4 sm:w-2.5 sm:h-5 bg-blue-600 rounded-full"></span>
+                        抽籤配對
+                    </h2>
+                    <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                        <label class="text-xs font-black text-slate-600 shrink-0">請選擇班級：</label>
+                        <select id="drawClassSelect" onchange="updateDrawSelection()" class="w-full sm:w-auto px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="402">402 班</option>
                             <option value="403">403 班</option>
                             <option value="404">404 班</option>
@@ -93,35 +91,33 @@
                     </div>
                 </div>
 
-                <div class="py-6 sm:py-8 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center space-y-4">
+                <div class="py-5 sm:py-8 px-2 sm:px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center space-y-3 w-full">
                     <div id="drawStatusText" class="text-xs sm:text-sm font-black text-slate-500">請選取班級並開始進行抽籤</div>
-                    <div id="drawDisplayBox" class="min-h-[140px] flex items-center justify-center">
-                        <span class="text-4xl text-slate-300 font-black">-</span>
+                    <div id="drawDisplayBox" class="min-h-[120px] sm:min-h-[140px] flex items-center justify-center w-full">
+                        <span class="text-3xl sm:text-4xl text-slate-300 font-black">-</span>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap gap-3 justify-center pt-2">
-                    <button type="button" onclick="startBatchDraw()" id="btnBatchDraw" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition shadow-md shadow-indigo-600/20">
+                <div class="flex justify-center pt-1 w-full">
+                    <button type="button" onclick="startBatchDraw()" id="btnBatchDraw" class="w-full sm:w-64 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition shadow-md shadow-indigo-600/20">
                         ⚡ 開始抽籤
                     </button>
                 </div>
             </div>
         </section>
 
-        <section id="pane_paired" class="route-pane hidden space-y-6">
-            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                            <span class="w-2.5 h-5 bg-emerald-600 rounded-full"></span>
-                            直屬配對名冊
-                        </h2>
-                    </div>
+        <section id="pane_paired" class="route-pane hidden space-y-4 sm:space-y-6 w-full">
+            <div class="bg-white p-3.5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3 sm:space-y-4 w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 border-b border-slate-100 pb-3">
+                    <h2 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                        <span class="w-2 h-4 sm:w-2.5 sm:h-5 bg-emerald-600 rounded-full"></span>
+                        直屬配對名冊
+                    </h2>
 
-                    <div class="flex flex-wrap items-center gap-2.5">
-                        <div class="flex items-center gap-1.5">
-                            <label class="text-xs font-black text-slate-600">班級：</label>
-                            <select id="filterPairingClass" onchange="renderPairingsTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                        <div class="flex items-center gap-1.5 w-full sm:w-auto">
+                            <label class="text-xs font-black text-slate-600 shrink-0">班級：</label>
+                            <select id="filterPairingClass" onchange="renderPairingsTable()" class="w-full sm:w-auto px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="ALL">全部班級</option>
                                 <optgroup label="高一班級">
                                     <option value="402">402 班</option>
@@ -135,26 +131,28 @@
                                 </optgroup>
                             </select>
                         </div>
-                        <span id="pairedCountBadge" class="text-xs font-black px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200">共 0 組</span>
-                        <button type="button" onclick="exportFilteredPairings()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition shadow">📥 匯出 Excel</button>
+                        <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                            <span id="pairedCountBadge" class="text-xs font-black px-2.5 py-1 rounded-xl bg-blue-50 text-blue-700 border border-blue-200">共 0 組</span>
+                            <button type="button" onclick="exportFilteredPairings()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition shadow">📥 匯出 Excel</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto max-h-[70vh] custom-scrollbar border border-slate-100 rounded-xl">
-                    <table class="w-full text-left text-xs border-collapse">
+                <div class="hidden lg:block max-h-[70vh] overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl w-full">
+                    <table class="w-full text-left text-xs border-collapse table-fixed">
                         <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
                             <tr>
-                                <th class="p-3">高一班級</th>
-                                <th class="p-3 w-16">高一座號</th>
-                                <th class="p-3">高一姓名</th>
-                                <th class="p-3">高一學號</th>
-                                <th class="p-3 w-20">性別</th>
-                                <th class="p-3 text-center">關係</th>
-                                <th class="p-3">高二班級</th>
-                                <th class="p-3 w-16">高二座號</th>
-                                <th class="p-3">高二直屬姓名</th>
-                                <th class="p-3">高二學號</th>
-                                <th class="p-3 w-20">性別</th>
+                                <th class="p-2.5 w-[9%]">高一班級</th>
+                                <th class="p-2.5 w-[7%]">座號</th>
+                                <th class="p-2.5 w-[11%]">姓名</th>
+                                <th class="p-2.5 w-[11%]">學號</th>
+                                <th class="p-2.5 w-[6%]">性別</th>
+                                <th class="p-2.5 w-[5%] text-center">關係</th>
+                                <th class="p-2.5 w-[9%]">高二班級</th>
+                                <th class="p-2.5 w-[7%]">座號</th>
+                                <th class="p-2.5 w-[11%]">姓名</th>
+                                <th class="p-2.5 w-[11%]">學號</th>
+                                <th class="p-2.5 w-[6%]">性別</th>
                             </tr>
                         </thead>
                         <tbody id="pairingsTableBody" class="divide-y divide-slate-100 font-bold text-slate-700">
@@ -162,62 +160,66 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div id="pairingsCardList" class="block lg:hidden max-h-[70vh] overflow-y-auto custom-scrollbar space-y-2 w-full">
+                    <div class="p-6 text-center text-xs text-slate-400 font-bold">目前尚無配對資料。</div>
+                </div>
             </div>
         </section>
 
-        <section id="pane_unpaired" class="route-pane hidden space-y-6">
-            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                            <span class="w-2.5 h-5 bg-amber-500 rounded-full"></span>
-                            尚未分配學生名冊
-                        </h2>
-                    </div>
+        <section id="pane_unpaired" class="route-pane hidden space-y-4 sm:space-y-6 w-full">
+            <div class="bg-white p-3.5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3 sm:space-y-4 w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 border-b border-slate-100 pb-3">
+                    <h2 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                        <span class="w-2 h-4 sm:w-2.5 sm:h-5 bg-amber-500 rounded-full"></span>
+                        尚未分配學生名冊
+                    </h2>
 
-                    <div class="flex flex-wrap items-center gap-2.5">
-                        <div class="flex items-center gap-1.5">
-                            <label class="text-xs font-black text-slate-600">年級：</label>
-                            <select id="filterUnpairedGrade" onchange="renderUnpairedTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-amber-500">
-                                <option value="ALL">全部</option>
-                                <option value="G1">高一</option>
-                                <option value="G2">高二</option>
-                            </select>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                        <div class="grid grid-cols-2 gap-1.5 w-full sm:w-auto">
+                            <div class="flex items-center gap-1">
+                                <label class="text-xs font-black text-slate-600 shrink-0">年級：</label>
+                                <select id="filterUnpairedGrade" onchange="renderUnpairedTable()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-amber-500">
+                                    <option value="ALL">全部</option>
+                                    <option value="G1">高一</option>
+                                    <option value="G2">高二</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <label class="text-xs font-black text-slate-600 shrink-0">班級：</label>
+                                <select id="filterUnpairedClass" onchange="renderUnpairedTable()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-amber-500">
+                                    <option value="ALL">全部</option>
+                                    <optgroup label="高一班級">
+                                        <option value="402">402 班</option>
+                                        <option value="403">403 班</option>
+                                        <option value="404">404 班</option>
+                                    </optgroup>
+                                    <optgroup label="高二班級">
+                                        <option value="502">502 班</option>
+                                        <option value="503">503 班</option>
+                                        <option value="504">504 班</option>
+                                    </optgroup>
+                                </select>
+                            </div>
                         </div>
-
-                        <div class="flex items-center gap-1.5">
-                            <label class="text-xs font-black text-slate-600">班級：</label>
-                            <select id="filterUnpairedClass" onchange="renderUnpairedTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-amber-500">
-                                <option value="ALL">全部班級</option>
-                                <optgroup label="高一班級">
-                                    <option value="402">402 班</option>
-                                    <option value="403">403 班</option>
-                                    <option value="404">404 班</option>
-                                </optgroup>
-                                <optgroup label="高二班級">
-                                    <option value="502">502 班</option>
-                                    <option value="503">503 班</option>
-                                    <option value="504">504 班</option>
-                                </optgroup>
-                            </select>
+                        <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                            <span id="unpairedCountBadge" class="text-xs font-black px-2.5 py-1 rounded-xl bg-amber-50 text-amber-800 border border-amber-200">共 0 人</span>
+                            <button type="button" onclick="exportFilteredUnpaired()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-black transition shadow">📥 匯出 Excel</button>
                         </div>
-
-                        <span id="unpairedCountBadge" class="text-xs font-black px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200">共 0 人</span>
-                        <button type="button" onclick="exportFilteredUnpaired()" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-black transition shadow">📥 匯出剩餘名冊</button>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto max-h-[70vh] custom-scrollbar border border-slate-100 rounded-xl">
-                    <table class="w-full text-left text-xs border-collapse">
+                <div class="hidden sm:block max-h-[70vh] overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl w-full">
+                    <table class="w-full text-left text-xs border-collapse table-fixed">
                         <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
                             <tr>
-                                <th class="p-3">班級</th>
-                                <th class="p-3 w-16">座號</th>
-                                <th class="p-3 w-20">年級</th>
-                                <th class="p-3">姓名</th>
-                                <th class="p-3">學號</th>
-                                <th class="p-3 w-20">性別</th>
-                                <th class="p-3">抽籤狀態</th>
+                                <th class="p-2.5 w-[14%]">班級</th>
+                                <th class="p-2.5 w-[10%]">座號</th>
+                                <th class="p-2.5 w-[12%]">年級</th>
+                                <th class="p-2.5 w-[18%]">姓名</th>
+                                <th class="p-2.5 w-[20%]">學號</th>
+                                <th class="p-2.5 w-[10%]">性別</th>
+                                <th class="p-2.5 w-[16%]">抽籤狀態</th>
                             </tr>
                         </thead>
                         <tbody id="unpairedTableBody" class="divide-y divide-slate-100 font-bold text-slate-700">
@@ -225,12 +227,16 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div id="unpairedCardList" class="block sm:hidden max-h-[70vh] overflow-y-auto custom-scrollbar space-y-2 w-full">
+                    <div class="p-6 text-center text-xs text-slate-400 font-bold">目前沒有尚未配對之學生！</div>
+                </div>
             </div>
         </section>
 
     </main>
 
-    <footer class="py-4 text-center text-xs text-slate-400 font-semibold border-t border-slate-200/60">
+    <footer class="py-3 text-center text-xs text-slate-400 font-semibold border-t border-slate-200/60 w-full">
         © 臺中市立新社高級中學學生會 ＆ 開發團隊 版權所有
     </footer>
 
@@ -246,28 +252,29 @@
         let isShowingDrawResult = false;
         let currentFilteredUnpaired = [];
 
-        function showToast(msg, isError = false) {
+        function showToast(msg, isError) {
             const t = document.getElementById('toast');
             if (!t) return;
             t.innerText = msg;
-            t.className = `fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl transition-all duration-300 ${isError ? 'bg-rose-500' : 'bg-emerald-600'}`;
+            t.className = 'fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl text-white font-extrabold text-xs sm:text-sm shadow-xl transition-all duration-300 ' + (isError ? 'bg-rose-500' : 'bg-emerald-600');
             t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 2800);
+            setTimeout(function() { t.style.display = 'none'; }, 2800);
         }
 
         function escapeHtml(value) {
-            return String(value ?? '').replace(/[&<>"']/g, char => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
-            }[char]));
+            return String(value == null ? '' : value).replace(/[&<>"']/g, function(char) {
+                if (char === '&') return '&amp;';
+                if (char === '<') return '&lt;';
+                if (char === '>') return '&gt;';
+                if (char === '"') return '&quot;';
+                if (char === "'") return '&#39;';
+                return char;
+            });
         }
 
         async function getClientIp() {
             if (!clientIpPromise) {
-                clientIpPromise = (async () => {
+                clientIpPromise = (async function() {
                     const services = [
                         { url: 'https://api.ipify.org?format=json', json: true },
                         { url: 'https://api64.ipify.org?format=json', json: true },
@@ -280,12 +287,13 @@
                         { url: 'https://checkip.amazonaws.com/', json: false },
                         { url: 'https://ifconfig.me/ip', json: false },
                         { url: 'https://ident.me/', json: false },
-                        { url: 'https://www.cloudflare.com/cdn-cgi/trace', json: false, trace: true }
+                        { url: 'https://cloudflare.com/cdn-cgi/trace', json: false, trace: true }
                     ];
-                    while (true) {
-                        for (const service of services) {
+                    for (let attempt = 0; attempt < 2; attempt++) {
+                        for (let i = 0; i < services.length; i++) {
+                            const service = services[i];
                             const controller = new AbortController();
-                            const timeout = setTimeout(() => controller.abort(), 3000);
+                            const timeout = setTimeout(function() { controller.abort(); }, 2000);
                             try {
                                 const response = await fetch(service.url, {
                                     headers: { Accept: 'application/json' },
@@ -294,40 +302,44 @@
                                 });
                                 if (!response.ok) continue;
                                 const body = service.json ? await response.json() : await response.text();
-                                const value = service.trace
-                                    ? String(body).match(/(?:^|\n)ip=([^\r\n]+)/)?.[1]
-                                    : (service.json ? (body.ip || body.ipAddress) : String(body).trim());
+                                let value = '';
+                                if (service.trace) {
+                                    const match = String(body).match(/(?:^|\n)ip=([^\r\n]+)/);
+                                    value = match ? match[1] : '';
+                                } else if (service.json) {
+                                    value = body.ip || body.ipAddress || '';
+                                } else {
+                                    value = String(body).trim();
+                                }
                                 if (value && /^(?:\d{1,3}\.){3}\d{1,3}$|^[0-9a-f:]+$/i.test(String(value))) {
                                     return String(value);
                                 }
-                            } catch (error) {
-                                console.warn('IP service unavailable:', service, error);
+                            } catch (e) {
                             } finally {
                                 clearTimeout(timeout);
                             }
                         }
-                        await new Promise(resolve => setTimeout(resolve, 1000));
                     }
+                    return '未知';
                 })();
             }
             return clientIpPromise;
         }
 
-        async function logAudit(actionType, details = {}) {
+        async function logAudit(actionType, details) {
             try {
                 const ipAddress = await getClientIp();
                 await client.from('audit_logs').insert([{
                     action_type: actionType,
-                    details,
+                    details: details || {},
                     ip_address: ipAddress
                 }]);
             } catch (error) {
-                console.error('Audit log failed:', error);
             }
         }
 
         function setRoute(r) {
-            window.location.hash = `#${r}`;
+            window.location.hash = '#' + r;
         }
 
         function handleHashRouting() {
@@ -336,15 +348,22 @@
             if (rawHash === 'paired') current = 'paired';
             if (rawHash === 'unpaired') current = 'unpaired';
 
-            document.querySelectorAll('.route-pane').forEach(el => el.classList.add('hidden'));
-            ['draw', 'paired', 'unpaired'].forEach(k => {
-                const b = document.getElementById(`tabBtn_${k}`);
-                if (b) b.className = "px-4 py-1.5 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:text-white transition";
-            });
+            const panes = document.querySelectorAll('.route-pane');
+            for (let i = 0; i < panes.length; i++) {
+                panes[i].classList.add('hidden');
+            }
 
-            document.getElementById(`pane_${current}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`tabBtn_${current}`);
-            if (activeBtn) activeBtn.className = "px-4 py-1.5 rounded-xl text-xs font-black bg-blue-600 text-white shadow transition";
+            const tabs = ['draw', 'paired', 'unpaired'];
+            for (let i = 0; i < tabs.length; i++) {
+                const b = document.getElementById('tabBtn_' + tabs[i]);
+                if (b) b.className = "px-2.5 py-1.5 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:text-white transition text-center";
+            }
+
+            const targetPane = document.getElementById('pane_' + current);
+            if (targetPane) targetPane.classList.remove('hidden');
+
+            const activeBtn = document.getElementById('tabBtn_' + current);
+            if (activeBtn) activeBtn.className = "px-2.5 py-1.5 rounded-xl text-xs font-black bg-blue-600 text-white shadow transition text-center";
 
             if (current === 'draw') {
                 updateDrawDashboard();
@@ -357,13 +376,13 @@
 
         async function loadData() {
             try {
-                const { data: stData, error: studentsError } = await client.from('students').select('*');
-                if (studentsError) throw studentsError;
-                allStudents = stData;
+                const resStudents = await client.from('students').select('*');
+                if (resStudents.error) throw resStudents.error;
+                allStudents = resStudents.data || [];
 
-                const { data: pairData, error: pairingsError } = await client.from('pairings').select('*').order('paired_at', { ascending: false });
-                if (pairingsError) throw pairingsError;
-                allPairings = pairData;
+                const resPairings = await client.from('pairings').select('*').order('paired_at', { ascending: false });
+                if (resPairings.error) throw resPairings.error;
+                allPairings = resPairings.data || [];
 
                 handleHashRouting();
             } catch (err) {
@@ -373,10 +392,15 @@
 
         function checkPhaseOneCompletion() {
             const targetClasses = ['402', '403', '404'];
-            const allTargetG1 = allStudents.filter(s => s.grade === 'G1' && targetClasses.some(c => s.class_name.includes(c)));
-            const pairedG1Set = new Set(allPairings.map(p => p.g1_student_no));
-
-            const uncompletedG1 = allTargetG1.filter(s => !pairedG1Set.has(s.student_no));
+            const allTargetG1 = allStudents.filter(function(s) {
+                return s.grade === 'G1' && targetClasses.some(function(c) {
+                    return s.class_name && s.class_name.indexOf(c) !== -1;
+                });
+            });
+            const pairedG1Set = new Set(allPairings.map(function(p) { return p.g1_student_no; }));
+            const uncompletedG1 = allTargetG1.filter(function(s) {
+                return !pairedG1Set.has(s.student_no);
+            });
             return {
                 isCompleted: uncompletedG1.length === 0,
                 uncompletedCount: uncompletedG1.length,
@@ -388,256 +412,194 @@
             const targetClassesG1 = ['402', '403', '404'];
             const targetClassesG2 = ['502', '503', '504'];
 
-            const g1Total = allStudents.filter(s => s.grade === 'G1' && targetClassesG1.some(c => s.class_name.includes(c))).length;
-            const g2Total = allStudents.filter(s => s.grade === 'G2' && targetClassesG2.some(c => s.class_name.includes(c))).length;
-            const pairedCount = allPairings.length;
-            const pairedG2Set = new Set(allPairings.map(p => p.g2_student_no));
-            const g2Remaining = allStudents.filter(s => s.grade === 'G2' && targetClassesG2.some(c => s.class_name.includes(c)) && !pairedG2Set.has(s.student_no)).length;
+            const g1Total = allStudents.filter(function(s) {
+                return s.grade === 'G1' && targetClassesG1.some(function(c) {
+                    return s.class_name && s.class_name.indexOf(c) !== -1;
+                });
+            }).length;
 
-            document.getElementById('statG1Count').innerText = g1Total;
-            document.getElementById('statG2Count').innerText = g2Total;
-            document.getElementById('statPairedCount').innerText = pairedCount;
-            document.getElementById('statG2Remaining').innerText = g2Remaining;
+            const g2Total = allStudents.filter(function(s) {
+                return s.grade === 'G2' && targetClassesG2.some(function(c) {
+                    return s.class_name && s.class_name.indexOf(c) !== -1;
+                });
+            }).length;
+
+            const pairedCount = allPairings.length;
+            const pairedG2Set = new Set(allPairings.map(function(p) { return p.g2_student_no; }));
+            const g2Remaining = allStudents.filter(function(s) {
+                return s.grade === 'G2' && targetClassesG2.some(function(c) {
+                    return s.class_name && s.class_name.indexOf(c) !== -1;
+                }) && !pairedG2Set.has(s.student_no);
+            }).length;
+
+            const elG1 = document.getElementById('statG1Count');
+            const elG2 = document.getElementById('statG2Count');
+            const elPaired = document.getElementById('statPairedCount');
+            const elG2Rem = document.getElementById('statG2Remaining');
+
+            if (elG1) elG1.innerText = g1Total;
+            if (elG2) elG2.innerText = g2Total;
+            if (elPaired) elPaired.innerText = pairedCount;
+            if (elG2Rem) elG2Rem.innerText = g2Remaining;
 
             const check = checkPhaseOneCompletion();
             const stageBox = document.getElementById('stageNoticeBox');
             const stageText = document.getElementById('stageNoticeText');
             const stageRemText = document.getElementById('stageG1RemainingText');
 
-            if (!check.isCompleted) {
-                stageBox.className = "p-4 rounded-2xl border bg-blue-50 border-blue-200 text-blue-900 text-xs font-bold flex items-center justify-between";
-                stageText.innerText = "目前階段：高一各班各抽一位直屬";
-                stageRemText.innerText = check.uncompletedCount === 0
-                    ? "已完成"
-                    : `尚有 ${check.uncompletedCount} 人未抽到直屬`;
-            } else {
-                stageBox.className = "p-4 rounded-2xl border bg-purple-50 border-purple-200 text-purple-900 text-xs font-bold flex items-center justify-between";
-                stageText.innerText = g2Remaining === 0
-                    ? "目前階段：直屬配對已全部完成"
-                    : "目前階段：高一全數分配完成，從所有高一隨機加抽";
-                stageRemText.innerText = g2Remaining === 0
-                    ? "已完成"
-                    : `高二尚有 ${g2Remaining} 人待抽`;
+            if (stageBox && stageText && stageRemText) {
+                if (!check.isCompleted) {
+                    stageBox.className = "p-3 sm:p-4 rounded-2xl border bg-blue-50 border-blue-200 text-blue-900 text-xs font-bold flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 w-full";
+                    stageText.innerText = "目前階段：高一各班各抽一位直屬";
+                    stageRemText.innerText = check.uncompletedCount === 0 ? "已完成" : "尚有 " + check.uncompletedCount + " 人未抽到直屬";
+                } else {
+                    stageBox.className = "p-3 sm:p-4 rounded-2xl border bg-purple-50 border-purple-200 text-purple-900 text-xs font-bold flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 w-full";
+                    stageText.innerText = g2Remaining === 0 ? "目前階段：直屬配對已全部完成" : "目前階段：高一全數分配完成，從所有高一隨機加抽";
+                    stageRemText.innerText = g2Remaining === 0 ? "已完成" : "高二尚有 " + g2Remaining + " 人待抽";
+                }
             }
+
             if (!isShowingDrawResult) updateDrawSelection();
         }
 
         function updateDrawSelection() {
             isShowingDrawResult = false;
-            const selectedClass = document.getElementById('drawClassSelect')?.value;
+            const selectEl = document.getElementById('drawClassSelect');
+            const selectedClass = selectEl ? selectEl.value : '';
             const displayEl = document.getElementById('drawDisplayBox');
             const statusEl = document.getElementById('drawStatusText');
             if (!selectedClass || !displayEl || !statusEl) return;
 
             const studentMap = {};
-            allStudents.forEach(student => { studentMap[student.student_no] = student; });
-            const classPairings = allPairings
-                .filter(pairing => {
-                    const g1 = studentMap[pairing.g1_student_no];
-                    return g1 && String(g1.class_name || '').includes(selectedClass);
-                })
-                .sort((a, b) => {
-                    const seatA = parseInt(studentMap[a.g1_student_no]?.seat_no, 10) || 0;
-                    const seatB = parseInt(studentMap[b.g1_student_no]?.seat_no, 10) || 0;
-                    return seatA - seatB;
-                });
+            for (let i = 0; i < allStudents.length; i++) {
+                studentMap[allStudents[i].student_no] = allStudents[i];
+            }
 
-            statusEl.innerText = classPairings.length > 0
-                ? `${selectedClass} 班抽籤結果`
-                : `${selectedClass} 班尚未完成抽籤`;
+            const classPairings = allPairings.filter(function(pairing) {
+                const g1 = studentMap[pairing.g1_student_no];
+                return g1 && String(g1.class_name || '').indexOf(selectedClass) !== -1;
+            }).sort(function(a, b) {
+                const seatA = parseInt(studentMap[a.g1_student_no]?.seat_no, 10) || 0;
+                const seatB = parseInt(studentMap[b.g1_student_no]?.seat_no, 10) || 0;
+                return seatA - seatB;
+            });
+
+            statusEl.innerText = classPairings.length > 0 ? selectedClass + " 班抽籤結果" : selectedClass + " 班尚未完成抽籤";
 
             if (classPairings.length === 0) {
                 displayEl.innerHTML = '<div class="text-sm font-bold text-slate-400">目前尚無抽籤結果</div>';
                 return;
             }
 
-            displayEl.innerHTML = `
-                <div class="w-full max-h-96 overflow-y-auto custom-scrollbar p-2 space-y-2 text-left">
-                    <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 px-3 text-[10px] font-black text-slate-500">
-                        <div class="px-3">高一學生（學弟妹）</div>
-                        <div class="px-3 text-center">關係</div>
-                        <div class="px-3">高二直屬（學長姐）</div>
-                    </div>
-                    ${classPairings.map(pairing => {
-                        const g1 = studentMap[pairing.g1_student_no] || {};
-                        const g2 = studentMap[pairing.g2_student_no] || {};
-                        return `
-                            <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-stretch gap-2 bg-white border border-slate-200 rounded-xl shadow-sm p-3 text-xs">
-                                <div class="p-3 rounded-lg bg-blue-50 border border-blue-100">
-                                    <div class="font-black text-blue-800 text-sm">${escapeHtml(g1.name || '未知')}</div>
-                                    <div class="mt-1 text-[10px] text-slate-600 leading-5">
-                                        班級：${escapeHtml(g1.class_name || '-')} ｜ 座號：${escapeHtml(g1.seat_no || '-')}<br>
-                                        學號：${escapeHtml(pairing.g1_student_no)} ｜ 性別：${escapeHtml(g1.gender || '未註記')}
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-center text-blue-400 text-lg font-black">➔</div>
-                                <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-                                    <div class="font-black text-emerald-800 text-sm">${escapeHtml(g2.name || '未知')}</div>
-                                    <div class="mt-1 text-[10px] text-slate-600 leading-5">
-                                        班級：${escapeHtml(g2.class_name || '-')} ｜ 座號：${escapeHtml(g2.seat_no || '-')}<br>
-                                        學號：${escapeHtml(pairing.g2_student_no)} ｜ 性別：${escapeHtml(g2.gender || '未註記')}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
+            let html = '<div class="w-full max-h-96 overflow-y-auto custom-scrollbar p-1 sm:p-2 space-y-2 text-left">';
+            for (let i = 0; i < classPairings.length; i++) {
+                const pairing = classPairings[i];
+                const g1 = studentMap[pairing.g1_student_no] || {};
+                const g2 = studentMap[pairing.g2_student_no] || {};
+                html += '<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-1 sm:gap-2 bg-white border border-slate-200 rounded-xl shadow-xs p-2 sm:p-3 text-xs w-full">';
+                html += '<div class="p-2 sm:p-2.5 rounded-lg bg-blue-50 border border-blue-100 overflow-hidden">';
+                html += '<div class="font-black text-blue-800 text-xs sm:text-sm break-all">' + escapeHtml(g1.name || '未知') + '</div>';
+                html += '<div class="mt-0.5 text-[10px] text-slate-600 leading-tight break-all">' + escapeHtml(g1.class_name || '-') + ' ｜ ' + (g1.seat_no ? escapeHtml(g1.seat_no) + '號' : '-') + '</div>';
+                html += '<div class="text-[9px] text-slate-400 font-mono break-all">' + escapeHtml(pairing.g1_student_no) + '</div>';
+                html += '</div>';
+                html += '<div class="text-blue-400 text-sm sm:text-base font-black px-1 text-center">➔</div>';
+                html += '<div class="p-2 sm:p-2.5 rounded-lg bg-emerald-50 border border-emerald-100 overflow-hidden text-right">';
+                html += '<div class="font-black text-emerald-800 text-xs sm:text-sm break-all">' + escapeHtml(g2.name || '未知') + '</div>';
+                html += '<div class="mt-0.5 text-[10px] text-slate-600 leading-tight break-all">' + escapeHtml(g2.class_name || '-') + ' ｜ ' + (g2.seat_no ? escapeHtml(g2.seat_no) + '號' : '-') + '</div>';
+                html += '<div class="text-[9px] text-slate-400 font-mono break-all">' + escapeHtml(pairing.g2_student_no) + '</div>';
+                html += '</div></div>';
+            }
+            html += '</div>';
+            displayEl.innerHTML = html;
         }
 
         function getEligibleG2Students() {
-            const pairedG2Nos = new Set(allPairings.map(p => p.g2_student_no));
-            const allG2 = allStudents.filter(s => s.grade === 'G2' && !pairedG2Nos.has(s.student_no));
-            return allG2.filter(s => s.class_name.includes('502') || s.class_name.includes('503') || s.class_name.includes('504'));
+            const pairedG2Nos = new Set(allPairings.map(function(p) { return p.g2_student_no; }));
+            const allG2 = allStudents.filter(function(s) {
+                return s.grade === 'G2' && !pairedG2Nos.has(s.student_no);
+            });
+            return allG2.filter(function(s) {
+                return s.class_name && (s.class_name.indexOf('502') !== -1 || s.class_name.indexOf('503') !== -1 || s.class_name.indexOf('504') !== -1);
+            });
         }
 
         function getTargetG1Students() {
             const pairingCounts = {};
-            allPairings.forEach(pairing => {
-                pairingCounts[pairing.g1_student_no] = (pairingCounts[pairing.g1_student_no] || 0) + 1;
+            for (let i = 0; i < allPairings.length; i++) {
+                const sid = allPairings[i].g1_student_no;
+                pairingCounts[sid] = (pairingCounts[sid] || 0) + 1;
+            }
+            const validG1 = allStudents.filter(function(s) {
+                return s.grade === 'G1' && s.class_name && (
+                    s.class_name.indexOf('402') !== -1 ||
+                    s.class_name.indexOf('403') !== -1 ||
+                    s.class_name.indexOf('404') !== -1
+                );
             });
-            return allStudents.filter(s => s.grade === 'G1' && (
-                s.class_name.includes('402') ||
-                s.class_name.includes('403') ||
-                s.class_name.includes('404')
-            ) && pairingCounts[s.student_no] === 1);
+            if (validG1.length === 0) return [];
+            let minCount = 999999;
+            for (let i = 0; i < validG1.length; i++) {
+                const count = pairingCounts[validG1[i].student_no] || 0;
+                if (count < minCount) minCount = count;
+            }
+            return validG1.filter(function(s) {
+                return (pairingCounts[s.student_no] || 0) === minCount;
+            });
         }
 
         function shuffle(items) {
-            const result = [...items];
+            const result = items.slice();
             for (let i = result.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [result[i], result[j]] = [result[j], result[i]];
+                const temp = result[i];
+                result[i] = result[j];
+                result[j] = temp;
             }
             return result;
-        }
-
-        async function startSingleDraw() {
-            const selectedClass = document.getElementById('drawClassSelect').value;
-            const phaseOne = checkPhaseOneCompletion();
-            const classG1 = allStudents.filter(s => s.grade === 'G1' && s.class_name.includes(selectedClass));
-            if (!phaseOne.isCompleted && classG1.length === 0) {
-                showToast(`高一 ${selectedClass} 班尚未匯入學生名單！`, true);
-                return;
-            }
-
-            const availableG2 = getEligibleG2Students();
-            if (availableG2.length === 0) {
-                showToast(`高二已配對完畢，無剩餘名額！`, true);
-                return;
-            }
-
-            const pairedG1Set = new Set(allPairings.map(p => p.g1_student_no));
-            const unpairedInThisClass = classG1.filter(s => !pairedG1Set.has(s.student_no));
-
-            if (!phaseOne.isCompleted && unpairedInThisClass.length === 0) {
-                showToast(`【第一階段進行中】${selectedClass} 班已分配直屬！請先將其他班級抽完再進入加抽階段！`, true);
-                return;
-            }
-
-            let targetG1 = null;
-            let isSecondRound = false;
-
-            if (phaseOne.isCompleted) {
-                const targetG1Students = getTargetG1Students();
-                if (targetG1Students.length === 0) {
-                    showToast("目前沒有可供超額加抽的高一學生！", true);
-                    return;
-                }
-                targetG1 = targetG1Students[Math.floor(Math.random() * targetG1Students.length)];
-                isSecondRound = true;
-            } else if (unpairedInThisClass.length > 0) {
-                targetG1 = unpairedInThisClass[0];
-            } else {
-                showToast(`【第一階段進行中】請先完成所有班級的第一輪配對！`, true);
-                return;
-            }
-
-            const chosenG2 = availableG2[Math.floor(Math.random() * availableG2.length)];
-
-            document.getElementById('btnBatchDraw').disabled = true;
-
-            const displayEl = document.getElementById('drawDisplayBox');
-            const statusEl = document.getElementById('drawStatusText');
-            statusEl.innerText = `正在為 ${targetG1.class_name} 班 ${targetG1.name} 抽選直屬學長姐...`;
-
-            let counter = 0;
-            const interval = setInterval(() => {
-                const randCandidate = availableG2[Math.floor(Math.random() * availableG2.length)];
-                displayEl.innerHTML = `
-                    <div class="text-3xl sm:text-5xl font-black text-slate-800 tracking-wider">
-                        ${escapeHtml(randCandidate.class_name)} ${escapeHtml(randCandidate.name)}
-                    </div>
-                `;
-                counter++;
-                if (counter > 16) {
-                    clearInterval(interval);
-                    saveSinglePairing(targetG1, chosenG2, isSecondRound);
-                }
-            }, 60);
-        }
-
-        async function saveSinglePairing(g1Student, g2Student, isSecondRound) {
-            try {
-                const { error } = await client.from('pairings').insert({
-                    g1_student_no: g1Student.student_no,
-                    g2_student_no: g2Student.student_no
-                });
-                if (error) throw error;
-
-                document.getElementById('drawDisplayBox').innerHTML = `
-                    <div class="flex flex-wrap items-center justify-center gap-3 text-2xl sm:text-4xl font-black py-4">
-                        <span class="text-blue-600 bg-blue-50 px-4 py-2 rounded-2xl border border-blue-200">
-                            ${escapeHtml(g1Student.class_name)} ${g1Student.seat_no ? `${escapeHtml(g1Student.seat_no)}號 ` : ''}${escapeHtml(g1Student.name)}
-                        </span>
-                        <span class="text-slate-400 text-lg sm:text-xl font-bold">
-                            配對 ➔
-                        </span>
-                        <span class="text-emerald-600 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-200">
-                            ${escapeHtml(g2Student.class_name)} ${g2Student.seat_no ? `${escapeHtml(g2Student.seat_no)}號 ` : ''}${escapeHtml(g2Student.name)}
-                        </span>
-                    </div>
-                `;
-                isShowingDrawResult = true;
-                document.getElementById('drawStatusText').innerText = "🎉 抽選配對成功！";
-                showToast(`🎉 配對成功：${g1Student.name} ➔ ${g2Student.name}！`);
-                await logAudit(isSecondRound ? "現場單人超額加抽" : "現場單人抽取直屬", {
-                    g1: `${g1Student.class_name} ${g1Student.name} (${g1Student.student_no})`,
-                    g2: `${g2Student.class_name} ${g2Student.name} (${g2Student.student_no})`
-                });
-                await loadData();
-            } catch (err) {
-                showToast("配對儲存失敗：" + err.message, true);
-            } finally {
-                document.getElementById('btnBatchDraw').disabled = false;
-            }
         }
 
         async function startBatchDraw() {
             const selectedClass = document.getElementById('drawClassSelect').value;
             const phaseOne = checkPhaseOneCompletion();
-            const classG1 = allStudents.filter(s => s.grade === 'G1' && s.class_name.includes(selectedClass));
+            const classG1 = allStudents.filter(function(s) {
+                return s.grade === 'G1' && s.class_name && s.class_name.indexOf(selectedClass) !== -1;
+            });
+
             if (!phaseOne.isCompleted && classG1.length === 0) {
-                showToast(`高一 ${selectedClass} 班尚未匯入學生名冊！`, true);
+                showToast("高一 " + selectedClass + " 班尚未匯入學生名冊！", true);
                 return;
             }
 
             const availableG2 = getEligibleG2Students();
             if (availableG2.length === 0) {
-                showToast(`高二已配對完畢，無剩餘名額！`, true);
+                showToast("高二已配對完畢，無剩餘名額！", true);
                 return;
             }
 
-            const pairedG1Set = new Set(allPairings.map(p => p.g1_student_no));
-            const unpairedInThisClass = classG1.filter(s => !pairedG1Set.has(s.student_no));
+            const pairedG1Set = new Set(allPairings.map(function(p) { return p.g1_student_no; }));
+            const unpairedInThisClass = classG1.filter(function(s) { return !pairedG1Set.has(s.student_no); });
 
             if (!phaseOne.isCompleted && unpairedInThisClass.length === 0) {
-                showToast(`【第一階段進行中】${selectedClass} 班高一已全數配對！請先至其他尚未抽完的班級進行抽籤！`, true);
+                showToast("【第一階段進行中】" + selectedClass + " 班高一已全數配對！請先至其他尚未抽完的班級進行抽籤！", true);
                 return;
             }
 
             const shuffledG2 = shuffle(availableG2);
-            const targetG1Students = phaseOne.isCompleted ? shuffle(getTargetG1Students()) : unpairedInThisClass;
+            let targetG1Students = [];
+
+            if (phaseOne.isCompleted) {
+                const candidates = shuffle(getTargetG1Students());
+                if (candidates.length === 0) {
+                    showToast("目前沒有可供抽籤的高一學生！", true);
+                    return;
+                }
+                for (let i = 0; i < shuffledG2.length; i++) {
+                    targetG1Students.push(candidates[i % candidates.length]);
+                }
+            } else {
+                targetG1Students = unpairedInThisClass;
+            }
+
             const drawCount = Math.min(targetG1Students.length, shuffledG2.length);
             if (drawCount === 0) {
                 showToast("目前沒有可供抽籤的高一學生！", true);
@@ -653,101 +615,89 @@
                     g1_student_no: g1.student_no,
                     g2_student_no: g2.student_no
                 });
-                resultList.push({ g1, g2 });
+                resultList.push({ g1: g1, g2: g2 });
             }
 
-            document.getElementById('btnBatchDraw').disabled = true;
+            const btn = document.getElementById('btnBatchDraw');
+            if (btn) btn.disabled = true;
 
             try {
-                const { error } = await client.from('pairings').insert(pairingsPayload);
-                if (error) throw error;
+                const res = await client.from('pairings').insert(pairingsPayload);
+                if (res.error) throw res.error;
 
                 const isExtra = phaseOne.isCompleted;
-                const msg = isExtra 
-                    ? `🎉 已從所有高一隨機完成加抽（共 ${pairingsPayload.length} 組）！`
-                    : `🎉 ${selectedClass} 班完成批次第一輪抽配（共 ${pairingsPayload.length} 組）！`;
+                const msg = isExtra
+                    ? "🎉 已從所有高一隨機完成加抽（共 " + pairingsPayload.length + " 組）！"
+                    : "🎉 " + selectedClass + " 班完成批次第一輪抽配（共 " + pairingsPayload.length + " 組）！";
 
                 showToast(msg);
                 document.getElementById('drawStatusText').innerText = isExtra
-                    ? `✨ 已從所有高一隨機完成超額加抽！本次共完成 ${pairingsPayload.length} 組直屬名單如下：`
-                    : `✨ 已完成 ${selectedClass} 班自動抽配！本次共完成 ${pairingsPayload.length} 組直屬名單如下：`;
+                    ? "✨ 已從所有高一隨機完成超額加抽！本次共完成 " + pairingsPayload.length + " 組直屬："
+                    : "✨ 已完成 " + selectedClass + " 班自動抽配！本次共完成 " + pairingsPayload.length + " 組直屬：";
 
-                const displayEl = document.getElementById('drawDisplayBox');
-                displayEl.innerHTML = `
-                    <div class="w-full max-h-96 overflow-y-auto custom-scrollbar p-1 space-y-1 text-left">
-                        <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-1 px-2 text-[10px] font-black text-slate-500">
-                            <div class="px-2">高一學生（學弟妹）</div>
-                            <div class="px-2 text-center">關係</div>
-                            <div class="px-2">高二直屬（學長姐）</div>
-                        </div>
-                        ${resultList.map(item => `
-                            <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-1.5 text-xs">
-                                <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-stretch gap-1">
-                                    <div class="p-2 rounded-md bg-blue-50 border border-blue-100">
-                                        <div class="font-black text-blue-800 text-sm leading-tight">${escapeHtml(item.g1.name)}</div>
-                                        <div class="mt-0.5 text-[10px] text-slate-600 leading-4">
-                                            年級：${item.g1.grade === 'G1' ? '高一' : escapeHtml(item.g1.grade || '-')} ｜ 班級：${escapeHtml(item.g1.class_name)}<br>
-                                            座號：${escapeHtml(item.g1.seat_no || '-')} ｜ 學號：${escapeHtml(item.g1.student_no)} ｜ 性別：${escapeHtml(item.g1.gender || '未註記')}
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-center text-blue-400 text-base font-black">➔</div>
-                                    <div class="p-2 rounded-md bg-emerald-50 border border-emerald-100">
-                                        <div class="font-black text-emerald-800 text-sm leading-tight">${escapeHtml(item.g2.name)}</div>
-                                        <div class="mt-0.5 text-[10px] text-slate-600 leading-4">
-                                            年級：${item.g2.grade === 'G2' ? '高二' : escapeHtml(item.g2.grade || '-')} ｜ 班級：${escapeHtml(item.g2.class_name)}<br>
-                                            座號：${escapeHtml(item.g2.seat_no || '-')} ｜ 學號：${escapeHtml(item.g2.student_no)} ｜ 性別：${escapeHtml(item.g2.gender || '未註記')}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                let html = '<div class="w-full max-h-96 overflow-y-auto custom-scrollbar p-1 space-y-2 text-left">';
+                for (let i = 0; i < resultList.length; i++) {
+                    const item = resultList[i];
+                    html += '<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-1 sm:gap-2 bg-white border border-slate-200 rounded-xl shadow-xs p-2 text-xs w-full">';
+                    html += '<div class="p-2 rounded-md bg-blue-50 border border-blue-100 overflow-hidden">';
+                    html += '<div class="font-black text-blue-800 text-xs sm:text-sm break-all">' + escapeHtml(item.g1.name) + '</div>';
+                    html += '<div class="mt-0.5 text-[10px] text-slate-600 break-all">' + escapeHtml(item.g1.class_name) + ' ｜ ' + (item.g1.seat_no ? escapeHtml(item.g1.seat_no) + '號' : '-') + '</div>';
+                    html += '<div class="text-[9px] text-slate-400 font-mono break-all">' + escapeHtml(item.g1.student_no) + '</div>';
+                    html += '</div>';
+                    html += '<div class="text-blue-400 text-sm font-black px-1 text-center">➔</div>';
+                    html += '<div class="p-2 rounded-md bg-emerald-50 border border-emerald-100 overflow-hidden text-right">';
+                    html += '<div class="font-black text-emerald-800 text-xs sm:text-sm break-all">' + escapeHtml(item.g2.name) + '</div>';
+                    html += '<div class="mt-0.5 text-[10px] text-slate-600 break-all">' + escapeHtml(item.g2.class_name) + ' ｜ ' + (item.g2.seat_no ? escapeHtml(item.g2.seat_no) + '號' : '-') + '</div>';
+                    html += '<div class="text-[9px] text-slate-400 font-mono break-all">' + escapeHtml(item.g2.student_no) + '</div>';
+                    html += '</div></div>';
+                }
+                html += '</div>';
+
+                document.getElementById('drawDisplayBox').innerHTML = html;
                 isShowingDrawResult = true;
 
+                const auditClassName = isExtra ? "所有目標高一" : selectedClass;
                 await logAudit(isExtra ? "全體高一隨機超額加抽" : "班級批次抽直屬", {
-                    class: isExtra ? "所有目標高一" : selectedClass,
+                    class: auditClassName,
                     count: pairingsPayload.length
                 });
                 await loadData();
             } catch (err) {
                 showToast("批次配對失敗：" + err.message, true);
             } finally {
-                document.getElementById('btnBatchDraw').disabled = false;
+                if (btn) btn.disabled = false;
             }
         }
 
         function renderPairingsTable() {
             const tbody = document.getElementById('pairingsTableBody');
+            const cardList = document.getElementById('pairingsCardList');
             const countBadge = document.getElementById('pairedCountBadge');
             const classFilter = document.getElementById('filterPairingClass')?.value || 'ALL';
-            if (!tbody) return;
+            if (!tbody || !cardList) return;
 
             const studentMap = {};
-            allStudents.forEach(s => { studentMap[s.student_no] = s; });
+            for (let i = 0; i < allStudents.length; i++) {
+                studentMap[allStudents[i].student_no] = allStudents[i];
+            }
 
-            const g1Counts = {};
-            allPairings.forEach(p => {
-                g1Counts[p.g1_student_no] = (g1Counts[p.g1_student_no] || 0) + 1;
-            });
-
-            currentFilteredPairings = allPairings.filter(p => {
+            currentFilteredPairings = allPairings.filter(function(p) {
                 const g1 = studentMap[p.g1_student_no] || {};
                 const g2 = studentMap[p.g2_student_no] || {};
                 if (classFilter !== 'ALL' &&
-                    !String(g1.class_name || '').includes(classFilter) &&
-                    !String(g2.class_name || '').includes(classFilter)) return false;
+                    String(g1.class_name || '').indexOf(classFilter) === -1 &&
+                    String(g2.class_name || '').indexOf(classFilter) === -1) return false;
                 return true;
             });
 
-            currentFilteredPairings.sort((a, b) => {
+            currentFilteredPairings.sort(function(a, b) {
                 const g1A = studentMap[a.g1_student_no] || { class_name: '', seat_no: 0 };
                 const g1B = studentMap[b.g1_student_no] || { class_name: '', seat_no: 0 };
                 const g2A = studentMap[a.g2_student_no] || { class_name: '', seat_no: 0 };
                 const g2B = studentMap[b.g2_student_no] || { class_name: '', seat_no: 0 };
 
-                const selectedA = classFilter !== 'ALL' && String(g1A.class_name || '').includes(classFilter) ? g1A : g2A;
-                const selectedB = classFilter !== 'ALL' && String(g1B.class_name || '').includes(classFilter) ? g1B : g2B;
+                const selectedA = classFilter !== 'ALL' && String(g1A.class_name || '').indexOf(classFilter) !== -1 ? g1A : g2A;
+                const selectedB = classFilter !== 'ALL' && String(g1B.class_name || '').indexOf(classFilter) !== -1 ? g1B : g2B;
                 const classA = classFilter === 'ALL' ? g1A.class_name : selectedA.class_name;
                 const classB = classFilter === 'ALL' ? g1B.class_name : selectedB.class_name;
                 const classCompare = String(classA || '').localeCompare(String(classB || ''), undefined, { numeric: true });
@@ -757,36 +707,51 @@
                 return sortSeatA - sortSeatB;
             });
 
-            if (countBadge) countBadge.innerText = `共 ${currentFilteredPairings.length} 組關係`;
+            if (countBadge) countBadge.innerText = "共 " + currentFilteredPairings.length + " 組";
 
             if (currentFilteredPairings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">目前無符合條件之配對記錄。</td></tr>`;
+                tbody.innerHTML = '<tr><td colspan="11" class="p-6 text-center text-slate-400">目前無符合條件之配對記錄。</td></tr>';
+                cardList.innerHTML = '<div class="p-6 text-center text-xs text-slate-400 font-bold">目前無符合條件之配對記錄。</div>';
                 return;
             }
 
-            tbody.innerHTML = currentFilteredPairings.map(p => {
+            let tableHtml = '';
+            let cardHtml = '';
+            for (let i = 0; i < currentFilteredPairings.length; i++) {
+                const p = currentFilteredPairings[i];
                 const g1 = studentMap[p.g1_student_no] || { name: '未知', class_name: '-', seat_no: '-' };
                 const g2 = studentMap[p.g2_student_no] || { name: '未知', class_name: '-', seat_no: '-' };
-                const hasTwoMentors = (g1Counts[p.g1_student_no] || 0) > 1;
 
-                return `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold">${escapeHtml(g1.class_name)} 班</td>
-                        <td class="p-3 font-mono text-slate-800">${g1.seat_no ? `${escapeHtml(g1.seat_no)}號` : '-'}</td>
-                        <td class="p-3 font-black text-slate-900">
-                            ${escapeHtml(g1.name)}
-                        </td>
-                        <td class="p-3 font-mono text-slate-500">${escapeHtml(p.g1_student_no)}</td>
-                        <td class="p-3">${escapeHtml(g1.gender || '-')}</td>
-                        <td class="p-3 text-center text-blue-600 font-black">➔</td>
-                        <td class="p-3 font-bold">${escapeHtml(g2.class_name)} 班</td>
-                        <td class="p-3 font-mono text-slate-800">${g2.seat_no ? `${escapeHtml(g2.seat_no)}號` : '-'}</td>
-                        <td class="p-3 font-black text-slate-900">${escapeHtml(g2.name)}</td>
-                        <td class="p-3 font-mono text-slate-500">${escapeHtml(p.g2_student_no)}</td>
-                        <td class="p-3">${escapeHtml(g2.gender || '-')}</td>
-                    </tr>
-                `;
-            }).join('');
+                tableHtml += '<tr class="hover:bg-slate-50 transition">';
+                tableHtml += '<td class="p-2.5 font-bold break-all">' + escapeHtml(g1.class_name) + '</td>';
+                tableHtml += '<td class="p-2.5 font-mono text-slate-800">' + (g1.seat_no ? escapeHtml(g1.seat_no) : '-') + '</td>';
+                tableHtml += '<td class="p-2.5 font-black text-slate-900 break-all">' + escapeHtml(g1.name) + '</td>';
+                tableHtml += '<td class="p-2.5 font-mono text-slate-500 break-all">' + escapeHtml(p.g1_student_no) + '</td>';
+                tableHtml += '<td class="p-2.5">' + escapeHtml(g1.gender || '-') + '</td>';
+                tableHtml += '<td class="p-2.5 text-center text-blue-600 font-black">➔</td>';
+                tableHtml += '<td class="p-2.5 font-bold break-all">' + escapeHtml(g2.class_name) + '</td>';
+                tableHtml += '<td class="p-2.5 font-mono text-slate-800">' + (g2.seat_no ? escapeHtml(g2.seat_no) : '-') + '</td>';
+                tableHtml += '<td class="p-2.5 font-black text-slate-900 break-all">' + escapeHtml(g2.name) + '</td>';
+                tableHtml += '<td class="p-2.5 font-mono text-slate-500 break-all">' + escapeHtml(p.g2_student_no) + '</td>';
+                tableHtml += '<td class="p-2.5">' + escapeHtml(g2.gender || '-') + '</td>';
+                tableHtml += '</tr>';
+
+                cardHtml += '<div class="p-2.5 rounded-xl border border-slate-200 bg-white shadow-xs w-full">';
+                cardHtml += '<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 text-xs w-full">';
+                cardHtml += '<div class="p-2 rounded-lg bg-blue-50/70 border border-blue-100 overflow-hidden">';
+                cardHtml += '<div class="font-black text-blue-900 text-xs break-all">' + escapeHtml(g1.name) + ' <span class="text-[10px] text-blue-600 font-normal">(' + escapeHtml(g1.gender || '-') + ')</span></div>';
+                cardHtml += '<div class="text-[10px] text-slate-600 mt-0.5 break-all">' + escapeHtml(g1.class_name) + ' 班 ｜ ' + (g1.seat_no ? escapeHtml(g1.seat_no) + '號' : '-') + '</div>';
+                cardHtml += '<div class="text-[9px] text-slate-400 font-mono break-all">' + escapeHtml(p.g1_student_no) + '</div>';
+                cardHtml += '</div>';
+                cardHtml += '<div class="text-blue-500 text-xs font-black text-center px-1">➔</div>';
+                cardHtml += '<div class="p-2 rounded-lg bg-emerald-50/70 border border-emerald-100 overflow-hidden text-right">';
+                cardHtml += '<div class="font-black text-emerald-900 text-xs break-all">' + escapeHtml(g2.name) + ' <span class="text-[10px] text-emerald-600 font-normal">(' + escapeHtml(g2.gender || '-') + ')</span></div>';
+                cardHtml += '<div class="text-[10px] text-slate-600 mt-0.5 break-all">' + escapeHtml(g2.class_name) + ' 班 ｜ ' + (g2.seat_no ? escapeHtml(g2.seat_no) + '號' : '-') + '</div>';
+                cardHtml += '<div class="text-[9px] text-slate-400 font-mono break-all">' + escapeHtml(p.g2_student_no) + '</div>';
+                cardHtml += '</div></div></div>';
+            }
+            tbody.innerHTML = tableHtml;
+            cardList.innerHTML = cardHtml;
         }
 
         function exportFilteredPairings() {
@@ -795,9 +760,11 @@
                 return;
             }
             const studentMap = {};
-            allStudents.forEach(s => { studentMap[s.student_no] = s; });
+            for (let i = 0; i < allStudents.length; i++) {
+                studentMap[allStudents[i].student_no] = allStudents[i];
+            }
 
-            const rows = currentFilteredPairings.map(p => {
+            const rows = currentFilteredPairings.map(function(p) {
                 const g1 = studentMap[p.g1_student_no] || {};
                 const g2 = studentMap[p.g2_student_no] || {};
                 return {
@@ -805,13 +772,12 @@
                     "高一座號": g1.seat_no || '',
                     "高一姓名": g1.name || '',
                     "高一學號": p.g1_student_no,
-                    "高一年級": g1.grade || '',
                     "高一性別": g1.gender || '',
+                    "關係": "➔",
+                    "高二班級": g2.class_name || '',
+                    "高二座號": g2.seat_no || '',
                     "高二直屬姓名": g2.name || '',
-                    "高二直屬班級": g2.class_name || '',
-                    "高二直屬座號": g2.seat_no || '',
-                    "高二直屬學號": p.g2_student_no,
-                    "高二年級": g2.grade || '',
+                    "高二學號": p.g2_student_no,
                     "高二性別": g2.gender || ''
                 };
             });
@@ -819,32 +785,36 @@
             const ws = XLSX.utils.json_to_sheet(rows);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "已配對清冊");
-            XLSX.writeFile(wb, `直屬配對清冊_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            XLSX.writeFile(wb, "直屬配對清冊_" + new Date().toISOString().slice(0, 10) + ".xlsx");
         }
 
         function renderUnpairedTable() {
             const tbody = document.getElementById('unpairedTableBody');
+            const cardList = document.getElementById('unpairedCardList');
             const countBadge = document.getElementById('unpairedCountBadge');
             const gradeFilter = document.getElementById('filterUnpairedGrade')?.value || 'ALL';
             const classFilter = document.getElementById('filterUnpairedClass')?.value || 'ALL';
-            if (!tbody) return;
+            if (!tbody || !cardList) return;
 
-            const pairedG1Set = new Set(allPairings.map(p => p.g1_student_no));
-            const pairedG2Set = new Set(allPairings.map(p => p.g2_student_no));
+            const pairedG1Set = new Set(allPairings.map(function(p) { return p.g1_student_no; }));
+            const pairedG2Set = new Set(allPairings.map(function(p) { return p.g2_student_no; }));
 
-            let list = allStudents.filter(s => {
+            let list = allStudents.filter(function(s) {
                 if (s.grade === 'G1' && pairedG1Set.has(s.student_no)) return false;
                 if (s.grade === 'G2' && pairedG2Set.has(s.student_no)) return false;
                 return true;
             });
 
-            if (gradeFilter !== 'ALL') list = list.filter(s => s.grade === gradeFilter);
-            if (classFilter !== 'ALL') list = list.filter(s => s.class_name.includes(classFilter));
+            if (gradeFilter !== 'ALL') {
+                list = list.filter(function(s) { return s.grade === gradeFilter; });
+            }
+            if (classFilter !== 'ALL') {
+                list = list.filter(function(s) { return s.class_name && s.class_name.indexOf(classFilter) !== -1; });
+            }
 
-            list.sort((a, b) => {
+            list.sort(function(a, b) {
                 const seatA = parseInt(a.seat_no, 10) || 0;
                 const seatB = parseInt(b.seat_no, 10) || 0;
-
                 if (classFilter !== 'ALL') {
                     return seatA - seatB;
                 } else {
@@ -855,31 +825,45 @@
             });
 
             currentFilteredUnpaired = list;
-            if (countBadge) countBadge.innerText = `共 ${currentFilteredUnpaired.length} 人`;
+            if (countBadge) countBadge.innerText = "共 " + currentFilteredUnpaired.length + " 人";
 
             if (currentFilteredUnpaired.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">目前沒有尚未配對之學生！</td></tr>`;
+                tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">目前沒有尚未配對之學生！</td></tr>';
+                cardList.innerHTML = '<div class="p-6 text-center text-xs text-slate-400 font-bold">目前沒有尚未配對之學生！</div>';
                 return;
             }
 
-            tbody.innerHTML = currentFilteredUnpaired.map(s => {
+            let tableHtml = '';
+            let cardHtml = '';
+            for (let i = 0; i < currentFilteredUnpaired.length; i++) {
+                const s = currentFilteredUnpaired[i];
                 const isG1 = s.grade === 'G1';
                 const statusTag = isG1 
-                    ? '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">高一 ｜ 尚無直屬</span>'
-                    : '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200">高二 ｜ 待抽籤池</span>';
+                    ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">未配對</span>'
+                    : '<span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200">待抽籤</span>';
 
-                return `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold text-slate-800">${s.class_name} 班</td>
-                        <td class="p-3 font-mono text-slate-800">${s.seat_no ? `${s.seat_no}號` : '-'}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-black ${isG1 ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}">${isG1 ? '高一' : '高二'}</span></td>
-                        <td class="p-3 font-black text-slate-900">${s.name}</td>
-                        <td class="p-3 font-mono text-slate-500">${s.student_no}</td>
-                        <td class="p-3">${s.gender || '-'}</td>
-                        <td class="p-3">${statusTag}</td>
-                    </tr>
-                `;
-            }).join('');
+                tableHtml += '<tr class="hover:bg-slate-50 transition">';
+                tableHtml += '<td class="p-2.5 font-bold text-slate-800 break-all">' + escapeHtml(s.class_name) + ' 班</td>';
+                tableHtml += '<td class="p-2.5 font-mono text-slate-800">' + (s.seat_no ? escapeHtml(s.seat_no) : '-') + '</td>';
+                tableHtml += '<td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-black ' + (isG1 ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700') + '">' + (isG1 ? '高一' : '高二') + '</span></td>';
+                tableHtml += '<td class="p-2.5 font-black text-slate-900 break-all">' + escapeHtml(s.name) + '</td>';
+                tableHtml += '<td class="p-2.5 font-mono text-slate-500 break-all">' + escapeHtml(s.student_no) + '</td>';
+                tableHtml += '<td class="p-2.5">' + escapeHtml(s.gender || '-') + '</td>';
+                tableHtml += '<td class="p-2.5">' + statusTag + '</td>';
+                tableHtml += '</tr>';
+
+                cardHtml += '<div class="p-2.5 rounded-xl border border-slate-200 bg-white shadow-xs flex items-center justify-between text-xs gap-2 w-full">';
+                cardHtml += '<div class="overflow-hidden">';
+                cardHtml += '<div class="font-black text-slate-900 text-xs break-all">' + escapeHtml(s.name) + ' <span class="text-[10px] font-mono text-slate-400">(' + escapeHtml(s.student_no) + ')</span></div>';
+                cardHtml += '<div class="text-[10px] text-slate-500 mt-0.5 break-all">' + escapeHtml(s.class_name) + ' 班 ｜ ' + (s.seat_no ? escapeHtml(s.seat_no) + '號' : '-') + ' ｜ 性別: ' + escapeHtml(s.gender || '-') + '</div>';
+                cardHtml += '</div>';
+                cardHtml += '<div class="shrink-0 flex items-center gap-1.5">';
+                cardHtml += '<span class="px-1.5 py-0.5 rounded text-[10px] font-black ' + (isG1 ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700') + '">' + (isG1 ? '高一' : '高二') + '</span>';
+                cardHtml += statusTag;
+                cardHtml += '</div></div>';
+            }
+            tbody.innerHTML = tableHtml;
+            cardList.innerHTML = cardHtml;
         }
 
         function exportFilteredUnpaired() {
@@ -887,21 +871,31 @@
                 showToast("無未配對名冊可供匯出！", true);
                 return;
             }
-            const rows = currentFilteredUnpaired.map(s => ({
-                "班級": s.class_name,
-                "座號": s.seat_no || '',
-                "年級": s.grade === 'G1' ? '高一' : '高二',
-                "姓名": s.name,
-                "學號": s.student_no,
-                "性別": s.gender || '',
-                "狀態": s.grade === 'G1' ? '尚無直屬' : '待抽籤池'
-            }));
+            const rows = currentFilteredUnpaired.map(function(s) {
+                return {
+                    "班級": s.class_name,
+                    "座號": s.seat_no || '',
+                    "年級": s.grade === 'G1' ? '高一' : '高二',
+                    "姓名": s.name,
+                    "學號": s.student_no,
+                    "性別": s.gender || '',
+                    "狀態": s.grade === 'G1' ? '尚無直屬' : '待抽籤池'
+                };
+            });
 
             const ws = XLSX.utils.json_to_sheet(rows);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "未被抽取名冊");
-            XLSX.writeFile(wb, `未被抽取學生名冊_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            XLSX.writeFile(wb, "未被抽取學生名冊_" + new Date().toISOString().slice(0, 10) + ".xlsx");
         }
+
+        window.setRoute = setRoute;
+        window.updateDrawSelection = updateDrawSelection;
+        window.startBatchDraw = startBatchDraw;
+        window.renderPairingsTable = renderPairingsTable;
+        window.exportFilteredPairings = exportFilteredPairings;
+        window.renderUnpairedTable = renderUnpairedTable;
+        window.exportFilteredUnpaired = exportFilteredUnpaired;
 
         window.addEventListener('hashchange', handleHashRouting);
         window.addEventListener('DOMContentLoaded', loadData);
