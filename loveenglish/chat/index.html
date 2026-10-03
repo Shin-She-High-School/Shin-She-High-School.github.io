@@ -134,6 +134,8 @@
     </div>
 
     <script>
+        const STORAGE_KEY = 'sshs_chat_auth_user';
+
         function updateAppHeight() {
             const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
             document.documentElement.style.setProperty('--app-height', `${h}px`);
@@ -263,7 +265,22 @@
                 }
 
                 currentUser = verifiedStudent;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
                 await loadChatRooms();
+            }
+        }
+
+        async function autoLoginCheck() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) return;
+                const user = JSON.parse(saved);
+                if (user && user.student_no && user.name) {
+                    currentUser = user;
+                    await loadChatRooms();
+                }
+            } catch (e) {
+                localStorage.removeItem(STORAGE_KEY);
             }
         }
 
@@ -295,6 +312,9 @@
 
             } catch (err) {
                 showError("載入失敗：" + err.message);
+                localStorage.removeItem(STORAGE_KEY);
+                document.getElementById('chatSection').classList.add('hidden');
+                document.getElementById('loginSection').classList.remove('hidden');
             }
         }
 
@@ -411,6 +431,7 @@
         }
 
         function logout() {
+            localStorage.removeItem(STORAGE_KEY);
             if (realtimeChannel) client.removeChannel(realtimeChannel);
             currentUser = null;
             verifiedStudent = null;
@@ -424,6 +445,8 @@
             document.getElementById('loginSection').classList.remove('hidden');
             resetToStep1();
         }
+
+        autoLoginCheck();
     </script>
 </body>
 </html>
