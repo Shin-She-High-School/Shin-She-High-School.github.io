@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>直屬聊天室</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,9 +10,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body {
+        :root {
+            --app-height: 100dvh;
+        }
+        html, body {
+            height: 100%;
+            height: var(--app-height);
             font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+        }
+        .chat-app-container {
+            height: 100%;
+            height: var(--app-height);
+        }
+        @media (min-width: 640px) {
+            .chat-app-container {
+                height: min(850px, 92vh);
+            }
         }
         .chat-scroll::-webkit-scrollbar {
             width: 4px;
@@ -30,14 +45,17 @@
             background: #ffffff;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
         }
+        .safe-bottom {
+            padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
+        }
     </style>
 </head>
-<body class="bg-[#f0f2f5] text-slate-900 min-h-screen flex items-center justify-center sm:p-4">
+<body class="bg-[#f0f2f5] text-slate-900 flex items-center justify-center sm:p-4">
 
-    <div class="w-full max-w-md bg-white sm:rounded-3xl shadow-xl h-[100dvh] sm:h-[840px] flex flex-col overflow-hidden relative border border-slate-200/80">
+    <div class="chat-app-container w-full max-w-md bg-white sm:rounded-3xl shadow-xl flex flex-col overflow-hidden relative border-0 sm:border border-slate-200/80">
 
-        <div id="loginSection" class="flex-1 flex flex-col justify-center px-6 py-8 bg-slate-50">
-            <div class="bg-white p-7 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+        <div id="loginSection" class="flex-1 flex flex-col justify-center px-6 py-8 bg-slate-50 overflow-y-auto">
+            <div class="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 shadow-sm space-y-5 my-auto">
                 <div class="text-center space-y-1">
                     <div class="w-14 h-14 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 font-bold">
                         💬
@@ -98,9 +116,9 @@
 
             <div id="targetTabsContainer" class="hidden bg-slate-800/95 border-b border-slate-700/50 px-3 py-1.5 flex gap-2 overflow-x-auto chat-scroll shrink-0"></div>
 
-            <main id="messageList" class="flex-1 overflow-y-auto p-4 space-y-3.5 chat-scroll bg-[#f4ede4] bg-opacity-70"></main>
+            <main id="messageList" class="flex-1 overflow-y-auto p-4 space-y-3.5 chat-scroll bg-[#f4ede4] bg-opacity-70 min-h-0"></main>
 
-            <footer class="bg-white p-2.5 border-t border-slate-200/80 shrink-0">
+            <footer class="bg-white px-2.5 pt-2 safe-bottom border-t border-slate-200/80 shrink-0 z-10">
                 <form onsubmit="handleSendMessage(event)" class="flex items-center gap-2">
                     <div class="flex-1 bg-slate-100 rounded-full px-4 py-2 border border-slate-200/80 focus-within:border-emerald-500 focus-within:bg-white transition flex items-center">
                         <input type="text" id="inputMessage" placeholder="輸入訊息..." autocomplete="off" class="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 font-normal">
@@ -116,6 +134,27 @@
     </div>
 
     <script>
+        function updateAppHeight() {
+            const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            document.documentElement.style.setProperty('--app-height', `${h}px`);
+        }
+        window.addEventListener('resize', updateAppHeight);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', updateAppHeight);
+            window.visualViewport.addEventListener('scroll', updateAppHeight);
+        }
+        updateAppHeight();
+
+        const inputMsg = document.getElementById('inputMessage');
+        if (inputMsg) {
+            inputMsg.addEventListener('focus', () => {
+                setTimeout(() => {
+                    updateAppHeight();
+                    scrollToBottom();
+                }, 300);
+            });
+        }
+
         const SUPABASE_URL = "https://qpqtiavufscdfwhabnod.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_ehTz6hW_jpdiO7Ht3Xq-yw_UoRl7F6M";
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -352,7 +391,9 @@
 
         function scrollToBottom() {
             const listEl = document.getElementById('messageList');
-            listEl.scrollTop = listEl.scrollHeight;
+            if (listEl) {
+                listEl.scrollTop = listEl.scrollHeight;
+            }
         }
 
         async function handleSendMessage(e) {
