@@ -16,7 +16,7 @@
         html, body {
             height: 100%;
             height: var(--app-height);
-            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
         }
@@ -48,12 +48,22 @@
         .safe-bottom {
             padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
         }
+        .typing-dot {
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
     </style>
 </head>
 <body class="bg-[#f0f2f5] text-slate-900 flex items-center justify-center sm:p-4">
 
     <div class="chat-app-container w-full max-w-md bg-white sm:rounded-3xl shadow-xl flex flex-col overflow-hidden relative border-0 sm:border border-slate-200/80">
 
+        <!-- 登入卡片 -->
         <div id="loginSection" class="flex-1 flex flex-col justify-center px-6 py-8 bg-slate-50 overflow-y-auto">
             <div class="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 shadow-sm space-y-5 my-auto">
                 <div class="text-center space-y-1">
@@ -88,8 +98,10 @@
             </div>
         </div>
 
+        <!-- 聊天室主畫面 -->
         <div id="chatSection" class="hidden flex-1 flex flex-col h-full bg-[#efeae2] relative overflow-hidden">
             
+            <!-- 頂部資訊列 -->
             <header class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between shadow-sm z-10 shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="relative">
@@ -114,14 +126,37 @@
                 </div>
             </header>
 
+            <!-- 多位直屬分頁列 -->
             <div id="targetTabsContainer" class="hidden bg-slate-800/95 border-b border-slate-700/50 px-3 py-1.5 flex gap-2 overflow-x-auto chat-scroll shrink-0"></div>
 
+            <!-- 對話紀錄串 -->
             <main id="messageList" class="flex-1 overflow-y-auto p-4 space-y-3.5 chat-scroll bg-[#f4ede4] bg-opacity-70 min-h-0"></main>
 
+            <!-- 輸入狀態提示 -->
+            <div id="typingIndicator" class="hidden px-4 py-1 text-[11px] text-slate-500 flex items-center gap-1.5 bg-white/60 backdrop-blur-xs">
+                <span>對方正在輸入</span>
+                <span class="flex gap-0.5">
+                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full typing-dot"></span>
+                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full typing-dot"></span>
+                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full typing-dot"></span>
+                </span>
+            </div>
+
+            <!-- Emoji 選擇面板 -->
+            <div id="emojiPicker" class="hidden bg-white border-t border-slate-200 p-2.5 grid grid-cols-8 gap-2 text-xl max-h-36 overflow-y-auto chat-scroll shrink-0"></div>
+
+            <!-- 底部訊息發送列 -->
             <footer class="bg-white px-2.5 pt-2 safe-bottom border-t border-slate-200/80 shrink-0 z-10">
-                <form onsubmit="handleSendMessage(event)" class="flex items-center gap-2">
+                <form onsubmit="handleSendMessage(event)" class="flex items-center gap-1.5">
+                    <button type="button" onclick="toggleEmojiPicker()" class="p-2 text-slate-400 hover:text-slate-600 rounded-full transition">
+                        😊
+                    </button>
+                    <label class="p-2 text-slate-400 hover:text-slate-600 rounded-full transition cursor-pointer">
+                        📷
+                        <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </label>
                     <div class="flex-1 bg-slate-100 rounded-full px-4 py-2 border border-slate-200/80 focus-within:border-emerald-500 focus-within:bg-white transition flex items-center">
-                        <input type="text" id="inputMessage" placeholder="輸入訊息..." autocomplete="off" class="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 font-normal">
+                        <input type="text" id="inputMessage" placeholder="輸入訊息..." autocomplete="off" oninput="handleTyping()" class="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 font-normal">
                     </div>
                     <button type="submit" id="btnSend" class="w-10 h-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full flex items-center justify-center transition shrink-0 shadow-sm disabled:opacity-50">
                         <svg class="w-4 h-4 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
@@ -131,10 +166,22 @@
 
         </div>
 
+        <!-- 圖片檢視燈箱 -->
+        <div id="imageLightbox" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4 cursor-pointer" onclick="closeLightbox()">
+            <img id="lightboxImg" class="max-w-full max-h-full rounded-lg object-contain">
+        </div>
+
+        <!-- 訊息操作選單（複製/撤回） -->
+        <div id="messageContextMenu" class="fixed bg-white border border-slate-200 shadow-xl rounded-xl py-1 z-40 hidden flex-col min-w-[120px] text-xs font-bold text-slate-700">
+            <button onclick="copyMenuMessage()" class="px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2">📋 複製文字</button>
+            <button id="menuRevokeBtn" onclick="revokeMenuMessage()" class="px-3 py-2 text-left hover:bg-rose-50 text-rose-600 flex items-center gap-2 hidden">↩ 撤回訊息</button>
+        </div>
+
     </div>
 
     <script>
         const STORAGE_KEY = 'sshs_chat_auth_user';
+        const EMOJIS = ['👍','❤️','😊','😂','😮','😢','🎉','🙏','✨','🔥','💯','👏','🤝','😎','🥳','🤔'];
 
         function updateAppHeight() {
             const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -147,16 +194,6 @@
         }
         updateAppHeight();
 
-        const inputMsg = document.getElementById('inputMessage');
-        if (inputMsg) {
-            inputMsg.addEventListener('focus', () => {
-                setTimeout(() => {
-                    updateAppHeight();
-                    scrollToBottom();
-                }, 300);
-            });
-        }
-
         const SUPABASE_URL = "https://qpqtiavufscdfwhabnod.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_ehTz6hW_jpdiO7Ht3Xq-yw_UoRl7F6M";
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -168,6 +205,50 @@
         let activePairing = null;
         let realtimeChannel = null;
         let lastRenderedDate = '';
+        let typingTimeout = null;
+        let selectedMessageData = null;
+
+        // 提示音（Web Audio API）
+        function playMessageSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1); // A5
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+            } catch (e) {}
+        }
+
+        function initEmojiPicker() {
+            const picker = document.getElementById('emojiPicker');
+            picker.innerHTML = '';
+            EMOJIS.forEach(e => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'hover:scale-125 transition transform p-1';
+                b.innerText = e;
+                b.onclick = () => {
+                    const input = document.getElementById('inputMessage');
+                    input.value += e;
+                    picker.classList.add('hidden');
+                    input.focus();
+                };
+                picker.appendChild(b);
+            });
+        }
+        initEmojiPicker();
+
+        function toggleEmojiPicker() {
+            const p = document.getElementById('emojiPicker');
+            p.classList.toggle('hidden');
+        }
 
         function maskName(name) {
             const str = String(name || '').trim();
@@ -327,7 +408,8 @@
 
                 pairingRooms = pairs.map(p => ({
                     pairingId: p.id,
-                    targetStudent: targetMap[isG1 ? p.g2_student_no : p.g1_student_no] || { name: '未知', class_name: '-', grade: isG1 ? 'G2' : 'G1' }
+                    targetStudent: targetMap[isG1 ? p.g2_student_no : p.g1_student_no] || { name: '未知', class_name: '-', grade: isG1 ? 'G2' : 'G1' },
+                    unreadCount: 0
                 }));
 
                 document.getElementById('loginSection').classList.add('hidden');
@@ -356,8 +438,11 @@
             pairingRooms.forEach((room, idx) => {
                 const btn = document.createElement('button');
                 btn.id = `tab-btn-${idx}`;
-                btn.className = `px-3 py-1 rounded-full text-xs font-bold shrink-0 transition ${idx === 0 ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`;
-                btn.innerText = maskName(room.targetStudent.name);
+                btn.className = `relative px-3 py-1 rounded-full text-xs font-bold shrink-0 transition ${idx === 0 ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`;
+                btn.innerHTML = `
+                    <span>${maskName(room.targetStudent.name)}</span>
+                    <span id="unread-badge-${idx}" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] rounded-full flex items-center justify-center font-black">0</span>
+                `;
                 btn.onclick = () => switchRoom(idx);
                 tabsContainer.appendChild(btn);
             });
@@ -379,10 +464,15 @@
             activePairing = pairingRooms[index];
             lastRenderedDate = '';
 
+            // 清空當前房間未讀標記
+            activePairing.unreadCount = 0;
+            const currentBadge = document.getElementById(`unread-badge-${index}`);
+            if (currentBadge) currentBadge.classList.add('hidden');
+
             if (pairingRooms.length > 1) {
                 pairingRooms.forEach((_, idx) => {
                     const btn = document.getElementById(`tab-btn-${idx}`);
-                    if (btn) btn.className = `px-3 py-1 rounded-full text-xs font-bold shrink-0 transition ${idx === index ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`;
+                    if (btn) btn.className = `relative px-3 py-1 rounded-full text-xs font-bold shrink-0 transition ${idx === index ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`;
                 });
             }
 
@@ -427,6 +517,7 @@
                         appendMessage(payload.new);
                         scrollToBottom();
                         if (payload.new.sender_id !== currentUser.student_no) {
+                            playMessageSound();
                             markMessagesAsRead();
                         }
                     }
@@ -443,7 +534,35 @@
                         updateMessageStatus(payload.new);
                     }
                 )
+                .on(
+                    'broadcast',
+                    { event: 'typing' },
+                    payload => {
+                        if (payload.payload.sender_id !== currentUser.student_no) {
+                            showTypingIndicator();
+                        }
+                    }
+                )
                 .subscribe();
+        }
+
+        function handleTyping() {
+            if (!realtimeChannel || !currentUser) return;
+            realtimeChannel.send({
+                type: 'broadcast',
+                event: 'typing',
+                payload: { sender_id: currentUser.student_no }
+            });
+        }
+
+        function showTypingIndicator() {
+            const ind = document.getElementById('typingIndicator');
+            ind.classList.remove('hidden');
+            scrollToBottom();
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                ind.classList.add('hidden');
+            }, 2000);
         }
 
         function appendMessage(msg) {
@@ -465,15 +584,28 @@
             const isMe = msg.sender_id === currentUser.student_no;
             const item = document.createElement('div');
             item.id = `msg-${msg.id}`;
-            item.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
+            item.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full cursor-pointer select-none`;
+            item.onclick = (e) => openContextMenu(e, msg);
 
             const timeStr = formatTime(msg.created_at);
             const statusHtml = isMe ? getStatusSvg(msg.is_read) : '';
 
+            let contentHtml = '';
+            if (msg.is_revoked) {
+                contentHtml = `<span class="italic text-slate-400 text-xs">🚫 此訊息已被撤回</span>`;
+            } else if (msg.msg_type === 'image') {
+                contentHtml = `<img src="${msg.content}" class="max-w-[200px] max-h-[200px] rounded-xl object-cover cursor-zoom-in" onclick="openLightbox(event, '${msg.content}')">`;
+            } else {
+                contentHtml = escapeHtml(msg.content);
+            }
+
             item.innerHTML = `
                 <div class="flex items-end gap-1.5 max-w-[80%] ${isMe ? 'flex-row-reverse' : 'flex-row'}">
-                    <div class="px-3.5 py-2 text-[13.5px] leading-relaxed break-all ${isMe ? 'bubble-me text-white' : 'bubble-other text-slate-800'}">
-                        ${escapeHtml(msg.content)}
+                    <div class="msg-bubble px-3.5 py-2 text-[13.5px] leading-relaxed break-all ${
+                        msg.is_revoked ? 'bg-slate-100 border border-slate-200 text-slate-500 rounded-2xl' :
+                        (isMe ? 'bubble-me text-white' : 'bubble-other text-slate-800')
+                    }">
+                        ${contentHtml}
                     </div>
                     <div class="flex items-center gap-0.5 shrink-0 mb-0.5 select-none text-[10px] text-slate-400 font-medium">
                         <span>${timeStr}</span>
@@ -506,7 +638,15 @@
 
         function updateMessageStatus(updatedMsg) {
             const msgEl = document.getElementById(`msg-${updatedMsg.id}`);
-            if (msgEl) {
+            if (!msgEl) return;
+
+            if (updatedMsg.is_revoked) {
+                const bubble = msgEl.querySelector('.msg-bubble');
+                if (bubble) {
+                    bubble.className = 'msg-bubble px-3.5 py-2 text-[13.5px] leading-relaxed break-all bg-slate-100 border border-slate-200 text-slate-500 rounded-2xl';
+                    bubble.innerHTML = `<span class="italic text-slate-400 text-xs">🚫 此訊息已被撤回</span>`;
+                }
+            } else {
                 const statusSpan = msgEl.querySelector('.msg-status');
                 if (statusSpan && updatedMsg.sender_id === currentUser.student_no) {
                     statusSpan.outerHTML = getStatusSvg(updatedMsg.is_read);
@@ -528,13 +668,110 @@
             if (!text || !activePairing) return;
 
             input.value = '';
+            document.getElementById('emojiPicker').classList.add('hidden');
+
             await client.from('direct_chat_messages').insert([{
                 pairing_id: activePairing.pairingId,
                 sender_id: currentUser.student_no,
                 content: text,
+                msg_type: 'text',
                 is_read: false
             }]);
         }
+
+        // 圖片上傳壓縮轉 Base64
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file || !activePairing) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    const maxW = 600;
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > maxW) {
+                        height = Math.round((height * maxW) / width);
+                        width = maxW;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.7);
+
+                    await client.from('direct_chat_messages').insert([{
+                        pairing_id: activePairing.pairingId,
+                        sender_id: currentUser.student_no,
+                        content: base64,
+                        msg_type: 'image',
+                        is_read: false
+                    }]);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        // 圖片燈箱
+        function openLightbox(e, src) {
+            e.stopPropagation();
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('imageLightbox').classList.remove('hidden');
+        }
+        function closeLightbox() {
+            document.getElementById('imageLightbox').classList.add('hidden');
+        }
+
+        // 訊息操作選單（複製/撤回）
+        function openContextMenu(e, msg) {
+            e.preventDefault();
+            e.stopPropagation();
+            selectedMessageData = msg;
+
+            const menu = document.getElementById('messageContextMenu');
+            const revokeBtn = document.getElementById('menuRevokeBtn');
+            const isMe = msg.sender_id === currentUser.student_no;
+
+            if (isMe && !msg.is_revoked) {
+                revokeBtn.classList.remove('hidden');
+            } else {
+                revokeBtn.classList.add('hidden');
+            }
+
+            const x = Math.min(e.clientX || window.innerWidth / 2, window.innerWidth - 140);
+            const y = Math.min(e.clientY || window.innerHeight / 2, window.innerHeight - 100);
+
+            menu.style.left = `${x}px`;
+            menu.style.top = `${y}px`;
+            menu.classList.remove('hidden');
+        }
+
+        function copyMenuMessage() {
+            if (selectedMessageData && selectedMessageData.content) {
+                navigator.clipboard.writeText(selectedMessageData.content);
+            }
+            closeContextMenu();
+        }
+
+        async function revokeMenuMessage() {
+            if (!selectedMessageData) return;
+            await client
+                .from('direct_chat_messages')
+                .update({ is_revoked: true })
+                .eq('id', selectedMessageData.id);
+            closeContextMenu();
+        }
+
+        function closeContextMenu() {
+            document.getElementById('messageContextMenu').classList.add('hidden');
+            selectedMessageData = null;
+        }
+
+        document.addEventListener('click', closeContextMenu);
 
         function logout() {
             localStorage.removeItem(STORAGE_KEY);
