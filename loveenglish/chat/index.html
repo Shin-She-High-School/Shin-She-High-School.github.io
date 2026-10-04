@@ -167,6 +167,7 @@
         let pairingRooms = [];
         let activePairing = null;
         let realtimeChannel = null;
+        let lastRenderedDate = '';
 
         function maskName(name) {
             const str = String(name || '').trim();
@@ -181,6 +182,31 @@
             if (!timestamp) return '';
             const date = new Date(timestamp);
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+
+        function formatDateLabel(timestamp) {
+            if (!timestamp) return '';
+            const msgDate = new Date(timestamp);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            const isSameDay = (d1, d2) => 
+                d1.getFullYear() === d2.getFullYear() &&
+                d1.getMonth() === d2.getMonth() &&
+                d1.getDate() === d2.getDate();
+
+            if (isSameDay(msgDate, today)) return '今天';
+            if (isSameDay(msgDate, yesterday)) return '昨天';
+
+            const yearStr = msgDate.getFullYear() === today.getFullYear() ? '' : `${msgDate.getFullYear()}年`;
+            return `${yearStr}${msgDate.getMonth() + 1}月${msgDate.getDate()}日`;
+        }
+
+        function getDateKey(timestamp) {
+            if (!timestamp) return '';
+            const d = new Date(timestamp);
+            return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
         }
 
         function escapeHtml(text) {
@@ -337,8 +363,21 @@
             });
         }
 
+        async function markMessagesAsRead() {
+            if (!activePairing || !currentUser) return;
+            try {
+                await client
+                    .from('direct_chat_messages')
+                    .update({ is_read: true })
+                    .eq('pairing_id', activePairing.pairingId)
+                    .neq('sender_id', currentUser.student_no)
+                    .eq('is_read', false);
+            } catch (e) {}
+        }
+
         async function switchRoom(index) {
             activePairing = pairingRooms[index];
+            lastRenderedDate = '';
 
             if (pairingRooms.length > 1) {
                 pairingRooms.forEach((_, idx) => {
@@ -372,6 +411,8 @@
             (messages || []).forEach(appendMessage);
             scrollToBottom();
 
+            await markMessagesAsRead();
+
             realtimeChannel = client
                 .channel(`room:${activePairing.pairingId}`)
                 .on(
@@ -385,6 +426,21 @@
                     payload => {
                         appendMessage(payload.new);
                         scrollToBottom();
+                        if (payload.new.sender_id !== currentUser.student_no) {
+                            markMessagesAsRead();
+                        }
+                    }
+                )
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'direct_chat_messages',
+                        filter: `pairing_id=eq.${activePairing.pairingId}`
+                    },
+                    payload => {
+                        updateMessageStatus(payload.new);
                     }
                 )
                 .subscribe();
@@ -392,21 +448,70 @@
 
         function appendMessage(msg) {
             const listEl = document.getElementById('messageList');
+            const msgDateKey = getDateKey(msg.created_at);
+
+            if (msgDateKey && msgDateKey !== lastRenderedDate) {
+                const dateDivider = document.createElement('div');
+                dateDivider.className = 'flex justify-center my-3 select-none';
+                dateDivider.innerHTML = `
+                    <span class="bg-slate-200/90 text-slate-600 text-[10px] font-bold px-3 py-0.5 rounded-full shadow-xs">
+                        ${formatDateLabel(msg.created_at)}
+                    </span>
+                `;
+                listEl.appendChild(dateDivider);
+                lastRenderedDate = msgDateKey;
+            }
+
             const isMe = msg.sender_id === currentUser.student_no;
             const item = document.createElement('div');
+            item.id = `msg-${msg.id}`;
             item.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
 
             const timeStr = formatTime(msg.created_at);
+            const statusHtml = isMe ? getStatusSvg(msg.is_read) : '';
 
             item.innerHTML = `
                 <div class="flex items-end gap-1.5 max-w-[80%] ${isMe ? 'flex-row-reverse' : 'flex-row'}">
                     <div class="px-3.5 py-2 text-[13.5px] leading-relaxed break-all ${isMe ? 'bubble-me text-white' : 'bubble-other text-slate-800'}">
                         ${escapeHtml(msg.content)}
                     </div>
-                    <span class="text-[10px] text-slate-400 font-medium shrink-0 mb-0.5 select-none">${timeStr}</span>
+                    <div class="flex items-center gap-0.5 shrink-0 mb-0.5 select-none text-[10px] text-slate-400 font-medium">
+                        <span>${timeStr}</span>
+                        ${statusHtml}
+                    </div>
                 </div>
             `;
             listEl.appendChild(item);
+        }
+
+        function getStatusSvg(isRead) {
+            if (isRead) {
+                return `
+                    <span class="msg-status text-emerald-600 inline-flex items-center ml-0.5" title="已讀">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6L7 17l-5-5"></path>
+                            <path d="M22 10l-7.5 7.5L13 16"></path>
+                        </svg>
+                    </span>
+                `;
+            }
+            return `
+                <span class="msg-status text-slate-400 inline-flex items-center ml-0.5" title="已送達">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6L9 17l-5-5"></path>
+                    </svg>
+                </span>
+            `;
+        }
+
+        function updateMessageStatus(updatedMsg) {
+            const msgEl = document.getElementById(`msg-${updatedMsg.id}`);
+            if (msgEl) {
+                const statusSpan = msgEl.querySelector('.msg-status');
+                if (statusSpan && updatedMsg.sender_id === currentUser.student_no) {
+                    statusSpan.outerHTML = getStatusSvg(updatedMsg.is_read);
+                }
+            }
         }
 
         function scrollToBottom() {
@@ -426,7 +531,8 @@
             await client.from('direct_chat_messages').insert([{
                 pairing_id: activePairing.pairingId,
                 sender_id: currentUser.student_no,
-                content: text
+                content: text,
+                is_read: false
             }]);
         }
 
@@ -438,6 +544,7 @@
             pairingRooms = [];
             activePairing = null;
             currentAuthStep = 1;
+            lastRenderedDate = '';
 
             document.getElementById('inputStudentNo').value = '';
             document.getElementById('inputFullName').value = '';
