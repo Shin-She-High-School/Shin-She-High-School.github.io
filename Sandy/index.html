@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>商城下單系統</title>
+    <title>商業經營科電商平台 | 臺中市立新社高中</title>
     <link rel="icon" type="image/png" href="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +16,16 @@
                 extend: {
                     fontFamily: {
                         sans: ['"Noto Sans TC"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
                     }
                 }
             }
@@ -24,137 +34,168 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
         .sync-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 2px 10px;
+            padding: 3px 10px;
             border-radius: 9999px;
             font-size: 11px;
-            font-weight: 800;
+            font-weight: 700;
         }
-        .sync-success { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .sync-success { 
+            background-color: rgba(16, 185, 129, 0.12); 
+            color: #059669; 
+            border: 1px solid rgba(16, 185, 129, 0.25); 
+        }
+        .sync-pulse {
+            width: 6px;
+            height: 6px;
+            border-radius: 9999px;
+            background-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 0.3; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .product-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.08), 0 4px 8px -4px rgba(15, 23, 42, 0.04);
+        }
     </style>
 </head>
-<body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col font-sans">
+<body class="bg-[#f8fafc] text-slate-800 h-[100dvh] overflow-hidden flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
 
-    <div id="msgBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl hidden transition-all duration-300"></div>
+    <div id="msgBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-2xl hidden transition-all duration-300 flex items-center gap-2"></div>
 
-    <div id="imageLightboxModal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeLightbox()">
-        <div class="relative max-w-3xl max-h-[85vh] bg-transparent flex flex-col items-center" onclick="event.stopPropagation()">
-            <img id="lightboxImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/20">
-            <button type="button" onclick="closeLightbox()" class="mt-4 px-5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs transition">關閉預覽</button>
+    <div id="imageLightboxModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 transition-all" onclick="closeLightbox()">
+        <div class="relative max-w-4xl max-h-[85vh] flex flex-col items-center" onclick="event.stopPropagation()">
+            <img id="lightboxImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/15">
+            <button type="button" onclick="closeLightbox()" class="mt-4 px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs tracking-wider transition backdrop-blur-sm border border-white/20">關閉預覽</button>
         </div>
     </div>
 
-    <div id="editProductModal" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeEditProductModal()">
+    <div id="editProductModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeEditProductModal()">
         <div class="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 class="text-base font-black text-slate-800">編輯商品內容</h3>
-                <button type="button" onclick="closeEditProductModal()" class="text-slate-400 hover:text-slate-600 font-black text-lg">✕</button>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                    <h3 class="text-base font-black text-slate-800 tracking-tight">編輯上架商品內容</h3>
+                </div>
+                <button type="button" onclick="closeEditProductModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
             </div>
             <form onsubmit="handleUpdateProduct(event)" class="space-y-4 overflow-y-auto custom-scrollbar pr-1">
                 <input type="hidden" id="editProdId">
                 <div id="editProdGroupField">
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">所屬組別 (1~6)</label>
-                    <select id="editProdGroup" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none">
-                        <option value="1">第 1 組</option>
-                        <option value="2">第 2 組</option>
-                        <option value="3">第 3 組</option>
-                        <option value="4">第 4 組</option>
-                        <option value="5">第 5 組</option>
-                        <option value="6">第 6 組</option>
+                    <label class="block text-xs font-black text-slate-600 mb-1">組別</label>
+                    <select id="editProdGroup" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
+                        <option value="1">第一組</option>
+                        <option value="2">第二組</option>
+                        <option value="3">第三組</option>
+                        <option value="4">第四組</option>
+                        <option value="5">第五組</option>
+                        <option value="6">第六組</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">商品名稱</label>
-                    <input type="text" id="editProdName" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none">
+                    <label class="block text-xs font-black text-slate-600 mb-1">商品名稱</label>
+                    <input type="text" id="editProdName" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">單價</label>
-                    <input type="number" id="editProdPrice" min="0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none">
+                    <label class="block text-xs font-black text-slate-600 mb-1">商品價格</label>
+                    <input type="number" id="editProdPrice" min="0" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">商品照片 (追加上傳)</label>
-                    <input type="file" id="editProdFiles" accept="image/*" multiple onchange="handleEditImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+                    <label class="block text-xs font-black text-slate-600 mb-1">商品展示照片 (點擊新增照片)</label>
+                    <input type="file" id="editProdFiles" accept="image/*" multiple onchange="handleEditImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
                 </div>
-                <div id="editImagePreviews" class="flex flex-wrap gap-2 pt-1 min-h-[50px] p-2 bg-slate-50 border border-dashed border-slate-200 rounded-xl items-center"></div>
-                <div class="flex gap-2 pt-2 border-t border-slate-100">
-                    <button type="button" onclick="closeEditProductModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-xl text-xs transition">取消</button>
-                    <button type="submit" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs transition shadow-md shadow-emerald-600/30">儲存變更</button>
+                <div id="editImagePreviews" class="flex flex-wrap gap-2.5 pt-1 min-h-[56px] p-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl items-center"></div>
+                <div class="flex gap-2.5 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeEditProductModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-xl text-xs transition">取消變更</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/30">儲存變更</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="userModal" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeUserModal()">
+    <div id="userModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeUserModal()">
         <div class="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 id="userModalTitle" class="text-base font-black text-slate-800">新增使用者帳號</h3>
-                <button type="button" onclick="closeUserModal()" class="text-slate-400 hover:text-slate-600 font-black text-lg">✕</button>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                    <h3 id="userModalTitle" class="text-base font-black text-slate-800">建立帳號</h3>
+                </div>
+                <button type="button" onclick="closeUserModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
             </div>
             <form onsubmit="handleSaveUser(event)" class="space-y-3.5">
                 <input type="hidden" id="modalUserId">
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">帳號</label>
-                    <input type="text" id="modalUserAccount" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none">
+                    <label class="block text-xs font-black text-slate-600 mb-1">登入帳號</label>
+                    <input type="text" id="modalUserAccount" required placeholder="如: t_lin 或 1" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-brand-500 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">姓名</label>
-                    <input type="text" id="modalUserName" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none">
+                    <label class="block text-xs font-black text-slate-600 mb-1">姓名 / 組別</label>
+                    <input type="text" id="modalUserName" required placeholder="如: 林志明 / 第一組" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-brand-500 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">身份角色</label>
-                    <select id="modalUserRole" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none">
-                        <option value="admin">admin</option>
-                        <option value="teacher">teacher</option>
-                        <option value="student">student</option>
-                        <option value="staff">staff</option>
+                    <label class="block text-xs font-black text-slate-600 mb-1">權限身分</label>
+                    <select id="modalUserRole" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-brand-500 transition">
+                        <option value="staff">教職員</option>
+                        <option value="student">學生</option>
+                        <option value="teacher">任課教師</option>
+                        <option value="admin">系統管理員</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">密碼</label>
-                    <input type="password" id="modalUserPassword" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none">
+                    <label class="block text-xs font-black text-slate-600 mb-1">登入密碼</label>
+                    <input type="password" id="modalUserPassword" placeholder="留白表示不修改密碼" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-brand-500 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">虛擬幣額度</label>
-                    <input type="number" id="modalUserBalance" min="0" value="500" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none">
+                    <label class="block text-xs font-black text-slate-600 mb-1">起始虛擬幣額度</label>
+                    <input type="number" id="modalUserBalance" min="0" value="500" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-brand-500 transition">
                 </div>
                 <div class="flex gap-2 pt-3 border-t border-slate-100">
-                    <button type="button" onclick="closeUserModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-xl text-xs transition">取消</button>
-                    <button type="submit" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs transition shadow-md shadow-emerald-600/30">儲存資料</button>
+                    <button type="button" onclick="closeUserModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-xl text-xs transition">取消變更</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/30">儲存使用者帳號</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="cartModal" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeCartModal()">
+    <div id="cartModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeCartModal()">
         <div class="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
                 <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-5 rounded-full bg-emerald-500"></span>
-                    <h3 class="text-base font-black text-slate-800">我的購物車</h3>
+                    <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                    <h3 class="text-base font-black text-slate-800">購物車</h3>
                 </div>
-                <button type="button" onclick="closeCartModal()" class="text-slate-400 hover:text-slate-600 font-black text-lg">✕</button>
+                <button type="button" onclick="closeCartModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
             </div>
 
             <div id="cartItemList" class="overflow-y-auto custom-scrollbar flex-1 divide-y divide-slate-100 pr-1 space-y-2"></div>
 
             <div class="border-t border-slate-100 pt-4 mt-3 space-y-3">
                 <div class="flex items-center justify-between text-xs font-bold text-slate-600">
-                    <span>剩餘虛擬幣：</span>
-                    <span id="cartUserBalance" class="text-sm font-black text-emerald-600">0 幣</span>
+                    <span>目前可用餘額：</span>
+                    <span id="cartUserBalance" class="text-sm font-black text-brand-600">0 幣</span>
                 </div>
                 <div class="flex items-center justify-between text-sm font-extrabold text-slate-800">
-                    <span>總計金額：</span>
+                    <span>合計金額：</span>
                     <span id="cartTotalAmount" class="text-lg font-black text-rose-600">0 幣</span>
                 </div>
                 <div class="flex gap-2 pt-1">
                     <button type="button" onclick="clearCart()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-xl text-xs transition">清空購物車</button>
-                    <button type="button" onclick="submitCartCheckout()" id="btnCheckout" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs transition shadow-md shadow-emerald-600/30">前往結帳</button>
+                    <button type="button" onclick="submitCartCheckout()" id="btnCheckout" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/30">確認結帳</button>
                 </div>
             </div>
         </div>
@@ -163,34 +204,35 @@
     <div id="authWorkspace" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
         <div class="relative w-full max-w-[390px] bg-white rounded-3xl p-8 shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-4">
-                <div class="p-3 bg-white rounded-full shadow-lg border border-slate-100">
-                    <img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="校徽" class="h-16 w-16 object-contain" onerror="this.src='https://placehold.co/100x100?text=校徽';">
+                <div class="p-3 bg-white rounded-2xl shadow-md border border-slate-100">
+                    <img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="新社高中校徽" class="h-16 w-16 object-contain" onerror="this.src='https://placehold.co/100x100?text=校徽';">
                 </div>
             </div>
             
-            <h2 class="text-2xl font-black text-center text-slate-800 tracking-tight mb-6">帳號登入</h2>
+            <h2 class="text-2xl font-black text-center text-slate-800 tracking-tight mb-1">商業經營科電商平台登入</h2>
+            <p class="text-xs text-center text-slate-400 font-bold mb-6">商業經營科電商平台</p>
 
             <form onsubmit="handleUnifiedLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-black text-slate-700 mb-1.5">帳號</label>
-                    <input type="text" id="loginAccount" required placeholder="請輸入帳號" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    <label class="block text-xs font-black text-slate-700 mb-1.5">登入帳號</label>
+                    <input type="text" id="loginAccount" required placeholder="請輸入帳號" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
                 </div>
 
                 <div>
                     <label class="block text-xs font-black text-slate-700 mb-1.5">密碼</label>
-                    <input type="password" id="loginPassword" placeholder="請輸入密碼" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    <input type="password" id="loginPassword" placeholder="教職員免輸入密碼" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
                 </div>
 
                 <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-extrabold leading-relaxed"></div>
 
-                <button type="submit" id="btnSubmitLogin" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-xl shadow-lg shadow-emerald-600/30 active:scale-[0.98] transition text-sm tracking-wider flex items-center justify-center gap-2">
-                    <span>確認登入</span>
+                <button type="submit" id="btnSubmitLogin" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl shadow-lg shadow-brand-600/30 active:scale-[0.98] transition text-sm tracking-wider flex items-center justify-center gap-2">
+                    <span>登入</span>
                 </button>
             </form>
 
             <div class="mt-8 border-t border-slate-100 pt-4 text-center">
                 <div class="text-[11px] text-slate-400 font-semibold tracking-wide">
-                    © 臺中市立新社高級中學商業經營科 & 開發團隊 版權所有
+                    © 臺中市立新社高級中學 商業經營科 ＆ 開發團隊
                 </div>
             </div>
         </div>
@@ -198,31 +240,35 @@
 
     <div id="appWorkspace" class="hidden flex-grow flex flex-col h-full overflow-hidden">
         
-        <header class="bg-[#1e1b4b] text-white shrink-0 py-2.5 px-4 shadow-md z-40">
+        <header class="bg-slate-900 text-white shrink-0 py-2.5 px-4 sm:px-6 shadow-md z-40">
             <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-y-2">
-                <div class="flex items-center gap-2.5">
+                <div class="flex items-center gap-3">
                     <img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="校徽" class="w-7 h-7 object-contain drop-shadow">
-                    <span id="userStatusDisplay" class="font-extrabold text-xs sm:text-sm text-slate-100 tracking-wide">載入中...</span>
+                    <span id="userStatusDisplay" class="font-extrabold text-xs sm:text-sm text-slate-200 tracking-wide">系統連線中...</span>
                 </div>
-                <div class="flex items-center gap-2.5">
-                    <button type="button" id="btnHeaderCart" onclick="openCartModal()" class="hidden relative px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-lg text-xs transition shadow-sm items-center gap-1.5">
-                        <span>🛒 購物車</span>
+                <div class="flex items-center gap-3">
+                    <button type="button" id="btnHeaderCart" onclick="openCartModal()" class="hidden relative px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-extrabold rounded-xl text-xs transition shadow-sm items-center gap-1.5">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>購物車</span>
                         <span id="cartBadgeCount" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span>
                     </button>
-                    <span id="syncStatusIndicator" class="sync-badge sync-success"><span>連線正常</span></span>
-                    <button type="button" onclick="handleLogout()" class="text-xs text-rose-400 hover:text-rose-300 font-extrabold transition flex items-center gap-1">
-                        <span>🚪</span> 登出
+                    <span id="syncStatusIndicator" class="sync-badge sync-success">
+                        <span class="sync-pulse"></span>
+                        <span>系統已連線</span>
+                    </span>
+                    <button type="button" onclick="handleLogout()" class="text-xs text-rose-400 hover:text-rose-300 font-extrabold transition flex items-center gap-1 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-700">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> 登出
                     </button>
                 </div>
             </div>
         </header>
 
-        <div id="navTabArea" class="bg-white border-b border-slate-200 shrink-0 px-4 py-2 shadow-2xs hidden">
+        <div id="navTabArea" class="bg-white border-b border-slate-200/80 shrink-0 px-4 sm:px-6 py-2 shadow-2xs hidden">
             <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
                 <div id="navTabButtons" class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200 text-xs font-extrabold gap-1 flex-wrap"></div>
                 <div id="teacherActionGroup" class="hidden">
-                    <button type="button" onclick="resetAllBalances()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-black transition">
-                        ⚡ 重置虛擬幣餘額
+                    <button type="button" onclick="resetAllBalances()" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-black transition flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> 重置所有虛擬幣
                     </button>
                 </div>
             </div>
@@ -233,61 +279,67 @@
 
                 <section id="page-mall" class="page-pane hidden space-y-4">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
-                            <span>🛒</span> 商品瀏覽
-                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                            <h3 class="text-base font-black text-slate-800">商品選購</h3>
+                        </div>
                         <div class="flex items-center gap-3">
-                            <button type="button" onclick="openCartModal()" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs font-black transition flex items-center gap-1">
-                                <span>🛒 檢視購物車 (<span id="btnCartInlineCount">0</span>)</span>
+                            <button type="button" onclick="openCartModal()" class="px-3.5 py-1.5 bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 rounded-xl text-xs font-black transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                                <span>查看購物車 (<span id="btnCartInlineCount">0</span>)</span>
                             </button>
                             <span class="text-xs font-bold text-slate-500" id="productCountBadge">共 0 項商品</span>
                         </div>
                     </div>
-                    <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+                    <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
                 </section>
 
                 <section id="page-student-publish" class="page-pane hidden space-y-6">
-                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                        <h3 class="text-sm font-black text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center gap-1.5">
-                            <span>📦</span> 新增上架商品
-                        </h3>
+                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
+                        <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
+                            <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                            <h3 class="text-sm font-black text-slate-800">新增商品</h3>
+                        </div>
                         <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                             <div>
-                                <label class="block text-xs font-extrabold text-slate-600 mb-1">商品名稱</label>
-                                <input type="text" id="newProdName" required placeholder="例如：手作點心禮盒" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                <label class="block text-xs font-black text-slate-600 mb-1">商品名稱</label>
+                                <input type="text" id="newProdName" required placeholder="請輸入商品名稱" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
                             </div>
                             <div>
-                                <label class="block text-xs font-extrabold text-slate-600 mb-1">單價</label>
-                                <input type="number" id="newProdPrice" min="0" required placeholder="例如：35" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                <label class="block text-xs font-black text-slate-600 mb-1">定價</label>
+                                <input type="number" id="newProdPrice" min="0" required placeholder="請輸入金額" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
                             </div>
                             <div>
-                                <label class="block text-xs font-extrabold text-slate-600 mb-1">上傳商品照片</label>
-                                <input type="file" id="newProdFiles" accept="image/*" multiple onchange="handleImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+                                <label class="block text-xs font-black text-slate-600 mb-1">上傳照片</label>
+                                <input type="file" id="newProdFiles" accept="image/*" multiple onchange="handleImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
                             </div>
                             <div class="sm:col-span-3">
-                                <div id="selectedImagePreviews" class="flex flex-wrap gap-2.5 pt-1 min-h-[50px] p-2 bg-slate-50 border border-dashed border-slate-200 rounded-xl items-center">
-                                    <span class="text-xs text-slate-400 font-bold px-2">尚未選擇照片，可一次選取多張照片直接上傳。</span>
+                                <div id="selectedImagePreviews" class="flex flex-wrap gap-2.5 min-h-[56px] p-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl items-center">
+                                    <span class="text-xs text-slate-400 font-bold px-2">尚未選取任何相片檔案。</span>
                                 </div>
                             </div>
                             <div class="sm:col-span-3 text-right pt-2 border-t border-slate-100">
-                                <button type="submit" id="submitProductBtn" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs transition shadow-md shadow-emerald-600/20">
-                                    確認發布上架
+                                <button type="submit" id="submitProductBtn" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/20">
+                                    確認上架商品
                                 </button>
                             </div>
                         </form>
                     </div>
 
-                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                        <h3 class="text-sm font-black text-slate-800 mb-4">本組目前已上架商品清單</h3>
-                        <div class="overflow-x-auto">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                            <h3 class="text-sm font-black text-slate-800">目前已上架商品清單</h3>
+                        </div>
+                        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
                             <table class="w-full text-xs text-left border-collapse">
                                 <thead>
-                                    <tr class="bg-slate-50 text-slate-600 font-extrabold border-b border-slate-200">
-                                        <th class="p-3 w-28">圖片預覽</th>
+                                    <tr class="bg-slate-50 text-slate-600 font-black border-b border-slate-200">
+                                        <th class="p-3 w-28">預覽商品</th>
                                         <th class="p-3">商品名稱</th>
                                         <th class="p-3 w-28">單價</th>
-                                        <th class="p-3 w-40">上架時間</th>
-                                        <th class="p-3 w-20 text-center">操作</th>
+                                        <th class="p-3 w-40">上架日期時間</th>
+                                        <th class="p-3 w-24 text-center">操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="studentProductTableBody" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
@@ -297,23 +349,23 @@
                 </section>
 
                 <section id="page-teacher-monitor" class="page-pane hidden space-y-6">
-                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
                             <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-5 rounded-full bg-emerald-500"></span>
-                                <h3 class="text-sm font-black text-slate-800">📦 各組商品上架紀錄</h3>
+                                <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                                <h3 class="text-sm font-black text-slate-800">商品管理</h3>
                             </div>
                             <span id="teacherProdCountBadge" class="text-xs font-bold text-slate-400">共 0 項商品</span>
                         </div>
-                        <div class="overflow-x-auto max-h-80 custom-scrollbar border border-slate-200 rounded-xl">
+                        <div class="overflow-x-auto max-h-80 custom-scrollbar border border-slate-200 rounded-2xl">
                             <table class="w-full text-xs text-left border-collapse">
-                                <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
+                                <thead class="bg-slate-50 text-slate-600 font-black sticky top-0 border-b border-slate-200">
                                     <tr>
-                                        <th class="p-2.5">組別</th>
-                                        <th class="p-2.5 w-20">圖片預覽</th>
-                                        <th class="p-2.5">商品名稱</th>
-                                        <th class="p-2.5">單價</th>
-                                        <th class="p-2.5">上架時間</th>
+                                        <th class="p-3">組別</th>
+                                        <th class="p-3 w-24">預覽商品</th>
+                                        <th class="p-3">商品名稱</th>
+                                        <th class="p-3">單價</th>
+                                        <th class="p-3">上架時間</th>
                                     </tr>
                                 </thead>
                                 <tbody id="teacherMonitorProdBody" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
@@ -321,24 +373,24 @@
                         </div>
                     </div>
 
-                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-5 rounded-full bg-indigo-600"></span>
-                                <h3 class="text-sm font-black text-slate-800">📋 教職員下單採購紀錄</h3>
+                                <h3 class="text-sm font-black text-slate-800">訂單紀錄</h3>
                             </div>
-                            <span id="orderTotalCountBadge" class="text-xs font-bold text-slate-400">共 0 筆</span>
+                            <span id="orderTotalCountBadge" class="text-xs font-bold text-slate-400">共 0 筆訂單</span>
                         </div>
-                        <div class="overflow-x-auto max-h-80 custom-scrollbar border border-slate-200 rounded-xl">
+                        <div class="overflow-x-auto max-h-80 custom-scrollbar border border-slate-200 rounded-2xl">
                             <table class="w-full text-xs text-left border-collapse">
-                                <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
+                                <thead class="bg-slate-50 text-slate-600 font-black sticky top-0 border-b border-slate-200">
                                     <tr>
-                                        <th class="p-2.5">訂購人</th>
-                                        <th class="p-2.5">商品 (組別)</th>
-                                        <th class="p-2.5 text-center">數量</th>
-                                        <th class="p-2.5">總額</th>
-                                        <th class="p-2.5">下單時間</th>
-                                        <th class="p-2.5 text-center w-24">操作</th>
+                                        <th class="p-3">訂購人</th>
+                                        <th class="p-3">訂購商品</th>
+                                        <th class="p-3 text-center">訂購數量</th>
+                                        <th class="p-3">扣除虛擬幣</th>
+                                        <th class="p-3">下單時間</th>
+                                        <th class="p-3 text-center w-28">操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="teacherOrderTableBody" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
@@ -348,26 +400,26 @@
                 </section>
 
                 <section id="page-user-mgmt" class="page-pane hidden space-y-4">
-                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                             <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-5 rounded-full bg-emerald-600"></span>
-                                <h3 class="text-sm font-black text-slate-800">👥 全校使用者帳號管理</h3>
+                                <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                                <h3 class="text-sm font-black text-slate-800">帳號管理</h3>
                             </div>
-                            <button type="button" onclick="openUserModal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition">
-                                ➕ 單筆新增帳號
+                            <button type="button" onclick="openUserModal()" class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black transition flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-user-plus"></i> 新增帳號
                             </button>
                         </div>
-                        <div class="overflow-x-auto max-h-[60vh] custom-scrollbar border border-slate-200 rounded-xl">
+                        <div class="overflow-x-auto max-h-[60vh] custom-scrollbar border border-slate-200 rounded-2xl">
                             <table class="w-full text-xs text-left border-collapse">
-                                <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
+                                <thead class="bg-slate-50 text-slate-600 font-black sticky top-0 border-b border-slate-200">
                                     <tr>
-                                        <th class="p-2.5">帳號</th>
-                                        <th class="p-2.5">姓名</th>
-                                        <th class="p-2.5">身份角色</th>
-                                        <th class="p-2.5">電子郵件</th>
-                                        <th class="p-2.5">餘額</th>
-                                        <th class="p-2.5 text-center w-28">操作</th>
+                                        <th class="p-3">帳號</th>
+                                        <th class="p-3">姓名</th>
+                                        <th class="p-3">權限身分</th>
+                                        <th class="p-3">聯絡信箱</th>
+                                        <th class="p-3">代幣餘額</th>
+                                        <th class="p-3 text-center w-28">帳號維護</th>
                                     </tr>
                                 </thead>
                                 <tbody id="userTableBody" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
@@ -377,28 +429,28 @@
                 </section>
 
                 <section id="page-audit-log" class="page-pane hidden space-y-4">
-                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-5 rounded-full bg-indigo-600"></span>
-                                <h3 class="text-sm font-black text-slate-800">📜 系統操作日誌 (Audit Log)</h3>
-                                <span id="auditCountText" class="text-xs font-bold text-slate-400">共 0 筆</span>
+                                <h3 class="text-sm font-black text-slate-800">系統操作日誌</h3>
+                                <span id="auditCountText" class="text-xs font-bold text-slate-400">共 0 筆紀錄</span>
                             </div>
                             <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <input type="text" id="auditSearchInput" oninput="filterAuditLogs()" placeholder="搜尋帳號、姓名、動作或 IP" class="w-full sm:w-56 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none">
-                                <button type="button" onclick="loadAuditLogs()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold shrink-0 transition">🔄 重新整理</button>
+                                <input type="text" id="auditSearchInput" oninput="filterAuditLogs()" placeholder="搜尋帳號、姓名、動作或 IP 位址..." class="w-full sm:w-60 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                                <button type="button" onclick="loadAuditLogs()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold shrink-0 transition">重新整理</button>
                             </div>
                         </div>
 
-                        <div class="overflow-x-auto max-h-[60vh] custom-scrollbar border border-slate-200 rounded-xl">
+                        <div class="overflow-x-auto max-h-[60vh] custom-scrollbar border border-slate-200 rounded-2xl">
                             <table class="w-full text-xs text-left border-collapse">
-                                <thead class="bg-slate-50 text-slate-600 font-extrabold sticky top-0 border-b border-slate-200">
+                                <thead class="bg-slate-50 text-slate-600 font-black sticky top-0 border-b border-slate-200">
                                     <tr>
-                                        <th class="p-2.5 w-36">時間</th>
-                                        <th class="p-2.5 w-32">操作人</th>
-                                        <th class="p-2.5 w-28">操作動作</th>
-                                        <th class="p-2.5 w-28">IP 位置</th>
-                                        <th class="p-2.5">詳細明細</th>
+                                        <th class="p-3 w-40">操作時間</th>
+                                        <th class="p-3 w-36">執行人</th>
+                                        <th class="p-3 w-32">動作類型</th>
+                                        <th class="p-3 w-32">連線 IP 位址</th>
+                                        <th class="p-3">事件詳細資訊</th>
                                     </tr>
                                 </thead>
                                 <tbody id="auditLogTableBody" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
@@ -408,7 +460,7 @@
                 </section>
 
                 <footer class="mt-12 text-center text-xs text-slate-400 font-semibold pt-6 border-t border-slate-200/80">
-                    <div>© 臺中市立新社高級中學商業經營科 & 開發團隊 版權所有</div>
+                    <div>© 臺中市立新社高級中學 商業經營科 ＆ 專案開發團隊 版權所有</div>
                 </footer>
 
             </div>
@@ -429,19 +481,45 @@
         let allUsersList = [];
         let currentPage = 'mall';
 
+        const ROLE_NAMES = {
+            admin: '系統管理員',
+            teacher: '任課教師',
+            student: '學生',
+            staff: '教職員'
+        };
+
+        const ACTION_LABELS = {
+            '使用者登入': '登入',
+            '使用者登出': '登出',
+            '加入購物車': '加入購物車',
+            '結帳': '確認結帳',
+            '新增商品': '新增商品',
+            '修改商品': '修改商品',
+            '下架商品': '下架',
+            '取消訂單退款': '退貨退款',
+            '重置虛擬幣餘額': '重置所有虛擬幣',
+            '新增使用者': '新增帳號',
+            '修改使用者資料': '編輯帳號',
+            '刪除使用者': '刪除帳號'
+        };
+
+        function formatCurrency(val) {
+            return Number(val || 0).toLocaleString('zh-TW');
+        }
+
         function showMsg(txt, isError = false) {
             const b = document.getElementById('msgBox');
             if (!b) return;
-            b.innerText = txt;
-            b.className = `fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl text-white font-extrabold text-sm shadow-xl transition-all duration-300 ${isError ? 'bg-rose-500' : 'bg-emerald-600'}`;
-            b.style.display = 'block';
+            b.innerHTML = isError ? `<i class="fa-solid fa-circle-exclamation text-base"></i><span>${txt}</span>` : `<i class="fa-solid fa-circle-check text-base"></i><span>${txt}</span>`;
+            b.className = `fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-2xl transition-all duration-300 flex items-center gap-2 ${isError ? 'bg-rose-600 shadow-rose-600/30' : 'bg-brand-600 shadow-brand-600/30'}`;
+            b.style.display = 'flex';
             setTimeout(() => { b.style.display = 'none'; }, 2600);
         }
 
         function showLoginError(msg) {
             const errEl = document.getElementById('loginErrorMsg');
             if (!errEl) return;
-            errEl.innerText = msg;
+            errEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1.5"></i>${msg}`;
             errEl.classList.remove('hidden');
         }
 
@@ -490,9 +568,9 @@
 
             document.querySelectorAll('.tab-nav-btn').forEach(btn => {
                 if (btn.getAttribute('data-target') === pageKey) {
-                    btn.className = "tab-nav-btn px-4 py-1.5 rounded-lg bg-white text-emerald-700 shadow-sm transition font-black";
+                    btn.className = "tab-nav-btn px-4 py-2 rounded-xl bg-white text-brand-700 shadow-sm transition font-black border border-slate-200/50";
                 } else {
-                    btn.className = "tab-nav-btn px-4 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition font-extrabold";
+                    btn.className = "tab-nav-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition font-extrabold";
                 }
             });
 
@@ -524,34 +602,35 @@
             let tabs = [];
             if (currentAuth.role === 'staff') {
                 tabs = [
-                    { key: 'mall', label: '🛒 商品瀏覽' }
+                    { key: 'mall', label: '商品選購', icon: 'fa-basket-shopping' }
                 ];
                 if (teacherActionGroup) teacherActionGroup.classList.add('hidden');
             } else if (currentAuth.role === 'student') {
                 tabs = [
-                    { key: 'student-publish', label: '📦 本組商品管理' }
+                    { key: 'student-publish', label: '商品管理', icon: 'fa-box-open' }
                 ];
                 if (teacherActionGroup) teacherActionGroup.classList.add('hidden');
             } else if (currentAuth.role === 'teacher') {
                 tabs = [
-                    { key: 'mall', label: '🛒 商品瀏覽' },
-                    { key: 'teacher-monitor', label: '📋 教學監控' },
-                    { key: 'audit-log', label: '📜 系統操作日誌' }
+                    { key: 'mall', label: '商品選購', icon: 'fa-basket-shopping' },
+                    { key: 'teacher-monitor', label: '訂單與商品管理', icon: 'fa-chart-line' },
+                    { key: 'audit-log', label: '系統操作日誌', icon: 'fa-shield-halved' }
                 ];
                 if (teacherActionGroup) teacherActionGroup.classList.remove('hidden');
             } else if (currentAuth.role === 'admin') {
                 tabs = [
-                    { key: 'mall', label: '🛒 商品瀏覽' },
-                    { key: 'teacher-monitor', label: '📋 全校教學監控' },
-                    { key: 'user-mgmt', label: '👥 帳號管理' },
-                    { key: 'audit-log', label: '📜 系統操作日誌' }
+                    { key: 'mall', label: '商品選購', icon: 'fa-basket-shopping' },
+                    { key: 'teacher-monitor', label: '訂單與商品管理', icon: 'fa-chart-line' },
+                    { key: 'user-mgmt', label: '帳號管理', icon: 'fa-users-gear' },
+                    { key: 'audit-log', label: '系統操作日誌', icon: 'fa-shield-halved' }
                 ];
                 if (teacherActionGroup) teacherActionGroup.classList.remove('hidden');
             }
 
             navTabButtons.innerHTML = tabs.map(t => `
-                <button type="button" data-target="${t.key}" onclick="switchPage('${t.key}')" class="tab-nav-btn px-4 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition font-extrabold">
-                    ${t.label}
+                <button type="button" data-target="${t.key}" onclick="switchPage('${t.key}')" class="tab-nav-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition font-extrabold flex items-center gap-1.5">
+                    <i class="fa-solid ${t.icon}"></i>
+                    <span>${t.label}</span>
                 </button>
             `).join('');
         }
@@ -625,11 +704,6 @@
                     const t = await r.text();
                     const m = t.match(/ip=(.+)/);
                     return m ? m[1].trim() : null;
-                },
-                async () => {
-                    const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(2000) });
-                    const j = await r.json();
-                    return j.ip;
                 }
             ];
 
@@ -687,7 +761,7 @@
                 return cachedClientIP;
             }
 
-            cachedClientIP = window.location.hostname === 'localhost' ? '127.0.0.1' : '校園內網用戶端';
+            cachedClientIP = window.location.hostname === 'localhost' ? '127.0.0.1' : '校園區域網路端點';
             return cachedClientIP;
         }
 
@@ -697,7 +771,7 @@
                 const user = currentAuth || {};
                 const payload = {
                     account: user.account || '訪客',
-                    operator_name: user.name || '未知',
+                    operator_name: user.name || '未知使用者',
                     operator_role: user.role || 'guest',
                     action_type: actionType,
                     details: details,
@@ -730,11 +804,11 @@
         function renderAuditLogs(logs) {
             const tbody = document.getElementById('auditLogTableBody');
             const countText = document.getElementById('auditCountText');
-            if (countText) countText.innerText = `共 ${logs.length} 筆`;
+            if (countText) countText.innerText = `共 ${logs.length} 筆紀錄`;
             if (!tbody) return;
 
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">尚無任何操作紀錄。</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-inbox text-2xl mb-2 block"></i>尚無系統操作紀錄</td></tr>`;
                 return;
             }
 
@@ -744,18 +818,21 @@
                     detailStr = typeof l.details === 'object' ? JSON.stringify(l.details) : String(l.details);
                 } catch (e) { detailStr = '-'; }
 
+                const roleBadge = ROLE_NAMES[l.operator_role] || l.operator_role;
+                const actionBadge = ACTION_LABELS[l.action_type] || l.action_type;
+
                 return `
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="p-2 border-b border-slate-100 font-mono text-[11px] text-slate-400">${new Date(l.created_at).toLocaleString('zh-TW')}</td>
-                        <td class="p-2 border-b border-slate-100">
-                            <span class="font-extrabold text-slate-800">${l.operator_name}</span>
-                            <span class="text-[10px] text-slate-400 block font-mono">${l.account} (${l.operator_role})</span>
+                        <td class="p-3 border-b border-slate-100 font-mono text-[11px] text-slate-400">${new Date(l.created_at).toLocaleString('zh-TW')}</td>
+                        <td class="p-3 border-b border-slate-100">
+                            <span class="font-black text-slate-800 text-xs">${l.operator_name}</span>
+                            <span class="text-[10px] text-slate-400 block font-mono font-medium">${l.account} (${roleBadge})</span>
                         </td>
-                        <td class="p-2 border-b border-slate-100">
-                            <span class="px-2 py-0.5 rounded-md font-extrabold text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200">${l.action_type}</span>
+                        <td class="p-3 border-b border-slate-100">
+                            <span class="px-2 py-0.5 rounded-lg font-black text-[10px] bg-slate-100 text-slate-700 border border-slate-200">${actionBadge}</span>
                         </td>
-                        <td class="p-2 border-b border-slate-100 font-mono text-emerald-600 font-black text-xs">${l.ip_address || '127.0.0.1'}</td>
-                        <td class="p-2 border-b border-slate-100 text-[11px] font-mono text-slate-500 max-w-xs truncate" title="${detailStr}">${detailStr}</td>
+                        <td class="p-3 border-b border-slate-100 font-mono text-brand-600 font-black text-xs">${l.ip_address || '127.0.0.1'}</td>
+                        <td class="p-3 border-b border-slate-100 text-[11px] font-mono text-slate-500 max-w-xs truncate" title="${detailStr}">${detailStr}</td>
                     </tr>
                 `;
             }).join('');
@@ -816,14 +893,14 @@
 
         async function addToCart(productId, prodName, groupNo, price) {
             if (!currentAuth || currentAuth.role !== 'staff') {
-                showMsg("僅教職員身分可將商品加入購物車！", true);
+                showMsg("僅限教職員身分可加入購物車！", true);
                 return;
             }
 
             const qtyInput = document.getElementById(`qty-${productId}`);
             const qty = parseInt(qtyInput ? qtyInput.value : 1, 10);
             if (!qty || qty <= 0) {
-                showMsg("請輸入有效的數量！", true);
+                showMsg("請填寫大於 0 的正確數量！", true);
                 return;
             }
 
@@ -845,8 +922,8 @@
                     });
                 }
 
-                await logAuditRecord("加入購物車", { product_name: prodName, qty, price });
-                showMsg(`🛒 已將【${prodName}】x${qty} 加入購物車！`);
+                await logAuditRecord("加入購物車", { 商品名稱: prodName, 數量: qty, 單價: price });
+                showMsg(`已成功將【${prodName}】x${qty} 加入購物車！`);
                 updateCartBadges();
             } catch (err) {
                 showMsg("加入購物車失敗：" + err.message, true);
@@ -878,7 +955,7 @@
                 updateCartBadges();
                 await renderCartModal();
             } catch (e) {
-                showMsg("調整數量失敗：" + e.message, true);
+                showMsg("數量調整失敗：" + e.message, true);
             }
         }
 
@@ -894,7 +971,7 @@
 
         async function clearCart() {
             if (!currentAuth) return;
-            if (!confirm("確定要清空購物車內所有商品嗎？")) return;
+            if (!confirm("確定要清空購物車嗎？")) return;
             try {
                 await client.from('carts').delete().eq('account', currentAuth.account);
                 updateCartBadges();
@@ -912,7 +989,7 @@
 
             const { data: latestUser } = await client.from('users').select('balance').ilike('account', currentAuth.account).maybeSingle();
             if (latestUser) currentAuth.balance = latestUser.balance;
-            if (userBalEl) userBalEl.innerText = `${currentAuth.balance} 幣`;
+            if (userBalEl) userBalEl.innerText = `${formatCurrency(currentAuth.balance)} 幣`;
 
             const { data: userCarts, error } = await client
                 .from('carts')
@@ -925,7 +1002,7 @@
                 .order('created_at', { ascending: false });
 
             if (error || !userCarts || userCarts.length === 0) {
-                container.innerHTML = `<div class="py-12 text-center text-slate-400 font-bold text-xs">購物車目前是空的，快去選購商品吧！</div>`;
+                container.innerHTML = `<div class="py-12 text-center text-slate-400 font-bold text-xs"><i class="fa-solid fa-basket-shopping text-3xl mb-2 block text-slate-300"></i>購物車目前是空的，快去挑選商品吧！</div>`;
                 if (totalAmountEl) totalAmountEl.innerText = `0 幣`;
                 return;
             }
@@ -936,25 +1013,25 @@
                 const subtotal = (prod.price || 0) * cart.quantity;
                 total += subtotal;
                 return `
-                    <div class="flex items-center justify-between py-2 text-xs">
-                        <div class="flex-1 pr-2">
-                            <div class="font-extrabold text-slate-800 leading-snug">${prod.name}</div>
-                            <div class="text-[10px] text-slate-400 font-bold">單價: ${prod.price} 幣</div>
+                    <div class="flex items-center justify-between py-2.5 text-xs">
+                        <div class="flex-1 pr-3">
+                            <div class="font-black text-slate-800 leading-snug text-sm">${prod.name}</div>
+                            <div class="text-[11px] text-slate-400 font-bold mt-0.5">組別：第 ${prod.group_no} 組 ｜ 單價：${formatCurrency(prod.price)} 幣</div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
-                                <button type="button" onclick="updateCartItemQty('${cart.id}', -1)" class="px-2 py-0.5 hover:bg-slate-200 font-bold text-slate-600">-</button>
-                                <span class="px-2 py-0.5 font-black text-slate-800">${cart.quantity}</span>
-                                <button type="button" onclick="updateCartItemQty('${cart.id}', 1)" class="px-2 py-0.5 hover:bg-slate-200 font-bold text-slate-600">+</button>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                                <button type="button" onclick="updateCartItemQty('${cart.id}', -1)" class="w-7 h-7 flex items-center justify-center hover:bg-slate-200 font-black text-slate-600 transition">-</button>
+                                <span class="px-2 font-black text-slate-800 text-xs">${cart.quantity}</span>
+                                <button type="button" onclick="updateCartItemQty('${cart.id}', 1)" class="w-7 h-7 flex items-center justify-center hover:bg-slate-200 font-black text-slate-600 transition">+</button>
                             </div>
-                            <span class="w-16 text-right font-black text-rose-600">${subtotal} 幣</span>
-                            <button type="button" onclick="removeCartItem('${cart.id}')" class="text-slate-300 hover:text-rose-500 font-bold px-1 text-sm">✕</button>
+                            <span class="w-20 text-right font-black text-rose-600 text-sm">${formatCurrency(subtotal)} 幣</span>
+                            <button type="button" onclick="removeCartItem('${cart.id}')" title="移除此商品" class="text-slate-300 hover:text-rose-500 font-bold px-1 text-sm transition">✕</button>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            if (totalAmountEl) totalAmountEl.innerText = `${total} 幣`;
+            if (totalAmountEl) totalAmountEl.innerText = `${formatCurrency(total)} 幣`;
         }
 
         async function submitCartCheckout() {
@@ -970,7 +1047,7 @@
                 .eq('account', currentAuth.account);
 
             if (fetchCartErr || !userCarts || userCarts.length === 0) {
-                showMsg("購物車內尚無商品！", true);
+                showMsg("購物車內目前沒有任何商品！", true);
                 return;
             }
 
@@ -984,23 +1061,23 @@
                 .maybeSingle();
 
             if (checkBalErr || !latestUser) {
-                showMsg("無法讀取最新餘額，請稍後再試！", true);
+                showMsg("讀取餘額失敗，請重新嘗試！", true);
                 return;
             }
 
             currentAuth.balance = latestUser.balance;
 
             if (currentAuth.balance < total) {
-                showMsg(`虛擬幣不足！購物車總需 ${total} 幣，目前僅剩餘 ${currentAuth.balance} 幣。`, true);
+                showMsg(`虛擬幣餘額不足！`, true);
                 return;
             }
 
-            if (!confirm(`確定要結帳購物車內共 ${validCarts.length} 項商品，總計花費 ${total} 虛擬幣嗎？`)) return;
+            if (!confirm(`確定要結帳嗎？`)) return;
 
             const btn = document.getElementById('btnCheckout');
             if (btn) {
                 btn.disabled = true;
-                btn.innerText = "結帳中...";
+                btn.innerText = "訂單處理中...";
             }
 
             try {
@@ -1023,9 +1100,9 @@
 
                 await client.from('carts').delete().eq('account', currentAuth.account);
 
-                await logAuditRecord("結帳", { total_amount: total, items_count: validCarts.length, new_balance: newBal });
+                await logAuditRecord("結帳", { 結算金額: total, 訂購品項數: validCarts.length, 扣除後餘額: newBal });
 
-                showMsg(`🎉 結帳成功！已扣除 ${total} 虛擬幣。`);
+                showMsg(`結帳成功！`);
                 currentAuth.balance = newBal;
                 updateCartBadges();
                 closeCartModal();
@@ -1036,7 +1113,7 @@
             } finally {
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerText = "前往結帳";
+                    btn.innerText = "確認結帳";
                 }
             }
         }
@@ -1045,7 +1122,7 @@
             if (!input.files || input.files.length === 0) return;
             const previewContainer = document.getElementById('selectedImagePreviews');
             if (previewContainer) {
-                previewContainer.innerHTML = '<span class="text-xs text-emerald-600 font-bold px-2">🔄 處理中...</span>';
+                previewContainer.innerHTML = '<span class="text-xs text-brand-600 font-bold px-2"><i class="fa-solid fa-spinner fa-spin mr-1"></i>相片處理中...</span>';
             }
 
             try {
@@ -1058,7 +1135,7 @@
                 }
                 renderSelectedImagePreviews();
             } catch (err) {
-                showMsg("圖片讀取或壓縮失敗：" + err.message, true);
+                showMsg("圖片處理失敗：" + err.message, true);
             }
         }
 
@@ -1072,16 +1149,16 @@
             if (!previewContainer) return;
 
             if (selectedBase64Images.length === 0) {
-                previewContainer.innerHTML = '<span class="text-xs text-slate-400 font-bold px-2">尚未選擇照片，可一次選取多張照片直接上傳。</span>';
+                previewContainer.innerHTML = '<span class="text-xs text-slate-400 font-bold px-2">尚未選取任何相片檔案。</span>';
                 return;
             }
 
             previewContainer.innerHTML = selectedBase64Images.map((b64, idx) => `
                 <div class="relative group">
                     <img src="${b64}" class="w-14 h-14 object-cover rounded-xl border border-slate-200 shadow-sm">
-                    <button type="button" onclick="removeSelectedImage(${idx})" class="absolute -top-1.5 -right-1.5 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-black shadow hover:bg-rose-700 transition">✕</button>
+                    <button type="button" onclick="removeSelectedImage(${idx})" class="absolute -top-1.5 -right-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-black shadow transition">✕</button>
                 </div>
-            `).join('') + `<span class="text-xs font-black text-emerald-700 ml-2">已選取 ${selectedBase64Images.length} 張照片</span>`;
+            `).join('') + `<span class="text-xs font-black text-brand-700 ml-2">已選取 ${selectedBase64Images.length} 張照片</span>`;
         }
 
         async function handleEditImageFilesSelected(input) {
@@ -1096,7 +1173,7 @@
                 }
                 renderEditImagePreviews();
             } catch (err) {
-                showMsg("圖片處理失敗：" + err.message, true);
+                showMsg("照片讀取失敗：" + err.message, true);
             }
         }
 
@@ -1109,13 +1186,13 @@
             const container = document.getElementById('editImagePreviews');
             if (!container) return;
             if (editBase64Images.length === 0) {
-                container.innerHTML = '<span class="text-xs text-slate-400 font-bold">無照片</span>';
+                container.innerHTML = '<span class="text-xs text-slate-400 font-bold">暫無照片</span>';
                 return;
             }
             container.innerHTML = editBase64Images.map((b64, idx) => `
                 <div class="relative group">
-                    <img src="${b64}" class="w-12 h-12 object-cover rounded-lg border border-slate-200">
-                    <button type="button" onclick="removeEditImage(${idx})" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">✕</button>
+                    <img src="${b64}" class="w-12 h-12 object-cover rounded-xl border border-slate-200">
+                    <button type="button" onclick="removeEditImage(${idx})" class="absolute -top-1.5 -right-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow">✕</button>
                 </div>
             `).join('');
         }
@@ -1174,8 +1251,8 @@
 
                 if (error) throw error;
 
-                await logAuditRecord("修改商品", { product_id: id, name, price, group_no });
-                showMsg("✅ 商品修改儲存成功！");
+                await logAuditRecord("修改商品", { 商品ID: id, 商品名稱: name, 單價: price, 組別: group_no });
+                showMsg("儲存變更成功！");
                 closeEditProductModal();
                 loadProductsData();
             } catch (err) {
@@ -1191,7 +1268,7 @@
             document.getElementById('modalUserRole').value = 'staff';
             document.getElementById('modalUserPassword').value = '';
             document.getElementById('modalUserBalance').value = '500';
-            document.getElementById('userModalTitle').innerText = '新增使用者帳號';
+            document.getElementById('userModalTitle').innerText = '建立帳號';
 
             if (userId) {
                 const u = allUsersList.find(item => item.id === userId);
@@ -1202,7 +1279,7 @@
                     document.getElementById('modalUserName').value = u.name;
                     document.getElementById('modalUserRole').value = u.role;
                     document.getElementById('modalUserBalance').value = u.balance;
-                    document.getElementById('userModalTitle').innerText = `編輯使用者 (${u.account})`;
+                    document.getElementById('userModalTitle').innerText = `編輯帳號 (${u.account})`;
                 }
             }
             document.getElementById('userModal').classList.remove('hidden');
@@ -1227,29 +1304,29 @@
                     if (password) updatePayload.password = password;
                     const { error } = await client.from('users').update(updatePayload).eq('id', id);
                     if (error) throw error;
-                    await logAuditRecord("修改使用者資料", { account, name, role, balance });
-                    showMsg("✅ 使用者更新成功！");
+                    await logAuditRecord("修改使用者資料", { 帳號: account, 姓名: name, 角色: role, 餘額: balance });
+                    showMsg("儲存使用者帳號成功！");
                 } else {
                     const insertPayload = { account, name, role, password, balance };
                     const { error } = await client.from('users').insert([insertPayload]);
                     if (error) throw error;
-                    await logAuditRecord("新增使用者", { account, name, role, balance });
-                    showMsg("✅ 新增使用者成功！");
+                    await logAuditRecord("新增使用者", { 帳號: account, 姓名: name, 角色: role, 起始虛擬幣額度: balance });
+                    showMsg("儲存使用者帳號成功！");
                 }
                 closeUserModal();
                 loadUsersTable();
             } catch (err) {
-                showMsg("儲存使用者失敗：" + err.message, true);
+                showMsg("儲存失敗：" + err.message, true);
             }
         }
 
         async function deleteUser(userId, account) {
-            if (!confirm(`確定要刪除帳號【${account}】嗎？此動作將清除該帳號所有關聯記錄！`)) return;
+            if (!confirm(`確定要刪除帳號嗎？`)) return;
             try {
                 const { error } = await client.from('users').delete().eq('id', userId);
                 if (error) throw error;
-                await logAuditRecord("刪除使用者", { user_id: userId, account });
-                showMsg(`已刪除帳號 ${account}！`);
+                await logAuditRecord("刪除使用者", { 帳號: account });
+                showMsg(`已刪除帳號！`);
                 loadUsersTable();
             } catch (e) {
                 showMsg("刪除失敗：" + e.message, true);
@@ -1264,12 +1341,7 @@
                 const { data, error } = await client.from('users').select('*');
                 if (error) throw error;
                 
-                const rolePriority = {
-                    admin: 1,
-                    teacher: 2,
-                    student: 3,
-                    staff: 4
-                };
+                const rolePriority = { admin: 1, teacher: 2, student: 3, staff: 4 };
 
                 allUsersList = (data || []).sort((a, b) => {
                     const pA = rolePriority[a.role] || 99;
@@ -1279,27 +1351,35 @@
                 });
 
                 if (allUsersList.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">目前尚無使用者資料。</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-users text-2xl mb-2 block"></i>尚無帳號</td></tr>`;
                     return;
                 }
 
-                tbody.innerHTML = allUsersList.map(u => `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-2.5 border-b border-slate-100 font-mono font-bold text-slate-800">${u.account}</td>
-                        <td class="p-2.5 border-b border-slate-100 font-extrabold text-slate-800">${u.name}</td>
-                        <td class="p-2.5 border-b border-slate-100">
-                            <span class="px-2 py-0.5 rounded-md font-extrabold text-[10px] ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'teacher' ? 'bg-blue-100 text-blue-700' : u.role === 'student' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">${u.role}</span>
-                        </td>
-                        <td class="p-2.5 border-b border-slate-100 font-mono text-[11px] text-slate-500">${u.email || (u.account + '@sshs.tc.edu.tw')}</td>
-                        <td class="p-2.5 border-b border-slate-100 font-black text-rose-600">${u.balance} 幣</td>
-                        <td class="p-2.5 border-b border-slate-100 text-center space-x-1">
-                            <button type="button" onclick="openUserModal('${u.id}')" class="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
-                            <button type="button" onclick="deleteUser('${u.id}', '${u.account}')" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">刪除</button>
-                        </td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = allUsersList.map(u => {
+                    let roleTagClass = 'bg-slate-100 text-slate-700 border-slate-200';
+                    if (u.role === 'admin') roleTagClass = 'bg-purple-50 text-purple-700 border-purple-200';
+                    else if (u.role === 'teacher') roleTagClass = 'bg-blue-50 text-blue-700 border-blue-200';
+                    else if (u.role === 'student') roleTagClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                    else if (u.role === 'staff') roleTagClass = 'bg-brand-50 text-brand-700 border-brand-200';
+
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 border-b border-slate-100 font-mono font-bold text-slate-800">${u.account}</td>
+                            <td class="p-3 border-b border-slate-100 font-black text-slate-800">${u.name}</td>
+                            <td class="p-3 border-b border-slate-100">
+                                <span class="px-2.5 py-1 rounded-lg font-black text-[11px] border ${roleTagClass}">${ROLE_NAMES[u.role] || u.role}</span>
+                            </td>
+                            <td class="p-3 border-b border-slate-100 font-mono text-[11px] text-slate-500">${u.email || (u.account + '@sshs.tc.edu.tw')}</td>
+                            <td class="p-3 border-b border-slate-100 font-black text-rose-600 text-xs">${formatCurrency(u.balance)} 幣</td>
+                            <td class="p-3 border-b border-slate-100 text-center space-x-1">
+                                <button type="button" onclick="openUserModal('${u.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">編輯</button>
+                                <button type="button" onclick="deleteUser('${u.id}', '${u.account}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">刪除</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-rose-500 font-bold">載入使用者失敗</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-rose-500 font-bold">載入失敗</td></tr>`;
             }
         }
 
@@ -1318,13 +1398,13 @@
             const price = parseInt(priceInput.value, 10);
 
             if (targetGroup < 1 || targetGroup > 6) {
-                showMsg("組別編號必須介於 1 到 6 之間！", true);
+                showMsg("組別必須介於 1 到 6 之間！", true);
                 return;
             }
 
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerText = "發布中...";
+                submitBtn.innerText = "商品上架中...";
             }
 
             try {
@@ -1339,9 +1419,9 @@
 
                 if (error) throw error;
 
-                await logAuditRecord("新增商品", { name, price, group_no: targetGroup, images_count: selectedBase64Images.length });
+                await logAuditRecord("新增商品", { 商品名稱: name, 定價: price, 組別: targetGroup });
 
-                showMsg("✅ 上架成功！");
+                showMsg("商品上架成功！");
                 nameInput.value = '';
                 priceInput.value = '';
                 document.getElementById('newProdFiles').value = '';
@@ -1350,24 +1430,24 @@
                 loadProductsData();
 
             } catch (err) {
-                showMsg("商品上架失敗：" + err.message, true);
+                showMsg("上架失敗：" + err.message, true);
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerText = "確認發布上架";
+                    submitBtn.innerText = "確認上架商品";
                 }
             }
         }
 
         async function deleteProduct(productId) {
-            if (!confirm("確定要下架此項商品嗎？")) return;
+            if (!confirm("確定要將這項商品下架嗎？")) return;
             const { error } = await client.from('products').delete().eq('id', productId);
             if (error) {
-                showMsg("下架失敗，該商品可能已有下單紀錄：" + error.message, true);
+                showMsg("下架失敗，可能已有訂單紀錄：" + error.message, true);
                 return;
             }
-            await logAuditRecord("下架商品", { product_id: productId });
-            showMsg("已成功下架商品！");
+            await logAuditRecord("下架商品", { 商品ID: productId });
+            showMsg("商品已下架！");
             loadProductsData();
         }
 
@@ -1387,7 +1467,7 @@
             if (!listArea) return;
 
             if (currentProductsList.length === 0) {
-                listArea.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 font-bold bg-white rounded-2xl border border-slate-200">目前尚無上架商品。</div>`;
+                listArea.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200"><i class="fa-solid fa-store-slash text-3xl mb-2 block text-slate-300"></i>目前尚無商品</div>`;
                 return;
             }
 
@@ -1398,38 +1478,39 @@
                 let imgHeaderHtml = '';
                 if (images.length > 0) {
                     imgHeaderHtml = `
-                        <div class="relative group bg-slate-100 flex items-center justify-center">
-                            <img id="main-img-${p.id}" src="${firstImg}" alt="${p.name}" class="w-full h-44 object-cover rounded-t-2xl cursor-pointer" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">
-                            ${images.length > 1 ? `<span class="absolute bottom-2 right-2 bg-slate-900/70 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">共 ${images.length} 張圖</span>` : ''}
+                        <div class="relative bg-slate-100 flex items-center justify-center overflow-hidden">
+                            <img id="main-img-${p.id}" src="${firstImg}" alt="${p.name}" class="w-full h-44 object-cover rounded-t-3xl cursor-pointer hover:scale-105 transition duration-300" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">
+                            ${images.length > 1 ? `<span class="absolute bottom-2.5 right-2.5 bg-slate-950/75 backdrop-blur-xs text-white text-[10px] font-black px-2 py-0.5 rounded-full"><i class="fa-regular fa-images mr-1"></i>${images.length}</span>` : ''}
                         </div>
                     `;
                     if (images.length > 1) {
                         imgHeaderHtml += `
                             <div class="flex gap-1.5 p-2 bg-slate-50 border-b border-slate-100 overflow-x-auto custom-scrollbar">
                                 ${images.map((img) => `
-                                    <img src="${img}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 cursor-pointer hover:border-emerald-500 transition shrink-0" onclick="switchMainImage('${p.id}', '${img}')">
+                                    <img src="${img}" class="w-10 h-10 object-cover rounded-xl border border-slate-200 cursor-pointer hover:border-brand-500 transition shrink-0" onclick="switchMainImage('${p.id}', '${img}')">
                                 `).join('')}
                             </div>
                         `;
                     }
                 } else {
-                    imgHeaderHtml = `<div class="w-full h-44 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-2xl">暫無圖片</div>`;
+                    imgHeaderHtml = `<div class="w-full h-44 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-3xl"><i class="fa-regular fa-image text-xl mr-1.5"></i>暫無照片</div>`;
                 }
 
                 return `
-                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col justify-between overflow-hidden hover:border-slate-300 transition">
+                    <div class="product-card bg-white border border-slate-200/80 rounded-3xl shadow-xs flex flex-col justify-between overflow-hidden">
                         ${imgHeaderHtml}
-                        <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                             <div>
-                                <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-black border border-emerald-200 mb-1.5">第 ${p.group_no} 組</span>
+                                <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200 mb-2">第 ${p.group_no} 組</span>
                                 <h4 class="font-black text-sm text-slate-800 leading-snug">${p.name}</h4>
                             </div>
-                            <div class="mt-4 flex items-center justify-between pt-2 border-t border-slate-100">
-                                <span class="text-base font-black text-rose-600">${p.price} <span class="text-xs">幣</span></span>
+                            <div class="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
+                                <span class="text-base font-black text-rose-600">${formatCurrency(p.price)} <span class="text-xs font-bold text-slate-400">幣</span></span>
                                 <div class="flex items-center gap-1.5">
-                                    <input type="number" id="qty-${p.id}" min="1" value="1" class="w-12 px-1.5 py-1 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                                    <button type="button" onclick="addToCart('${p.id}', '${p.name}', ${p.group_no}, ${p.price})" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-extrabold transition shadow-sm flex items-center gap-1">
-                                        <span>+ 購物車</span>
+                                    <input type="number" id="qty-${p.id}" min="1" value="1" class="w-12 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-black text-center focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                    <button type="button" onclick="addToCart('${p.id}', '${p.name}', ${p.group_no}, ${p.price})" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black transition shadow-sm flex items-center gap-1">
+                                        <i class="fa-solid fa-cart-plus text-[11px]"></i>
+                                        <span>加入購物車</span>
                                     </button>
                                 </div>
                             </div>
@@ -1447,7 +1528,7 @@
             const myProds = currentProductsList.filter(p => parseInt(p.group_no, 10) === myGroupNo);
 
             if (myProds.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">目前尚無上架商品。</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>貴組目前尚未上架任何實習商品</td></tr>`;
                 return;
             }
 
@@ -1457,13 +1538,13 @@
                 return `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 border-b border-slate-100">
-                            ${firstImg ? `<div class="relative inline-block"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-lg cursor-pointer" onclick="openLightbox('${firstImg}')">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">無</span>`}
+                            ${firstImg ? `<div class="relative inline-block"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-xl cursor-pointer" onclick="openLightbox('${firstImg}')">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full font-bold">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">暫無照片</span>`}
                         </td>
-                        <td class="p-3 border-b border-slate-100 font-extrabold text-slate-800">${p.name}</td>
-                        <td class="p-3 border-b border-slate-100 text-rose-600 font-black">${p.price} 幣</td>
+                        <td class="p-3 border-b border-slate-100 font-black text-slate-800 text-xs">${p.name}</td>
+                        <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
                         <td class="p-3 border-b border-slate-100 text-slate-400 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
                         <td class="p-3 border-b border-slate-100 text-center space-x-1">
-                            <button type="button" onclick="deleteProduct('${p.id}')" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
+                            <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
                         </td>
                     </tr>
                 `;
@@ -1477,7 +1558,7 @@
             if (!tbody) return;
 
             if (currentProductsList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">目前尚無商品上架。</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>目前尚無商品</td></tr>`;
                 return;
             }
 
@@ -1486,13 +1567,13 @@
                 const firstImg = images.length > 0 ? images[0] : '';
                 return `
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="p-2.5 border-b border-slate-100 font-black text-emerald-600">第 ${p.group_no} 組</td>
-                        <td class="p-2.5 border-b border-slate-100">
-                            ${firstImg ? `<img src="${firstImg}" class="w-10 h-10 object-cover rounded-lg cursor-pointer" onclick="openLightbox('${firstImg}')">` : `<span class="text-slate-300">無</span>`}
+                        <td class="p-3 border-b border-slate-100 font-black text-brand-600">第 ${p.group_no} 組</td>
+                        <td class="p-3 border-b border-slate-100">
+                            ${firstImg ? `<img src="${firstImg}" class="w-10 h-10 object-cover rounded-xl cursor-pointer" onclick="openLightbox('${firstImg}')">` : `<span class="text-slate-300">暫無照片</span>`}
                         </td>
-                        <td class="p-2.5 border-b border-slate-100 font-extrabold text-slate-800">${p.name}</td>
-                        <td class="p-2.5 border-b border-slate-100 text-rose-600 font-black">${p.price} 幣</td>
-                        <td class="p-2.5 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
+                        <td class="p-3 border-b border-slate-100 font-black text-slate-800 text-xs">${p.name}</td>
+                        <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
+                        <td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
                     </tr>
                 `;
             }).join('');
@@ -1508,7 +1589,7 @@
 
             const oTbody = document.getElementById('teacherOrderTableBody');
             const countBadge = document.getElementById('orderTotalCountBadge');
-            if (countBadge) countBadge.innerText = `共 ${orders ? orders.length : 0} 筆`;
+            if (countBadge) countBadge.innerText = `共 ${orders ? orders.length : 0} 筆訂單`;
 
             if (orders && orders.length > 0) {
                 oTbody.innerHTML = orders.map(o => {
@@ -1516,27 +1597,27 @@
                     const staff = staffMap[cleanAcc] || { name: '教職員', email: '' };
                     return `
                         <tr class="hover:bg-slate-50 transition">
-                            <td class="p-2.5 border-b border-slate-100">
-                                <div class="font-extrabold text-slate-800">${staff.name}</div>
-                                <div class="text-[10px] text-slate-400 font-mono">${o.account} ｜ ${staff.email}</div>
+                            <td class="p-3 border-b border-slate-100">
+                                <div class="font-black text-slate-800 text-xs">${staff.name}</div>
+                                <div class="text-[10px] text-slate-400 font-mono font-medium">${o.account} ｜ ${staff.email}</div>
                             </td>
-                            <td class="p-2.5 border-b border-slate-100 font-extrabold text-slate-800">${o.product_name} <span class="text-[10px] text-slate-400">(第${o.group_no}組)</span></td>
-                            <td class="p-2.5 border-b border-slate-100 text-center font-bold text-sm">${o.quantity}</td>
-                            <td class="p-2.5 border-b border-slate-100 text-rose-600 font-black">${o.total_amount} 幣</td>
-                            <td class="p-2.5 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(o.created_at).toLocaleString('zh-TW')}</td>
-                            <td class="p-2.5 border-b border-slate-100 text-center">
-                                <button type="button" onclick="deleteOrder('${o.id}', '${o.account}', ${o.total_amount})" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">退款取消</button>
+                            <td class="p-3 border-b border-slate-100 font-black text-slate-800 text-xs">${o.product_name} <span class="text-[10px] text-slate-400 font-bold">(第 ${o.group_no} 組)</span></td>
+                            <td class="p-3 border-b border-slate-100 text-center font-black text-sm">${o.quantity}</td>
+                            <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(o.total_amount)} 幣</td>
+                            <td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(o.created_at).toLocaleString('zh-TW')}</td>
+                            <td class="p-3 border-b border-slate-100 text-center">
+                                <button type="button" onclick="deleteOrder('${o.id}', '${o.account}', ${o.total_amount})" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">退貨退款</button>
                             </td>
                         </tr>
                     `;
                 }).join('');
             } else {
-                oTbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">目前尚無下單紀錄。</td></tr>`;
+                oTbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>尚無下單紀錄</td></tr>`;
             }
         }
 
         async function deleteOrder(orderId, account, refundAmount) {
-            if (!confirm(`確定要取消該筆訂單並全額退還 ${refundAmount} 虛擬幣給 ${account} 嗎？`)) return;
+            if (!confirm(`確定要取消該筆訂單並全額退款嗎？`)) return;
 
             try {
                 const { data: userRec } = await client.from('users').select('balance').ilike('account', account).maybeSingle();
@@ -1546,8 +1627,8 @@
 
                 await client.from('orders').delete().eq('id', orderId);
 
-                await logAuditRecord("取消訂單退款", { order_id: orderId, account, refundAmount });
-                showMsg(`已成功取消訂單並退款 ${refundAmount} 幣！`);
+                await logAuditRecord("取消訂單退款", { 訂單ID: orderId, 帳號: account, 退款金額: refundAmount });
+                showMsg(`已退款 ${formatCurrency(refundAmount)} 幣！`);
                 loadTeacherDashboard();
             } catch (e) {
                 showMsg("操作失敗：" + e.message, true);
@@ -1561,8 +1642,8 @@
                 showMsg("重置失敗：" + error.message, true);
                 return;
             }
-            await logAuditRecord("重置虛擬幣餘額", { new_balance: 500 });
-            showMsg("✅ 全體教職員虛擬幣額度已重置為 500 點！");
+            await logAuditRecord("重置虛擬幣餘額", { 重置額度: 500 });
+            showMsg("全體教職員虛擬幣已重置為 500 點！");
             loadTeacherDashboard();
             loadAuditLogs();
         }
@@ -1629,7 +1710,7 @@
             const btn = document.getElementById('btnSubmitLogin');
             if (btn) {
                 btn.disabled = true;
-                btn.innerText = "登入中...";
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>登入中...`;
             }
 
             try {
@@ -1644,7 +1725,7 @@
                 }
 
                 if (!usersList || usersList.length === 0) {
-                    showLoginError("查無此帳號，請確認輸入是否正確！");
+                    showLoginError("查無此帳號，請確認帳號或組別是否正確！");
                     return;
                 }
 
@@ -1658,22 +1739,22 @@
                 }
 
                 activateUserSession(user);
-                await logAuditRecord("使用者登入", { status: "登入成功" });
-                showMsg("✅ 登入成功！");
+                await logAuditRecord("使用者登入", { 狀態: "登入成功" });
+                showMsg(`登入成功！`);
 
             } catch (err) {
                 showLoginError("系統發生未預期錯誤：" + err.message);
             } finally {
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerHTML = `<span>確認登入</span>`;
+                    btn.innerHTML = `<span>登入</span>`;
                 }
             }
         }
 
         async function handleLogout() {
             if (currentAuth) {
-                await logAuditRecord("使用者登出", { status: "登出成功" });
+                await logAuditRecord("使用者登出", { 狀態: "登出成功" });
             }
             currentAuth = null;
             selectedBase64Images = [];
@@ -1691,7 +1772,7 @@
             } catch (e) {
                 window.location.hash = '#login';
             }
-            showMsg("🚪 登出成功！");
+            showMsg("登出成功！");
         }
 
         function renderAuthViews() {
@@ -1716,25 +1797,25 @@
             let roleTitle = "";
 
             if (currentAuth.role === 'staff') {
-                roleTitle = `您好，<b class="text-amber-300">${currentAuth.name}</b> 老師 ｜ 教職員 (${currentAuth.account})`;
+                roleTitle = `您好，<b class="text-amber-300 font-black">${currentAuth.name}</b> ｜ 教職員 (${currentAuth.account})`;
                 if (btnHeaderCart) {
                     btnHeaderCart.classList.remove('hidden');
                     btnHeaderCart.classList.add('flex');
                 }
             } else if (currentAuth.role === 'student') {
-                roleTitle = `您好，第 <b class="text-amber-300">${currentAuth.account}</b> 組 ｜ 學生團隊`;
+                roleTitle = `您好，第 <b class="text-amber-300 font-black">${currentAuth.account}</b> 組 ｜ 學生`;
                 if (btnHeaderCart) {
                     btnHeaderCart.classList.add('hidden');
                     btnHeaderCart.classList.remove('flex');
                 }
             } else if (currentAuth.role === 'teacher') {
-                roleTitle = `您好，<b class="text-amber-300">任課教師</b> ｜ 課程指導`;
+                roleTitle = `您好，<b class="text-amber-300 font-black">${currentAuth.name}</b> ｜ 任課教師`;
                 if (btnHeaderCart) {
                     btnHeaderCart.classList.add('hidden');
                     btnHeaderCart.classList.remove('flex');
                 }
             } else if (currentAuth.role === 'admin') {
-                roleTitle = `您好，<b class="text-amber-300">系統管理員</b> ｜ 總控管理`;
+                roleTitle = `您好，<b class="text-amber-300 font-black">系統管理員</b>`;
                 if (btnHeaderCart) {
                     btnHeaderCart.classList.add('hidden');
                     btnHeaderCart.classList.remove('flex');
