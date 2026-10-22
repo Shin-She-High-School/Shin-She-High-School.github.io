@@ -111,9 +111,15 @@
                     <label class="block text-xs font-black text-slate-600 mb-1">商品名稱</label>
                     <input type="text" id="editProdName" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
                 </div>
-                <div>
-                    <label class="block text-xs font-black text-slate-600 mb-1">商品價格</label>
-                    <input type="number" id="editProdPrice" min="0" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-black text-slate-600 mb-1">商品價格</label>
+                        <input type="number" id="editProdPrice" min="0" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-600 mb-1">庫存 (-1表示無上限)</label>
+                        <input type="number" id="editProdStock" min="-1" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-black text-slate-600 mb-1">商品展示照片 (點擊新增照片)</label>
@@ -122,7 +128,7 @@
                 <div id="editImagePreviews" class="flex flex-wrap gap-2.5 pt-1 min-h-[56px] p-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl items-center"></div>
                 <div class="flex gap-2.5 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeEditProductModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-xl text-xs transition">取消變更</button>
-                    <button type="submit" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/30">儲存變更</button>
+                    <button type="submit" id="btnUpdateProduct" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/30">儲存變更</button>
                 </div>
             </form>
         </div>
@@ -166,7 +172,7 @@
                 </div>
                 <div class="flex gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeUserModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-xl text-xs transition">取消變更</button>
-                    <button type="submit" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/30">儲存使用者帳號</button>
+                    <button type="submit" id="btnSaveUser" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/30">儲存使用者帳號</button>
                 </div>
             </form>
         </div>
@@ -300,7 +306,7 @@
                             <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
                             <h3 class="text-sm font-black text-slate-800">新增商品</h3>
                         </div>
-                        <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                        <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-start">
                             <div>
                                 <label class="block text-xs font-black text-slate-600 mb-1">商品名稱</label>
                                 <input type="text" id="newProdName" required placeholder="請輸入商品名稱" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
@@ -310,15 +316,19 @@
                                 <input type="number" id="newProdPrice" min="0" required placeholder="請輸入金額" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
                             </div>
                             <div>
+                                <label class="block text-xs font-black text-slate-600 mb-1">庫存量 (-1表示無上限)</label>
+                                <input type="number" id="newProdStock" min="-1" value="-1" required placeholder="庫存量" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                            </div>
+                            <div>
                                 <label class="block text-xs font-black text-slate-600 mb-1">上傳照片</label>
                                 <input type="file" id="newProdFiles" accept="image/*" multiple onchange="handleImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
                             </div>
-                            <div class="sm:col-span-3">
+                            <div class="sm:col-span-4">
                                 <div id="selectedImagePreviews" class="flex flex-wrap gap-2.5 min-h-[56px] p-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl items-center">
                                     <span class="text-xs text-slate-400 font-bold px-2">尚未選取任何相片檔案。</span>
                                 </div>
                             </div>
-                            <div class="sm:col-span-3 text-right pt-2 border-t border-slate-100">
+                            <div class="sm:col-span-4 text-right pt-2 border-t border-slate-100">
                                 <button type="submit" id="submitProductBtn" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/20">
                                     確認上架商品
                                 </button>
@@ -338,6 +348,7 @@
                                         <th class="p-3 w-28">預覽商品</th>
                                         <th class="p-3">商品名稱</th>
                                         <th class="p-3 w-28">單價</th>
+                                        <th class="p-3 w-24 text-center">庫存</th>
                                         <th class="p-3 w-40">上架日期時間</th>
                                         <th class="p-3 w-24 text-center">操作</th>
                                     </tr>
@@ -365,6 +376,7 @@
                                         <th class="p-3 w-24">預覽商品</th>
                                         <th class="p-3">商品名稱</th>
                                         <th class="p-3">單價</th>
+                                        <th class="p-3 text-center">庫存</th>
                                         <th class="p-3">上架時間</th>
                                     </tr>
                                 </thead>
@@ -379,7 +391,13 @@
                                 <span class="w-2.5 h-5 rounded-full bg-indigo-600"></span>
                                 <h3 class="text-sm font-black text-slate-800">訂單紀錄</h3>
                             </div>
-                            <span id="orderTotalCountBadge" class="text-xs font-bold text-slate-400">共 0 筆訂單</span>
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="exportOrdersToCSV()" class="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-black transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-csv"></i>
+                                    <span>匯出訂單 CSV 報表</span>
+                                </button>
+                                <span id="orderTotalCountBadge" class="text-xs font-bold text-slate-400">共 0 筆訂單</span>
+                            </div>
                         </div>
                         <div class="overflow-x-auto max-h-80 custom-scrollbar border border-slate-200 rounded-2xl">
                             <table class="w-full text-xs text-left border-collapse">
@@ -389,6 +407,7 @@
                                         <th class="p-3">訂購商品</th>
                                         <th class="p-3 text-center">訂購數量</th>
                                         <th class="p-3">扣除虛擬幣</th>
+                                        <th class="p-3 text-center">訂單狀態</th>
                                         <th class="p-3">下單時間</th>
                                         <th class="p-3 text-center w-28">操作</th>
                                     </tr>
@@ -472,6 +491,8 @@
         const SUPABASE_ANON_KEY = "sb_publishable_HUfSJgvMX0iYCoZ6AUlF1Q_VewS2O2p";
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        const SESSION_STORAGE_KEY = 'sshs_mall_auth_session';
+
         let currentAuth = null;
         let selectedBase64Images = [];
         let editBase64Images = [];
@@ -479,7 +500,9 @@
         let cachedClientIP = null;
         let currentProductsList = [];
         let allUsersList = [];
+        let currentOrdersList = [];
         let currentPage = 'mall';
+        let realtimeChannel = null;
 
         const ROLE_NAMES = {
             admin: '系統管理員',
@@ -497,6 +520,7 @@
             '修改商品': '修改商品',
             '下架商品': '下架',
             '取消訂單退款': '退貨退款',
+            '更新訂單狀態': '更新狀態',
             '重置虛擬幣餘額': '重置所有虛擬幣',
             '新增使用者': '新增帳號',
             '修改使用者資料': '編輯帳號',
@@ -532,24 +556,22 @@
 
         function parseHashParams() {
             const hash = window.location.hash || '';
-            const match = hash.match(/token=([^&]+)/);
             const pageMatch = hash.match(/page=([^&]+)/);
             return {
-                token: match ? decodeURIComponent(match[1]) : null,
                 page: pageMatch ? decodeURIComponent(pageMatch[1]) : null
             };
         }
 
         function buildHash(pageKey) {
-            if (!currentAuth) return '#login';
-            return `#token=${encodeURIComponent(currentAuth.account)}&page=${encodeURIComponent(pageKey)}`;
+            if (!currentAuth) return '';
+            return `#page=${encodeURIComponent(pageKey)}`;
         }
 
         function safeUpdateHash(pageKey) {
             const newHash = buildHash(pageKey);
             try {
                 if (window.location.protocol === 'file:') {
-                    history.replaceState(null, null, newHash);
+                    history.replaceState(null, null, newHash || ' ');
                 } else {
                     window.location.hash = newHash;
                 }
@@ -891,7 +913,7 @@
             if (badge2) badge2.innerText = totalCount;
         }
 
-        async function addToCart(productId, prodName, groupNo, price) {
+        async function addToCart(productId, prodName, groupNo, price, stock) {
             if (!currentAuth || currentAuth.role !== 'staff') {
                 showMsg("僅限教職員身分可加入購物車！", true);
                 return;
@@ -904,6 +926,12 @@
                 return;
             }
 
+            const isUnlimited = (stock < 0);
+            if (!isUnlimited && qty > stock) {
+                showMsg(`加入失敗！所選數量大於現有庫存 (${stock})`, true);
+                return;
+            }
+
             try {
                 const { data: existing } = await client
                     .from('carts')
@@ -913,6 +941,10 @@
                     .maybeSingle();
 
                 if (existing) {
+                    if (!isUnlimited && (existing.quantity + qty > stock)) {
+                        showMsg(`購物車內已有此品項，累積數量將超過現有庫存 (${stock})！`, true);
+                        return;
+                    }
                     await client.from('carts').update({ quantity: existing.quantity + qty }).eq('id', existing.id);
                 } else {
                     await client.from('carts').insert({
@@ -943,10 +975,18 @@
 
         async function updateCartItemQty(cartId, change) {
             try {
-                const { data: currentCart } = await client.from('carts').select('quantity').eq('id', cartId).single();
+                const { data: currentCart } = await client.from('carts').select('quantity, product_id, products(stock, name)').eq('id', cartId).single();
                 if (!currentCart) return;
 
                 const newQty = currentCart.quantity + change;
+                const maxStock = currentCart.products ? currentCart.products.stock : 999;
+                const isUnlimited = (maxStock < 0);
+
+                if (!isUnlimited && newQty > maxStock) {
+                    showMsg(`無法再增加！該商品最大庫存僅剩 ${maxStock} 件`, true);
+                    return;
+                }
+
                 if (newQty <= 0) {
                     await client.from('carts').delete().eq('id', cartId);
                 } else {
@@ -996,7 +1036,7 @@
                 .select(`
                     id,
                     quantity,
-                    products (id, name, price, group_no)
+                    products (id, name, price, stock, group_no)
                 `)
                 .eq('account', currentAuth.account)
                 .order('created_at', { ascending: false });
@@ -1009,14 +1049,15 @@
 
             let total = 0;
             container.innerHTML = userCarts.map(cart => {
-                const prod = cart.products || { name: '已下架商品', price: 0, group_no: '-' };
+                const prod = cart.products || { name: '已下架商品', price: 0, stock: 0, group_no: '-' };
                 const subtotal = (prod.price || 0) * cart.quantity;
                 total += subtotal;
+                const stockText = prod.stock < 0 ? '無限制' : prod.stock;
                 return `
                     <div class="flex items-center justify-between py-2.5 text-xs">
                         <div class="flex-1 pr-3">
                             <div class="font-black text-slate-800 leading-snug text-sm">${prod.name}</div>
-                            <div class="text-[11px] text-slate-400 font-bold mt-0.5">組別：第 ${prod.group_no} 組 ｜ 單價：${formatCurrency(prod.price)} 幣</div>
+                            <div class="text-[11px] text-slate-400 font-bold mt-0.5">組別：第 ${prod.group_no} 組 ｜ 單價：${formatCurrency(prod.price)} 幣 ｜ 庫存：${stockText}</div>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
@@ -1037,73 +1078,25 @@
         async function submitCartCheckout() {
             if (!currentAuth) return;
 
-            const { data: userCarts, error: fetchCartErr } = await client
-                .from('carts')
-                .select(`
-                    id,
-                    quantity,
-                    products (id, name, price, group_no)
-                `)
-                .eq('account', currentAuth.account);
-
-            if (fetchCartErr || !userCarts || userCarts.length === 0) {
-                showMsg("購物車內目前沒有任何商品！", true);
-                return;
-            }
-
-            const validCarts = userCarts.filter(c => c.products);
-            const total = validCarts.reduce((sum, item) => sum + (item.products.price * item.quantity), 0);
-
-            const { data: latestUser, error: checkBalErr } = await client
-                .from('users')
-                .select('balance')
-                .ilike('account', currentAuth.account)
-                .maybeSingle();
-
-            if (checkBalErr || !latestUser) {
-                showMsg("讀取餘額失敗，請重新嘗試！", true);
-                return;
-            }
-
-            currentAuth.balance = latestUser.balance;
-
-            if (currentAuth.balance < total) {
-                showMsg(`虛擬幣餘額不足！`, true);
-                return;
-            }
+            const btn = document.getElementById('btnCheckout');
+            if (btn && btn.disabled) return;
 
             if (!confirm(`確定要結帳嗎？`)) return;
 
-            const btn = document.getElementById('btnCheckout');
             if (btn) {
                 btn.disabled = true;
-                btn.innerText = "訂單處理中...";
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>訂單處理中...`;
             }
 
             try {
-                const newBal = currentAuth.balance - total;
-                const { error: balErr } = await client.from('users').update({ balance: newBal }).ilike('account', currentAuth.account);
-                if (balErr) throw balErr;
+                const { data, error } = await client.rpc('atomic_checkout', { p_account: currentAuth.account });
 
-                const ordersPayload = validCarts.map(item => ({
-                    account: currentAuth.account,
-                    product_id: item.products.id,
-                    product_name: item.products.name,
-                    group_no: parseInt(item.products.group_no, 10),
-                    unit_price: item.products.price,
-                    quantity: item.quantity,
-                    total_amount: item.products.price * item.quantity
-                }));
+                if (error) throw error;
 
-                const { error: orderErr } = await client.from('orders').insert(ordersPayload);
-                if (orderErr) throw orderErr;
-
-                await client.from('carts').delete().eq('account', currentAuth.account);
-
-                await logAuditRecord("結帳", { 結算金額: total, 訂購品項數: validCarts.length, 扣除後餘額: newBal });
+                await logAuditRecord("結帳", { 結算金額: data.total_amount, 扣除後餘額: data.new_balance });
 
                 showMsg(`結帳成功！`);
-                currentAuth.balance = newBal;
+                currentAuth.balance = data.new_balance;
                 updateCartBadges();
                 closeCartModal();
                 loadProductsData();
@@ -1205,6 +1198,7 @@
             document.getElementById('editProdGroup').value = String(p.group_no);
             document.getElementById('editProdName').value = p.name;
             document.getElementById('editProdPrice').value = p.price;
+            document.getElementById('editProdStock').value = p.stock !== undefined ? p.stock : -1;
             document.getElementById('editProdFiles').value = '';
             editBase64Images = parseImages(p.image_url);
             renderEditImagePreviews();
@@ -1227,6 +1221,9 @@
 
         async function handleUpdateProduct(e) {
             e.preventDefault();
+            const btn = document.getElementById('btnUpdateProduct');
+            if (btn && btn.disabled) return;
+
             const id = document.getElementById('editProdId').value;
             let group_no = parseInt(document.getElementById('editProdGroup').value, 10);
             if (currentAuth.role === 'student') {
@@ -1234,6 +1231,7 @@
             }
             const name = document.getElementById('editProdName').value.trim();
             const price = parseInt(document.getElementById('editProdPrice').value, 10);
+            const stock = parseInt(document.getElementById('editProdStock').value, 10);
             const joinedImages = editBase64Images.join('\n');
 
             if (group_no < 1 || group_no > 6) {
@@ -1241,22 +1239,33 @@
                 return;
             }
 
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>儲存中...`;
+            }
+
             try {
                 const { error } = await client.from('products').update({
                     group_no,
                     name,
                     price,
+                    stock,
                     image_url: joinedImages || null
                 }).eq('id', id);
 
                 if (error) throw error;
 
-                await logAuditRecord("修改商品", { 商品ID: id, 商品名稱: name, 單價: price, 組別: group_no });
+                await logAuditRecord("修改商品", { 商品ID: id, 商品名稱: name, 單價: price, 庫存: stock, 組別: group_no });
                 showMsg("儲存變更成功！");
                 closeEditProductModal();
                 loadProductsData();
             } catch (err) {
                 showMsg("修改失敗：" + err.message, true);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = "儲存變更";
+                }
             }
         }
 
@@ -1291,12 +1300,20 @@
 
         async function handleSaveUser(e) {
             e.preventDefault();
+            const btn = document.getElementById('btnSaveUser');
+            if (btn && btn.disabled) return;
+
             const id = document.getElementById('modalUserId').value;
             const account = document.getElementById('modalUserAccount').value.trim().toLowerCase();
             const name = document.getElementById('modalUserName').value.trim();
             const role = document.getElementById('modalUserRole').value;
             const password = document.getElementById('modalUserPassword').value.trim();
             const balance = parseInt(document.getElementById('modalUserBalance').value, 10) || 0;
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>處理中...`;
+            }
 
             try {
                 if (id) {
@@ -1317,6 +1334,11 @@
                 loadUsersTable();
             } catch (err) {
                 showMsg("儲存失敗：" + err.message, true);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = "儲存使用者帳號";
+                }
             }
         }
 
@@ -1385,9 +1407,12 @@
 
         async function handleCreateProduct(e) {
             e.preventDefault();
+            const submitBtn = document.getElementById('submitProductBtn');
+            if (submitBtn && submitBtn.disabled) return;
+
             const nameInput = document.getElementById('newProdName');
             const priceInput = document.getElementById('newProdPrice');
-            const submitBtn = document.getElementById('submitProductBtn');
+            const stockInput = document.getElementById('newProdStock');
 
             let targetGroup = 1;
             if (currentAuth.role === 'student') {
@@ -1396,6 +1421,7 @@
 
             const name = nameInput.value.trim();
             const price = parseInt(priceInput.value, 10);
+            const stock = parseInt(stockInput.value, 10);
 
             if (targetGroup < 1 || targetGroup > 6) {
                 showMsg("組別必須介於 1 到 6 之間！", true);
@@ -1404,7 +1430,7 @@
 
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerText = "商品上架中...";
+                submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>商品上架中...`;
             }
 
             try {
@@ -1414,16 +1440,18 @@
                     group_no: targetGroup,
                     name: name,
                     price: price,
+                    stock: stock,
                     image_url: joinedImages || null
                 });
 
                 if (error) throw error;
 
-                await logAuditRecord("新增商品", { 商品名稱: name, 定價: price, 組別: targetGroup });
+                await logAuditRecord("新增商品", { 商品名稱: name, 定價: price, 庫存: stock, 組別: targetGroup });
 
-                showMsg("商品上架成功！");
+                showMsg("上架成功！");
                 nameInput.value = '';
                 priceInput.value = '';
+                stockInput.value = '-1';
                 document.getElementById('newProdFiles').value = '';
                 selectedBase64Images = [];
                 renderSelectedImagePreviews();
@@ -1474,13 +1502,17 @@
             listArea.innerHTML = currentProductsList.map(p => {
                 const images = parseImages(p.image_url);
                 const firstImg = images.length > 0 ? images[0] : '';
+                const stock = p.stock !== undefined ? p.stock : -1;
+                const isUnlimited = (stock < 0);
+                const isOutOfStock = (!isUnlimited && stock <= 0);
                 
                 let imgHeaderHtml = '';
                 if (images.length > 0) {
                     imgHeaderHtml = `
                         <div class="relative bg-slate-100 flex items-center justify-center overflow-hidden">
-                            <img id="main-img-${p.id}" src="${firstImg}" alt="${p.name}" class="w-full h-44 object-cover rounded-t-3xl cursor-pointer hover:scale-105 transition duration-300" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">
+                            <img id="main-img-${p.id}" src="${firstImg}" alt="${p.name}" class="w-full h-44 object-cover rounded-t-3xl cursor-pointer hover:scale-105 transition duration-300 ${isOutOfStock ? 'grayscale opacity-75' : ''}" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">
                             ${images.length > 1 ? `<span class="absolute bottom-2.5 right-2.5 bg-slate-950/75 backdrop-blur-xs text-white text-[10px] font-black px-2 py-0.5 rounded-full"><i class="fa-regular fa-images mr-1"></i>${images.length}</span>` : ''}
+                            ${isOutOfStock ? `<span class="absolute top-2.5 left-2.5 bg-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-md">已售完</span>` : ''}
                         </div>
                     `;
                     if (images.length > 1) {
@@ -1496,21 +1528,27 @@
                     imgHeaderHtml = `<div class="w-full h-44 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-3xl"><i class="fa-regular fa-image text-xl mr-1.5"></i>暫無照片</div>`;
                 }
 
+                const displayStock = isUnlimited ? '無限制' : stock;
+                const maxAttr = isUnlimited ? '' : `max="${stock}"`;
+
                 return `
                     <div class="product-card bg-white border border-slate-200/80 rounded-3xl shadow-xs flex flex-col justify-between overflow-hidden">
                         ${imgHeaderHtml}
                         <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                             <div>
-                                <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200 mb-2">第 ${p.group_no} 組</span>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200">第 ${p.group_no} 組</span>
+                                    <span class="text-[11px] font-bold ${isOutOfStock ? 'text-rose-600' : 'text-slate-400'}">庫存: ${displayStock}</span>
+                                </div>
                                 <h4 class="font-black text-sm text-slate-800 leading-snug">${p.name}</h4>
                             </div>
                             <div class="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
                                 <span class="text-base font-black text-rose-600">${formatCurrency(p.price)} <span class="text-xs font-bold text-slate-400">幣</span></span>
                                 <div class="flex items-center gap-1.5">
-                                    <input type="number" id="qty-${p.id}" min="1" value="1" class="w-12 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-black text-center focus:outline-none focus:ring-1 focus:ring-brand-500">
-                                    <button type="button" onclick="addToCart('${p.id}', '${p.name}', ${p.group_no}, ${p.price})" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black transition shadow-sm flex items-center gap-1">
+                                    <input type="number" id="qty-${p.id}" min="1" value="1" ${maxAttr} ${isOutOfStock ? 'disabled' : ''} class="w-12 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-black text-center focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-40">
+                                    <button type="button" onclick="addToCart('${p.id}', '${p.name}', ${p.group_no}, ${p.price}, ${stock})" ${isOutOfStock ? 'disabled' : ''} class="px-3 py-1.5 ${isOutOfStock ? 'bg-slate-300 cursor-not-allowed text-white' : 'bg-brand-600 hover:bg-brand-700 text-white'} rounded-xl text-xs font-black transition shadow-sm flex items-center gap-1">
                                         <i class="fa-solid fa-cart-plus text-[11px]"></i>
-                                        <span>加入購物車</span>
+                                        <span>${isOutOfStock ? '已售完' : '加入購物車'}</span>
                                     </button>
                                 </div>
                             </div>
@@ -1528,13 +1566,17 @@
             const myProds = currentProductsList.filter(p => parseInt(p.group_no, 10) === myGroupNo);
 
             if (myProds.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>貴組目前尚未上架任何實習商品</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>貴組目前尚未上架任何實習商品</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = myProds.map(p => {
                 const images = parseImages(p.image_url);
                 const firstImg = images.length > 0 ? images[0] : '';
+                const stockVal = p.stock !== undefined ? p.stock : -1;
+                const stockDisplay = stockVal < 0 ? '無限制' : stockVal;
+                const stockClass = (stockVal >= 0 && stockVal <= 0) ? 'text-rose-600 font-black' : 'text-slate-700 font-black';
+
                 return `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 border-b border-slate-100">
@@ -1542,8 +1584,10 @@
                         </td>
                         <td class="p-3 border-b border-slate-100 font-black text-slate-800 text-xs">${p.name}</td>
                         <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
+                        <td class="p-3 border-b border-slate-100 text-center ${stockClass}">${stockDisplay}</td>
                         <td class="p-3 border-b border-slate-100 text-slate-400 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
                         <td class="p-3 border-b border-slate-100 text-center space-x-1">
+                            <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
                             <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
                         </td>
                     </tr>
@@ -1558,13 +1602,17 @@
             if (!tbody) return;
 
             if (currentProductsList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>目前尚無商品</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>目前尚無商品</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = currentProductsList.map(p => {
                 const images = parseImages(p.image_url);
                 const firstImg = images.length > 0 ? images[0] : '';
+                const stockVal = p.stock !== undefined ? p.stock : -1;
+                const stockDisplay = stockVal < 0 ? '無限制' : stockVal;
+                const stockClass = (stockVal >= 0 && stockVal <= 0) ? 'text-rose-600 font-black' : 'text-slate-700 font-black';
+
                 return `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 border-b border-slate-100 font-black text-brand-600">第 ${p.group_no} 組</td>
@@ -1573,6 +1621,7 @@
                         </td>
                         <td class="p-3 border-b border-slate-100 font-black text-slate-800 text-xs">${p.name}</td>
                         <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
+                        <td class="p-3 border-b border-slate-100 text-center ${stockClass}">${stockDisplay}</td>
                         <td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
                     </tr>
                 `;
@@ -1581,6 +1630,8 @@
 
         async function loadTeacherDashboard() {
             const { data: orders } = await client.from('orders').select('*').order('created_at', { ascending: false });
+            currentOrdersList = orders || [];
+
             const { data: staffList } = await client.from('users').select('account, name, email').eq('role', 'staff');
             const staffMap = {};
             if (staffList) {
@@ -1589,12 +1640,14 @@
 
             const oTbody = document.getElementById('teacherOrderTableBody');
             const countBadge = document.getElementById('orderTotalCountBadge');
-            if (countBadge) countBadge.innerText = `共 ${orders ? orders.length : 0} 筆訂單`;
+            if (countBadge) countBadge.innerText = `共 ${currentOrdersList.length} 筆訂單`;
 
-            if (orders && orders.length > 0) {
-                oTbody.innerHTML = orders.map(o => {
+            if (currentOrdersList.length > 0) {
+                oTbody.innerHTML = currentOrdersList.map(o => {
                     const cleanAcc = String(o.account || '').toLowerCase();
                     const staff = staffMap[cleanAcc] || { name: '教職員', email: '' };
+                    const status = o.status || '處理中';
+
                     return `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-3 border-b border-slate-100">
@@ -1604,35 +1657,84 @@
                             <td class="p-3 border-b border-slate-100 font-black text-slate-800 text-xs">${o.product_name} <span class="text-[10px] text-slate-400 font-bold">(第 ${o.group_no} 組)</span></td>
                             <td class="p-3 border-b border-slate-100 text-center font-black text-sm">${o.quantity}</td>
                             <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(o.total_amount)} 幣</td>
-                            <td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(o.created_at).toLocaleString('zh-TW')}</td>
                             <td class="p-3 border-b border-slate-100 text-center">
-                                <button type="button" onclick="deleteOrder('${o.id}', '${o.account}', ${o.total_amount})" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">退貨退款</button>
+                                <select onchange="updateOrderStatus('${o.id}', this.value)" class="text-xs font-black rounded-lg px-2 py-1 outline-none border ${status === '已完成' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : status === '待取貨' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}">
+                                    <option value="處理中" ${status === '處理中' ? 'selected' : ''}>處理中</option>
+                                    <option value="待取貨" ${status === '待取貨' ? 'selected' : ''}>待取貨</option>
+                                    <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
+                                </select>
+                            </td>
+                            <td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
+                            <td class="p-3 border-b border-slate-100 text-center">
+                                <button type="button" onclick="deleteOrder('${o.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">退貨退款</button>
                             </td>
                         </tr>
                     `;
                 }).join('');
             } else {
-                oTbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>尚無下單紀錄</td></tr>`;
+                oTbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>尚無下單紀錄</td></tr>`;
             }
         }
 
-        async function deleteOrder(orderId, account, refundAmount) {
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const { error } = await client.from('orders').update({ status: newStatus }).eq('id', orderId);
+                if (error) throw error;
+                await logAuditRecord("更新訂單狀態", { 訂單ID: orderId, 新狀態: newStatus });
+                showMsg(`訂單狀態已更新為【${newStatus}】！`);
+                loadTeacherDashboard();
+            } catch (e) {
+                showMsg("更新狀態失敗：" + e.message, true);
+            }
+        }
+
+        async function deleteOrder(orderId) {
             if (!confirm(`確定要取消該筆訂單並全額退款嗎？`)) return;
 
             try {
-                const { data: userRec } = await client.from('users').select('balance').ilike('account', account).maybeSingle();
-                if (userRec) {
-                    await client.from('users').update({ balance: userRec.balance + refundAmount }).ilike('account', account);
-                }
+                const { data, error } = await client.rpc('atomic_refund_order', { p_order_id: orderId });
+                if (error) throw error;
 
-                await client.from('orders').delete().eq('id', orderId);
-
-                await logAuditRecord("取消訂單退款", { 訂單ID: orderId, 帳號: account, 退款金額: refundAmount });
-                showMsg(`已退款 ${formatCurrency(refundAmount)} 幣！`);
+                await logAuditRecord("取消訂單退款", { 訂單ID: orderId, 買家帳號: data.account, 退款金額: data.refund_amount });
+                showMsg(`已退款 ${formatCurrency(data.refund_amount)} 幣！`);
                 loadTeacherDashboard();
+                loadProductsData();
             } catch (e) {
                 showMsg("操作失敗：" + e.message, true);
             }
+        }
+
+        function exportOrdersToCSV() {
+            if (!currentOrdersList || currentOrdersList.length === 0) {
+                showMsg("目前尚無訂單可匯出！", true);
+                return;
+            }
+
+            let csvContent = "\uFEFF訂單編號,訂購人帳號,商品名稱,提供組別,單價,數量,扣除代幣,訂單狀態,下單時間\n";
+
+            currentOrdersList.forEach(o => {
+                const row = [
+                    `"${o.id}"`,
+                    `"${o.account}"`,
+                    `"${o.product_name}"`,
+                    `"第 ${o.group_no} 組"`,
+                    o.unit_price,
+                    o.quantity,
+                    o.total_amount,
+                    `"${o.status || '處理中'}"`,
+                    `"${new Date(o.created_at).toLocaleString('zh-TW')}"`
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `新社高中商經科_電商採購訂單報表_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showMsg("CSV 報表匯出成功！");
         }
 
         async function resetAllBalances() {
@@ -1648,13 +1750,35 @@
             loadAuditLogs();
         }
 
+        function setupRealtimeListeners() {
+            if (realtimeChannel) client.removeChannel(realtimeChannel);
+
+            realtimeChannel = client
+                .channel('mall_realtime_events')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+                    loadProductsData();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+                    if (currentAuth && (currentAuth.role === 'teacher' || currentAuth.role === 'admin')) {
+                        loadTeacherDashboard();
+                    }
+                })
+                .subscribe();
+        }
+
         function activateUserSession(user) {
             currentAuth = user;
+            try {
+                sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
+            } catch(e) {}
+
             renderAuthViews();
             renderNavigationTabs();
             handleHashRouting();
 
             loadProductsData();
+            setupRealtimeListeners();
+
             if (user.role === 'staff') {
                 updateCartBadges();
             } else if (user.role === 'teacher' || user.role === 'admin') {
@@ -1664,11 +1788,18 @@
             }
         }
 
-        async function restoreSessionFromHash() {
+        async function restoreSessionFromStorage() {
             getClientIP();
-            const { token, page } = parseHashParams();
+            const { page } = parseHashParams();
 
-            if (!token) {
+            let savedUser = null;
+            try {
+                const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+                if (stored) savedUser = JSON.parse(stored);
+            } catch(e) {}
+
+            if (!savedUser || !savedUser.account) {
+                currentAuth = null;
                 renderAuthViews();
                 return;
             }
@@ -1677,7 +1808,7 @@
                 const { data: dbUser, error } = await client
                     .from('users')
                     .select('*')
-                    .ilike('account', token)
+                    .ilike('account', savedUser.account)
                     .maybeSingle();
 
                 if (!error && dbUser) {
@@ -1685,13 +1816,13 @@
                     if (page) switchPage(page, false);
                 } else {
                     currentAuth = null;
+                    try { sessionStorage.removeItem(SESSION_STORAGE_KEY); } catch(e) {}
                     renderAuthViews();
-                    safeUpdateHash('login');
                 }
             } catch (e) {
                 currentAuth = null;
+                try { sessionStorage.removeItem(SESSION_STORAGE_KEY); } catch(err) {}
                 renderAuthViews();
-                safeUpdateHash('login');
             }
         }
 
@@ -1756,21 +1887,25 @@
             if (currentAuth) {
                 await logAuditRecord("使用者登出", { 狀態: "登出成功" });
             }
+            if (realtimeChannel) client.removeChannel(realtimeChannel);
+
             currentAuth = null;
+            try { sessionStorage.removeItem(SESSION_STORAGE_KEY); } catch(e) {}
             selectedBase64Images = [];
             editBase64Images = [];
             currentProductsList = [];
             allAuditLogs = [];
             allUsersList = [];
+            currentOrdersList = [];
             document.getElementById('loginAccount').value = '';
             document.getElementById('loginPassword').value = '';
             clearLoginError();
             renderAuthViews();
             renderNavigationTabs();
             try {
-                history.replaceState(null, null, '#login');
+                history.replaceState(null, null, ' ');
             } catch (e) {
-                window.location.hash = '#login';
+                window.location.hash = '';
             }
             showMsg("登出成功！");
         }
@@ -1838,10 +1973,9 @@
 
         window.addEventListener('hashchange', () => {
             if (currentAuth) handleHashRouting();
-            else restoreSessionFromHash();
         });
 
-        restoreSessionFromHash();
+        restoreSessionFromStorage();
     </script>
 </body>
 </html>
