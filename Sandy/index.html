@@ -121,7 +121,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-extrabold text-slate-600 mb-1">虛擬幣額度</label>
-                    <input type="number" id="modalUserBalance" min="0" value="300" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none">
+                    <input type="number" id="modalUserBalance" min="0" value="500" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none">
                 </div>
                 <div class="flex gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeUserModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-xl text-xs transition">取消</button>
@@ -1190,7 +1190,7 @@
             document.getElementById('modalUserName').value = '';
             document.getElementById('modalUserRole').value = 'staff';
             document.getElementById('modalUserPassword').value = '';
-            document.getElementById('modalUserBalance').value = '300';
+            document.getElementById('modalUserBalance').value = '500';
             document.getElementById('userModalTitle').innerText = '新增使用者帳號';
 
             if (userId) {
@@ -1555,14 +1555,14 @@
         }
 
         async function resetAllBalances() {
-            if (!confirm("確定要將全體教職員的虛擬幣餘額重置為 300 點嗎？")) return;
-            const { error } = await client.from('users').update({ balance: 300 }).eq('role', 'staff');
+            if (!confirm("確定要將全體教職員的虛擬幣餘額重置為 500 點嗎？")) return;
+            const { error } = await client.from('users').update({ balance: 500 }).eq('role', 'staff');
             if (error) {
                 showMsg("重置失敗：" + error.message, true);
                 return;
             }
-            await logAuditRecord("重置虛擬幣餘額", { new_balance: 300 });
-            showMsg("✅ 全體教職員虛擬幣額度已重置為 300 點！");
+            await logAuditRecord("重置虛擬幣餘額", { new_balance: 500 });
+            showMsg("✅ 全體教職員虛擬幣額度已重置為 500 點！");
             loadTeacherDashboard();
             loadAuditLogs();
         }
