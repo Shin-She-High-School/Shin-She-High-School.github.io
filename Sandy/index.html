@@ -79,10 +79,19 @@
     <!-- 系統提示訊息（頂層 z-[100]） -->
     <div id="msgBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-2xl hidden transition-all duration-300 flex items-center gap-2"></div>
 
-    <!-- 全螢幕照片放大預覽燈箱（次頂層 z-[90]） -->
+    <!-- 全螢幕照片放大預覽燈箱（次頂層 z-[90] 含左右切換按鍵） -->
     <div id="imageLightboxModal" class="fixed inset-0 z-[90] hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 transition-all" onclick="closeLightbox()">
-        <div class="relative max-w-4xl max-h-[85vh] flex flex-col items-center" onclick="event.stopPropagation()">
-            <img id="lightboxImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/20">
+        <div class="relative max-w-4xl max-h-[85vh] w-full flex flex-col items-center justify-center" onclick="event.stopPropagation()">
+            <button type="button" id="lightboxPrevBtn" onclick="navigateLightbox(-1)" class="absolute left-2 sm:-left-12 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center text-lg transition backdrop-blur-sm z-20">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            
+            <img id="lightboxImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/20 select-none">
+
+            <button type="button" id="lightboxNextBtn" onclick="navigateLightbox(1)" class="absolute right-2 sm:-right-12 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center text-lg transition backdrop-blur-sm z-20">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
             <button type="button" onclick="closeLightbox()" class="mt-4 px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs tracking-wider transition backdrop-blur-sm border border-white/20">關閉預覽</button>
         </div>
     </div>
@@ -371,7 +380,7 @@
                     <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
                 </section>
 
-                <!-- 2. 獨立商品詳細頁面（非彈窗） -->
+                <!-- 2. 獨立商品詳細頁面（含上下張切換按鈕） -->
                 <section id="page-product-detail" class="page-pane hidden space-y-4">
                     <div class="flex items-center justify-between pb-2 border-b border-slate-200">
                         <button type="button" onclick="switchPage('mall')" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-black transition flex items-center gap-2 shadow-xs">
@@ -384,9 +393,17 @@
                     <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                             <div class="space-y-4">
-                                <div class="relative bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 flex items-center justify-center min-h-[300px] max-h-[420px]">
+                                <div class="relative bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 flex items-center justify-center min-h-[300px] max-h-[420px] group">
+                                    <button type="button" id="detailPrevImgBtn" onclick="navigateDetailImage(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-slate-800 shadow-md flex items-center justify-center text-sm transition z-10 opacity-80 group-hover:opacity-100">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                    </button>
+
                                     <img id="detailMainImg" src="" alt="商品大圖" class="w-full h-80 object-contain cursor-zoom-in transition duration-200 hover:scale-105" onclick="openLightbox(this.src)">
-                                    <div id="detailOutOfStockBadge" class="hidden absolute top-4 left-4 bg-rose-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">已售完</div>
+                                    <div id="detailOutOfStockBadge" class="hidden absolute top-4 left-4 bg-rose-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md z-10">已售完</div>
+
+                                    <button type="button" id="detailNextImgBtn" onclick="navigateDetailImage(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-slate-800 shadow-md flex items-center justify-center text-sm transition z-10 opacity-80 group-hover:opacity-100">
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </button>
                                 </div>
                                 <div id="detailThumbnails" class="flex gap-2.5 overflow-x-auto custom-scrollbar pb-1"></div>
                             </div>
@@ -505,34 +522,8 @@
                     </div>
                 </section>
 
-                <!-- 4. 教學監控專區 (訂單紀錄) -->
+                <!-- 4. 訂單區（由原「訂單與商品管理」更名） -->
                 <section id="page-teacher-monitor" class="page-pane hidden space-y-6">
-                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
-                                <h3 class="text-sm font-black text-slate-800">商品管理</h3>
-                            </div>
-                            <span id="teacherProdCountBadge" class="text-xs font-bold text-slate-400">共 0 項商品</span>
-                        </div>
-                        <div class="overflow-x-auto max-h-80 custom-scrollbar border border-slate-200 rounded-2xl">
-                            <table class="w-full text-xs text-left border-collapse">
-                                <thead class="bg-slate-50 text-slate-600 font-black sticky top-0 border-b border-slate-200">
-                                    <tr>
-                                        <th class="p-3">組別</th>
-                                        <th class="p-3 w-24">預覽商品</th>
-                                        <th class="p-3">商品名稱</th>
-                                        <th class="p-3">單價</th>
-                                        <th class="p-3 text-center">庫存</th>
-                                        <th class="p-3">上架時間</th>
-                                        <th class="p-3 text-center">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="teacherMonitorProdBody" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
                             <div class="flex items-center gap-2">
@@ -662,6 +653,8 @@
         let currentOrderFilter = 'all';
         let currentPage = 'mall';
         let currentDetailProduct = null;
+        let currentDetailImages = [];
+        let currentDetailImageIndex = 0;
         let realtimeChannel = null;
 
         // 購物車勾選集合
@@ -812,7 +805,7 @@
                 tabs = [
                     { key: 'mall', label: '商品選購', icon: 'fa-basket-shopping' },
                     { key: 'student-publish', label: '商品管理', icon: 'fa-box-open' },
-                    { key: 'teacher-monitor', label: '訂單與商品管理', icon: 'fa-chart-line' },
+                    { key: 'teacher-monitor', label: '訂單', icon: 'fa-receipt' },
                     { key: 'user-mgmt', label: '帳號管理', icon: 'fa-users-gear' },
                     { key: 'audit-log', label: '系統操作日誌', icon: 'fa-shield-halved' }
                 ];
@@ -851,7 +844,7 @@
         }
 
         // ==========================================
-        // 獨立商品詳細頁面控制 (非彈窗)
+        // 獨立商品詳細頁面控制 (含圖片上下張切換)
         // ==========================================
         window.openProductDetailPage = async function(productId, updateHash = true) {
             let p = currentProductsList.find(item => String(item.id) === String(productId));
@@ -868,6 +861,9 @@
             }
 
             currentDetailProduct = p;
+            currentDetailImages = parseImages(p.image_url);
+            currentDetailImageIndex = 0;
+
             const mainImg = document.getElementById('detailMainImg');
             const thumbsContainer = document.getElementById('detailThumbnails');
             const outOfStockBadge = document.getElementById('detailOutOfStockBadge');
@@ -880,10 +876,10 @@
             const qtyInput = document.getElementById('detailQtyInput');
             const btnAdd = document.getElementById('btnDetailAddToCart');
             const btnBuyNow = document.getElementById('btnDetailBuyNow');
+            const prevBtn = document.getElementById('detailPrevImgBtn');
+            const nextBtn = document.getElementById('detailNextImgBtn');
 
-            const images = parseImages(p.image_url);
-            const firstImg = images.length > 0 ? images[0] : 'https://placehold.co/500x400?text=無商品圖片';
-            mainImg.src = firstImg;
+            updateDetailImageDisplay();
 
             const stock = p.stock !== undefined ? p.stock : -1;
             const isUnlimited = (stock < 0);
@@ -918,14 +914,18 @@
             qtyInput.value = "1";
             qtyInput.max = isUnlimited ? "" : String(stock);
 
-            if (images.length > 1) {
-                thumbsContainer.innerHTML = images.map((img, idx) => `
-                    <img src="${img}" class="w-14 h-14 object-cover rounded-xl border-2 ${idx === 0 ? 'border-brand-500' : 'border-slate-200'} cursor-pointer hover:border-brand-400 transition shrink-0" onclick="switchDetailMainImage('${img}', this)">
+            if (currentDetailImages.length > 1) {
+                thumbsContainer.innerHTML = currentDetailImages.map((img, idx) => `
+                    <img src="${img}" class="w-14 h-14 object-cover rounded-xl border-2 ${idx === 0 ? 'border-brand-500' : 'border-slate-200'} cursor-pointer hover:border-brand-400 transition shrink-0" onclick="setDetailImageIndex(${idx})">
                 `).join('');
                 thumbsContainer.classList.remove('hidden');
+                if (prevBtn) prevBtn.classList.remove('hidden');
+                if (nextBtn) nextBtn.classList.remove('hidden');
             } else {
                 thumbsContainer.innerHTML = '';
                 thumbsContainer.classList.add('hidden');
+                if (prevBtn) prevBtn.classList.add('hidden');
+                if (nextBtn) nextBtn.classList.add('hidden');
             }
 
             switchPage('product-detail', false);
@@ -935,13 +935,30 @@
             }
         };
 
-        window.switchDetailMainImage = function(imgSrc, element) {
+        function updateDetailImageDisplay() {
             const mainImg = document.getElementById('detailMainImg');
-            if (mainImg) mainImg.src = imgSrc;
+            if (!mainImg) return;
+            const imgSrc = currentDetailImages.length > 0 ? currentDetailImages[currentDetailImageIndex] : 'https://placehold.co/500x400?text=無商品圖片';
+            mainImg.src = imgSrc;
+
             const allThumbs = document.querySelectorAll('#detailThumbnails img');
-            allThumbs.forEach(t => t.className = "w-14 h-14 object-cover rounded-xl border-2 border-slate-200 cursor-pointer hover:border-brand-400 transition shrink-0");
-            if (element) {
-                element.className = "w-14 h-14 object-cover rounded-xl border-2 border-brand-500 cursor-pointer transition shrink-0";
+            allThumbs.forEach((t, idx) => {
+                t.className = `w-14 h-14 object-cover rounded-xl border-2 ${idx === currentDetailImageIndex ? 'border-brand-500' : 'border-slate-200'} cursor-pointer hover:border-brand-400 transition shrink-0`;
+            });
+        }
+
+        window.navigateDetailImage = function(direction) {
+            if (currentDetailImages.length <= 1) return;
+            currentDetailImageIndex += direction;
+            if (currentDetailImageIndex < 0) currentDetailImageIndex = currentDetailImages.length - 1;
+            if (currentDetailImageIndex >= currentDetailImages.length) currentDetailImageIndex = 0;
+            updateDetailImageDisplay();
+        };
+
+        window.setDetailImageIndex = function(index) {
+            if (index >= 0 && index < currentDetailImages.length) {
+                currentDetailImageIndex = index;
+                updateDetailImageDisplay();
             }
         };
 
@@ -1459,7 +1476,7 @@
         }
 
         // ==========================================
-        // 圖片與商品管理功能
+        // 圖片與商品管理功能（修復相符的函式名稱）
         // ==========================================
         function parseImages(rawUrl) {
             if (!rawUrl) return [];
@@ -1552,6 +1569,7 @@
             }
         }
 
+        // 統一函式名稱，修復 Uncaught ReferenceError
         function renderEditImagePreviews() {
             const container = document.getElementById('editImagePreviews');
             if (!container) return;
@@ -1578,7 +1596,7 @@
             document.getElementById('editProdStock').value = p.stock !== undefined ? p.stock : -1;
             document.getElementById('editProdFiles').value = '';
             editBase64Images = parseImages(p.image_url);
-            renderEditPreviews();
+            renderEditImagePreviews(); // 正確呼叫修復後的函式名稱
 
             const groupField = document.getElementById('editProdGroupField');
             if (isPrivileged()) {
@@ -1720,7 +1738,6 @@
 
             loadStaffMall();
             loadStudentProducts();
-            loadTeacherMonitorProducts();
         }
 
         function loadStaffMall() {
@@ -1822,46 +1839,6 @@
                         <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
                         <td class="p-3 border-b border-slate-100 text-center ${stockClass}">${stockDisplay}</td>
                         <td class="p-3 border-b border-slate-100 text-slate-400 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
-                        <td class="p-3 border-b border-slate-100 text-center space-x-1">
-                            <button type="button" onclick="openProductDetailPage('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
-                            <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
-                            <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function loadTeacherMonitorProducts() {
-            const tbody = document.getElementById('teacherMonitorProdBody');
-            const badge = document.getElementById('teacherProdCountBadge');
-            if (badge) badge.innerText = `共 ${currentProductsList.length} 項商品`;
-            if (!tbody) return;
-
-            if (currentProductsList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>目前尚無商品</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = currentProductsList.map(p => {
-                const images = parseImages(p.image_url);
-                const firstImg = images.length > 0 ? images[0] : '';
-                const stockVal = p.stock !== undefined ? p.stock : -1;
-                const stockDisplay = stockVal < 0 ? '無限制' : stockVal;
-                const stockClass = (stockVal >= 0 && stockVal <= 0) ? 'text-rose-600 font-black' : 'text-slate-700 font-black';
-
-                return `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 border-b border-slate-100 font-black text-brand-600">第 ${p.group_no} 組</td>
-                        <td class="p-3 border-b border-slate-100">
-                            ${firstImg ? `<img src="${firstImg}" class="w-10 h-10 object-cover rounded-xl cursor-pointer" onclick="openProductDetailPage('${p.id}')">` : `<span class="text-slate-300">暫無照片</span>`}
-                        </td>
-                        <td class="p-3 border-b border-slate-100">
-                            <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailPage('${p.id}')">${p.name}</span>
-                        </td>
-                        <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
-                        <td class="p-3 border-b border-slate-100 text-center ${stockClass}">${stockDisplay}</td>
-                        <td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
                         <td class="p-3 border-b border-slate-100 text-center space-x-1">
                             <button type="button" onclick="openProductDetailPage('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
                             <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
@@ -2078,14 +2055,51 @@
             ));
         }
 
+        // ==========================================
+        // 燈箱全螢幕預覽 (含切換功能)
+        // ==========================================
+        let lightboxImagesList = [];
+        let lightboxCurrentIndex = 0;
+
         window.openLightbox = function(url) {
             const modal = document.getElementById('imageLightboxModal');
             const img = document.getElementById('lightboxImg');
+            const prevBtn = document.getElementById('lightboxPrevBtn');
+            const nextBtn = document.getElementById('lightboxNextBtn');
+
             if (modal && img) {
-                img.src = url;
+                if (currentDetailImages.length > 0) {
+                    lightboxImagesList = currentDetailImages;
+                    const foundIdx = lightboxImagesList.indexOf(url);
+                    lightboxCurrentIndex = foundIdx !== -1 ? foundIdx : 0;
+                } else {
+                    lightboxImagesList = [url];
+                    lightboxCurrentIndex = 0;
+                }
+
+                img.src = lightboxImagesList[lightboxCurrentIndex];
+
+                if (lightboxImagesList.length > 1) {
+                    prevBtn?.classList.remove('hidden');
+                    nextBtn?.classList.remove('hidden');
+                } else {
+                    prevBtn?.classList.add('hidden');
+                    nextBtn?.classList.add('hidden');
+                }
+
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
             }
+        };
+
+        window.navigateLightbox = function(direction) {
+            if (lightboxImagesList.length <= 1) return;
+            lightboxCurrentIndex += direction;
+            if (lightboxCurrentIndex < 0) lightboxCurrentIndex = lightboxImagesList.length - 1;
+            if (lightboxCurrentIndex >= lightboxImagesList.length) lightboxCurrentIndex = 0;
+
+            const img = document.getElementById('lightboxImg');
+            if (img) img.src = lightboxImagesList[lightboxCurrentIndex];
         };
 
         window.closeLightbox = function() {
@@ -2264,6 +2278,20 @@
                 closeEditProductModal();
                 closeUserModal();
                 closeCheckoutModal();
+            } else if (e.key === 'ArrowLeft') {
+                const modal = document.getElementById('imageLightboxModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    navigateLightbox(-1);
+                } else if (currentPage === 'product-detail') {
+                    navigateDetailImage(-1);
+                }
+            } else if (e.key === 'ArrowRight') {
+                const modal = document.getElementById('imageLightboxModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    navigateLightbox(1);
+                } else if (currentPage === 'product-detail') {
+                    navigateDetailImage(1);
+                }
             }
         });
 
