@@ -76,10 +76,8 @@
 </head>
 <body class="bg-[#f8fafc] text-slate-800 h-[100dvh] overflow-hidden flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
 
-    <!-- 系統提示訊息（頂層 z-[100]） -->
     <div id="msgBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-2xl hidden transition-all duration-300 flex items-center gap-2"></div>
 
-    <!-- 全螢幕照片放大預覽燈箱（次頂層 z-[90] 含左右切換按鍵） -->
     <div id="imageLightboxModal" class="fixed inset-0 z-[90] hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 transition-all" onclick="closeLightbox()">
         <div class="relative max-w-4xl max-h-[85vh] w-full flex flex-col items-center justify-center" onclick="event.stopPropagation()">
             <button type="button" id="lightboxPrevBtn" onclick="navigateLightbox(-1)" class="absolute left-2 sm:-left-12 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center text-lg transition backdrop-blur-sm z-20">
@@ -96,7 +94,6 @@
         </div>
     </div>
 
-    <!-- 編輯商品 Modal -->
     <div id="editProductModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeEditProductModal()">
         <div class="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
@@ -146,7 +143,6 @@
         </div>
     </div>
 
-    <!-- 帳號管理 Modal -->
     <div id="userModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeUserModal()">
         <div class="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
@@ -191,7 +187,6 @@
         </div>
     </div>
 
-    <!-- 購物車 Modal -->
     <div id="cartModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" onclick="closeCartModal()">
         <div class="relative w-full max-w-2xl bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[88vh]" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
@@ -235,7 +230,6 @@
         </div>
     </div>
 
-    <!-- 訂單確認明細 Modal -->
     <div id="checkoutModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeCheckoutModal()">
         <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/70">
@@ -284,7 +278,6 @@
         </div>
     </div>
 
-    <!-- 登入介面 -->
     <div id="authWorkspace" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
         <div class="relative w-full max-w-[390px] bg-white rounded-3xl p-8 shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-4">
@@ -322,7 +315,6 @@
         </div>
     </div>
 
-    <!-- 平台工作區 -->
     <div id="appWorkspace" class="hidden flex-grow flex flex-col h-full overflow-hidden">
         
         <header class="bg-slate-900 text-white shrink-0 py-2.5 px-4 sm:px-6 shadow-md z-40">
@@ -362,7 +354,6 @@
         <main id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar p-4 sm:p-6 pb-20">
             <div class="max-w-6xl mx-auto space-y-6">
 
-                <!-- 1. 商品選購區 -->
                 <section id="page-mall" class="page-pane hidden space-y-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -380,7 +371,6 @@
                     <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
                 </section>
 
-                <!-- 2. 獨立商品詳細頁面（含上下張切換按鈕） -->
                 <section id="page-product-detail" class="page-pane hidden space-y-4">
                     <div class="flex items-center justify-between pb-2 border-b border-slate-200">
                         <button type="button" onclick="switchPage('mall')" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-black transition flex items-center gap-2 shadow-xs">
@@ -450,7 +440,6 @@
                     </div>
                 </section>
 
-                <!-- 3. 商品管理區 -->
                 <section id="page-student-publish" class="page-pane hidden space-y-6">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
@@ -522,7 +511,6 @@
                     </div>
                 </section>
 
-                <!-- 4. 訂單區（由原「訂單與商品管理」更名） -->
                 <section id="page-teacher-monitor" class="page-pane hidden space-y-6">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
@@ -565,7 +553,6 @@
                     </div>
                 </section>
 
-                <!-- 5. 全校帳號管理區 -->
                 <section id="page-user-mgmt" class="page-pane hidden space-y-4">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -595,7 +582,6 @@
                     </div>
                 </section>
 
-                <!-- 6. 系統操作審計日誌 -->
                 <section id="page-audit-log" class="page-pane hidden space-y-4">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
@@ -657,7 +643,6 @@
         let currentDetailImageIndex = 0;
         let realtimeChannel = null;
 
-        // 購物車勾選集合
         let selectedCartItemIds = new Set();
         let userRawCarts = [];
 
@@ -843,9 +828,6 @@
             switchPage(targetPage, false);
         }
 
-        // ==========================================
-        // 獨立商品詳細頁面控制 (含圖片上下張切換)
-        // ==========================================
         window.openProductDetailPage = async function(productId, updateHash = true) {
             let p = currentProductsList.find(item => String(item.id) === String(productId));
 
@@ -989,9 +971,6 @@
             }
         };
 
-        // ==========================================
-        // 購物車與勾選結帳核心
-        // ==========================================
         async function updateCartBadges() {
             if (!canPurchase()) return;
             try {
@@ -1274,9 +1253,6 @@
             }
         }
 
-        // ==========================================
-        // 訂單結帳與確認流程
-        // ==========================================
         function openCheckoutModal() {
             if (selectedCartItemIds.size === 0) {
                 showMsg("請至少勾選一項商品進行結帳！", true);
@@ -1475,9 +1451,6 @@
             showMsg("CSV 報表匯出成功！");
         }
 
-        // ==========================================
-        // 圖片與商品管理功能（修復相符的函式名稱）
-        // ==========================================
         function parseImages(rawUrl) {
             if (!rawUrl) return [];
             if (rawUrl.includes('|||')) {
@@ -1569,7 +1542,6 @@
             }
         }
 
-        // 統一函式名稱，修復 Uncaught ReferenceError
         function renderEditImagePreviews() {
             const container = document.getElementById('editImagePreviews');
             if (!container) return;
@@ -1596,7 +1568,7 @@
             document.getElementById('editProdStock').value = p.stock !== undefined ? p.stock : -1;
             document.getElementById('editProdFiles').value = '';
             editBase64Images = parseImages(p.image_url);
-            renderEditImagePreviews(); // 正確呼叫修復後的函式名稱
+            renderEditImagePreviews();
 
             const groupField = document.getElementById('editProdGroupField');
             if (isPrivileged()) {
@@ -1855,9 +1827,6 @@
             renderOrdersTable();
         }
 
-        // ==========================================
-        // 帳號管理與審計
-        // ==========================================
         window.openUserModal = function(userId = null) {
             document.getElementById('modalUserId').value = '';
             document.getElementById('modalUserAccount').value = '';
@@ -2055,9 +2024,6 @@
             ));
         }
 
-        // ==========================================
-        // 燈箱全螢幕預覽 (含切換功能)
-        // ==========================================
         let lightboxImagesList = [];
         let lightboxCurrentIndex = 0;
 
@@ -2107,9 +2073,6 @@
             document.body.style.overflow = '';
         };
 
-        // ==========================================
-        // 登入驗證與即時監聽
-        // ==========================================
         function setupRealtimeListeners() {
             if (realtimeChannel) client.removeChannel(realtimeChannel);
             realtimeChannel = client
