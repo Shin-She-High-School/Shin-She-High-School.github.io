@@ -78,6 +78,7 @@
 
     <div id="msgBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-2xl hidden transition-all duration-300 flex items-center gap-2"></div>
 
+    <!-- 全螢幕燈箱 -->
     <div id="imageLightboxModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 transition-all" onclick="closeLightbox()">
         <div class="relative max-w-4xl max-h-[85vh] flex flex-col items-center" onclick="event.stopPropagation()">
             <img id="lightboxImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/15">
@@ -85,6 +86,69 @@
         </div>
     </div>
 
+    <!-- 商品詳細頁面彈窗 (Product Detail Modal) -->
+    <div id="productDetailModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeProductDetailModal()">
+        <div class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] overflow-hidden" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/70">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                    <h3 class="text-base font-black text-slate-800 tracking-tight">商品詳細規格</h3>
+                </div>
+                <button type="button" onclick="closeProductDetailModal()" class="w-8 h-8 rounded-full bg-slate-200/60 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition text-sm">✕</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <!-- 左側：圖片輪播與放大展示 -->
+                    <div class="space-y-3">
+                        <div class="relative bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 flex items-center justify-center min-h-[260px] max-h-[360px]">
+                            <img id="detailMainImg" src="" alt="商品大圖" class="w-full h-72 object-contain cursor-zoom-in transition duration-200 hover:scale-105" onclick="openLightbox(this.src)">
+                            <div id="detailOutOfStockBadge" class="hidden absolute top-3 left-3 bg-rose-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">已售完</div>
+                        </div>
+                        <div id="detailThumbnails" class="flex gap-2 overflow-x-auto custom-scrollbar pb-1"></div>
+                    </div>
+
+                    <!-- 右側：商品屬性與購買設定 -->
+                    <div class="flex flex-col justify-between space-y-5">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span id="detailGroupTag" class="px-3 py-1 rounded-lg bg-brand-50 text-brand-700 text-xs font-black border border-brand-200">第 - 組</span>
+                                <span id="detailStockTag" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">庫存: -</span>
+                            </div>
+                            <h2 id="detailTitle" class="text-2xl font-black text-slate-800 leading-snug">載入中...</h2>
+                            <div class="flex items-baseline gap-2 pt-1 border-t border-slate-100">
+                                <span class="text-xs font-bold text-slate-400">專案售價</span>
+                                <span id="detailPrice" class="text-3xl font-black text-rose-600">0</span>
+                                <span class="text-sm font-bold text-slate-500">虛擬幣</span>
+                            </div>
+                            <div class="text-xs font-medium text-slate-400 pt-2 space-y-1">
+                                <div>上架日期：<span id="detailCreatedAt" class="font-mono text-slate-600 font-bold">-</span></div>
+                                <div>實習組別：<span id="detailGroupName" class="text-slate-600 font-bold">-</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 購買控制區 -->
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span>購買數量</span>
+                                <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+                                    <button type="button" onclick="adjustDetailQty(-1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 font-black text-slate-600 text-sm transition">-</button>
+                                    <input type="number" id="detailQtyInput" min="1" value="1" class="w-12 h-8 text-center text-xs font-black bg-transparent outline-none">
+                                    <button type="button" onclick="adjustDetailQty(1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 font-black text-slate-600 text-sm transition">+</button>
+                                </div>
+                            </div>
+                            <button type="button" id="btnDetailAddToCart" onclick="submitDetailAddToCart()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs sm:text-sm transition shadow-md shadow-brand-600/30 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cart-plus"></i>
+                                <span>加入購物車</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 編輯商品 Modal -->
     <div id="editProductModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeEditProductModal()">
         <div class="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
@@ -134,6 +198,7 @@
         </div>
     </div>
 
+    <!-- 帳號管理 Modal -->
     <div id="userModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeUserModal()">
         <div class="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
@@ -178,6 +243,7 @@
         </div>
     </div>
 
+    <!-- 購物車 Modal -->
     <div id="cartModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeCartModal()">
         <div class="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
@@ -207,6 +273,7 @@
         </div>
     </div>
 
+    <!-- 登入介面 -->
     <div id="authWorkspace" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
         <div class="relative w-full max-w-[390px] bg-white rounded-3xl p-8 shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-4">
@@ -244,6 +311,7 @@
         </div>
     </div>
 
+    <!-- 平台工作區 -->
     <div id="appWorkspace" class="hidden flex-grow flex flex-col h-full overflow-hidden">
         
         <header class="bg-slate-900 text-white shrink-0 py-2.5 px-4 sm:px-6 shadow-md z-40">
@@ -283,6 +351,7 @@
         <main id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar p-4 sm:p-6 pb-20">
             <div class="max-w-6xl mx-auto space-y-6">
 
+                <!-- 1. 商品選購區 -->
                 <section id="page-mall" class="page-pane hidden space-y-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -300,6 +369,7 @@
                     <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
                 </section>
 
+                <!-- 2. 商品管理區 -->
                 <section id="page-student-publish" class="page-pane hidden space-y-6">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
@@ -371,6 +441,7 @@
                     </div>
                 </section>
 
+                <!-- 3. 教學監控專區 -->
                 <section id="page-teacher-monitor" class="page-pane hidden space-y-6">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
@@ -431,6 +502,7 @@
                     </div>
                 </section>
 
+                <!-- 4. 全校帳號管理區 -->
                 <section id="page-user-mgmt" class="page-pane hidden space-y-4">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -460,6 +532,7 @@
                     </div>
                 </section>
 
+                <!-- 5. 系統操作審計日誌 -->
                 <section id="page-audit-log" class="page-pane hidden space-y-4">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
@@ -515,6 +588,7 @@
         let allUsersList = [];
         let currentOrdersList = [];
         let currentPage = 'mall';
+        let currentDetailProduct = null;
         let realtimeChannel = null;
 
         const ROLE_NAMES = {
@@ -542,6 +616,10 @@
 
         function isPrivileged() {
             return currentAuth && (currentAuth.role === 'admin' || currentAuth.role === 'teacher');
+        }
+
+        function canPurchase() {
+            return currentAuth && currentAuth.role !== 'student';
         }
 
         function formatCurrency(val) {
@@ -574,18 +652,22 @@
         function parseHashParams() {
             const hash = window.location.hash || '';
             const pageMatch = hash.match(/page=([^&]+)/);
+            const idMatch = hash.match(/id=([^&]+)/);
             return {
-                page: pageMatch ? decodeURIComponent(pageMatch[1]) : null
+                page: pageMatch ? decodeURIComponent(pageMatch[1]) : null,
+                id: idMatch ? decodeURIComponent(idMatch[1]) : null
             };
         }
 
-        function buildHash(pageKey) {
+        function buildHash(pageKey, extra = {}) {
             if (!currentAuth) return '';
-            return `#page=${encodeURIComponent(pageKey)}`;
+            let h = `#page=${encodeURIComponent(pageKey)}`;
+            if (extra.id) h += `&id=${encodeURIComponent(extra.id)}`;
+            return h;
         }
 
-        function safeUpdateHash(pageKey) {
-            const newHash = buildHash(pageKey);
+        function safeUpdateHash(pageKey, extra = {}) {
+            const newHash = buildHash(pageKey, extra);
             try {
                 if (window.location.protocol === 'file:') {
                     history.replaceState(null, null, newHash || ' ');
@@ -671,9 +753,16 @@
         function handleHashRouting() {
             if (!currentAuth) return;
 
-            const { page } = parseHashParams();
-            const validPages = ['mall', 'student-publish', 'teacher-monitor', 'user-mgmt', 'audit-log'];
+            const { page, id } = parseHashParams();
 
+            if (page === 'product-detail' && id) {
+                openProductDetailModal(id, false);
+                return;
+            } else {
+                closeProductDetailModal(false);
+            }
+
+            const validPages = ['mall', 'student-publish', 'teacher-monitor', 'user-mgmt', 'audit-log'];
             let targetPage = page && validPages.includes(page) ? page : (currentAuth.role === 'student' ? 'student-publish' : 'mall');
 
             if (currentAuth.role === 'staff' && (targetPage === 'student-publish' || targetPage === 'teacher-monitor' || targetPage === 'user-mgmt' || targetPage === 'audit-log')) {
@@ -685,6 +774,134 @@
 
             switchPage(targetPage, false);
         }
+
+        // 商品詳細頁面開啟/關閉控制
+        window.openProductDetailModal = async function(productId, updateHash = true) {
+            let p = currentProductsList.find(item => String(item.id) === String(productId));
+
+            if (!p) {
+                const { data } = await client.from('products').select('*').eq('id', productId).maybeSingle();
+                if (data) p = data;
+            }
+
+            if (!p) {
+                showMsg("找不到該項商品！", true);
+                return;
+            }
+
+            currentDetailProduct = p;
+            const modal = document.getElementById('productDetailModal');
+            const mainImg = document.getElementById('detailMainImg');
+            const thumbsContainer = document.getElementById('detailThumbnails');
+            const outOfStockBadge = document.getElementById('detailOutOfStockBadge');
+            const groupTag = document.getElementById('detailGroupTag');
+            const stockTag = document.getElementById('detailStockTag');
+            const titleEl = document.getElementById('detailTitle');
+            const priceEl = document.getElementById('detailPrice');
+            const createdAtEl = document.getElementById('detailCreatedAt');
+            const groupNameEl = document.getElementById('detailGroupName');
+            const qtyInput = document.getElementById('detailQtyInput');
+            const btnAdd = document.getElementById('btnDetailAddToCart');
+
+            const images = parseImages(p.image_url);
+            const firstImg = images.length > 0 ? images[0] : 'https://placehold.co/500x400?text=無商品圖片';
+            mainImg.src = firstImg;
+
+            const stock = p.stock !== undefined ? p.stock : -1;
+            const isUnlimited = (stock < 0);
+            const isOutOfStock = (!isUnlimited && stock <= 0);
+
+            if (isOutOfStock) {
+                outOfStockBadge.classList.remove('hidden');
+                stockTag.className = "px-3 py-1 rounded-lg bg-rose-50 text-rose-700 text-xs font-black border border-rose-200";
+                stockTag.innerText = "庫存: 已售完";
+                if (btnAdd) {
+                    btnAdd.disabled = true;
+                    btnAdd.className = "w-full py-3 bg-slate-300 text-white font-black rounded-xl text-xs sm:text-sm cursor-not-allowed flex items-center justify-center gap-2";
+                    btnAdd.innerHTML = `<span>已售完，無法購買</span>`;
+                }
+            } else {
+                outOfStockBadge.classList.add('hidden');
+                stockTag.className = "px-3 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200";
+                stockTag.innerText = isUnlimited ? "庫存: 無限制" : `庫存: ${stock} 件`;
+                if (btnAdd) {
+                    btnAdd.disabled = false;
+                    btnAdd.className = "w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs sm:text-sm transition shadow-md shadow-brand-600/30 flex items-center justify-center gap-2";
+                    btnAdd.innerHTML = `<i class="fa-solid fa-cart-plus"></i><span>加入購物車</span>`;
+                }
+            }
+
+            groupTag.innerText = `第 ${p.group_no} 組商品`;
+            titleEl.innerText = p.name;
+            priceEl.innerText = formatCurrency(p.price);
+            createdAtEl.innerText = new Date(p.created_at).toLocaleString('zh-TW');
+            groupNameEl.innerText = `商業經營科 學生專題 第 ${p.group_no} 組`;
+
+            qtyInput.value = "1";
+            qtyInput.max = isUnlimited ? "" : String(stock);
+
+            if (images.length > 1) {
+                thumbsContainer.innerHTML = images.map((img, idx) => `
+                    <img src="${img}" class="w-12 h-12 object-cover rounded-xl border-2 ${idx === 0 ? 'border-brand-500' : 'border-slate-200'} cursor-pointer hover:border-brand-400 transition shrink-0" onclick="switchDetailMainImage('${img}', this)">
+                `).join('');
+                thumbsContainer.classList.remove('hidden');
+            } else {
+                thumbsContainer.innerHTML = '';
+                thumbsContainer.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            if (updateHash) {
+                safeUpdateHash('product-detail', { id: p.id });
+            }
+        };
+
+        window.switchDetailMainImage = function(imgSrc, element) {
+            const mainImg = document.getElementById('detailMainImg');
+            if (mainImg) mainImg.src = imgSrc;
+            const allThumbs = document.querySelectorAll('#detailThumbnails img');
+            allThumbs.forEach(t => t.className = "w-12 h-12 object-cover rounded-xl border-2 border-slate-200 cursor-pointer hover:border-brand-400 transition shrink-0");
+            if (element) {
+                element.className = "w-12 h-12 object-cover rounded-xl border-2 border-brand-500 cursor-pointer transition shrink-0";
+            }
+        };
+
+        window.adjustDetailQty = function(change) {
+            const input = document.getElementById('detailQtyInput');
+            if (!input || !currentDetailProduct) return;
+            let val = parseInt(input.value || 1, 10) + change;
+            if (val < 1) val = 1;
+
+            const stock = currentDetailProduct.stock !== undefined ? currentDetailProduct.stock : -1;
+            if (stock >= 0 && val > stock) {
+                val = stock;
+                showMsg(`已達目前庫存上限 (${stock})！`, true);
+            }
+            input.value = val;
+        };
+
+        window.submitDetailAddToCart = async function() {
+            if (!currentDetailProduct) return;
+            const input = document.getElementById('detailQtyInput');
+            const qty = parseInt(input ? input.value : 1, 10) || 1;
+            
+            const stock = currentDetailProduct.stock !== undefined ? currentDetailProduct.stock : -1;
+            await addToCart(currentDetailProduct.id, currentDetailProduct.name, currentDetailProduct.group_no, currentDetailProduct.price, stock, qty);
+        };
+
+        window.closeProductDetailModal = function(updateHash = true) {
+            const modal = document.getElementById('productDetailModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+            currentDetailProduct = null;
+            if (updateHash && currentAuth) {
+                safeUpdateHash(currentPage);
+            }
+        };
 
         function compressImage(file, maxWidth = 600, quality = 0.65) {
             return new Promise((resolve, reject) => {
@@ -859,7 +1076,7 @@
                             <span class="text-[10px] text-slate-400 block font-mono font-medium">${l.account} (${roleBadge})</span>
                         </td>
                         <td class="p-3 border-b border-slate-100">
-                            <span class="px-2 py-0.5 rounded-lg font-black text-[10px] bg-slate-100 text-slate-700 border border-slate-200">${actionBadge}</span>
+                            <span class="px-2.5 py-0.5 rounded-lg font-black text-[10px] bg-slate-100 text-slate-700 border border-slate-200">${actionBadge}</span>
                         </td>
                         <td class="p-3 border-b border-slate-100 font-mono text-brand-600 font-black text-xs">${l.ip_address || '127.0.0.1'}</td>
                         <td class="p-3 border-b border-slate-100 text-[11px] font-mono text-slate-500 max-w-xs truncate" title="${detailStr}">${detailStr}</td>
@@ -914,24 +1131,47 @@
             }
         };
 
+        // 更新購物車數量徽章（支援教職員、教師與管理員，加總全部購買件數）
         async function updateCartBadges() {
-            if (!currentAuth || currentAuth.role !== 'staff') return;
-            const { count, error } = await client.from('carts').select('*', { count: 'exact', head: true }).eq('account', currentAuth.account);
-            const totalCount = (!error && count) ? count : 0;
-            const badge1 = document.getElementById('cartBadgeCount');
-            const badge2 = document.getElementById('btnCartInlineCount');
-            if (badge1) badge1.innerText = totalCount;
-            if (badge2) badge2.innerText = totalCount;
+            if (!currentAuth || currentAuth.role === 'student') return;
+            try {
+                const { data: cartItems, error } = await client
+                    .from('carts')
+                    .select('quantity')
+                    .eq('account', currentAuth.account);
+
+                const totalItemsCount = (!error && cartItems)
+                    ? cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
+                    : 0;
+
+                const badge1 = document.getElementById('cartBadgeCount');
+                const badge2 = document.getElementById('btnCartInlineCount');
+                if (badge1) badge1.innerText = totalItemsCount;
+                if (badge2) badge2.innerText = totalItemsCount;
+            } catch (e) {
+                console.error("更新購物車數量失敗", e);
+            }
         }
 
-        async function addToCart(productId, prodName, groupNo, price, stock) {
+        async function addToCart(productId, prodName, groupNo, price, stock, customQty = null) {
             if (!currentAuth) {
                 showMsg("請先登入！", true);
                 return;
             }
 
-            const qtyInput = document.getElementById(`qty-${productId}`);
-            const qty = parseInt(qtyInput ? qtyInput.value : 1, 10);
+            if (currentAuth.role === 'student') {
+                showMsg("學生帳號為實習賣家，無法選購商品！", true);
+                return;
+            }
+
+            let qty = 1;
+            if (customQty !== null) {
+                qty = customQty;
+            } else {
+                const qtyInput = document.getElementById(`qty-${productId}`);
+                qty = parseInt(qtyInput ? qtyInput.value : 1, 10);
+            }
+
             if (!qty || qty <= 0) {
                 showMsg("請填寫大於 0 的正確數量！", true);
                 return;
@@ -952,11 +1192,12 @@
                     .maybeSingle();
 
                 if (existing) {
-                    if (!isUnlimited && (existing.quantity + qty > stock)) {
+                    const nextQty = existing.quantity + qty;
+                    if (!isUnlimited && (nextQty > stock)) {
                         showMsg(`購物車內已有此品項，累積數量將超過現有庫存 (${stock})！`, true);
                         return;
                     }
-                    await client.from('carts').update({ quantity: existing.quantity + qty }).eq('id', existing.id);
+                    await client.from('carts').update({ quantity: nextQty }).eq('id', existing.id);
                 } else {
                     await client.from('carts').insert({
                         account: currentAuth.account,
@@ -967,7 +1208,13 @@
 
                 await logAuditRecord("加入購物車", { 商品名稱: prodName, 數量: qty, 單價: price });
                 showMsg(`已成功將【${prodName}】x${qty} 加入購物車！`);
-                updateCartBadges();
+                
+                await updateCartBadges();
+
+                const cartModal = document.getElementById('cartModal');
+                if (cartModal && !cartModal.classList.contains('hidden')) {
+                    await renderCartModal();
+                }
             } catch (err) {
                 showMsg("加入購物車失敗：" + err.message, true);
             }
@@ -1242,7 +1489,8 @@
             }
             const name = document.getElementById('editProdName').value.trim();
             const price = parseInt(document.getElementById('editProdPrice').value, 10);
-            const stock = parseInt(document.getElementById('editProdStock').value, 10);
+            const rawStock = parseInt(document.getElementById('editProdStock').value, 10);
+            const stock = isNaN(rawStock) ? -1 : rawStock;
             const joinedImages = editBase64Images.join('|||');
 
             if (group_no < 1 || group_no > 6) {
@@ -1435,7 +1683,8 @@
 
             const name = nameInput.value.trim();
             const price = parseInt(priceInput.value, 10);
-            const stock = parseInt(stockInput.value, 10);
+            const rawStock = parseInt(stockInput.value, 10);
+            const stock = isNaN(rawStock) ? -1 : rawStock;
 
             if (targetGroup < 1 || targetGroup > 6) {
                 showMsg("組別必須介於 1 到 6 之間！", true);
@@ -1523,23 +1772,14 @@
                 let imgHeaderHtml = '';
                 if (images.length > 0) {
                     imgHeaderHtml = `
-                        <div class="relative bg-slate-100 flex items-center justify-center overflow-hidden">
-                            <img id="main-img-${p.id}" src="${firstImg}" alt="${p.name}" class="w-full h-44 object-cover rounded-t-3xl cursor-pointer hover:scale-105 transition duration-300 ${isOutOfStock ? 'grayscale opacity-75' : ''}" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">
+                        <div class="relative bg-slate-100 flex items-center justify-center overflow-hidden cursor-pointer" onclick="openProductDetailModal('${p.id}')">
+                            <img id="main-img-${p.id}" src="${firstImg}" alt="${p.name}" class="w-full h-44 object-cover rounded-t-3xl hover:scale-105 transition duration-300 ${isOutOfStock ? 'grayscale opacity-75' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">
                             ${images.length > 1 ? `<span class="absolute bottom-2.5 right-2.5 bg-slate-950/75 backdrop-blur-xs text-white text-[10px] font-black px-2 py-0.5 rounded-full"><i class="fa-regular fa-images mr-1"></i>${images.length}</span>` : ''}
                             ${isOutOfStock ? `<span class="absolute top-2.5 left-2.5 bg-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-md">已售完</span>` : ''}
                         </div>
                     `;
-                    if (images.length > 1) {
-                        imgHeaderHtml += `
-                            <div class="flex gap-1.5 p-2 bg-slate-50 border-b border-slate-100 overflow-x-auto custom-scrollbar">
-                                ${images.map((img) => `
-                                    <img src="${img}" class="w-10 h-10 object-cover rounded-xl border border-slate-200 cursor-pointer hover:border-brand-500 transition shrink-0" onclick="switchMainImage('${p.id}', '${img}')">
-                                `).join('')}
-                            </div>
-                        `;
-                    }
                 } else {
-                    imgHeaderHtml = `<div class="w-full h-44 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-3xl"><i class="fa-regular fa-image text-xl mr-1.5"></i>暫無照片</div>`;
+                    imgHeaderHtml = `<div class="w-full h-44 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-3xl cursor-pointer" onclick="openProductDetailModal('${p.id}')"><i class="fa-regular fa-image text-xl mr-1.5"></i>暫無照片</div>`;
                 }
 
                 const displayStock = isUnlimited ? '無限制' : stock;
@@ -1549,12 +1789,12 @@
                     <div class="product-card bg-white border border-slate-200/80 rounded-3xl shadow-xs flex flex-col justify-between overflow-hidden">
                         ${imgHeaderHtml}
                         <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
-                            <div>
+                            <div class="cursor-pointer" onclick="openProductDetailModal('${p.id}')">
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200">第 ${p.group_no} 組</span>
                                     <span class="text-[11px] font-bold ${isOutOfStock ? 'text-rose-600' : 'text-slate-400'}">庫存: ${displayStock}</span>
                                 </div>
-                                <h4 class="font-black text-sm text-slate-800 leading-snug">${p.name}</h4>
+                                <h4 class="font-black text-sm text-slate-800 leading-snug hover:text-brand-600 transition">${p.name}</h4>
                             </div>
                             <div class="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
                                 <span class="text-base font-black text-rose-600">${formatCurrency(p.price)} <span class="text-xs font-bold text-slate-400">幣</span></span>
@@ -1604,14 +1844,17 @@
                 return `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 border-b border-slate-100">
-                            ${firstImg ? `<div class="relative inline-block"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-xl cursor-pointer" onclick="openLightbox('${firstImg}')">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full font-bold">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">暫無照片</span>`}
+                            ${firstImg ? `<div class="relative inline-block cursor-pointer" onclick="openProductDetailModal('${p.id}')"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-xl">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full font-bold">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">暫無照片</span>`}
                         </td>
-                        <td class="p-3 border-b border-slate-100 font-black text-slate-800 text-xs">${p.name}</td>
+                        <td class="p-3 border-b border-slate-100">
+                            <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailModal('${p.id}')">${p.name}</span>
+                        </td>
                         <td class="p-3 border-b border-slate-100 text-center font-black text-brand-600">第 ${p.group_no} 組</td>
                         <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
                         <td class="p-3 border-b border-slate-100 text-center ${stockClass}">${stockDisplay}</td>
                         <td class="p-3 border-b border-slate-100 text-slate-400 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
                         <td class="p-3 border-b border-slate-100 text-center space-x-1">
+                            <button type="button" onclick="openProductDetailModal('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
                             <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
                             <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
                         </td>
@@ -1642,13 +1885,16 @@
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 border-b border-slate-100 font-black text-brand-600">第 ${p.group_no} 組</td>
                         <td class="p-3 border-b border-slate-100">
-                            ${firstImg ? `<img src="${firstImg}" class="w-10 h-10 object-cover rounded-xl cursor-pointer" onclick="openLightbox('${firstImg}')">` : `<span class="text-slate-300">暫無照片</span>`}
+                            ${firstImg ? `<img src="${firstImg}" class="w-10 h-10 object-cover rounded-xl cursor-pointer" onclick="openProductDetailModal('${p.id}')">` : `<span class="text-slate-300">暫無照片</span>`}
                         </td>
-                        <td class="p-3 border-b border-slate-100 font-black text-slate-800 text-xs">${p.name}</td>
+                        <td class="p-3 border-b border-slate-100">
+                            <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailModal('${p.id}')">${p.name}</span>
+                        </td>
                         <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
                         <td class="p-3 border-b border-slate-100 text-center ${stockClass}">${stockDisplay}</td>
                         <td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
                         <td class="p-3 border-b border-slate-100 text-center space-x-1">
+                            <button type="button" onclick="openProductDetailModal('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
                             <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
                             <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
                         </td>
@@ -1808,9 +2054,11 @@
             loadProductsData();
             setupRealtimeListeners();
 
-            if (user.role === 'staff') {
+            if (user.role !== 'student') {
                 updateCartBadges();
-            } else if (isPrivileged()) {
+            }
+
+            if (isPrivileged()) {
                 loadTeacherDashboard();
                 loadAuditLogs();
                 loadUsersTable();
@@ -1928,6 +2176,7 @@
             allAuditLogs = [];
             allUsersList = [];
             currentOrdersList = [];
+            currentDetailProduct = null;
             document.getElementById('loginAccount').value = '';
             document.getElementById('loginPassword').value = '';
             clearLoginError();
@@ -1964,32 +2213,29 @@
 
             if (currentAuth.role === 'staff') {
                 roleTitle = `您好，<b class="text-amber-300 font-black">${currentAuth.name}</b> ｜ 教職員 (${currentAuth.account})`;
-                if (btnHeaderCart) {
-                    btnHeaderCart.classList.remove('hidden');
-                    btnHeaderCart.classList.add('flex');
-                }
             } else if (currentAuth.role === 'student') {
                 roleTitle = `您好，第 <b class="text-amber-300 font-black">${currentAuth.account}</b> 組 ｜ 學生`;
-                if (btnHeaderCart) {
-                    btnHeaderCart.classList.add('hidden');
-                    btnHeaderCart.classList.remove('flex');
-                }
             } else if (currentAuth.role === 'teacher') {
                 roleTitle = `您好，<b class="text-amber-300 font-black">${currentAuth.name}</b> ｜ 任課教師 (全權限)`;
-                if (btnHeaderCart) {
-                    btnHeaderCart.classList.remove('hidden');
-                    btnHeaderCart.classList.add('flex');
-                }
             } else if (currentAuth.role === 'admin') {
                 roleTitle = `您好，<b class="text-amber-300 font-black">系統管理員</b>`;
-                if (btnHeaderCart) {
-                    btnHeaderCart.classList.remove('hidden');
-                    btnHeaderCart.classList.add('flex');
-                }
             }
 
             if (userStatusDisplay) {
                 userStatusDisplay.innerHTML = roleTitle;
+            }
+
+            // 只要不是學生身分，均顯示右上角購物車按鈕
+            if (canPurchase()) {
+                if (btnHeaderCart) {
+                    btnHeaderCart.classList.remove('hidden');
+                    btnHeaderCart.classList.add('flex');
+                }
+            } else {
+                if (btnHeaderCart) {
+                    btnHeaderCart.classList.add('hidden');
+                    btnHeaderCart.classList.remove('flex');
+                }
             }
         }
 
@@ -1999,6 +2245,7 @@
                 closeCartModal();
                 closeEditProductModal();
                 closeUserModal();
+                closeProductDetailModal();
             }
         });
 
