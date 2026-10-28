@@ -76,77 +76,14 @@
 </head>
 <body class="bg-[#f8fafc] text-slate-800 h-[100dvh] overflow-hidden flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
 
-    <div id="msgBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-2xl hidden transition-all duration-300 flex items-center gap-2"></div>
+    <!-- 系統提示訊息（頂層 z-[100]） -->
+    <div id="msgBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-2xl hidden transition-all duration-300 flex items-center gap-2"></div>
 
-    <!-- 全螢幕燈箱 -->
-    <div id="imageLightboxModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 transition-all" onclick="closeLightbox()">
+    <!-- 全螢幕照片放大預覽燈箱（次頂層 z-[90]） -->
+    <div id="imageLightboxModal" class="fixed inset-0 z-[90] hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 transition-all" onclick="closeLightbox()">
         <div class="relative max-w-4xl max-h-[85vh] flex flex-col items-center" onclick="event.stopPropagation()">
-            <img id="lightboxImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/15">
+            <img id="lightboxImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/20">
             <button type="button" onclick="closeLightbox()" class="mt-4 px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs tracking-wider transition backdrop-blur-sm border border-white/20">關閉預覽</button>
-        </div>
-    </div>
-
-    <!-- 商品詳細頁面彈窗 (PDP) -->
-    <div id="productDetailModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeProductDetailModal()">
-        <div class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] overflow-hidden" onclick="event.stopPropagation()">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/70">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
-                    <h3 class="text-base font-black text-slate-800 tracking-tight">商品詳細規格</h3>
-                </div>
-                <button type="button" onclick="closeProductDetailModal()" class="w-8 h-8 rounded-full bg-slate-200/60 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition text-sm">✕</button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                    <div class="space-y-3">
-                        <div class="relative bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 flex items-center justify-center min-h-[260px] max-h-[360px]">
-                            <img id="detailMainImg" src="" alt="商品大圖" class="w-full h-72 object-contain cursor-zoom-in transition duration-200 hover:scale-105" onclick="openLightbox(this.src)">
-                            <div id="detailOutOfStockBadge" class="hidden absolute top-3 left-3 bg-rose-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">已售完</div>
-                        </div>
-                        <div id="detailThumbnails" class="flex gap-2 overflow-x-auto custom-scrollbar pb-1"></div>
-                    </div>
-
-                    <div class="flex flex-col justify-between space-y-5">
-                        <div class="space-y-3">
-                            <div class="flex items-center gap-2">
-                                <span id="detailGroupTag" class="px-3 py-1 rounded-lg bg-brand-50 text-brand-700 text-xs font-black border border-brand-200">第 - 組</span>
-                                <span id="detailStockTag" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">庫存: -</span>
-                            </div>
-                            <h2 id="detailTitle" class="text-2xl font-black text-slate-800 leading-snug">載入中...</h2>
-                            <div class="flex items-baseline gap-2 pt-1 border-t border-slate-100">
-                                <span class="text-xs font-bold text-slate-400">定價</span>
-                                <span id="detailPrice" class="text-3xl font-black text-rose-600">0</span>
-                                <span class="text-sm font-bold text-slate-500">幣</span>
-                            </div>
-                            <div class="text-xs font-medium text-slate-400 pt-2 space-y-1">
-                                <div>上架日期：<span id="detailCreatedAt" class="font-mono text-slate-600 font-bold">-</span></div>
-                                <div>提供組別：<span id="detailGroupName" class="text-slate-600 font-bold">-</span></div>
-                            </div>
-                        </div>
-
-                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
-                            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
-                                <span>選購數量</span>
-                                <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
-                                    <button type="button" onclick="adjustDetailQty(-1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 font-black text-slate-600 text-sm transition">-</button>
-                                    <input type="number" id="detailQtyInput" min="1" value="1" class="w-12 h-8 text-center text-xs font-black bg-transparent outline-none">
-                                    <button type="button" onclick="adjustDetailQty(1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 font-black text-slate-600 text-sm transition">+</button>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <button type="button" id="btnDetailAddToCart" onclick="submitDetailAddToCart(false)" class="w-full py-3 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-black rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-cart-plus"></i>
-                                    <span>加入購物車</span>
-                                </button>
-                                <button type="button" id="btnDetailBuyNow" onclick="submitDetailAddToCart(true)" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs sm:text-sm transition shadow-md shadow-brand-600/30 flex items-center justify-center gap-1.5">
-                                    <span>直接購買</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -245,7 +182,7 @@
         </div>
     </div>
 
-    <!-- 購物車 Modal (支援分組勾選結帳流程) -->
+    <!-- 購物車 Modal -->
     <div id="cartModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" onclick="closeCartModal()">
         <div class="relative w-full max-w-2xl bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[88vh]" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
@@ -257,7 +194,6 @@
                 <button type="button" onclick="closeCartModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
             </div>
 
-            <!-- 全選與清空條 -->
             <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs font-bold text-slate-600 mb-2">
                 <label class="flex items-center gap-2 cursor-pointer select-none">
                     <input type="checkbox" id="selectAllCartCheckbox" onchange="toggleSelectAllCart(this.checked)" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
@@ -290,7 +226,7 @@
         </div>
     </div>
 
-    <!-- 訂單確認明細 Modal (Checkout Confirm) -->
+    <!-- 訂單確認明細 Modal -->
     <div id="checkoutModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeCheckoutModal()">
         <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/70">
@@ -435,7 +371,69 @@
                     <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
                 </section>
 
-                <!-- 2. 商品管理區 -->
+                <!-- 2. 獨立商品詳細頁面（非彈窗） -->
+                <section id="page-product-detail" class="page-pane hidden space-y-4">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                        <button type="button" onclick="switchPage('mall')" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-black transition flex items-center gap-2 shadow-xs">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>返回商品選購</span>
+                        </button>
+                        <span class="text-xs font-bold text-slate-400">商品詳細資訊</span>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                            <div class="space-y-4">
+                                <div class="relative bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 flex items-center justify-center min-h-[300px] max-h-[420px]">
+                                    <img id="detailMainImg" src="" alt="商品大圖" class="w-full h-80 object-contain cursor-zoom-in transition duration-200 hover:scale-105" onclick="openLightbox(this.src)">
+                                    <div id="detailOutOfStockBadge" class="hidden absolute top-4 left-4 bg-rose-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">已售完</div>
+                                </div>
+                                <div id="detailThumbnails" class="flex gap-2.5 overflow-x-auto custom-scrollbar pb-1"></div>
+                            </div>
+
+                            <div class="flex flex-col justify-between space-y-6">
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-2">
+                                        <span id="detailGroupTag" class="px-3 py-1 rounded-lg bg-brand-50 text-brand-700 text-xs font-black border border-brand-200">第 - 組</span>
+                                        <span id="detailStockTag" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">庫存: -</span>
+                                    </div>
+                                    <h2 id="detailTitle" class="text-2xl sm:text-3xl font-black text-slate-800 leading-snug">載入中...</h2>
+                                    <div class="flex items-baseline gap-2 pt-2 border-t border-slate-100">
+                                        <span class="text-xs font-bold text-slate-400">定價</span>
+                                        <span id="detailPrice" class="text-3xl sm:text-4xl font-black text-rose-600">0</span>
+                                        <span class="text-sm font-bold text-slate-500">幣</span>
+                                    </div>
+                                    <div class="text-xs font-medium text-slate-400 pt-2 space-y-1.5 border-t border-slate-100">
+                                        <div>上架日期：<span id="detailCreatedAt" class="font-mono text-slate-600 font-bold">-</span></div>
+                                        <div>提供組別：<span id="detailGroupName" class="text-slate-600 font-bold">-</span></div>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-4">
+                                    <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                                        <span>選購數量</span>
+                                        <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+                                            <button type="button" onclick="adjustDetailQty(-1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 font-black text-slate-600 text-sm transition">-</button>
+                                            <input type="number" id="detailQtyInput" min="1" value="1" class="w-12 h-8 text-center text-xs font-black bg-transparent outline-none">
+                                            <button type="button" onclick="adjustDetailQty(1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 font-black text-slate-600 text-sm transition">+</button>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button type="button" id="btnDetailAddToCart" onclick="submitDetailAddToCart(false)" class="w-full py-3 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-black rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-cart-plus"></i>
+                                            <span>加入購物車</span>
+                                        </button>
+                                        <button type="button" id="btnDetailBuyNow" onclick="submitDetailAddToCart(true)" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs sm:text-sm transition shadow-md shadow-brand-600/30 flex items-center justify-center gap-1.5">
+                                            <span>直接購買</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. 商品管理區 -->
                 <section id="page-student-publish" class="page-pane hidden space-y-6">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
@@ -507,7 +505,7 @@
                     </div>
                 </section>
 
-                <!-- 3. 教學監控專區 (訂單紀錄) -->
+                <!-- 4. 教學監控專區 (訂單紀錄) -->
                 <section id="page-teacher-monitor" class="page-pane hidden space-y-6">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
@@ -550,7 +548,6 @@
                             </div>
                         </div>
 
-                        <!-- 狀態切換分籤 -->
                         <div class="flex items-center gap-1 pb-3 overflow-x-auto custom-scrollbar border-b border-slate-100 text-xs font-black">
                             <button type="button" onclick="filterOrderStatus('all')" class="order-filter-tab px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700">全部訂單</button>
                             <button type="button" onclick="filterOrderStatus('處理中')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">處理中</button>
@@ -577,7 +574,7 @@
                     </div>
                 </section>
 
-                <!-- 4. 全校帳號管理區 -->
+                <!-- 5. 全校帳號管理區 -->
                 <section id="page-user-mgmt" class="page-pane hidden space-y-4">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -607,7 +604,7 @@
                     </div>
                 </section>
 
-                <!-- 5. 系統操作審計日誌 -->
+                <!-- 6. 系統操作審計日誌 -->
                 <section id="page-audit-log" class="page-pane hidden space-y-4">
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
@@ -710,7 +707,7 @@
             const b = document.getElementById('msgBox');
             if (!b) return;
             b.innerHTML = isError ? `<i class="fa-solid fa-circle-exclamation text-base"></i><span>${txt}</span>` : `<i class="fa-solid fa-circle-check text-base"></i><span>${txt}</span>`;
-            b.className = `fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-2xl transition-all duration-300 flex items-center gap-2 ${isError ? 'bg-rose-600 shadow-rose-600/30' : 'bg-brand-600 shadow-brand-600/30'}`;
+            b.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-2xl transition-all duration-300 flex items-center gap-2 ${isError ? 'bg-rose-600 shadow-rose-600/30' : 'bg-brand-600 shadow-brand-600/30'}`;
             b.style.display = 'flex';
             setTimeout(() => { b.style.display = 'none'; }, 2600);
         }
@@ -836,10 +833,8 @@
             const { page, id } = parseHashParams();
 
             if (page === 'product-detail' && id) {
-                openProductDetailModal(id, false);
+                openProductDetailPage(id, false);
                 return;
-            } else {
-                closeProductDetailModal(false);
             }
 
             const validPages = ['mall', 'student-publish', 'teacher-monitor', 'user-mgmt', 'audit-log'];
@@ -856,9 +851,9 @@
         }
 
         // ==========================================
-        // 商品詳細頁面開啟/關閉控制 (PDP)
+        // 獨立商品詳細頁面控制 (非彈窗)
         // ==========================================
-        window.openProductDetailModal = async function(productId, updateHash = true) {
+        window.openProductDetailPage = async function(productId, updateHash = true) {
             let p = currentProductsList.find(item => String(item.id) === String(productId));
 
             if (!p) {
@@ -868,11 +863,11 @@
 
             if (!p) {
                 showMsg("找不到該項商品！", true);
+                switchPage('mall');
                 return;
             }
 
             currentDetailProduct = p;
-            const modal = document.getElementById('productDetailModal');
             const mainImg = document.getElementById('detailMainImg');
             const thumbsContainer = document.getElementById('detailThumbnails');
             const outOfStockBadge = document.getElementById('detailOutOfStockBadge');
@@ -925,7 +920,7 @@
 
             if (images.length > 1) {
                 thumbsContainer.innerHTML = images.map((img, idx) => `
-                    <img src="${img}" class="w-12 h-12 object-cover rounded-xl border-2 ${idx === 0 ? 'border-brand-500' : 'border-slate-200'} cursor-pointer hover:border-brand-400 transition shrink-0" onclick="switchDetailMainImage('${img}', this)">
+                    <img src="${img}" class="w-14 h-14 object-cover rounded-xl border-2 ${idx === 0 ? 'border-brand-500' : 'border-slate-200'} cursor-pointer hover:border-brand-400 transition shrink-0" onclick="switchDetailMainImage('${img}', this)">
                 `).join('');
                 thumbsContainer.classList.remove('hidden');
             } else {
@@ -933,8 +928,7 @@
                 thumbsContainer.classList.add('hidden');
             }
 
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+            switchPage('product-detail', false);
 
             if (updateHash) {
                 safeUpdateHash('product-detail', { id: p.id });
@@ -945,9 +939,9 @@
             const mainImg = document.getElementById('detailMainImg');
             if (mainImg) mainImg.src = imgSrc;
             const allThumbs = document.querySelectorAll('#detailThumbnails img');
-            allThumbs.forEach(t => t.className = "w-12 h-12 object-cover rounded-xl border-2 border-slate-200 cursor-pointer hover:border-brand-400 transition shrink-0");
+            allThumbs.forEach(t => t.className = "w-14 h-14 object-cover rounded-xl border-2 border-slate-200 cursor-pointer hover:border-brand-400 transition shrink-0");
             if (element) {
-                element.className = "w-12 h-12 object-cover rounded-xl border-2 border-brand-500 cursor-pointer transition shrink-0";
+                element.className = "w-14 h-14 object-cover rounded-xl border-2 border-brand-500 cursor-pointer transition shrink-0";
             }
         };
 
@@ -972,22 +966,9 @@
             const stock = currentDetailProduct.stock !== undefined ? currentDetailProduct.stock : -1;
 
             await addToCart(currentDetailProduct.id, currentDetailProduct.name, currentDetailProduct.group_no, currentDetailProduct.price, stock, qty);
-            closeProductDetailModal(false);
 
             if (isBuyNow) {
                 openCartModal();
-            }
-        };
-
-        window.closeProductDetailModal = function(updateHash = true) {
-            const modal = document.getElementById('productDetailModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
-            }
-            currentDetailProduct = null;
-            if (updateHash && currentAuth) {
-                safeUpdateHash(currentPage);
             }
         };
 
@@ -1277,7 +1258,7 @@
         }
 
         // ==========================================
-        // 訂單結帳與確認流程 (Checkout)
+        // 訂單結帳與確認流程
         // ==========================================
         function openCheckoutModal() {
             if (selectedCartItemIds.size === 0) {
@@ -1360,9 +1341,6 @@
             }
         }
 
-        // ==========================================
-        // 訂單狀態追蹤分籤 (Filter)
-        // ==========================================
         function filterOrderStatus(status) {
             currentOrderFilter = status;
             document.querySelectorAll('.order-filter-tab').forEach(btn => {
@@ -1600,7 +1578,7 @@
             document.getElementById('editProdStock').value = p.stock !== undefined ? p.stock : -1;
             document.getElementById('editProdFiles').value = '';
             editBase64Images = parseImages(p.image_url);
-            renderEditImagePreviews();
+            renderEditPreviews();
 
             const groupField = document.getElementById('editProdGroupField');
             if (isPrivileged()) {
@@ -1713,6 +1691,7 @@
                 selectedBase64Images = [];
                 renderSelectedImagePreviews();
                 loadProductsData();
+
             } catch (err) {
                 showMsg("上架失敗：" + err.message, true);
             } finally {
@@ -1765,14 +1744,14 @@
                 let imgHeaderHtml = '';
                 if (images.length > 0) {
                     imgHeaderHtml = `
-                        <div class="relative bg-slate-100 flex items-center justify-center overflow-hidden cursor-pointer" onclick="openProductDetailModal('${p.id}')">
-                            <img src="${firstImg}" alt="${p.name}" class="w-full h-44 object-cover rounded-t-3xl hover:scale-105 transition duration-300 ${isOutOfStock ? 'grayscale opacity-75' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">
-                            ${images.length > 1 ? `<span class="absolute bottom-2.5 right-2.5 bg-slate-950/75 backdrop-blur-xs text-white text-[10px] font-black px-2 py-0.5 rounded-full"><i class="fa-regular fa-images mr-1"></i>${images.length}</span>` : ''}
-                            ${isOutOfStock ? `<span class="absolute top-2.5 left-2.5 bg-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-md">已售完</span>` : ''}
+                        <div class="relative bg-slate-100 flex items-center justify-center overflow-hidden cursor-pointer" onclick="openProductDetailPage('${p.id}')">
+                            <img id="main-img-${p.id}" src="${firstImg}" alt="${p.name}" class="w-full h-44 object-cover rounded-t-3xl hover:scale-105 transition duration-300 ${isOutOfStock ? 'grayscale opacity-75' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=無圖片';">
+                            ${images.length > 1 ? `<span class="absolute bottom-2.5 right-2.5 bg-slate-950/75 backdrop-blur-xs text-white text-[10px] font-black px-2 py-0.5 rounded-full z-10"><i class="fa-regular fa-images mr-1"></i>${images.length}</span>` : ''}
+                            ${isOutOfStock ? `<span class="absolute top-2.5 left-2.5 bg-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-md z-10">已售完</span>` : ''}
                         </div>
                     `;
                 } else {
-                    imgHeaderHtml = `<div class="w-full h-44 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-3xl cursor-pointer" onclick="openProductDetailModal('${p.id}')"><i class="fa-regular fa-image text-xl mr-1.5"></i>暫無照片</div>`;
+                    imgHeaderHtml = `<div class="w-full h-44 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs rounded-t-3xl cursor-pointer" onclick="openProductDetailPage('${p.id}')"><i class="fa-regular fa-image text-xl mr-1.5"></i>暫無照片</div>`;
                 }
 
                 const displayStock = isUnlimited ? '無限制' : stock;
@@ -1782,7 +1761,7 @@
                     <div class="product-card bg-white border border-slate-200/80 rounded-3xl shadow-xs flex flex-col justify-between overflow-hidden">
                         ${imgHeaderHtml}
                         <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
-                            <div class="cursor-pointer" onclick="openProductDetailModal('${p.id}')">
+                            <div class="cursor-pointer" onclick="openProductDetailPage('${p.id}')">
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200">第 ${p.group_no} 組</span>
                                     <span class="text-[11px] font-bold ${isOutOfStock ? 'text-rose-600' : 'text-slate-400'}">庫存: ${displayStock}</span>
@@ -1834,17 +1813,17 @@
                 return `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 border-b border-slate-100">
-                            ${firstImg ? `<div class="relative inline-block cursor-pointer" onclick="openProductDetailModal('${p.id}')"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-xl">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full font-bold">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">暫無照片</span>`}
+                            ${firstImg ? `<div class="relative inline-block cursor-pointer" onclick="openProductDetailPage('${p.id}')"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-xl">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full font-bold">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">暫無照片</span>`}
                         </td>
                         <td class="p-3 border-b border-slate-100">
-                            <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailModal('${p.id}')">${p.name}</span>
+                            <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailPage('${p.id}')">${p.name}</span>
                         </td>
                         <td class="p-3 border-b border-slate-100 text-center font-black text-brand-600">第 ${p.group_no} 組</td>
                         <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
                         <td class="p-3 border-b border-slate-100 text-center ${stockClass}">${stockDisplay}</td>
                         <td class="p-3 border-b border-slate-100 text-slate-400 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
                         <td class="p-3 border-b border-slate-100 text-center space-x-1">
-                            <button type="button" onclick="openProductDetailModal('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
+                            <button type="button" onclick="openProductDetailPage('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
                             <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
                             <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
                         </td>
@@ -1875,16 +1854,16 @@
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 border-b border-slate-100 font-black text-brand-600">第 ${p.group_no} 組</td>
                         <td class="p-3 border-b border-slate-100">
-                            ${firstImg ? `<img src="${firstImg}" class="w-10 h-10 object-cover rounded-xl cursor-pointer" onclick="openProductDetailModal('${p.id}')">` : `<span class="text-slate-300">暫無照片</span>`}
+                            ${firstImg ? `<img src="${firstImg}" class="w-10 h-10 object-cover rounded-xl cursor-pointer" onclick="openProductDetailPage('${p.id}')">` : `<span class="text-slate-300">暫無照片</span>`}
                         </td>
                         <td class="p-3 border-b border-slate-100">
-                            <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailModal('${p.id}')">${p.name}</span>
+                            <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailPage('${p.id}')">${p.name}</span>
                         </td>
                         <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs">${formatCurrency(p.price)} 幣</td>
                         <td class="p-3 border-b border-slate-100 text-center ${stockClass}">${stockDisplay}</td>
                         <td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px]">${new Date(p.created_at).toLocaleString('zh-TW')}</td>
                         <td class="p-3 border-b border-slate-100 text-center space-x-1">
-                            <button type="button" onclick="openProductDetailModal('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
+                            <button type="button" onclick="openProductDetailPage('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
                             <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
                             <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
                         </td>
@@ -2284,7 +2263,6 @@
                 closeCartModal();
                 closeEditProductModal();
                 closeUserModal();
-                closeProductDetailModal();
                 closeCheckoutModal();
             }
         });
