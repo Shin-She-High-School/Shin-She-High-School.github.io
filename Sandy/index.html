@@ -622,7 +622,7 @@
                                         </button>
                                     </div>
                                     <div class="pt-2 flex justify-end">
-                                        <button type="button" onclick="if (currentDetailProduct) openProductHistoryModal(currentDetailProduct.id)" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold rounded-xl border border-slate-200 transition shadow-2xs">
+                                        <button type="button" id="btnDetailProductHistory" onclick="if (currentDetailProduct) openProductHistoryModal(currentDetailProduct.id)" class="hidden items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold rounded-xl border border-slate-200 transition shadow-2xs">
                                             <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
                                             <span>查看此商品版本修改歷程</span>
                                         </button>
@@ -1251,6 +1251,19 @@
                 thumbsContainer.classList.add('hidden');
                 if (prevBtn) prevBtn.classList.add('hidden');
                 if (nextBtn) nextBtn.classList.add('hidden');
+            }
+
+            // Only privileged users (admin/teacher) or students of the group can view product revision history
+            const btnHistory = document.getElementById('btnDetailProductHistory');
+            if (btnHistory) {
+                const canViewHistory = isPrivileged() || (currentAuth && currentAuth.role === 'student' && String(currentAuth.account) === String(p.group_no));
+                if (canViewHistory) {
+                    btnHistory.classList.remove('hidden');
+                    btnHistory.classList.add('inline-flex');
+                } else {
+                    btnHistory.classList.add('hidden');
+                    btnHistory.classList.remove('inline-flex');
+                }
             }
 
             switchPage('product-detail', false);
