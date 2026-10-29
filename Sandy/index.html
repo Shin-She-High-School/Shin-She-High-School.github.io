@@ -155,7 +155,13 @@
                     <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
                     <h3 class="text-base font-black text-slate-800 tracking-tight">編輯上架商品內容</h3>
                 </div>
-                <button type="button" onclick="closeEditProductModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openProductHistoryModal(document.getElementById('editProdId').value)" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-black transition border border-amber-200/80 inline-flex items-center gap-1" title="查看商品版本修改前後歷程">
+                        <i class="fa-solid fa-clock-rotate-left text-[11px]"></i>
+                        <span>版本歷程</span>
+                    </button>
+                    <button type="button" onclick="closeEditProductModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
+                </div>
             </div>
             <form onsubmit="handleUpdateProduct(event)" class="space-y-4 overflow-y-auto custom-scrollbar pr-1">
                 <input type="hidden" id="editProdId">
@@ -234,7 +240,7 @@
                     <input type="password" id="modalUserPassword" placeholder="留白表示不修改密碼" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-brand-500 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-black text-slate-600 mb-1">起始虛擬幣額度</label>
+                    <label class="block text-xs font-black text-slate-600 mb-1">起始商GO幣額度</label>
                     <input type="number" id="modalUserBalance" min="0" value="500" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-brand-500 transition">
                 </div>
                 <div class="flex gap-2 pt-3 border-t border-slate-100">
@@ -398,6 +404,53 @@
         </div>
     </div>
 
+    <!-- 商品版本修改歷程視窗 -->
+    <div id="productHistoryModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeProductHistoryModal()">
+        <div class="relative w-full max-w-2xl bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-6 rounded-full bg-amber-500"></span>
+                    <div>
+                        <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
+                            <span>商品版本修改歷程</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-black">Before ➔ After</span>
+                        </h3>
+                        <p id="prodHistorySubtitle" class="text-xs text-slate-400 font-bold">載入中...</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeProductHistoryModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
+            </div>
+
+            <div id="prodHistoryContent" class="overflow-y-auto custom-scrollbar flex-1 space-y-3.5 pr-1"></div>
+
+            <div class="pt-3 border-t border-slate-100 flex justify-end">
+                <button type="button" onclick="closeProductHistoryModal()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black rounded-xl text-xs transition">關閉視窗</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 歷程修改前後對照視窗 (日誌專用) -->
+    <div id="diffComparisonModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeDiffComparisonModal()">
+        <div class="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-6 rounded-full bg-indigo-600"></span>
+                    <div>
+                        <h3 id="diffModalTitle" class="text-base font-black text-slate-800">修改前後對照詳情</h3>
+                        <p id="diffModalSubtitle" class="text-xs text-slate-400 font-bold">載入中...</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDiffComparisonModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
+            </div>
+
+            <div id="diffModalContent" class="overflow-y-auto custom-scrollbar flex-1 space-y-3 pr-1"></div>
+
+            <div class="pt-3 border-t border-slate-100 flex justify-end">
+                <button type="button" onclick="closeDiffComparisonModal()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black rounded-xl text-xs transition">關閉</button>
+            </div>
+        </div>
+    </div>
+
     <div id="authWorkspace" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
         <div class="relative w-full max-w-[390px] bg-white rounded-3xl p-8 shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-4">
@@ -429,7 +482,7 @@
 
             <div class="mt-8 border-t border-slate-100 pt-4 text-center">
                 <div class="text-[11px] text-slate-400 font-semibold tracking-wide">
-                    © 臺中市立新社高級中學 商業經營科 ＆ 開發團隊
+                    © 臺中市立新社高級中學 商業經營科 ＆ 開發團隊 版權所有
                 </div>
             </div>
         </div>
@@ -444,7 +497,7 @@
                     <span id="userStatusDisplay" class="font-extrabold text-xs sm:text-sm text-slate-200 tracking-wide">系統連線中...</span>
                     <div id="headerBalancePill" class="hidden items-center gap-1.5 px-3 py-1 bg-amber-400/15 text-amber-300 border border-amber-400/30 rounded-xl text-xs font-black shadow-2xs">
                         <i class="fa-solid fa-coins text-amber-400"></i>
-                        <span class="text-slate-300 font-medium">目前餘額:</span>
+                        <span class="text-slate-300 font-medium">商GO幣:</span>
                         <span id="headerUserBalance" class="text-amber-300 font-mono text-sm font-black">0</span>
                         <span class="text-[11px] text-amber-400/90 font-bold">幣</span>
                     </div>
@@ -475,7 +528,7 @@
                 <div id="navTabButtons" class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200 text-xs font-extrabold gap-1 flex-wrap"></div>
                 <div id="teacherActionGroup" class="hidden">
                     <button type="button" onclick="resetAllBalances()" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-black transition flex items-center gap-1">
-                        <i class="fa-solid fa-rotate-left"></i> 重置所有虛擬幣
+                        <i class="fa-solid fa-rotate-left"></i> 重置所有商GO幣
                     </button>
                 </div>
             </div>
@@ -568,6 +621,12 @@
                                             <span>直接購買</span>
                                         </button>
                                     </div>
+                                    <div class="pt-2 flex justify-end">
+                                        <button type="button" onclick="if (currentDetailProduct) openProductHistoryModal(currentDetailProduct.id)" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold rounded-xl border border-slate-200 transition shadow-2xs">
+                                            <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+                                            <span>查看此商品版本修改歷程</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -580,7 +639,6 @@
                             <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
                             <div>
                                 <h3 class="text-base font-black text-slate-800">我的訂單</h3>
-                                <p class="text-[11px] text-slate-400 font-medium">查看您在商城的歷史購買明細與目前訂單最新處理狀態</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
@@ -711,7 +769,6 @@
                             <button type="button" onclick="filterOrderStatus('待取貨')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">待取貨</button>
                             <button type="button" onclick="filterOrderStatus('已完成')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">已完成</button>
                             <button type="button" onclick="filterOrderStatus('已退款')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">已退款</button>
-                            <button type="button" onclick="filterOrderStatus('mine')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 flex items-center gap-1"><i class="fa-solid fa-user"></i><span>我的訂單</span></button>
                         </div>
 
                         <div class="overflow-x-auto max-h-80 custom-scrollbar border border-slate-200 rounded-2xl mt-3">
@@ -722,7 +779,7 @@
                                         <th class="p-3 w-28 whitespace-nowrap">訂購人</th>
                                         <th class="p-3 min-w-[160px]">訂購商品</th>
                                         <th class="p-3 w-24 text-center whitespace-nowrap">訂購數量</th>
-                                        <th class="p-3 w-28 whitespace-nowrap">扣除虛擬幣</th>
+                                        <th class="p-3 w-28 whitespace-nowrap">扣除商GO幣</th>
                                         <th class="p-3 w-28 text-center whitespace-nowrap">訂單狀態</th>
                                         <th class="p-3 w-44 whitespace-nowrap">下單時間</th>
                                         <th class="p-3 w-28 text-center whitespace-nowrap">操作</th>
@@ -766,7 +823,7 @@
                                         <th class="p-3 w-28 whitespace-nowrap">姓名</th>
                                         <th class="p-3 w-28 whitespace-nowrap">權限身分</th>
                                         <th class="p-3 min-w-[180px]">聯絡信箱</th>
-                                        <th class="p-3 w-28 whitespace-nowrap">代幣餘額</th>
+                                        <th class="p-3 w-28 whitespace-nowrap">商GO幣餘額</th>
                                         <th class="p-3 w-32 text-center whitespace-nowrap">帳號維護</th>
                                     </tr>
                                 </thead>
@@ -780,14 +837,26 @@
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
                             <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-5 rounded-full bg-indigo-600"></span>
-                                <h3 class="text-sm font-black text-slate-800">系統操作日誌</h3>
-                                <span id="auditCountText" class="text-xs font-bold text-slate-400">共 0 筆紀錄</span>
+                                <span class="w-2.5 h-6 rounded-full bg-indigo-600"></span>
+                                <div>
+                                    <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
+                                        <span>版本管理與修改歷程</span>
+                                    </h3>
+                                </div>
+                                <span id="auditCountText" class="text-xs font-bold text-slate-400 ml-2">共 0 筆紀錄</span>
                             </div>
                             <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <input type="text" id="auditSearchInput" oninput="filterAuditLogs()" placeholder="搜尋帳號、姓名、動作或 IP 位址..." class="w-full sm:w-60 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                                <input type="text" id="auditSearchInput" oninput="filterAuditLogs()" placeholder="搜尋帳號、商品、修改前後內容..." class="w-full sm:w-60 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
                                 <button type="button" onclick="loadAuditLogs()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold shrink-0 transition">重新整理</button>
                             </div>
+                        </div>
+
+                        <!-- 快速分類標籤 -->
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <button type="button" onclick="setAuditCategoryFilter('all')" id="btnFilterAuditAll" class="audit-filter-btn px-3 py-1 rounded-xl text-xs font-black bg-slate-800 text-white transition shadow-xs">全部日誌</button>
+                            <button type="button" onclick="setAuditCategoryFilter('product_diff')" id="btnFilterAuditProdDiff" class="audit-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">商品修改歷程 (前後對照)</button>
+                            <button type="button" onclick="setAuditCategoryFilter('user_diff')" id="btnFilterAuditUserDiff" class="audit-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">帳號修改歷程</button>
+                            <button type="button" onclick="setAuditCategoryFilter('order_flow')" id="btnFilterAuditOrderFlow" class="audit-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">訂單與退款</button>
                         </div>
 
                         <div class="overflow-x-auto max-h-[60vh] custom-scrollbar border border-slate-200 rounded-2xl">
@@ -808,7 +877,7 @@
                 </section>
 
                 <footer class="mt-12 text-center text-xs text-slate-400 font-semibold pt-6 border-t border-slate-200/80">
-                    <div>© 臺中市立新社高級中學 商業經營科 ＆ 專案開發團隊 版權所有</div>
+                    <div>© 臺中市立新社高級中學 商業經營科 ＆ 開發團隊 版權所有</div>
                 </footer>
 
             </div>
@@ -893,7 +962,8 @@
             '下架商品': '下架',
             '取消訂單退款': '退貨退款',
             '更新訂單狀態': '更新狀態',
-            '重置虛擬幣餘額': '重置所有虛擬幣',
+            '重置商GO幣餘額': '重置所有商GO幣',
+            '重置虛擬幣餘額': '重置所有商GO幣',
             '新增使用者': '新增帳號',
             '修改使用者資料': '編輯帳號',
             '刪除使用者': '刪除帳號'
@@ -909,7 +979,8 @@
             '下架商品': { label: '下架商品', color: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-solid fa-trash-can' },
             '取消訂單退款': { label: '退貨退款', color: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-solid fa-rotate-left' },
             '更新訂單狀態': { label: '更新狀態', color: 'bg-amber-50 text-amber-800 border-amber-200', icon: 'fa-solid fa-clock-rotate-left' },
-            '重置虛擬幣餘額': { label: '重置所有虛擬幣', color: 'bg-purple-50 text-purple-700 border-purple-200', icon: 'fa-solid fa-rotate' },
+            '重置商GO幣餘額': { label: '重置所有商GO幣', color: 'bg-purple-50 text-purple-700 border-purple-200', icon: 'fa-solid fa-rotate' },
+            '重置虛擬幣餘額': { label: '重置所有商GO幣', color: 'bg-purple-50 text-purple-700 border-purple-200', icon: 'fa-solid fa-rotate' },
             '新增使用者': { label: '新增帳號', color: 'bg-blue-50 text-blue-700 border-blue-200', icon: 'fa-solid fa-user-plus' },
             '修改使用者資料': { label: '編輯帳號', color: 'bg-indigo-50 text-indigo-700 border-indigo-200', icon: 'fa-solid fa-user-pen' },
             '刪除使用者': { label: '刪除帳號', color: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-solid fa-user-xmark' }
@@ -1057,7 +1128,7 @@
                     { key: 'student-publish', label: '商品管理', icon: 'fa-box-open' },
                     { key: 'teacher-monitor', label: '訂單管理', icon: 'fa-clipboard-list' },
                     { key: 'user-mgmt', label: '帳號管理', icon: 'fa-users-gear' },
-                    { key: 'audit-log', label: '系統操作日誌', icon: 'fa-shield-halved' }
+                    { key: 'audit-log', label: '版本與修改歷程', icon: 'fa-clock-rotate-left' }
                 ];
                 if (teacherActionGroup) teacherActionGroup.classList.remove('hidden');
             }
@@ -2038,7 +2109,7 @@
                 return;
             }
 
-            let csvContent = "\uFEFF訂單編號,訂購人姓名,訂購人帳號,商品明細,總數量,扣除代幣,訂單狀態,買家備註,退款原因,下單時間\n";
+            let csvContent = "\uFEFF訂單編號,訂購人姓名,訂購人帳號,商品明細,總數量,扣除商GO幣,訂單狀態,買家備註,退款原因,下單時間\n";
             csvGroupMap.forEach((items, orderNo) => {
                 const primary = items[0];
                 const totalQty = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
@@ -2227,27 +2298,61 @@
             const desc = document.getElementById('editProdDesc')?.value.trim() || null;
             const joinedImages = editBase64Images.join('|||');
 
-            // Calculate exact diff
+            // Calculate exact diff and structured Before / After
             const orig = (currentProductsList || []).find(p => String(p.id) === String(id));
             const changeList = [];
+            const diffRecords = [];
+            const beforeData = {};
+            const afterData = {};
+
             if (orig) {
-                if (orig.name !== name) changeList.push(`名稱「${orig.name}」➔「${name}」`);
-                if (orig.price !== price) changeList.push(`單價 ${formatCurrency(orig.price)} ➔ ${formatCurrency(price)} 幣`);
+                if (orig.name !== name) {
+                    changeList.push(`名稱「${orig.name}」➔「${name}」`);
+                    diffRecords.push({ field: '商品名稱', before: orig.name, after: name });
+                    beforeData['商品名稱'] = orig.name;
+                    afterData['商品名稱'] = name;
+                }
+                if (orig.price !== price) {
+                    changeList.push(`單價 ${formatCurrency(orig.price)} ➔ ${formatCurrency(price)} 幣`);
+                    diffRecords.push({ field: '商品單價', before: `${formatCurrency(orig.price)} 幣`, after: `${formatCurrency(price)} 幣` });
+                    beforeData['單價'] = `${formatCurrency(orig.price)} 幣`;
+                    afterData['單價'] = `${formatCurrency(price)} 幣`;
+                }
                 const origStock = orig.stock !== undefined ? orig.stock : -1;
                 if (origStock !== stock) {
-                    const oStr = origStock === -1 ? '無限制' : `${origStock}件`;
-                    const nStr = stock === -1 ? '無限制' : `${stock}件`;
+                    const oStr = origStock === -1 ? '無限制' : `${origStock} 件`;
+                    const nStr = stock === -1 ? '無限制' : `${stock} 件`;
                     changeList.push(`庫存 ${oStr} ➔ ${nStr}`);
+                    diffRecords.push({ field: '庫存數量', before: oStr, after: nStr });
+                    beforeData['庫存'] = oStr;
+                    afterData['庫存'] = nStr;
                 }
-                if (orig.group_no !== group_no) changeList.push(`組別 第${orig.group_no}組 ➔ 第${group_no}組`);
+                if (orig.group_no !== group_no) {
+                    changeList.push(`組別 第 ${orig.group_no} 組 ➔ 第 ${group_no} 組`);
+                    diffRecords.push({ field: '組別', before: `第 ${orig.group_no} 組`, after: `第 ${group_no} 組` });
+                    beforeData['組別'] = `第 ${orig.group_no} 組`;
+                    afterData['組別'] = `第 ${group_no} 組`;
+                }
                 const origDesc = (orig.description || '').trim();
                 const newDesc = (desc || '').trim();
                 if (origDesc !== newDesc) {
-                    changeList.push(origDesc ? '詳細介紹已修改' : '新增詳細介紹');
+                    const bStr = origDesc || '(未填寫)';
+                    const aStr = newDesc || '(未填寫)';
+                    changeList.push(`詳細介紹「${bStr}」➔「${aStr}」`);
+                    diffRecords.push({ field: '詳細介紹', before: bStr, after: aStr });
+                    beforeData['詳細介紹'] = bStr;
+                    afterData['詳細介紹'] = aStr;
                 }
                 const origImg = (orig.image_url || '').trim();
                 const newImg = (joinedImages || '').trim();
-                if (origImg !== newImg) changeList.push('展示照片已更新');
+                if (origImg !== newImg) {
+                    const bImg = origImg ? '原照片' : '(無照片)';
+                    const aImg = newImg ? '新上傳照片' : '(已移除照片)';
+                    changeList.push(`展示照片「${bImg}」➔「${aImg}」`);
+                    diffRecords.push({ field: '展示照片', before: bImg, after: aImg });
+                    beforeData['展示照片'] = bImg;
+                    afterData['展示照片'] = aImg;
+                }
             }
             const changeSummary = changeList.length > 0 ? changeList.join('、') : '無資料異動';
 
@@ -2275,8 +2380,13 @@
                 if (error) throw error;
 
                 await logAuditRecord("修改商品", {
+                    商品ID: id,
                     商品名稱: orig ? orig.name : name,
-                    修改項目: changeSummary
+                    原商品名稱: orig ? orig.name : name,
+                    修改差異: changeSummary,
+                    修改前: beforeData,
+                    修改後: afterData,
+                    異動項目: diffRecords
                 });
                 showMsg("儲存變更成功！");
                 closeEditProductModal();
@@ -2491,6 +2601,7 @@
                         <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap space-x-1">
                             <button type="button" onclick="openProductDetailPage('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
                             <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
+                            <button type="button" onclick="openProductHistoryModal('${p.id}')" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-black transition inline-flex items-center gap-1" title="查看商品版本與修改前後歷程"><i class="fa-solid fa-clock-rotate-left text-[10px]"></i><span>歷程</span></button>
                             <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
                         </td>
                     </tr>
@@ -2522,6 +2633,13 @@
             document.getElementById('modalUserBalance').value = '500';
             document.getElementById('userModalTitle').innerText = '建立帳號';
 
+            const roleSelect = document.getElementById('modalUserRole');
+            const adminOption = roleSelect?.querySelector('option[value="admin"]');
+            if (adminOption) {
+                adminOption.disabled = (currentAuth && currentAuth.role !== 'admin');
+            }
+            if (roleSelect) roleSelect.disabled = false;
+
             if (userId) {
                 const u = allUsersList.find(item => item.id === userId);
                 if (u) {
@@ -2532,6 +2650,10 @@
                     document.getElementById('modalUserRole').value = u.role;
                     document.getElementById('modalUserBalance').value = u.balance;
                     document.getElementById('userModalTitle').innerText = `編輯帳號 (${u.account})`;
+
+                    if (u.role === 'admin' && currentAuth && currentAuth.role !== 'admin') {
+                        roleSelect.disabled = true;
+                    }
                 }
             }
             document.getElementById('userModal').classList.remove('hidden');
@@ -2561,12 +2683,43 @@
             try {
                 if (id) {
                     const origUser = (allUsersList || []).find(u => String(u.id) === String(id));
+                    if (origUser && origUser.role === 'admin' && currentAuth && currentAuth.role !== 'admin' && role !== 'admin') {
+                        showMsg("權限不足：任課教師不可變更系統管理員的角色權限！", true);
+                        if (btn) { btn.disabled = false; btn.innerText = "儲存使用者帳號"; }
+                        return;
+                    }
                     const userChanges = [];
+                    const userDiffRecords = [];
+                    const userBefore = {};
+                    const userAfter = {};
+
                     if (origUser) {
-                        if (origUser.name !== name) userChanges.push(`姓名「${origUser.name}」➔「${name}」`);
-                        if (origUser.role !== role) userChanges.push(`身分「${ROLE_NAMES[origUser.role] || origUser.role}」➔「${ROLE_NAMES[role] || role}」`);
-                        if (origUser.balance !== balance) userChanges.push(`餘額 ${origUser.balance} ➔ ${balance} 幣`);
-                        if (password) userChanges.push('已重置密碼');
+                        if (origUser.name !== name) {
+                            userChanges.push(`姓名「${origUser.name}」➔「${name}」`);
+                            userDiffRecords.push({ field: '姓名', before: origUser.name, after: name });
+                            userBefore['姓名'] = origUser.name;
+                            userAfter['姓名'] = name;
+                        }
+                        if (origUser.role !== role) {
+                            const bRole = ROLE_NAMES[origUser.role] || origUser.role;
+                            const aRole = ROLE_NAMES[role] || role;
+                            userChanges.push(`身分「${bRole}」➔「${aRole}」`);
+                            userDiffRecords.push({ field: '權限身分', before: bRole, after: aRole });
+                            userBefore['權限身分'] = bRole;
+                            userAfter['權限身分'] = aRole;
+                        }
+                        if (origUser.balance !== balance) {
+                            userChanges.push(`餘額 ${origUser.balance} ➔ ${balance} 幣`);
+                            userDiffRecords.push({ field: '商GO幣餘額', before: `${origUser.balance} 幣`, after: `${balance} 幣` });
+                            userBefore['商GO幣餘額'] = `${origUser.balance} 幣`;
+                            userAfter['商GO幣餘額'] = `${balance} 幣`;
+                        }
+                        if (password) {
+                            userChanges.push('已重置密碼');
+                            userDiffRecords.push({ field: '密碼', before: '(原密碼)', after: '(已設定新密碼)' });
+                            userBefore['密碼'] = '(原密碼)';
+                            userAfter['密碼'] = '(已設定新密碼)';
+                        }
                     }
                     const userChangeSummary = userChanges.length > 0 ? userChanges.join('、') : '無資料異動';
 
@@ -2574,13 +2727,19 @@
                     if (password) updatePayload.password = password;
                     const { error } = await client.from('users').update(updatePayload).eq('id', id);
                     if (error) throw error;
-                    await logAuditRecord("修改使用者資料", { 帳號: account, 修改項目: userChangeSummary });
+                    await logAuditRecord("修改使用者資料", {
+                        帳號: account,
+                        修改差異: userChangeSummary,
+                        修改前: userBefore,
+                        修改後: userAfter,
+                        異動項目: userDiffRecords
+                    });
                     showMsg("儲存使用者帳號成功！");
                 } else {
                     const insertPayload = { account, name, role, password, balance };
                     const { error } = await client.from('users').insert([insertPayload]);
                     if (error) throw error;
-                    await logAuditRecord("新增使用者", { 帳號: account, 姓名: name, 角色: role, 起始虛擬幣額度: balance });
+                    await logAuditRecord("新增使用者", { 帳號: account, 姓名: name, 角色: role, 起始商GO幣額度: balance });
                     showMsg("儲存使用者帳號成功！");
                 }
                 closeUserModal();
@@ -2596,7 +2755,16 @@
         }
 
         async function deleteUser(userId, account) {
-            if (!confirm(`確定要刪除帳號嗎？`)) return;
+            const targetUser = (allUsersList || []).find(u => String(u.id) === String(userId) || u.account === account);
+            if (targetUser && targetUser.role === 'admin' && currentAuth && currentAuth.role !== 'admin') {
+                showMsg("權限不足：任課教師不可刪除系統管理員帳號！", true);
+                return;
+            }
+            if (currentAuth && (String(currentAuth.id) === String(userId) || currentAuth.account === account)) {
+                showMsg("操作受限：不可刪除自己目前登入中的帳號！", true);
+                return;
+            }
+            if (!confirm(`確定要刪除帳號「${account}」嗎？`)) return;
             try {
                 const { error } = await client.from('users').delete().eq('id', userId);
                 if (error) throw error;
@@ -2684,32 +2852,46 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(u => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-3 border-b border-slate-100 font-mono font-bold text-slate-800 whitespace-nowrap">${u.account}</td>
-                    <td class="p-3 border-b border-slate-100 font-black text-slate-800 whitespace-nowrap">${u.name}</td>
-                    <td class="p-3 border-b border-slate-100 whitespace-nowrap">
-                        <span class="px-2.5 py-1 rounded-lg font-black text-[11px] border ${u.role === 'admin' ? 'bg-amber-50 text-amber-800 border-amber-200' : u.role === 'teacher' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : u.role === 'student' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200'}">${ROLE_NAMES[u.role] || u.role}</span>
-                    </td>
-                    <td class="p-3 border-b border-slate-100 font-mono text-[11px] text-slate-500 min-w-[180px]">${u.email || (u.account + '@sshs.tc.edu.tw')}</td>
-                    <td class="p-3 border-b border-slate-100 font-black text-rose-600 text-xs whitespace-nowrap">${formatCurrency(u.balance)} 幣</td>
-                    <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap space-x-1">
-                        <button type="button" onclick="openUserModal('${u.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">編輯</button>
-                        <button type="button" onclick="deleteUser('${u.id}', '${u.account}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">刪除</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = filtered.map(u => {
+                const isTargetAdmin = (u.role === 'admin');
+                const isSelf = currentAuth && (String(currentAuth.id) === String(u.id) || currentAuth.account === u.account);
+
+                let deleteBtnHtml = '';
+                if (isTargetAdmin && currentAuth && currentAuth.role !== 'admin') {
+                    deleteBtnHtml = `<span class="px-2 py-1 text-slate-300 text-[11px] font-bold cursor-not-allowed" title="任課教師不可刪除系統管理員">不可刪除</span>`;
+                } else if (isSelf) {
+                    deleteBtnHtml = `<span class="px-2 py-1 text-slate-300 text-[11px] font-bold cursor-not-allowed" title="不可刪除目前登入帳號">目前登入</span>`;
+                } else {
+                    deleteBtnHtml = `<button type="button" onclick="deleteUser('${u.id}', '${u.account}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">刪除</button>`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 border-b border-slate-100 font-mono font-bold text-slate-800 whitespace-nowrap">${u.account}</td>
+                        <td class="p-3 border-b border-slate-100 font-black text-slate-800 whitespace-nowrap">${u.name}</td>
+                        <td class="p-3 border-b border-slate-100 whitespace-nowrap">
+                            <span class="px-2.5 py-1 rounded-lg font-black text-[11px] border ${u.role === 'admin' ? 'bg-amber-50 text-amber-800 border-amber-200' : u.role === 'teacher' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : u.role === 'student' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200'}">${ROLE_NAMES[u.role] || u.role}</span>
+                        </td>
+                        <td class="p-3 border-b border-slate-100 font-mono text-[11px] text-slate-500 min-w-[180px]">${u.email || (u.account + '@sshs.tc.edu.tw')}</td>
+                        <td class="p-3 border-b border-slate-100 font-black text-rose-600 text-xs whitespace-nowrap">${formatCurrency(u.balance)} 幣</td>
+                        <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap space-x-1">
+                            <button type="button" onclick="openUserModal('${u.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">編輯</button>
+                            ${deleteBtnHtml}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         async function resetAllBalances() {
-            if (!confirm("確定要將全體教職員的虛擬幣餘額重置為 500 點嗎？")) return;
+            if (!confirm("確定要將全體教職員的商GO幣餘額重置為 500 點嗎？")) return;
             const { error } = await client.from('users').update({ balance: 500 }).eq('role', 'staff');
             if (error) {
                 showMsg("重置失敗：" + error.message, true);
                 return;
             }
-            await logAuditRecord("重置虛擬幣餘額", { 重置額度: 500 });
-            showMsg("全體教職員虛擬幣已重置為 500 點！");
+            await logAuditRecord("重置商GO幣餘額", { 重置額度: 500 });
+            showMsg("全體教職員商GO幣已重置為 500 點！");
             loadTeacherDashboard();
             loadAuditLogs();
         }
@@ -2763,7 +2945,7 @@
             renderAuditLogs(allAuditLogs);
         }
 
-        function formatAuditDetails(details) {
+        function formatAuditDetails(details, logItem = null) {
             if (!details) return '<span class="text-slate-300 font-normal">-</span>';
             let obj = details;
             if (typeof details === 'string') {
@@ -2777,7 +2959,18 @@
                 return '<span class="text-slate-300 font-normal">-</span>';
             }
 
-            const priorityKeys = ['商品名稱', '修改項目', '變更內容', '組別', '買家帳號', '帳號', '姓名', '角色', '訂單編號', '訂單ID', '新狀態', '狀態', 'status', '單價', '定價', '金額', '結算金額', '扣除後餘額', '退款金額', '數量', '庫存', '原下單時間', '時間', '日期', '重置額度'];
+            // If this is a '修改商品' log without explicit '修改差異', use precomputed diff
+            if (logItem && logItem.action_type === '修改商品' && !obj['修改差異'] && !obj['修改項目'] && window.auditLogDiffMap) {
+                const diffStr = window.auditLogDiffMap.get(logItem.id);
+                if (diffStr) {
+                    obj = {
+                        商品名稱: obj['商品名稱'] || '商品',
+                        修改差異: diffStr
+                    };
+                }
+            }
+
+            const priorityKeys = ['商品名稱', '修改差異', '修改項目', '變更內容', '組別', '買家帳號', '帳號', '姓名', '角色', '訂單編號', '訂單ID', '新狀態', '狀態', 'status', '單價', '定價', '金額', '結算金額', '扣除後餘額', '退款金額', '數量', '庫存', '原下單時間', '時間', '日期', '重置額度'];
             const rawEntries = Object.entries(obj);
             const hasProdName = Boolean(obj['商品名稱']);
             const prodId = obj['商品ID'] || obj['productId'];
@@ -2799,7 +2992,7 @@
             }
 
             for (const [key, val] of rawEntries) {
-                if (key === '商品ID' || key === 'productId') {
+                if (key === '商品ID' || key === 'productId' || key === '修改前' || key === '修改後' || key === '異動項目' || key === '原商品名稱') {
                     continue;
                 }
                 entries.push([key, val]);
@@ -2820,32 +3013,44 @@
                     const badgeClass = isDelisted ? "bg-slate-100 text-slate-600 border-slate-200" : "bg-emerald-50 text-emerald-800 border-emerald-200";
                     const icon = isDelisted ? "fa-solid fa-box-archive text-slate-400" : "fa-solid fa-tag text-emerald-600";
                     const tooltip = prodId ? ` title="商品編號: ${prodId}"` : '';
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs ${badgeClass} font-bold shadow-xs cursor-help"${tooltip}><i class="${icon} text-[10px]"></i><span class="opacity-80 font-medium">商品:</span><span class="font-black">${strVal}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs ${badgeClass} font-bold shadow-xs cursor-help whitespace-nowrap shrink-0"${tooltip}><i class="${icon} text-[10px] shrink-0"></i><span class="opacity-80 font-medium whitespace-nowrap">商品:</span><span class="font-black whitespace-nowrap">${strVal}</span></span>`;
                 }
 
-                if (key === '修改項目' || key === '變更內容') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs bg-amber-50 text-amber-900 border-amber-300 font-bold shadow-xs"><i class="fa-solid fa-pen-to-square text-amber-600 text-[11px]"></i><span class="text-amber-700 font-medium">修改內容:</span><span class="font-black text-amber-950">${strVal}</span></span>`;
+                if (key === '修改差異' || key === '修改項目' || key === '變更內容') {
+                    const diffBtn = (logItem && logItem.id) ? `
+                        <button type="button" onclick="openDiffModalByLogId('${logItem.id}')" class="px-2 py-0.5 bg-amber-200/80 hover:bg-amber-300 text-amber-950 rounded-md text-[10px] font-black transition inline-flex items-center gap-1 shadow-2xs whitespace-nowrap shrink-0">
+                            <i class="fa-solid fa-code-compare text-[9px] shrink-0"></i>
+                            <span>前後對照</span>
+                        </button>
+                    ` : '';
+                    const parts = strVal.split(/[、；]/).map(s => s.trim()).filter(Boolean);
+                    if (parts.length > 1) {
+                        return `<div class="inline-flex flex-wrap items-center gap-1.5 py-0.5">` +
+                            parts.map(p => `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs bg-amber-50 text-amber-900 border-amber-300 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-pen-to-square text-amber-600 text-[10px] shrink-0"></i><span>${p}</span></span>`).join('') +
+                            diffBtn + `</div>`;
+                    }
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs bg-amber-50 text-amber-900 border-amber-300 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-pen-to-square text-amber-600 text-[11px] shrink-0"></i><span class="text-amber-700 font-medium whitespace-nowrap shrink-0">修改內容:</span><span class="font-black text-amber-950 whitespace-nowrap shrink-0">${strVal}</span>${diffBtn}</span>`;
                 }
 
                 if (key === '組別') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] bg-teal-50 text-teal-800 border-teal-200 font-black shadow-xs"><i class="fa-solid fa-users text-teal-600 text-[10px]"></i><span>第 ${val} 組</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] bg-teal-50 text-teal-800 border-teal-200 font-black shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-users text-teal-600 text-[10px] shrink-0"></i><span>第 ${val} 組</span></span>`;
                 }
 
                 if (key === '狀態' || key === 'status' || key === '新狀態') {
                     if (strVal.includes('登出')) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold shadow-xs"><i class="fa-solid fa-arrow-right-from-bracket text-slate-400 text-[10px]"></i><span>${strVal}</span></span>`;
+                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-arrow-right-from-bracket text-slate-400 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
                     } else if (strVal.includes('登入') || strVal.includes('成功') || strVal.includes('完成')) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-xs"><i class="fa-solid fa-circle-check text-emerald-500 text-[10px]"></i><span>${strVal}</span></span>`;
+                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-circle-check text-emerald-500 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
                     } else if (strVal.includes('待取貨') || strVal.includes('處理中')) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold shadow-xs"><i class="fa-solid fa-clock text-amber-500 text-[10px]"></i><span>${strVal}</span></span>`;
+                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-clock text-amber-500 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
                     } else if (strVal.includes('失敗') || strVal.includes('取消') || strVal.includes('退款')) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold shadow-xs"><i class="fa-solid fa-circle-xmark text-rose-500 text-[10px]"></i><span>${strVal}</span></span>`;
+                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-circle-xmark text-rose-500 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
                     }
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 text-xs font-bold shadow-xs"><i class="fa-solid fa-info-circle text-sky-500 text-[10px]"></i><span>${strVal}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-info-circle text-sky-500 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
                 }
 
                 if (key === '重置額度') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold shadow-xs"><i class="fa-solid fa-rotate text-purple-500 text-[10px]"></i><span class="font-medium opacity-80">全體重置:</span><span class="font-mono font-black">${formatCurrency(val)} 幣</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-rotate text-purple-500 text-[10px] shrink-0"></i><span class="font-medium opacity-80 whitespace-nowrap">全體重置:</span><span class="font-mono font-black whitespace-nowrap">${formatCurrency(val)} 幣</span></span>`;
                 }
 
                 if (key.includes('金額') || key.includes('單價') || key.includes('定價') || key.includes('餘額') || key.includes('退款')) {
@@ -2858,22 +3063,22 @@
                         colorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
                         icon = "fa-solid fa-rotate-left text-emerald-500";
                     }
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] ${colorClass} font-mono font-black shadow-xs"><i class="${icon} text-[10px]"></i><span class="font-sans opacity-80 font-medium">${key}:</span><span>${formatCurrency(val)} 幣</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] ${colorClass} font-mono font-black shadow-xs whitespace-nowrap shrink-0"><i class="${icon} text-[10px] shrink-0"></i><span class="font-sans opacity-80 font-medium whitespace-nowrap">${key}:</span><span class="whitespace-nowrap">${formatCurrency(val)} 幣</span></span>`;
                 }
 
                 if (key === '數量') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-bold shadow-xs"><i class="fa-solid fa-boxes-stacked text-indigo-400 text-[10px]"></i><span class="opacity-80 font-medium">數量:</span><span class="font-black">${val} 件</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-boxes-stacked text-indigo-400 text-[10px] shrink-0"></i><span class="opacity-80 font-medium whitespace-nowrap">數量:</span><span class="font-black whitespace-nowrap">${val} 件</span></span>`;
                 }
 
                 if (key === '庫存') {
                     const isUnlimited = val === -1 || val === '-1';
                     if (isUnlimited) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-[11px] font-bold shadow-xs"><i class="fa-solid fa-infinity text-slate-400 text-[10px]"></i><span>無限制</span></span>`;
+                        return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-[11px] font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-infinity text-slate-400 text-[10px] shrink-0"></i><span>無限制</span></span>`;
                     }
                     const isOut = val <= 0;
                     const stockClass = isOut ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-sky-50 text-sky-700 border-sky-200";
                     const icon = isOut ? "fa-solid fa-triangle-exclamation text-rose-500" : "fa-solid fa-warehouse text-sky-500";
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] ${stockClass} font-bold shadow-xs"><i class="${icon} text-[10px]"></i><span class="opacity-80 font-medium">庫存:</span><span class="font-black">${val} 件</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] ${stockClass} font-bold shadow-xs whitespace-nowrap shrink-0"><i class="${icon} text-[10px] shrink-0"></i><span class="opacity-80 font-medium whitespace-nowrap">庫存:</span><span class="font-black whitespace-nowrap">${val} 件</span></span>`;
                 }
 
                 if (key === '訂單ID' || key === 'orderId' || key === '訂單編號') {
@@ -2882,34 +3087,34 @@
                     }
                     const strVal = String(val);
                     const displayNo = obj['訂單編號'] || getOrderNo(strVal);
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-[11px] font-bold shadow-xs cursor-help" title="完整訂單編號: ${strVal}"><i class="fa-solid fa-receipt text-[10px] text-sky-500"></i><span>訂單 ${displayNo}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-[11px] font-bold shadow-xs cursor-help whitespace-nowrap shrink-0" title="完整訂單編號: ${strVal}"><i class="fa-solid fa-receipt text-[10px] text-sky-500 shrink-0"></i><span>訂單 ${displayNo}</span></span>`;
                 }
 
                 if (key === '買家帳號' || key === '帳號') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs"><i class="fa-solid fa-user text-[10px] text-slate-400"></i><span class="text-slate-500 font-medium">${key}:</span><span class="font-mono text-slate-800">${val}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-user text-[10px] text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium whitespace-nowrap">${key}:</span><span class="font-mono text-slate-800 whitespace-nowrap">${val}</span></span>`;
                 }
 
                 if (key === '姓名') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs"><i class="fa-solid fa-id-badge text-[10px] text-slate-400"></i><span class="text-slate-500 font-medium">姓名:</span><span class="text-slate-900">${val}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-id-badge text-[10px] text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium whitespace-nowrap">姓名:</span><span class="text-slate-900 whitespace-nowrap">${val}</span></span>`;
                 }
 
                 if (key === '角色') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-[11px] text-indigo-700 font-bold shadow-xs"><i class="fa-solid fa-shield-halved text-[10px] text-indigo-400"></i><span>${ROLE_NAMES[val] || val}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-[11px] text-indigo-700 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-shield-halved text-[10px] text-indigo-400 shrink-0"></i><span>${ROLE_NAMES[val] || val}</span></span>`;
                 }
 
                 if (lowerKey.includes('id')) {
                     const shortVal = strVal.length > 8 ? `#${strVal.slice(0, 8)}...` : strVal;
-                    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80 text-[10px] text-slate-400 font-mono cursor-help" title="${strVal}"><span class="font-sans font-medium text-slate-400">${key}:</span><span>${shortVal}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80 text-[10px] text-slate-400 font-mono cursor-help whitespace-nowrap shrink-0" title="${strVal}"><span class="font-sans font-medium text-slate-400 whitespace-nowrap">${key}:</span><span>${shortVal}</span></span>`;
                 }
 
                 const isIsoDate = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/.test(val);
                 const isDateKey = key.includes('時間') || key.includes('日期') || lowerKey.includes('date') || lowerKey.includes('time') || lowerKey.endsWith('_at');
                 if (isIsoDate || isDateKey) {
                     const formatted = formatDateTime(val);
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-700 shadow-xs"><i class="fa-regular fa-clock text-slate-400 text-[10px]"></i><span class="font-sans opacity-80 font-medium">${key}:</span><span class="font-bold">${formatted}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-700 shadow-xs whitespace-nowrap shrink-0"><i class="fa-regular fa-clock text-slate-400 text-[10px] shrink-0"></i><span class="font-sans opacity-80 font-medium whitespace-nowrap">${key}:</span><span class="font-bold whitespace-nowrap">${formatted}</span></span>`;
                 }
 
-                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[11px] bg-slate-50 text-slate-700 border-slate-200 shadow-xs"><span class="text-slate-400 font-medium">${key}:</span><span class="font-bold text-slate-700">${strVal}</span></span>`;
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[11px] bg-slate-50 text-slate-700 border-slate-200 shadow-xs whitespace-nowrap shrink-0"><span class="text-slate-400 font-medium whitespace-nowrap">${key}:</span><span class="font-bold text-slate-700 whitespace-nowrap">${strVal}</span></span>`;
             }).join('') + `</div>`;
         }
 
@@ -2918,6 +3123,48 @@
             const countText = document.getElementById('auditCountText');
             if (countText) countText.innerText = `共 ${logs.length} 筆紀錄`;
             if (!tbody) return;
+
+            // Pre-calculate exact diffs for all '修改商品' logs across chronological history
+            const chronoLogs = [...(allAuditLogs || logs)].reverse();
+            const prodState = {};
+            window.auditLogDiffMap = new Map();
+
+            for (const l of chronoLogs) {
+                if (l.action_type === '修改商品') {
+                    let obj = l.details;
+                    if (typeof obj === 'string') {
+                        try { obj = JSON.parse(obj); } catch(e) {}
+                    }
+                    if (obj && typeof obj === 'object') {
+                        if (obj['修改差異'] || obj['修改項目']) {
+                            window.auditLogDiffMap.set(l.id, obj['修改差異'] || obj['修改項目']);
+                        } else {
+                            const pKey = obj['商品ID'] || obj['商品名稱'];
+                            const prev = prodState[pKey];
+                            const diffs = [];
+                            if (prev) {
+                                if (obj['商品名稱'] && prev['商品名稱'] && obj['商品名稱'] !== prev['商品名稱']) {
+                                    diffs.push(`名稱「${prev['商品名稱']}」➔「${obj['商品名稱']}」`);
+                                }
+                                if (obj['單價'] !== undefined && prev['單價'] !== undefined && obj['單價'] !== prev['單價']) {
+                                    diffs.push(`單價 ${formatCurrency(prev['單價'])} ➔ ${formatCurrency(obj['單價'])} 幣`);
+                                }
+                                if (obj['庫存'] !== undefined && prev['庫存'] !== undefined && obj['庫存'] !== prev['庫存']) {
+                                    const pStr = prev['庫存'] === -1 ? '無限制' : `${prev['庫存']} 件`;
+                                    const nStr = obj['庫存'] === -1 ? '無限制' : `${obj['庫存']} 件`;
+                                    diffs.push(`庫存 ${pStr} ➔ ${nStr}`);
+                                }
+                                if (obj['組別'] !== undefined && prev['組別'] !== undefined && obj['組別'] !== prev['組別']) {
+                                    diffs.push(`組別 第 ${prev['組別']} 組 ➔ 第 ${obj['組別']} 組`);
+                                }
+                            }
+                            prodState[pKey] = { ...obj };
+                            const diffStr = diffs.length > 0 ? diffs.join('、') : '資料確認（無欄位數值異動）';
+                            window.auditLogDiffMap.set(l.id, diffStr);
+                        }
+                    }
+                }
+            }
 
             tbody.innerHTML = logs.map(l => {
                 const actCfg = ACTION_CONFIG[l.action_type] || {
@@ -2940,21 +3187,398 @@
                             </span>
                         </td>
                         <td class="p-3 border-b border-slate-100 font-mono text-brand-600 font-black text-xs whitespace-nowrap">${l.ip_address || '127.0.0.1'}</td>
-                        <td class="p-3 border-b border-slate-100 text-xs min-w-[280px]">${formatAuditDetails(l.details)}</td>
+                        <td class="p-3 border-b border-slate-100 text-xs min-w-[280px]">${formatAuditDetails(l.details, l)}</td>
                     </tr>
                 `;
             }).join('');
         }
 
+        function extractDiffItemsFromLog(l, prod = null) {
+            if (!l) return [];
+            let obj = l.details;
+            if (typeof obj === 'string') {
+                try { obj = JSON.parse(obj); } catch(e) {}
+            }
+            if (!obj || typeof obj !== 'object') return [];
+
+            // 1. Structured diff records array
+            if (Array.isArray(obj['異動項目']) && obj['異動項目'].length > 0) {
+                return obj['異動項目'].map(item => ({
+                    field: item.field || item['欄位'] || '欄位',
+                    before: item.before || item['修改前'] || item['原值'] || '-',
+                    after: item.after || item['修改後'] || item['新值'] || '-'
+                }));
+            }
+
+            // 2. Structured before / after objects
+            if (obj['修改前'] && obj['修改後'] && typeof obj['修改前'] === 'object') {
+                const b = obj['修改前'];
+                const a = obj['修改後'];
+                const fields = new Set([...Object.keys(b), ...Object.keys(a)]);
+                const items = [];
+                for (const f of fields) {
+                    if (String(b[f]) !== String(a[f])) {
+                        items.push({
+                            field: f,
+                            before: b[f] !== undefined ? String(b[f]) : '(無)',
+                            after: a[f] !== undefined ? String(a[f]) : '(無)'
+                        });
+                    }
+                }
+                if (items.length > 0) return items;
+            }
+
+            // 3. Parse diff string from '修改差異', '修改項目', or precomputed diffMap
+            const diffStr = obj['修改差異'] || obj['修改項目'] || (window.auditLogDiffMap ? window.auditLogDiffMap.get(l.id) : null);
+            if (diffStr && typeof diffStr === 'string' && diffStr !== '無資料異動' && diffStr !== '資料確認（無欄位數值異動）') {
+                const parts = diffStr.split(/[、；]/).map(s => s.trim()).filter(Boolean);
+                const results = [];
+                for (const p of parts) {
+                    if (p.includes('➔')) {
+                        const sub = p.split('➔').map(s => s.trim());
+                        let left = sub[0];
+                        let right = sub[1];
+                        let field = '欄位異動';
+
+                        if (left.startsWith('名稱「') && left.endsWith('」')) {
+                            field = '商品名稱';
+                            left = left.replace(/^名稱「/, '').replace(/」$/, '');
+                            right = right.replace(/^「/, '').replace(/」$/, '');
+                        } else if (left.startsWith('詳細介紹「') && left.endsWith('」')) {
+                            field = '詳細介紹';
+                            left = left.replace(/^詳細介紹「/, '').replace(/」$/, '');
+                            right = right.replace(/^「/, '').replace(/」$/, '');
+                        } else if (left.startsWith('展示照片「') && left.endsWith('」')) {
+                            field = '展示照片';
+                            left = left.replace(/^展示照片「/, '').replace(/」$/, '');
+                            right = right.replace(/^「/, '').replace(/」$/, '');
+                        } else if (left.startsWith('單價')) {
+                            field = '商品單價';
+                            left = left.replace(/^單價\s*/, '');
+                        } else if (left.startsWith('庫存')) {
+                            field = '庫存數量';
+                            left = left.replace(/^庫存\s*/, '');
+                        } else if (left.startsWith('組別')) {
+                            field = '組別';
+                            left = left.replace(/^組別\s*/, '');
+                        } else if (left.startsWith('姓名「') && left.endsWith('」')) {
+                            field = '姓名';
+                            left = left.replace(/^姓名「/, '').replace(/」$/, '');
+                            right = right.replace(/^「/, '').replace(/」$/, '');
+                        } else if (left.startsWith('身分「') && left.endsWith('」')) {
+                            field = '權限身分';
+                            left = left.replace(/^身分「/, '').replace(/」$/, '');
+                            right = right.replace(/^「/, '').replace(/」$/, '');
+                        } else if (left.startsWith('餘額')) {
+                            field = '商GO幣餘額';
+                            left = left.replace(/^餘額\s*/, '');
+                        }
+                        results.push({ field, before: left, after: right });
+                    } else if (p.includes('詳細介紹')) {
+                        const targetProd = prod || (currentProductsList || []).find(it => 
+                            (obj['商品ID'] && String(it.id) === String(obj['商品ID'])) || 
+                            (obj['商品名稱'] && it.name === obj['商品名稱'])
+                        );
+                        const currentDesc = (targetProd && targetProd.description) ? targetProd.description : '';
+                        const isAdd = p.includes('新增');
+                        results.push({
+                            field: '詳細介紹',
+                            before: isAdd ? '(未填寫)' : '（舊版系統未記錄修改前內文）',
+                            after: currentDesc ? currentDesc : (isAdd ? '(已新增介紹內容)' : '(已更新介紹內容)')
+                        });
+                    } else if (p.includes('照片')) {
+                        results.push({
+                            field: '展示照片',
+                            before: '（舊版系統未記錄原照片檔）',
+                            after: '已更新上傳照片'
+                        });
+                    } else if (p.includes('密碼')) {
+                        results.push({
+                            field: '密碼',
+                            before: '(舊密碼)',
+                            after: '(已重置新密碼)'
+                        });
+                    } else {
+                        results.push({ field: '異動說明', before: '-', after: p });
+                    }
+                }
+                if (results.length > 0) return results;
+            }
+
+            return [];
+        }
+
+        let currentAuditFilterCategory = 'all';
+
+        function setAuditCategoryFilter(cat) {
+            currentAuditFilterCategory = cat;
+            document.querySelectorAll('.audit-filter-btn').forEach(btn => {
+                btn.className = "audit-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition";
+            });
+            const activeBtn = document.getElementById(
+                cat === 'product_diff' ? 'btnFilterAuditProdDiff' :
+                cat === 'user_diff' ? 'btnFilterAuditUserDiff' :
+                cat === 'order_flow' ? 'btnFilterAuditOrderFlow' : 'btnFilterAuditAll'
+            );
+            if (activeBtn) {
+                activeBtn.className = "audit-filter-btn px-3 py-1 rounded-xl text-xs font-black bg-slate-800 text-white transition shadow-xs";
+            }
+            filterAuditLogs();
+        }
+
+        window.openDiffModalByLogId = function(logId) {
+            const l = (allAuditLogs || []).find(item => String(item.id) === String(logId));
+            if (!l) return;
+            const modal = document.getElementById('diffComparisonModal');
+            const title = document.getElementById('diffModalTitle');
+            const subTitle = document.getElementById('diffModalSubtitle');
+            const content = document.getElementById('diffModalContent');
+            if (!modal) return;
+
+            modal.classList.remove('hidden');
+            title.innerText = `${l.action_type} ｜ 修改前後對照詳情`;
+            subTitle.innerText = `${formatDateTime(l.created_at)} 由 ${l.operator_name || l.account} 操作 ｜ IP: ${l.ip_address || '127.0.0.1'}`;
+
+            const diffItems = extractDiffItemsFromLog(l);
+
+            if (diffItems.length === 0) {
+                content.innerHTML = `
+                    <div class="p-6 text-center bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+                        <i class="fa-solid fa-circle-info text-2xl text-slate-400"></i>
+                        <p class="text-xs font-bold text-slate-600">此筆紀錄無特定欄位數值異動</p>
+                    </div>
+                `;
+                return;
+            }
+
+            content.innerHTML = `
+                <div class="space-y-2.5">
+                    <div class="text-xs font-black text-slate-600 mb-1 flex items-center justify-between">
+                        <span>變更欄位清單 (${diffItems.length} 個欄位異動)</span>
+                        <span class="text-[11px] text-slate-400 font-normal">Before ➔ After</span>
+                    </div>
+                    ${diffItems.map(item => `
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                            <div class="font-black text-slate-800 text-xs flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+                                <span>${item.field}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <div class="p-2.5 bg-rose-50/80 border border-rose-200 rounded-xl space-y-1">
+                                    <div class="text-[10px] font-black text-rose-500 uppercase flex items-center gap-1">
+                                        <i class="fa-solid fa-clock-rotate-left text-[9px]"></i>
+                                        <span>修改前 (舊資料)</span>
+                                    </div>
+                                    <div class="font-medium text-rose-900 whitespace-pre-line break-words leading-relaxed ${item.before === '(未填寫)' ? 'italic text-rose-400' : ''}">${item.before}</div>
+                                </div>
+                                <div class="p-2.5 bg-emerald-50/80 border border-emerald-300 rounded-xl space-y-1">
+                                    <div class="text-[10px] font-black text-emerald-600 uppercase flex items-center gap-1">
+                                        <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                                        <span>修改後 (新資料)</span>
+                                    </div>
+                                    <div class="font-black text-emerald-950 whitespace-pre-line break-words leading-relaxed">${item.after}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        };
+
+        window.closeDiffComparisonModal = function() {
+            document.getElementById('diffComparisonModal')?.classList.add('hidden');
+        };
+
+        window.openProductHistoryModal = async function(productId) {
+            const p = (currentProductsList || []).find(item => String(item.id) === String(productId));
+            const modal = document.getElementById('productHistoryModal');
+            const subTitle = document.getElementById('prodHistorySubtitle');
+            const content = document.getElementById('prodHistoryContent');
+            if (!modal) return;
+
+            modal.classList.remove('hidden');
+            const prodName = p ? p.name : '商品';
+            const prodGroup = p ? `第 ${p.group_no} 組` : '';
+            subTitle.innerText = `${prodName} ${prodGroup ? `(${prodGroup})` : ''} ｜ 載入版本修改歷程中...`;
+            content.innerHTML = `
+                <div class="py-12 text-center text-slate-400 font-bold space-y-2">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl text-amber-500"></i>
+                    <div>正在讀取修改前後歷程...</div>
+                </div>
+            `;
+
+            try {
+                let logs = allAuditLogs || [];
+                if (logs.length === 0) {
+                    const { data } = await client.from('audit_logs').select('*').order('created_at', { ascending: true });
+                    logs = data || [];
+                    allAuditLogs = [...logs].reverse();
+                }
+
+                const prodLogs = logs.filter(l => {
+                    if (!l.details) return false;
+                    let obj = l.details;
+                    if (typeof obj === 'string') {
+                        try { obj = JSON.parse(obj); } catch(e) { return false; }
+                    }
+                    if (obj['商品ID'] && String(obj['商品ID']) === String(productId)) return true;
+                    if (obj['productId'] && String(obj['productId']) === String(productId)) return true;
+                    if (obj['商品名稱'] && p && obj['商品名稱'] === p.name) return true;
+                    return false;
+                });
+
+                prodLogs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+                subTitle.innerText = `${prodName} ${prodGroup ? `(${prodGroup})` : ''} ｜ 共 ${prodLogs.length} 筆版本紀錄`;
+
+                if (prodLogs.length === 0) {
+                    content.innerHTML = `
+                        <div class="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                            <i class="fa-solid fa-box-open text-3xl text-slate-300"></i>
+                            <p class="text-sm font-black text-slate-700">${prodName} 目前為初次上架版本</p>
+                            <p class="text-xs text-slate-400 font-medium">尚未有任何欄位修改或異動歷程紀錄</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const reversed = [...prodLogs].reverse();
+                const total = prodLogs.length;
+
+                content.innerHTML = reversed.map((l, revIdx) => {
+                    const versionNum = total - revIdx;
+                    const isLatest = (revIdx === 0);
+                    const isCreation = (l.action_type === '新增商品');
+                    const diffItems = extractDiffItemsFromLog(l, p);
+
+                    let diffHtml = '';
+                    if (isCreation) {
+                        diffHtml = `
+                            <div class="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl space-y-1.5 text-xs">
+                                <div class="font-black text-emerald-800 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                    <span>初次上架建立商品</span>
+                                </div>
+                                <div class="text-[11px] text-emerald-700">商品完成初次發布，建立原始版本數據。</div>
+                            </div>
+                        `;
+                    } else if (diffItems.length === 0) {
+                        diffHtml = `
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 font-bold">
+                                資料確認儲存（無欄位數值異動）
+                            </div>
+                        `;
+                    } else {
+                        diffHtml = `
+                            <div class="space-y-2">
+                                <div class="text-[11px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-code-compare text-amber-600"></i>
+                                    <span>修改前後欄位差異對照 (Before ➔ After)</span>
+                                </div>
+                                <div class="grid grid-cols-1 gap-2.5">
+                                    ${diffItems.map(item => {
+                                        const isDetailed = item.field === '詳細介紹' || (item.before && item.before.length > 20) || (item.after && item.after.length > 20);
+                                        if (isDetailed) {
+                                            return `
+                                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-xs">
+                                                    <div class="font-black text-slate-700 flex items-center gap-1.5">
+                                                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                                        <span>${item.field}</span>
+                                                    </div>
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                                        <div class="p-2.5 bg-rose-50/80 border border-rose-200 rounded-xl space-y-1">
+                                                            <div class="text-[10px] font-black text-rose-500 uppercase flex items-center gap-1">
+                                                                <i class="fa-solid fa-clock-rotate-left text-[9px]"></i>
+                                                                <span>修改前 (舊資料)</span>
+                                                            </div>
+                                                            <div class="font-medium text-rose-900 whitespace-pre-line break-words leading-relaxed ${item.before === '(未填寫)' ? 'italic text-rose-400' : ''}">${item.before}</div>
+                                                        </div>
+                                                        <div class="p-2.5 bg-emerald-50/80 border border-emerald-300 rounded-xl space-y-1">
+                                                            <div class="text-[10px] font-black text-emerald-600 uppercase flex items-center gap-1">
+                                                                <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                                                                <span>修改後 (新資料)</span>
+                                                            </div>
+                                                            <div class="font-black text-emerald-950 whitespace-pre-line break-words leading-relaxed">${item.after}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }
+
+                                        return `
+                                            <div class="p-2.5 bg-slate-50/80 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                                                <span class="inline-flex items-center gap-1 font-black text-slate-700 shrink-0">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                    ${item.field}
+                                                </span>
+                                                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                                    <div class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 font-bold text-xs line-through flex items-center gap-1" title="修改前 (舊資料)">
+                                                        <span class="text-[10px] text-rose-400 no-underline font-medium">前:</span>
+                                                        <span>${item.before}</span>
+                                                    </div>
+                                                    <i class="fa-solid fa-arrow-right text-slate-400 text-xs"></i>
+                                                    <div class="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 font-black text-xs flex items-center gap-1" title="修改後 (新資料)">
+                                                        <span class="text-[10px] text-emerald-600 font-medium">後:</span>
+                                                        <span>${item.after}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="p-4 bg-white border ${isLatest ? 'border-amber-300 ring-2 ring-amber-100' : 'border-slate-200'} rounded-2xl shadow-xs space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-lg text-xs font-black ${isLatest ? 'bg-amber-500 text-white shadow-xs' : 'bg-slate-100 text-slate-700 border border-slate-200'}">
+                                        ${isCreation ? 'v1 (初始上架)' : `Rev #${versionNum} ${isLatest ? '(最新版)' : ''}`}
+                                    </span>
+                                    <span class="font-bold text-slate-800 text-xs">${l.action_type}</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-[11px] font-mono text-slate-400">
+                                    <span><i class="fa-regular fa-clock mr-1"></i>${formatDateTime(l.created_at)}</span>
+                                    <span class="text-slate-600 font-bold"><i class="fa-regular fa-user mr-1 text-slate-400"></i>${l.operator_name || l.account || '使用者'}</span>
+                                </div>
+                            </div>
+                            ${diffHtml}
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (e) {
+                content.innerHTML = `<div class="p-4 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold">載入歷程失敗：${e.message}</div>`;
+            }
+        };
+
+        window.closeProductHistoryModal = function() {
+            document.getElementById('productHistoryModal')?.classList.add('hidden');
+        };
+
         function filterAuditLogs() {
             const kw = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
-            if (!kw) return renderAuditLogs(allAuditLogs);
-            renderAuditLogs(allAuditLogs.filter(l =>
-                (l.account && l.account.toLowerCase().includes(kw)) ||
-                (l.operator_name && l.operator_name.toLowerCase().includes(kw)) ||
-                (l.action_type && l.action_type.toLowerCase().includes(kw)) ||
-                (l.details && JSON.stringify(l.details).toLowerCase().includes(kw))
-            ));
+            let filtered = allAuditLogs || [];
+
+            if (currentAuditFilterCategory === 'product_diff') {
+                filtered = filtered.filter(l => l.action_type === '修改商品' || l.action_type === '新增商品' || l.action_type === '下架商品');
+            } else if (currentAuditFilterCategory === 'user_diff') {
+                filtered = filtered.filter(l => l.action_type === '修改使用者資料' || l.action_type === '新增使用者' || l.action_type === '刪除使用者');
+            } else if (currentAuditFilterCategory === 'order_flow') {
+                filtered = filtered.filter(l => l.action_type === '更新訂單狀態' || l.action_type === '訂單退款' || l.action_type === '結帳');
+            }
+
+            if (kw) {
+                filtered = filtered.filter(l =>
+                    (l.account && l.account.toLowerCase().includes(kw)) ||
+                    (l.operator_name && l.operator_name.toLowerCase().includes(kw)) ||
+                    (l.action_type && l.action_type.toLowerCase().includes(kw)) ||
+                    (l.details && JSON.stringify(l.details).toLowerCase().includes(kw))
+                );
+            }
+            renderAuditLogs(filtered);
         }
 
         let lightboxImagesList = [];
