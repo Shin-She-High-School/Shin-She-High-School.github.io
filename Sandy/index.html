@@ -353,19 +353,19 @@
     </div>
 
     <div id="refundModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeRefundModal()">
-        <div class="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        <div class="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
                 <div class="flex items-center gap-2">
                     <span class="w-2.5 h-5 rounded-full bg-rose-600"></span>
-                    <h3 class="text-base font-black text-slate-800">辦理退貨退款</h3>
+                    <h3 class="text-base font-black text-slate-800">辦理商品退貨退款</h3>
                 </div>
                 <button type="button" onclick="closeRefundModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
             </div>
 
-            <form onsubmit="handleConfirmRefund(event)" class="space-y-4">
+            <form onsubmit="handleConfirmRefund(event)" class="space-y-3.5 flex-1 flex flex-col min-h-0">
                 <input type="hidden" id="refundOrderId">
 
-                <div class="p-3.5 bg-rose-50/60 border border-rose-100 rounded-2xl space-y-1.5 text-xs">
+                <div class="p-3 bg-rose-50/60 border border-rose-100 rounded-2xl space-y-1.5 text-xs">
                     <div class="flex justify-between items-center">
                         <span class="text-slate-500 font-bold">訂單編號</span>
                         <span id="refundOrderNoText" class="font-mono font-black text-slate-800">-</span>
@@ -374,13 +374,28 @@
                         <span class="text-slate-500 font-bold">訂購人</span>
                         <span id="refundBuyerText" class="font-bold text-slate-800">-</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-500 font-bold">退款商品</span>
-                        <span id="refundProductText" class="font-bold text-slate-800 truncate max-w-[200px]">-</span>
+                </div>
+
+                <div class="flex-1 flex flex-col min-h-0">
+                    <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100">
+                        <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-check text-rose-600"></i>
+                            <span>勾選欲退貨之商品品項：</span>
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="toggleRefundItemSelection(true)" class="text-[11px] font-black text-rose-700 hover:text-rose-900 transition">全選</button>
+                            <span class="text-slate-300 text-xs">|</span>
+                            <button type="button" onclick="toggleRefundItemSelection(false)" class="text-[11px] font-black text-slate-500 hover:text-slate-700 transition">取消全選</button>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center pt-1 border-t border-rose-200/50">
-                        <span class="text-rose-700 font-black">退款金額</span>
-                        <span id="refundAmountText" class="font-mono text-base font-black text-rose-600">0 幣</span>
+
+                    <div id="refundItemsCheckboxList" class="space-y-1.5 overflow-y-auto custom-scrollbar max-h-44 pr-1 py-1">
+                        <!-- 動態插入勾選商品清單 -->
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 mt-2 border-t border-rose-200/60 bg-rose-50/40 p-2.5 rounded-xl">
+                        <span class="text-xs text-rose-800 font-black">本次退款金額合計</span>
+                        <span id="refundAmountText" class="font-mono text-base font-black text-rose-600">0 幣 (0 項)</span>
                     </div>
                 </div>
 
@@ -388,19 +403,19 @@
                     <label class="block text-xs font-black text-slate-700 mb-1.5">
                         <span class="text-rose-500">*</span> 請選擇或填寫退款原因：
                     </label>
-                    <div class="flex flex-wrap gap-1.5 mb-2.5">
-                        <button type="button" onclick="setRefundReasonPreset('買家提出退換貨申請')" class="px-2.5 py-1 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">買家申請</button>
-                        <button type="button" onclick="setRefundReasonPreset('商品瑕疵 / 外觀破損')" class="px-2.5 py-1 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">商品瑕疵</button>
-                        <button type="button" onclick="setRefundReasonPreset('規格款式不符')" class="px-2.5 py-1 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">規格不符</button>
-                        <button type="button" onclick="setRefundReasonPreset('門市庫存不足/缺貨')" class="px-2.5 py-1 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">門市缺貨</button>
-                        <button type="button" onclick="setRefundReasonPreset('逾期未至門市取貨')" class="px-2.5 py-1 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">逾期未取</button>
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <button type="button" onclick="setRefundReasonPreset('買家提出退換貨申請')" class="px-2 py-0.5 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">買家申請</button>
+                        <button type="button" onclick="setRefundReasonPreset('商品瑕疵 / 外觀破損')" class="px-2 py-0.5 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">商品瑕疵</button>
+                        <button type="button" onclick="setRefundReasonPreset('規格款式不符')" class="px-2 py-0.5 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">規格不符</button>
+                        <button type="button" onclick="setRefundReasonPreset('門市庫存不足/缺貨')" class="px-2 py-0.5 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">門市缺貨</button>
+                        <button type="button" onclick="setRefundReasonPreset('逾期未至門市取貨')" class="px-2 py-0.5 rounded-lg text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-700 font-bold text-slate-600 transition border border-slate-200/60">逾期未取</button>
                     </div>
-                    <input type="text" id="refundReasonInput" required placeholder="請點選上方標籤或在此輸入原因" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-rose-500 transition">
+                    <input type="text" id="refundReasonInput" required placeholder="請點選上方標籤或在此輸入原因" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-rose-500 transition">
                 </div>
 
                 <div class="flex gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="closeRefundModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-xl text-xs transition">取消</button>
-                    <button type="submit" id="btnConfirmRefundSubmit" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-rose-600/30">確認退款並結案</button>
+                    <button type="submit" id="btnConfirmRefundSubmit" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black rounded-xl text-xs transition shadow-md shadow-rose-600/30">確認退款</button>
                 </div>
             </form>
         </div>
@@ -1856,20 +1871,31 @@
                 const primary = items[0];
                 const totalQuantity = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
                 const totalAmount = items.reduce((sum, it) => sum + (it.total_amount || 0), 0);
-                const isAllRefunded = items.every(it => it.status === '已退款');
+
+                const refundedItems = items.filter(it => it.status === '已退款');
+                const activeItems = items.filter(it => it.status !== '已退款');
+                const isAllRefunded = activeItems.length === 0 && items.length > 0;
+                const hasPartialRefund = refundedItems.length > 0 && activeItems.length > 0;
+
+                const activeAmount = activeItems.reduce((sum, it) => sum + (it.total_amount || 0), 0);
+                const refundedAmount = refundedItems.reduce((sum, it) => sum + (it.total_amount || 0), 0);
+                const activeQuantity = activeItems.reduce((sum, it) => sum + (it.quantity || 1), 0);
+                const refundedQuantity = refundedItems.reduce((sum, it) => sum + (it.quantity || 1), 0);
 
                 // 依組別進行分組統計
                 const groups = Array.from(new Set(items.map(it => parseInt(it.group_no, 10)))).sort((a, b) => a - b);
                 const groupStatuses = groups.map(grpNo => {
                     const grpItems = items.filter(it => parseInt(it.group_no, 10) === grpNo);
-                    const isGrpRefunded = grpItems.every(it => it.status === '已退款');
-                    const grpStatus = isGrpRefunded ? '已退款' : (grpItems[0]?.status || '處理中');
+                    const grpActiveItems = grpItems.filter(it => it.status !== '已退款');
+                    const isGrpAllRefunded = grpActiveItems.length === 0 && grpItems.length > 0;
+                    const grpStatus = isGrpAllRefunded ? '已退款' : (grpActiveItems[0]?.status || grpItems[0]?.status || '處理中');
                     const grpCompletedAt = grpItems.find(it => it.completed_at)?.completed_at || null;
                     return {
                         groupNo: grpNo,
                         items: grpItems,
+                        activeItems: grpActiveItems,
                         status: grpStatus,
-                        isRefunded: isGrpRefunded,
+                        isRefunded: isGrpAllRefunded,
                         completedAt: grpCompletedAt,
                         totalQuantity: grpItems.reduce((s, it) => s + (it.quantity || 1), 0),
                         totalAmount: grpItems.reduce((s, it) => s + (it.total_amount || 0), 0)
@@ -1889,7 +1915,13 @@
                     groupStatuses,
                     totalQuantity,
                     totalAmount,
+                    activeAmount,
+                    refundedAmount,
+                    activeQuantity,
+                    refundedQuantity,
                     isRefunded: isAllRefunded,
+                    hasPartialRefund,
+                    hasActiveItems: activeItems.length > 0,
                     note,
                     refundReason,
                     refundedAt,
@@ -1908,51 +1940,54 @@
             }
 
             oTbody.innerHTML = groupedOrders.map(group => {
-                const { orderNo, items, primary, groups, groupStatuses, totalQuantity, totalAmount, isRefunded, note, refundReason, refundedAt, completedAt } = group;
+                const { orderNo, items, primary, groups, groupStatuses, totalQuantity, totalAmount, activeAmount, refundedAmount, activeQuantity, refundedQuantity, isRefunded, hasPartialRefund, hasActiveItems, note, refundReason, refundedAt, completedAt } = group;
 
                 let actionButtonHtml = '';
                 if (isRefunded) {
-                    actionButtonHtml = '<span class="inline-flex items-center gap-1 px-2 py-1 text-slate-400 font-bold text-xs"><i class="fa-solid fa-circle-check text-rose-400 text-[11px]"></i>已結案</span>';
+                    actionButtonHtml = '<span class="inline-flex items-center gap-1 px-2 py-1 text-slate-400 font-bold text-xs"><i class="fa-solid fa-circle-check text-rose-400 text-[11px]"></i>已全額退款</span>';
                 } else if (isPrivileged()) {
-                    actionButtonHtml = '<button type="button" onclick="openRefundModal(\'' + orderNo + '\')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">退貨退款</button>';
+                    actionButtonHtml = '<button type="button" onclick="openRefundModal(\'' + orderNo + '\')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition inline-flex items-center gap-1">' +
+                        '<i class="fa-solid fa-rotate-left text-[10px]"></i>' +
+                        '<span>' + (hasPartialRefund ? '繼續退款' : '退貨退款') + '</span>' +
+                    '</button>';
                 } else {
                     actionButtonHtml = '<span class="text-xs text-slate-400 font-bold px-2 py-1">門市處理</span>';
                 }
 
-                // 桌機版商品品項：依組別分塊呈現
+                // 桌機版商品品項：每一品項均提供「單項商品退貨按鈕」
                 let productsHtml = '';
-                if (groupStatuses.length === 1) {
-                    const gs = groupStatuses[0];
-                    productsHtml = '<div class="space-y-1">' +
-                        gs.items.map(item =>
-                            '<div class="flex items-center justify-between gap-3 text-xs">' +
-                                '<span class="font-black text-slate-800">' + item.product_name + ' <span class="text-[10px] text-teal-700 font-bold bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200/50">第 ' + item.group_no + ' 組</span></span>' +
-                                '<span class="text-[10px] text-slate-500 font-mono whitespace-nowrap">' + formatCurrency(item.unit_price) + ' 幣 × ' + item.quantity + '</span>' +
-                            '</div>'
-                        ).join('') +
-                    '</div>';
-                } else {
-                    productsHtml = '<div class="space-y-2">' +
-                        groupStatuses.map(gs =>
-                            '<div class="p-2 rounded-xl bg-slate-50 border border-slate-200/70">' +
-                                '<div class="flex items-center justify-between pb-1 mb-1 border-b border-slate-200/60">' +
-                                    '<span class="inline-flex items-center gap-1 text-[11px] font-black text-teal-800">' +
-                                        '<i class="fa-solid fa-users text-[9px] text-teal-600"></i>第 ' + gs.groupNo + ' 組品項' +
-                                    '</span>' +
-                                    '<span class="text-[10px] font-mono text-slate-500 font-bold">' + gs.totalQuantity + ' 件</span>' +
-                                '</div>' +
-                                '<div class="space-y-1">' +
-                                    gs.items.map(item =>
-                                        '<div class="flex items-center justify-between gap-2 text-xs">' +
-                                            '<span class="font-bold text-slate-800">' + item.product_name + '</span>' +
-                                            '<span class="text-[10px] text-slate-500 font-mono whitespace-nowrap">' + formatCurrency(item.unit_price) + ' 幣 × ' + item.quantity + '</span>' +
-                                        '</div>'
-                                    ).join('') +
-                                '</div>' +
-                            '</div>'
-                        ).join('') +
-                    '</div>';
-                }
+                productsHtml = '<div class="space-y-2">' +
+                    groupStatuses.map(gs =>
+                        '<div class="p-2 rounded-xl bg-slate-50 border border-slate-200/70">' +
+                            '<div class="flex items-center justify-between pb-1 mb-1 border-b border-slate-200/60">' +
+                                '<span class="inline-flex items-center gap-1 text-[11px] font-black text-teal-800">' +
+                                    '<i class="fa-solid fa-users text-[9px] text-teal-600"></i>第 ' + gs.groupNo + ' 組品項' +
+                                '</span>' +
+                                '<span class="text-[10px] font-mono text-slate-500 font-bold">' + gs.totalQuantity + ' 件</span>' +
+                            '</div>' +
+                            '<div class="space-y-1.5">' +
+                                gs.items.map(item => {
+                                    const isItemRefunded = item.status === '已退款';
+                                    return '<div class="flex items-center justify-between gap-2 text-xs ' + (isItemRefunded ? 'opacity-60 bg-rose-50/40 p-1 rounded-lg' : '') + '">' +
+                                        '<div class="flex items-center gap-1.5 min-w-0 flex-1">' +
+                                            (isItemRefunded
+                                                ? '<span class="shrink-0 px-1.5 py-0.2 rounded text-[9px] font-black bg-rose-100 text-rose-700">已退款</span><span class="line-through text-slate-500 font-bold truncate">' + item.product_name + '</span>'
+                                                : '<span class="font-bold text-slate-800 truncate">' + item.product_name + '</span>') +
+                                        '</div>' +
+                                        '<div class="flex items-center gap-2 shrink-0 font-mono text-[10px]">' +
+                                            '<span class="' + (isItemRefunded ? 'line-through text-slate-400' : 'text-slate-500') + '">' + formatCurrency(item.unit_price) + ' × ' + item.quantity + '</span>' +
+                                            (!isItemRefunded && isPrivileged()
+                                                ? '<button type="button" onclick="openRefundModal(\'' + orderNo + '\', \'' + item.id + '\')" title="僅針對此商品辦理退貨退款" class="px-1.5 py-0.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[10px] font-black transition inline-flex items-center gap-0.5 shadow-2xs">' +
+                                                    '<i class="fa-solid fa-rotate-left text-[8px]"></i>退此項' +
+                                                  '</button>'
+                                                : '') +
+                                        '</div>' +
+                                    '</div>';
+                                }).join('') +
+                            '</div>' +
+                        '</div>'
+                    ).join('') +
+                '</div>';
 
                 // 桌機版狀態欄：組別獨立分拆狀態選單
                 let statusControlHtml = '';
@@ -2008,18 +2043,22 @@
                             (isRefunded && refundReason ? '<span class="inline-flex items-center gap-1 text-[10px] text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md font-medium cursor-help" title="退款原因: ' + refundReason + '"><i class="fa-solid fa-rotate-left text-[9px] text-rose-500"></i><span>原因: ' + refundReason + '</span></span>' : '') +
                         '</div>' +
                     '</td>' +
-                    '<td class="p-3 border-b border-slate-100 text-center font-black text-sm whitespace-nowrap align-top">' + totalQuantity + '</td>' +
+                    '<td class="p-3 border-b border-slate-100 text-center font-black text-sm whitespace-nowrap align-top">' +
+                        (hasPartialRefund ? '<span class="text-slate-800">' + activeQuantity + '</span> <span class="text-[10px] text-rose-500 font-normal block">退 ' + refundedQuantity + ' 件</span>' : totalQuantity) +
+                    '</td>' +
                     '<td class="p-3 border-b border-slate-100 whitespace-nowrap align-top">' +
                         (isRefunded
                             ? '<span class="line-through text-slate-400 text-xs font-mono font-bold">' + formatCurrency(totalAmount) + ' 幣</span><span class="text-[10px] text-rose-600 font-black block">已全額退款</span>'
-                            : '<span class="text-rose-600 font-black text-xs font-mono">' + formatCurrency(totalAmount) + ' 幣</span>') +
+                            : hasPartialRefund
+                                ? '<span class="text-rose-600 font-black text-xs font-mono">' + formatCurrency(activeAmount) + ' 幣</span><span class="text-[10px] text-slate-400 font-bold block">(已退 ' + formatCurrency(refundedAmount) + ' 幣)</span>'
+                                : '<span class="text-rose-600 font-black text-xs font-mono">' + formatCurrency(totalAmount) + ' 幣</span>') +
                     '</td>' +
                     '<td class="p-3 border-b border-slate-100 align-top">' +
                         statusControlHtml +
                     '</td>' +
                     '<td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px] whitespace-nowrap align-top">' +
                         '<div>' + formatDateTime(primary.created_at) + '</div>' +
-                        (isRefunded && refundedAt ? '<div class="text-[10px] text-rose-500 font-medium font-mono mt-0.5 flex items-center gap-1"><i class="fa-solid fa-rotate-left text-[9px]"></i><span>退款: ' + formatDateTime(refundedAt) + '</span></div>' : '') +
+                        (refundedAt ? '<div class="text-[10px] text-rose-500 font-medium font-mono mt-0.5 flex items-center gap-1"><i class="fa-solid fa-rotate-left text-[9px]"></i><span>退款: ' + formatDateTime(refundedAt) + '</span></div>' : '') +
                         (completedAt ? '<div class="text-[10px] text-emerald-600 font-medium font-mono mt-0.5 flex items-center gap-1"><i class="fa-solid fa-check text-[9px]"></i><span>完成: ' + formatDateTime(completedAt) + '</span></div>' : '') +
                     '</td>' +
                     '<td class="p-3 border-b border-slate-100 text-center whitespace-nowrap align-top">' +
@@ -2030,12 +2069,15 @@
 
             if (orderCardsView) {
                 orderCardsView.innerHTML = groupedOrders.map(group => {
-                    const { orderNo, items, primary, groups, groupStatuses, totalQuantity, totalAmount, isRefunded, note, refundReason } = group;
+                    const { orderNo, items, primary, groups, groupStatuses, totalQuantity, totalAmount, activeAmount, refundedAmount, activeQuantity, refundedQuantity, isRefunded, hasPartialRefund, hasActiveItems, note, refundReason } = group;
                     let actionBtn = '';
                     if (isRefunded) {
-                        actionBtn = '<span class="inline-flex items-center gap-1 text-slate-400 font-bold text-xs"><i class="fa-solid fa-circle-check text-rose-400"></i>已結案</span>';
+                        actionBtn = '<span class="inline-flex items-center gap-1 text-slate-400 font-bold text-xs"><i class="fa-solid fa-circle-check text-rose-400"></i>已全額退款</span>';
                     } else if (isPrivileged()) {
-                        actionBtn = '<button type="button" onclick="openRefundModal(\'' + orderNo + '\')" class="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition">辦理退貨退款</button>';
+                        actionBtn = '<button type="button" onclick="openRefundModal(\'' + orderNo + '\')" class="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">' +
+                            '<i class="fa-solid fa-rotate-left text-[11px]"></i>' +
+                            '<span>' + (hasPartialRefund ? '繼續辦理退貨退款' : '辦理退貨退款') + '</span>' +
+                        '</button>';
                     }
 
                     return '<div class="bg-white border ' + (isRefunded ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200') + ' rounded-2xl p-4 space-y-3 shadow-xs">' +
@@ -2048,7 +2090,8 @@
                                 (groupStatuses.length > 1 ? '<span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/60">跨 ' + groupStatuses.length + ' 組</span>' : '') +
                             '</div>' +
                             '<div>' +
-                                (isRefunded ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black"><i class="fa-solid fa-rotate-left text-[9px]"></i>已退款</span>' : '') +
+                                (isRefunded ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black"><i class="fa-solid fa-rotate-left text-[9px]"></i>已退款</span>'
+                                : hasPartialRefund ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-black">部分品項已退款</span>' : '') +
                             '</div>' +
                         '</div>' +
                         '<div class="space-y-1.5 text-xs">' +
@@ -2072,13 +2115,25 @@
                                             '</select>'
                                             : '<span class="text-xs font-bold text-slate-500">' + gs.status + '</span>') +
                                         '</div>' +
-                                        '<div class="pl-1 space-y-1">' +
-                                            gs.items.map(it =>
-                                                '<div class="flex items-center justify-between text-xs">' +
-                                                    '<span class="font-bold text-slate-800">' + it.product_name + '</span>' +
-                                                    '<span class="font-mono text-slate-600 text-[11px]">' + formatCurrency(it.unit_price) + ' 幣 × ' + it.quantity + '</span>' +
-                                                '</div>'
-                                            ).join('') +
+                                        '<div class="pl-1 space-y-1.5">' +
+                                            gs.items.map(it => {
+                                                const isItRefunded = it.status === '已退款';
+                                                return '<div class="flex items-center justify-between text-xs ' + (isItRefunded ? 'opacity-60 bg-rose-50/40 p-1 rounded-lg' : '') + '">' +
+                                                    '<div class="flex items-center gap-1.5 min-w-0 flex-1">' +
+                                                        (isItRefunded
+                                                            ? '<span class="shrink-0 px-1 py-0.2 rounded text-[9px] font-black bg-rose-100 text-rose-700">退款</span><span class="line-through text-slate-500 font-bold truncate">' + it.product_name + '</span>'
+                                                            : '<span class="font-bold text-slate-800 truncate">' + it.product_name + '</span>') +
+                                                    '</div>' +
+                                                    '<div class="flex items-center gap-2 shrink-0 font-mono text-[11px]">' +
+                                                        '<span class="' + (isItRefunded ? 'line-through text-slate-400' : 'text-slate-600') + '">' + formatCurrency(it.unit_price) + ' × ' + it.quantity + '</span>' +
+                                                        (!isItRefunded && isPrivileged()
+                                                            ? '<button type="button" onclick="openRefundModal(\'' + orderNo + '\', \'' + it.id + '\')" class="px-1.5 py-0.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[10px] font-black transition inline-flex items-center gap-0.5">' +
+                                                                '<i class="fa-solid fa-rotate-left text-[8px]"></i>退款' +
+                                                              '</button>'
+                                                            : '') +
+                                                    '</div>' +
+                                                '</div>';
+                                            }).join('') +
                                         '</div>' +
                                     '</div>';
                                 }).join('') +
@@ -2086,12 +2141,14 @@
                                 (isRefunded && refundReason ? '<div class="text-[10px] text-rose-600 pt-1 border-t border-slate-100 flex items-center gap-1"><i class="fa-solid fa-rotate-left text-rose-500"></i>原因: ' + refundReason + '</div>' : '') +
                             '</div>' +
                             '<div class="flex items-center justify-between pt-1 font-bold">' +
-                                '<span class="text-slate-500 text-xs">總數量: ' + totalQuantity + ' 件</span>' +
+                                '<span class="text-slate-500 text-xs">數量: ' + (hasPartialRefund ? activeQuantity + ' 件 (退 ' + refundedQuantity + ' 件)' : totalQuantity + ' 件') + '</span>' +
                                 '<div>' +
                                     '<span class="text-slate-500 text-xs mr-1">合計:</span>' +
                                     (isRefunded
                                         ? '<span class="line-through text-slate-400 font-mono">' + formatCurrency(totalAmount) + ' 幣</span> <span class="text-rose-600 font-black text-xs">(已退款)</span>'
-                                        : '<span class="text-rose-600 font-black text-sm font-mono">' + formatCurrency(totalAmount) + ' 幣</span>') +
+                                        : hasPartialRefund
+                                            ? '<span class="text-rose-600 font-black text-sm font-mono">' + formatCurrency(activeAmount) + ' 幣</span> <span class="text-[10px] text-slate-400 font-normal">(退 ' + formatCurrency(refundedAmount) + ')</span>'
+                                            : '<span class="text-rose-600 font-black text-sm font-mono">' + formatCurrency(totalAmount) + ' 幣</span>') +
                                 '</div>' +
                             '</div>' +
                         '</div>' +
@@ -2106,7 +2163,8 @@
                 const parsedGroupNo = parseInt(groupNo, 10);
                 const targetItems = currentOrdersList.filter(o => 
                     (o.order_no || getOrderNo(o.id)) === orderNo && 
-                    parseInt(o.group_no, 10) === parsedGroupNo
+                    parseInt(o.group_no, 10) === parsedGroupNo &&
+                    o.status !== '已退款'
                 );
                 if (targetItems.length === 0) return;
                 const itemIds = targetItems.map(it => it.id);
@@ -2149,7 +2207,7 @@
                 return updateOrderGroupStatus(orderNo, studentGroupNo, newStatus);
             }
             try {
-                const targetItems = currentOrdersList.filter(o => (o.order_no || getOrderNo(o.id)) === orderNo);
+                const targetItems = currentOrdersList.filter(o => (o.order_no || getOrderNo(o.id)) === orderNo && o.status !== '已退款');
                 if (targetItems.length === 0) return;
                 const itemIds = targetItems.map(it => it.id);
 
@@ -2176,27 +2234,87 @@
             }
         }
 
-        window.openRefundModal = function(orderNoOrId) {
+        // 開啟退貨退款視窗 (支援單項商品退貨或多項勾選退貨)
+        window.openRefundModal = function(orderNoOrId, specificItemId = null) {
             const targetItems = currentOrdersList.filter(o => (o.order_no || getOrderNo(o.id)) === orderNoOrId || String(o.id) === String(orderNoOrId));
             if (targetItems.length === 0) return;
+
             const isAllRefunded = targetItems.every(it => it.status === '已退款');
             if (isAllRefunded) {
-                showMsg("此訂單先前已退款處理完成！", true);
+                showMsg("此訂單所有商品先前均已完成退款！", true);
                 return;
             }
 
             const primary = targetItems[0];
             const orderNo = primary.order_no || getOrderNo(primary.id);
-            const totalAmount = targetItems.reduce((sum, it) => sum + (it.total_amount || 0), 0);
 
             document.getElementById('refundOrderId').value = orderNo;
             document.getElementById('refundOrderNoText').innerText = orderNo;
-            document.getElementById('refundBuyerText').innerText = `${primary.buyer_name || primary.account} (${primary.account})`;
-            document.getElementById('refundProductText').innerText = targetItems.map(it => `${it.product_name} x${it.quantity}`).join(' + ');
-            document.getElementById('refundAmountText').innerText = `${formatCurrency(totalAmount)} 幣`;
+            document.getElementById('refundBuyerText').innerText = (primary.buyer_name || primary.account) + ' (' + primary.account + ')';
             document.getElementById('refundReasonInput').value = '買家提出退換貨申請';
 
+            const checkboxListEl = document.getElementById('refundItemsCheckboxList');
+            if (checkboxListEl) {
+                checkboxListEl.innerHTML = targetItems.map(it => {
+                    const isItemRefunded = it.status === '已退款';
+                    // 若指定了 specificItemId，則僅勾選該項目；若無指定，則預設勾選所有尚未退款的項目
+                    const isChecked = !isItemRefunded && (specificItemId ? String(it.id) === String(specificItemId) : true);
+
+                    if (isItemRefunded) {
+                        return '<div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200/70 text-xs opacity-60">' +
+                            '<div class="flex items-center gap-2">' +
+                                '<input type="checkbox" disabled class="rounded text-rose-600 focus:ring-0 cursor-not-allowed">' +
+                                '<span class="px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 text-[10px] font-bold">第 ' + it.group_no + ' 組</span>' +
+                                '<span class="font-bold line-through text-slate-500">' + it.product_name + '</span>' +
+                                '<span class="text-rose-600 text-[10px] font-black">(已退款)</span>' +
+                            '</div>' +
+                            '<span class="font-mono line-through text-slate-400">' + formatCurrency(it.total_amount) + ' 幣</span>' +
+                        '</div>';
+                    }
+
+                    return '<label class="flex items-center justify-between p-2.5 rounded-xl bg-white hover:bg-rose-50/50 border border-slate-200 hover:border-rose-200 text-xs transition cursor-pointer shadow-2xs">' +
+                        '<div class="flex items-center gap-2 min-w-0 flex-1">' +
+                            '<input type="checkbox" name="refundItemCheck" value="' + it.id + '" data-amount="' + it.total_amount + '" ' + (isChecked ? 'checked' : '') + ' onchange="recalcRefundAmount()" class="rounded text-rose-600 focus:ring-rose-500 w-4 h-4 cursor-pointer accent-rose-600">' +
+                            '<span class="px-1.5 py-0.5 rounded bg-teal-50 text-teal-800 text-[10px] font-black border border-teal-200/50 shrink-0">第 ' + it.group_no + ' 組</span>' +
+                            '<span class="font-black text-slate-800 truncate">' + it.product_name + '</span>' +
+                            '<span class="text-slate-400 font-mono text-[11px] shrink-0">× ' + it.quantity + '</span>' +
+                        '</div>' +
+                        '<span class="font-mono font-black text-rose-600 shrink-0 ml-2">' + formatCurrency(it.total_amount) + ' 幣</span>' +
+                    '</label>';
+                }).join('');
+            }
+
+            recalcRefundAmount();
             document.getElementById('refundModal')?.classList.remove('hidden');
+        };
+
+        // 重新計算勾選品項的退款總額
+        window.recalcRefundAmount = function() {
+            const checkboxes = document.querySelectorAll('input[name="refundItemCheck"]:checked');
+            let total = 0;
+            checkboxes.forEach(cb => {
+                total += parseFloat(cb.dataset.amount || 0);
+            });
+
+            const amtEl = document.getElementById('refundAmountText');
+            if (amtEl) {
+                amtEl.innerText = formatCurrency(total) + ' 幣 (' + checkboxes.length + ' 項)';
+            }
+
+            const btn = document.getElementById('btnConfirmRefundSubmit');
+            if (btn) {
+                btn.disabled = checkboxes.length === 0;
+                btn.innerText = checkboxes.length === 0 ? '請先勾選退貨品項' : '確認退款 (' + checkboxes.length + ' 項)';
+            }
+        };
+
+        // 勾選全選 / 取消全選
+        window.toggleRefundItemSelection = function(selectAll) {
+            const checkboxes = document.querySelectorAll('input[name="refundItemCheck"]');
+            checkboxes.forEach(cb => {
+                if (!cb.disabled) cb.checked = selectAll;
+            });
+            recalcRefundAmount();
         };
 
         window.closeRefundModal = function() {
@@ -2211,14 +2329,22 @@
             }
         };
 
+        // 執行退貨退款 (支援單項或批次勾選退款)
         window.handleConfirmRefund = async function(e) {
             e.preventDefault();
-            const orderNoOrId = document.getElementById('refundOrderId').value;
-            const targetItems = currentOrdersList.filter(o => (o.order_no || getOrderNo(o.id)) === orderNoOrId || String(o.id) === String(orderNoOrId));
+            const orderNo = document.getElementById('refundOrderId').value;
+            const checkedBoxes = Array.from(document.querySelectorAll('input[name="refundItemCheck"]:checked'));
+
+            if (checkedBoxes.length === 0) {
+                showMsg("請至少勾選一項要辦理退貨退款的商品！", true);
+                return;
+            }
+
+            const selectedItemIds = checkedBoxes.map(cb => cb.value);
+            const targetItems = currentOrdersList.filter(o => selectedItemIds.includes(String(o.id)));
             if (targetItems.length === 0) return;
 
-            const primary = targetItems[0];
-            const orderNo = primary.order_no || getOrderNo(primary.id);
+            const primary = currentOrdersList.find(o => (o.order_no || getOrderNo(o.id)) === orderNo) || targetItems[0];
             const reason = (document.getElementById('refundReasonInput').value || '').trim() || '買家提出退換貨申請';
 
             const btn = document.getElementById('btnConfirmRefundSubmit');
@@ -2230,6 +2356,7 @@
             try {
                 let totalRefunded = 0;
                 const refundTime = new Date().toISOString();
+                const refundedItemNames = [];
 
                 for (const item of targetItems) {
                     if (item.status === '已退款') continue;
@@ -2237,6 +2364,7 @@
                     if (error) throw error;
                     const refundAmt = (data && data.refund_amount !== undefined) ? data.refund_amount : item.total_amount;
                     totalRefunded += refundAmt;
+                    refundedItemNames.push(item.product_name + ' (第' + item.group_no + '組)');
 
                     try {
                         await client.from('orders').update({
@@ -2245,23 +2373,25 @@
                             updated_at: refundTime,
                             status: '已退款'
                         }).eq('id', item.id);
+
                         item.refund_reason = reason;
                         item.refunded_at = refundTime;
                         item.status = '已退款';
                     } catch(uErr) {}
                 }
 
-                await logAuditRecord("取消訂單退款", {
+                await logAuditRecord("商品退貨退款", {
                     訂單編號: orderNo,
-                    退款原因: reason,
-                    買家帳號: primary.account,
-                    退款金額: totalRefunded,
+                    退款品項: refundedItemNames.join(', '),
                     品項數量: targetItems.length,
+                    買家帳號: primary.account,
+                    退款總金額: totalRefunded,
+                    退款原因: reason,
                     狀態: "已退款"
                 });
 
                 closeRefundModal();
-                showMsg(`已成功退款 ${formatCurrency(totalRefunded)} 幣，訂單【${orderNo}】已完成退款！`);
+                showMsg("已成功退款 " + formatCurrency(totalRefunded) + " 幣（共 " + targetItems.length + " 項商品）！");
                 await loadTeacherDashboard();
                 loadProductsData();
             } catch (err) {
@@ -2269,7 +2399,7 @@
             } finally {
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerText = '確認退款並結案';
+                    btn.innerText = '確認退款';
                 }
             }
         };
@@ -4060,16 +4190,25 @@
                 const primary = items[0];
                 const totalQuantity = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
                 const totalAmount = items.reduce((sum, it) => sum + (it.total_amount || 0), 0);
-                const isAllRefunded = items.every(it => it.status === '已退款');
-                const isAllCompleted = items.every(it => it.status === '已完成');
-                const isAllReady = items.every(it => it.status === '待取貨');
-                const isAnyReady = items.some(it => it.status === '待取貨');
+
+                const activeItems = items.filter(it => it.status !== '已退款');
+                const refundedItems = items.filter(it => it.status === '已退款');
+                const isAllRefunded = activeItems.length === 0 && items.length > 0;
+                const hasPartialRefund = refundedItems.length > 0 && activeItems.length > 0;
+
+                const activeAmount = activeItems.reduce((sum, it) => sum + (it.total_amount || 0), 0);
+                const refundedAmount = refundedItems.reduce((sum, it) => sum + (it.total_amount || 0), 0);
+                const activeQuantity = activeItems.reduce((sum, it) => sum + (it.quantity || 1), 0);
+
+                const isAllCompleted = activeItems.length > 0 && activeItems.every(it => it.status === '已完成');
+                const isAllReady = activeItems.length > 0 && activeItems.every(it => it.status === '待取貨');
+                const isAnyReady = activeItems.some(it => it.status === '待取貨');
 
                 let status = '處理中';
                 if (isAllRefunded) status = '已退款';
                 else if (isAllCompleted) status = '已完成';
                 else if (isAnyReady) status = '待取貨';
-                else if (items.some(it => it.status === '處理中')) status = '處理中';
+                else if (activeItems.some(it => it.status === '處理中')) status = '處理中';
                 else status = primary.status || '處理中';
 
                 const note = items.find(it => it.note && it.note.trim() && it.note !== '無特別備註' && it.note !== '無')?.note || null;
@@ -4083,11 +4222,15 @@
                     primary,
                     totalQuantity,
                     totalAmount,
+                    activeAmount,
+                    refundedAmount,
+                    activeQuantity,
                     status,
                     isAllReady,
                     isAnyReady,
                     isAllCompleted,
-                    isRefunded: status === '已退款',
+                    isRefunded: isAllRefunded,
+                    hasPartialRefund,
                     note,
                     refundReason,
                     refundedAt,
@@ -4137,7 +4280,7 @@
 
             listArea.innerHTML = displayed.map(order => {
                 let statusBadge = '';
-                if (order.status === '已退款') {
+                if (order.isRefunded) {
                     statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-800 border border-rose-200">' +
                         '<i class="fa-solid fa-rotate-left text-rose-600"></i>' +
                         '<span>↩️ 已退款（金額已退回餘額）</span>' +
@@ -4145,12 +4288,12 @@
                 } else if (order.isAllCompleted) {
                     statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200">' +
                         '<i class="fa-solid fa-circle-check text-emerald-600"></i>' +
-                        '<span>✅ 訂單已完成（全部成功取貨）</span>' +
+                        '<span>✅ 訂單已完成' + (order.hasPartialRefund ? '（部分品項退款，其餘已取貨）' : '（全部成功取貨）') + '</span>' +
                     '</div>';
                 } else if (order.isAllReady) {
                     statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-800 border border-blue-200 shadow-xs">' +
                         '<span class="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></span>' +
-                        '<span>📦 待取貨（全部商品已備妥，請至攤位取貨）</span>' +
+                        '<span>📦 待取貨（商品已備妥，請至攤位取貨）</span>' +
                     '</div>';
                 } else if (order.isAnyReady) {
                     statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-sky-50 text-sky-800 border border-sky-300 shadow-xs">' +
@@ -4160,7 +4303,7 @@
                 } else {
                     statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-200">' +
                         '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>' +
-                        '<span>⏳ 處理中（店家備貨中）</span>' +
+                        '<span>⏳ 處理中' + (order.hasPartialRefund ? '（部分品項已退款，其餘店家備貨中）' : '（店家備貨中）') + '</span>' +
                     '</div>';
                 }
 
@@ -4177,15 +4320,17 @@
                         itemStatusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>備貨中</span>';
                     }
 
-                    return '<div class="flex flex-col sm:flex-row sm:items-center justify-between py-2.5 border-b border-slate-100 last:border-b-0 text-xs gap-2">' +
+                    const isItemRefunded = it.status === '已退款';
+
+                    return '<div class="flex flex-col sm:flex-row sm:items-center justify-between py-2.5 border-b border-slate-100 last:border-b-0 text-xs gap-2 ' + (isItemRefunded ? 'opacity-65 bg-rose-50/20 px-2 rounded-xl' : '') + '">' +
                         '<div class="flex items-center gap-2 flex-wrap">' +
                             '<span class="px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 font-bold text-[11px] border border-teal-200/60 whitespace-nowrap">第 ' + it.group_no + ' 組</span>' +
-                            '<span class="font-black text-slate-800">' + it.product_name + '</span>' +
+                            '<span class="font-black ' + (isItemRefunded ? 'line-through text-slate-500' : 'text-slate-800') + '">' + it.product_name + '</span>' +
                             itemStatusBadge +
                         '</div>' +
-                        '<div class="flex items-center gap-3 font-bold text-slate-600 self-end sm:self-auto">' +
-                            '<span class="font-mono text-slate-500">' + formatCurrency(it.unit_price) + ' 幣 × ' + it.quantity + '</span>' +
-                            '<span class="font-black text-slate-900 font-mono w-20 text-right">' + formatCurrency(it.total_amount) + ' 幣</span>' +
+                        '<div class="flex items-center gap-3 font-bold ' + (isItemRefunded ? 'text-slate-400' : 'text-slate-600') + ' self-end sm:self-auto">' +
+                            '<span class="font-mono ' + (isItemRefunded ? 'line-through' : 'text-slate-500') + '">' + formatCurrency(it.unit_price) + ' 幣 × ' + it.quantity + '</span>' +
+                            '<span class="font-black ' + (isItemRefunded ? 'line-through text-slate-400' : 'text-slate-900') + ' font-mono w-20 text-right">' + formatCurrency(it.total_amount) + ' 幣</span>' +
                         '</div>' +
                     '</div>';
                 }).join('');
@@ -4199,10 +4344,10 @@
                 }
 
                 let refundBadge = '';
-                if (order.isRefunded && order.refundReason) {
+                if ((order.isRefunded || order.hasPartialRefund) && order.refundReason) {
                     refundBadge = '<div class="mt-2.5 px-3 py-1.5 bg-rose-50/70 border border-rose-200/60 rounded-xl text-xs font-bold text-rose-700 flex items-start gap-1.5">' +
                         '<i class="fa-solid fa-circle-exclamation text-rose-500 mt-0.5"></i>' +
-                        '<span><b>退款原因：</b>' + order.refundReason + ' ' + (order.refundedAt ? '(' + formatDateTime(order.refundedAt) + ')' : '') + '</span>' +
+                        '<span><b>退款說明：</b>' + order.refundReason + ' ' + (order.refundedAt ? '(' + formatDateTime(order.refundedAt) + ')' : '') + (order.hasPartialRefund ? '【已退 ' + formatCurrency(order.refundedAmount) + ' 幣】' : '') + '</span>' +
                     '</div>';
                 }
 
@@ -4227,8 +4372,16 @@
                     '<div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100 mt-2 text-xs">' +
                         '<div>' + completedTimeText + '</div>' +
                         '<div class="flex items-center gap-3">' +
-                            '<span class="text-slate-500 font-bold">共 <b class="text-slate-800">' + order.totalQuantity + '</b> 件商品</span>' +
-                            '<div class="text-sm font-black text-rose-600 font-mono">合計扣除：<span class="text-base">' + formatCurrency(order.totalAmount) + '</span> 幣</div>' +
+                            '<span class="text-slate-500 font-bold">' +
+                                (order.hasPartialRefund ? '有效品項: <b class="text-slate-800">' + order.activeQuantity + '</b> 件 (共 ' + order.totalQuantity + ' 件)' : '共 <b class="text-slate-800">' + order.totalQuantity + '</b> 件商品') +
+                            '</span>' +
+                            '<div class="text-sm font-black text-rose-600 font-mono">' +
+                                (order.isRefunded
+                                    ? '<span class="line-through text-slate-400 font-normal mr-1">' + formatCurrency(order.totalAmount) + ' 幣</span> <span>(已全額退款)</span>'
+                                    : order.hasPartialRefund
+                                        ? '合計扣除：<span class="text-base">' + formatCurrency(order.activeAmount) + '</span> 幣 <span class="text-[11px] text-slate-400 font-normal">(退 ' + formatCurrency(order.refundedAmount) + ')</span>'
+                                        : '合計扣除：<span class="text-base">' + formatCurrency(order.totalAmount) + '</span> 幣') +
+                            '</div>' +
                         '</div>' +
                     '</div>' +
                 '</div>';
