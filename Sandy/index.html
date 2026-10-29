@@ -1821,7 +1821,7 @@
             const studentGroupNo = isStudent ? parseInt(currentAuth.account, 10) : null;
 
             if (isStudent) {
-                if (orderTitle) orderTitle.innerText = `第 ${studentGroupNo} 組 專屬訂單`;
+                if (orderTitle) orderTitle.innerText = "第 " + studentGroupNo + " 組 專屬訂單";
                 if (groupFilterRow) groupFilterRow.classList.add('hidden');
             } else {
                 if (orderTitle) orderTitle.innerText = '全校訂單管理';
@@ -1857,7 +1857,25 @@
                 const totalQuantity = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
                 const totalAmount = items.reduce((sum, it) => sum + (it.total_amount || 0), 0);
                 const isAllRefunded = items.every(it => it.status === '已退款');
-                const status = isAllRefunded ? '已退款' : primary.status || '處理中';
+
+                // 依組別進行分組統計
+                const groups = Array.from(new Set(items.map(it => parseInt(it.group_no, 10)))).sort((a, b) => a - b);
+                const groupStatuses = groups.map(grpNo => {
+                    const grpItems = items.filter(it => parseInt(it.group_no, 10) === grpNo);
+                    const isGrpRefunded = grpItems.every(it => it.status === '已退款');
+                    const grpStatus = isGrpRefunded ? '已退款' : (grpItems[0]?.status || '處理中');
+                    const grpCompletedAt = grpItems.find(it => it.completed_at)?.completed_at || null;
+                    return {
+                        groupNo: grpNo,
+                        items: grpItems,
+                        status: grpStatus,
+                        isRefunded: isGrpRefunded,
+                        completedAt: grpCompletedAt,
+                        totalQuantity: grpItems.reduce((s, it) => s + (it.quantity || 1), 0),
+                        totalAmount: grpItems.reduce((s, it) => s + (it.total_amount || 0), 0)
+                    };
+                });
+
                 const note = items.find(it => it.note && it.note.trim() && it.note !== '無特別備註' && it.note !== '無')?.note || null;
                 const refundReason = items.find(it => it.refund_reason && it.refund_reason.trim() && it.refund_reason !== '正常交易無退款')?.refund_reason || null;
                 const refundedAt = items.find(it => it.refunded_at)?.refunded_at || null;
@@ -1867,10 +1885,11 @@
                     orderNo,
                     items,
                     primary,
+                    groups,
+                    groupStatuses,
                     totalQuantity,
                     totalAmount,
-                    status,
-                    isRefunded: status === '已退款',
+                    isRefunded: isAllRefunded,
                     note,
                     refundReason,
                     refundedAt,
@@ -1878,168 +1897,257 @@
                 };
             });
 
-            if (countBadge) countBadge.innerText = `共 ${groupedOrders.length} 筆訂單`;
-
-            if (groupedOrders.length === 0) {
-                oTbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>目前無此狀態訂單</td></tr>`;
-                return;
-            }
+            if (countBadge) countBadge.innerText = '共 ' + groupedOrders.length + ' 筆訂單';
 
             const orderCardsView = document.getElementById('teacherOrderCardsView');
             if (groupedOrders.length === 0) {
-                const emptyOrderHtml = `<div class="p-8 text-center text-slate-400 font-bold bg-slate-50 border border-slate-200 rounded-2xl"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>目前無此狀態訂單</div>`;
-                oTbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>目前無此狀態訂單</td></tr>`;
+                const emptyOrderHtml = '<div class="p-8 text-center text-slate-400 font-bold bg-slate-50 border border-slate-200 rounded-2xl"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>目前無此狀態訂單</div>';
+                oTbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>目前無此狀態訂單</td></tr>';
                 if (orderCardsView) orderCardsView.innerHTML = emptyOrderHtml;
                 return;
             }
 
             oTbody.innerHTML = groupedOrders.map(group => {
-                const { orderNo, items, primary, totalQuantity, totalAmount, status, isRefunded, note, refundReason, refundedAt, completedAt } = group;
+                const { orderNo, items, primary, groups, groupStatuses, totalQuantity, totalAmount, isRefunded, note, refundReason, refundedAt, completedAt } = group;
 
                 let actionButtonHtml = '';
                 if (isRefunded) {
-                    actionButtonHtml = `<span class="inline-flex items-center gap-1 px-2 py-1 text-slate-400 font-bold text-xs"><i class="fa-solid fa-circle-check text-rose-400 text-[11px]"></i>已結案</span>`;
+                    actionButtonHtml = '<span class="inline-flex items-center gap-1 px-2 py-1 text-slate-400 font-bold text-xs"><i class="fa-solid fa-circle-check text-rose-400 text-[11px]"></i>已結案</span>';
                 } else if (isPrivileged()) {
-                    actionButtonHtml = `<button type="button" onclick="openRefundModal('${orderNo}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">退貨退款</button>`;
+                    actionButtonHtml = '<button type="button" onclick="openRefundModal(\'' + orderNo + '\')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">退貨退款</button>';
                 } else {
-                    actionButtonHtml = `<span class="text-xs text-slate-400 font-bold px-2 py-1">門市處理</span>`;
+                    actionButtonHtml = '<span class="text-xs text-slate-400 font-bold px-2 py-1">門市處理</span>';
                 }
 
+                // 桌機版商品品項：依組別分塊呈現
                 let productsHtml = '';
-                if (items.length === 1) {
-                    const item = items[0];
-                    productsHtml = `
-                        <div class="font-black text-slate-800">${item.product_name} <span class="text-[10px] text-slate-400 font-bold">(第 ${item.group_no} 組)</span></div>
-                        <div class="text-[10px] text-slate-400 font-mono mt-0.5">單價: ${formatCurrency(item.unit_price)} 幣</div>
-                    `;
+                if (groupStatuses.length === 1) {
+                    const gs = groupStatuses[0];
+                    productsHtml = '<div class="space-y-1">' +
+                        gs.items.map(item =>
+                            '<div class="flex items-center justify-between gap-3 text-xs">' +
+                                '<span class="font-black text-slate-800">' + item.product_name + ' <span class="text-[10px] text-teal-700 font-bold bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200/50">第 ' + item.group_no + ' 組</span></span>' +
+                                '<span class="text-[10px] text-slate-500 font-mono whitespace-nowrap">' + formatCurrency(item.unit_price) + ' 幣 × ' + item.quantity + '</span>' +
+                            '</div>'
+                        ).join('') +
+                    '</div>';
                 } else {
-                    productsHtml = `
-                        <div class="space-y-1.5 divide-y divide-slate-100">
-                            ${items.map(item => `
-                                <div class="flex items-center justify-between gap-3 text-xs pt-1 first:pt-0">
-                                    <div>
-                                        <span class="font-black text-slate-800">${item.product_name}</span>
-                                        <span class="text-[10px] text-slate-400 font-bold ml-1">(第 ${item.group_no} 組)</span>
-                                    </div>
-                                    <div class="text-[10px] text-slate-500 font-mono whitespace-nowrap">
-                                        ${formatCurrency(item.unit_price)} 幣 × ${item.quantity}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
+                    productsHtml = '<div class="space-y-2">' +
+                        groupStatuses.map(gs =>
+                            '<div class="p-2 rounded-xl bg-slate-50 border border-slate-200/70">' +
+                                '<div class="flex items-center justify-between pb-1 mb-1 border-b border-slate-200/60">' +
+                                    '<span class="inline-flex items-center gap-1 text-[11px] font-black text-teal-800">' +
+                                        '<i class="fa-solid fa-users text-[9px] text-teal-600"></i>第 ' + gs.groupNo + ' 組品項' +
+                                    '</span>' +
+                                    '<span class="text-[10px] font-mono text-slate-500 font-bold">' + gs.totalQuantity + ' 件</span>' +
+                                '</div>' +
+                                '<div class="space-y-1">' +
+                                    gs.items.map(item =>
+                                        '<div class="flex items-center justify-between gap-2 text-xs">' +
+                                            '<span class="font-bold text-slate-800">' + item.product_name + '</span>' +
+                                            '<span class="text-[10px] text-slate-500 font-mono whitespace-nowrap">' + formatCurrency(item.unit_price) + ' 幣 × ' + item.quantity + '</span>' +
+                                        '</div>'
+                                    ).join('') +
+                                '</div>' +
+                            '</div>'
+                        ).join('') +
+                    '</div>';
                 }
 
-                return `
-                    <tr class="hover:bg-slate-50 transition ${isRefunded ? 'bg-rose-50/25' : ''}">
-                        <td class="p-3 border-b border-slate-100 whitespace-nowrap font-mono align-top">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 text-sky-800 border border-sky-200 text-xs font-black shadow-xs cursor-help" title="訂單編號: ${orderNo}">
-                                <i class="fa-solid fa-receipt text-[10px] text-sky-500"></i>
-                                <span>${orderNo}</span>
-                            </span>
-                            ${items.length > 1 ? `<span class="block text-[10px] text-slate-400 font-bold mt-1">共 ${items.length} 項品項</span>` : ''}
-                        </td>
-                        <td class="p-3 border-b border-slate-100 whitespace-nowrap align-top">
-                            <div class="font-black text-slate-800 text-xs">${primary.buyer_name || primary.account}</div>
-                            <div class="flex items-center gap-1 mt-0.5">
-                                <span class="text-[10px] text-slate-400 font-mono">${primary.account}</span>
-                                ${primary.buyer_role ? `<span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${primary.buyer_role === 'admin' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600'}">${ROLE_NAMES[primary.buyer_role] || primary.buyer_role}</span>` : ''}
-                            </div>
-                        </td>
-                        <td class="p-3 border-b border-slate-100 text-xs align-top">
-                            ${productsHtml}
-                            <div class="flex flex-wrap gap-1 mt-1.5">
-                                ${note ? `<span class="inline-flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md font-medium cursor-help" title="買家備註: ${note}"><i class="fa-regular fa-comment-dots text-[9px] text-amber-600"></i><span>備註: ${note}</span></span>` : ''}
-                                ${isRefunded && refundReason ? `<span class="inline-flex items-center gap-1 text-[10px] text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md font-medium cursor-help" title="退款原因: ${refundReason}"><i class="fa-solid fa-rotate-left text-[9px] text-rose-500"></i><span>原因: ${refundReason}</span></span>` : ''}
-                            </div>
-                        </td>
-                        <td class="p-3 border-b border-slate-100 text-center font-black text-sm whitespace-nowrap align-top">${totalQuantity}</td>
-                        <td class="p-3 border-b border-slate-100 whitespace-nowrap align-top">
-                            ${isRefunded
-                                ? `<span class="line-through text-slate-400 text-xs font-mono font-bold">${formatCurrency(totalAmount)} 幣</span><span class="text-[10px] text-rose-600 font-black block">已全額退款</span>`
-                                : `<span class="text-rose-600 font-black text-xs font-mono">${formatCurrency(totalAmount)} 幣</span>`}
-                        </td>
-                        <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap align-top">
-                            ${isRefunded
-                                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black shadow-xs"><i class="fa-solid fa-rotate-left text-[10px]"></i><span>已退款</span></span>`
-                                : `<select onchange="updateGroupedOrderStatus('${orderNo}', this.value)" class="text-xs font-black rounded-lg px-2 py-1 outline-none border ${status === '已完成' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : status === '待取貨' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}">
-                                    <option value="處理中" ${status === '處理中' ? 'selected' : ''}>處理中</option>
-                                    <option value="待取貨" ${status === '待取貨' ? 'selected' : ''}>待取貨</option>
-                                    <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
-                                </select>`}
-                        </td>
-                        <td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px] whitespace-nowrap align-top">
-                            <div>${formatDateTime(primary.created_at)}</div>
-                            ${isRefunded && refundedAt ? `<div class="text-[10px] text-rose-500 font-medium font-mono mt-0.5 flex items-center gap-1"><i class="fa-solid fa-rotate-left text-[9px]"></i><span>退款: ${formatDateTime(refundedAt)}</span></div>` : ''}
-                            ${status === '已完成' && completedAt ? `<div class="text-[10px] text-emerald-600 font-medium font-mono mt-0.5 flex items-center gap-1"><i class="fa-solid fa-check text-[9px]"></i><span>完成: ${formatDateTime(completedAt)}</span></div>` : ''}
-                        </td>
-                        <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap align-top">
-                            ${actionButtonHtml}
-                        </td>
-                    </tr>
-                `;
+                // 桌機版狀態欄：組別獨立分拆狀態選單
+                let statusControlHtml = '';
+                if (isRefunded) {
+                    statusControlHtml = '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black shadow-xs"><i class="fa-solid fa-rotate-left text-[10px]"></i><span>已退款</span></span>';
+                } else {
+                    statusControlHtml = '<div class="space-y-1.5 min-w-[130px]">' +
+                        groupStatuses.map(gs => {
+                            const canEditThisGroup = !isStudent || studentGroupNo === gs.groupNo;
+                            if (gs.isRefunded) {
+                                return '<div class="flex items-center justify-between gap-1.5 p-1 rounded-lg bg-rose-50 border border-rose-200 text-xs">' +
+                                    '<span class="text-[10px] font-black text-rose-800">第 ' + gs.groupNo + ' 組</span>' +
+                                    '<span class="text-rose-700 font-black text-[11px]">已退款</span>' +
+                                '</div>';
+                            }
+                            if (!canEditThisGroup) {
+                                return '<div class="flex items-center justify-between gap-1.5 p-1 rounded-lg bg-slate-50 border border-slate-200 text-xs">' +
+                                    '<span class="text-[10px] font-black text-slate-600">第 ' + gs.groupNo + ' 組</span>' +
+                                    '<span class="text-xs font-bold text-slate-500">' + gs.status + '</span>' +
+                                '</div>';
+                            }
+                            return '<div class="flex items-center gap-1.5 p-1 rounded-lg ' + (groupStatuses.length > 1 ? 'bg-slate-50 border border-slate-200/80 shadow-xs' : '') + '">' +
+                                (groupStatuses.length > 1 ? '<span class="text-[10px] font-black text-teal-800 whitespace-nowrap px-1 py-0.5 bg-teal-50 rounded border border-teal-200/50">第 ' + gs.groupNo + ' 組</span>' : '') +
+                                '<select onchange="updateOrderGroupStatus(\'' + orderNo + '\', ' + gs.groupNo + ', this.value)" class="w-full text-xs font-black rounded-lg px-2 py-1 outline-none border transition cursor-pointer ' + (gs.status === '已完成' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : gs.status === '待取貨' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200') + '">' +
+                                    '<option value="處理中" ' + (gs.status === '處理中' ? 'selected' : '') + '>處理中</option>' +
+                                    '<option value="待取貨" ' + (gs.status === '待取貨' ? 'selected' : '') + '>待取貨</option>' +
+                                    '<option value="已完成" ' + (gs.status === '已完成' ? 'selected' : '') + '>已完成</option>' +
+                                '</select>' +
+                            '</div>';
+                        }).join('') +
+                    '</div>';
+                }
+
+                return '<tr class="hover:bg-slate-50 transition ' + (isRefunded ? 'bg-rose-50/25' : '') + '">' +
+                    '<td class="p-3 border-b border-slate-100 whitespace-nowrap font-mono align-top">' +
+                        '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 text-sky-800 border border-sky-200 text-xs font-black shadow-xs cursor-help" title="訂單編號: ' + orderNo + '">' +
+                            '<i class="fa-solid fa-receipt text-[10px] text-sky-500"></i>' +
+                            '<span>' + orderNo + '</span>' +
+                        '</span>' +
+                        (groupStatuses.length > 1 ? '<span class="block text-[10px] text-teal-700 font-bold mt-1">跨 ' + groupStatuses.length + ' 組品項</span>' : '') +
+                    '</td>' +
+                    '<td class="p-3 border-b border-slate-100 whitespace-nowrap align-top">' +
+                        '<div class="font-black text-slate-800 text-xs">' + (primary.buyer_name || primary.account) + '</div>' +
+                        '<div class="flex items-center gap-1 mt-0.5">' +
+                            '<span class="text-[10px] text-slate-400 font-mono">' + primary.account + '</span>' +
+                            (primary.buyer_role ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold ' + (primary.buyer_role === 'admin' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600') + '">' + (ROLE_NAMES[primary.buyer_role] || primary.buyer_role) + '</span>' : '') +
+                        '</div>' +
+                    '</td>' +
+                    '<td class="p-3 border-b border-slate-100 text-xs align-top">' +
+                        productsHtml +
+                        '<div class="flex flex-wrap gap-1 mt-1.5">' +
+                            (note ? '<span class="inline-flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md font-medium cursor-help" title="買家備註: ' + note + '"><i class="fa-regular fa-comment-dots text-[9px] text-amber-600"></i><span>備註: ' + note + '</span></span>' : '') +
+                            (isRefunded && refundReason ? '<span class="inline-flex items-center gap-1 text-[10px] text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md font-medium cursor-help" title="退款原因: ' + refundReason + '"><i class="fa-solid fa-rotate-left text-[9px] text-rose-500"></i><span>原因: ' + refundReason + '</span></span>' : '') +
+                        '</div>' +
+                    '</td>' +
+                    '<td class="p-3 border-b border-slate-100 text-center font-black text-sm whitespace-nowrap align-top">' + totalQuantity + '</td>' +
+                    '<td class="p-3 border-b border-slate-100 whitespace-nowrap align-top">' +
+                        (isRefunded
+                            ? '<span class="line-through text-slate-400 text-xs font-mono font-bold">' + formatCurrency(totalAmount) + ' 幣</span><span class="text-[10px] text-rose-600 font-black block">已全額退款</span>'
+                            : '<span class="text-rose-600 font-black text-xs font-mono">' + formatCurrency(totalAmount) + ' 幣</span>') +
+                    '</td>' +
+                    '<td class="p-3 border-b border-slate-100 align-top">' +
+                        statusControlHtml +
+                    '</td>' +
+                    '<td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px] whitespace-nowrap align-top">' +
+                        '<div>' + formatDateTime(primary.created_at) + '</div>' +
+                        (isRefunded && refundedAt ? '<div class="text-[10px] text-rose-500 font-medium font-mono mt-0.5 flex items-center gap-1"><i class="fa-solid fa-rotate-left text-[9px]"></i><span>退款: ' + formatDateTime(refundedAt) + '</span></div>' : '') +
+                        (completedAt ? '<div class="text-[10px] text-emerald-600 font-medium font-mono mt-0.5 flex items-center gap-1"><i class="fa-solid fa-check text-[9px]"></i><span>完成: ' + formatDateTime(completedAt) + '</span></div>' : '') +
+                    '</td>' +
+                    '<td class="p-3 border-b border-slate-100 text-center whitespace-nowrap align-top">' +
+                        actionButtonHtml +
+                    '</td>' +
+                '</tr>';
             }).join('');
 
             if (orderCardsView) {
                 orderCardsView.innerHTML = groupedOrders.map(group => {
-                    const { orderNo, items, primary, totalQuantity, totalAmount, status, isRefunded, note, refundReason } = group;
+                    const { orderNo, items, primary, groups, groupStatuses, totalQuantity, totalAmount, isRefunded, note, refundReason } = group;
                     let actionBtn = '';
                     if (isRefunded) {
-                        actionBtn = `<span class="inline-flex items-center gap-1 text-slate-400 font-bold text-xs"><i class="fa-solid fa-circle-check text-rose-400"></i>已結案</span>`;
+                        actionBtn = '<span class="inline-flex items-center gap-1 text-slate-400 font-bold text-xs"><i class="fa-solid fa-circle-check text-rose-400"></i>已結案</span>';
                     } else if (isPrivileged()) {
-                        actionBtn = `<button type="button" onclick="openRefundModal('${orderNo}')" class="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition">辦理退貨退款</button>`;
+                        actionBtn = '<button type="button" onclick="openRefundModal(\'' + orderNo + '\')" class="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition">辦理退貨退款</button>';
                     }
 
-                    return `
-                        <div class="p-3.5 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-2.5 shadow-xs">
-                            <div class="flex items-center justify-between gap-2 border-b border-slate-200/60 pb-2">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 text-sky-800 border border-sky-200 text-xs font-black shadow-xs">
-                                    <i class="fa-solid fa-receipt text-[10px] text-sky-500"></i>
-                                    <span>${orderNo}</span>
-                                </span>
-                                <div>
-                                    ${isRefunded
-                                        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black"><i class="fa-solid fa-rotate-left text-[9px]"></i>已退款</span>`
-                                        : `<select onchange="updateGroupedOrderStatus('${orderNo}', this.value)" class="text-xs font-black rounded-lg px-2 py-1 outline-none border ${status === '已完成' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : status === '待取貨' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}">
-                                            <option value="處理中" ${status === '處理中' ? 'selected' : ''}>處理中</option>
-                                            <option value="待取貨" ${status === '待取貨' ? 'selected' : ''}>待取貨</option>
-                                            <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
-                                        </select>`}
-                                </div>
-                            </div>
-                            <div class="space-y-1.5 text-xs">
-                                <div class="flex items-center justify-between text-slate-700">
-                                    <span class="font-bold">訂購人: <b class="text-slate-900">${primary.buyer_name || primary.account}</b> (${primary.account})</span>
-                                    <span class="font-mono text-[10px] text-slate-400">${formatDateTime(primary.created_at)}</span>
-                                </div>
-                                <div class="bg-white border border-slate-200 rounded-xl p-2.5 space-y-1">
-                                    ${items.map(it => `
-                                        <div class="flex items-center justify-between text-xs">
-                                            <span class="font-black text-slate-800">${it.product_name} <b class="text-slate-400 font-normal text-[10px]">(第 ${it.group_no} 組)</b></span>
-                                            <span class="font-mono text-slate-600 text-[11px]">${formatCurrency(it.unit_price)} 幣 × ${it.quantity}</span>
-                                        </div>
-                                    `).join('')}
-                                    ${note ? `<div class="text-[10px] text-amber-700 pt-1 border-t border-slate-100 flex items-center gap-1"><i class="fa-regular fa-comment-dots text-amber-500"></i>備註: ${note}</div>` : ''}
-                                    ${isRefunded && refundReason ? `<div class="text-[10px] text-rose-600 pt-1 border-t border-slate-100 flex items-center gap-1"><i class="fa-solid fa-rotate-left text-rose-500"></i>原因: ${refundReason}</div>` : ''}
-                                </div>
-                                <div class="flex items-center justify-between pt-1 font-bold">
-                                    <span class="text-slate-500 text-xs">總數量: ${totalQuantity} 件</span>
-                                    <div>
-                                        <span class="text-slate-500 text-xs mr-1">合計:</span>
-                                        ${isRefunded
-                                            ? `<span class="line-through text-slate-400 font-mono">${formatCurrency(totalAmount)} 幣</span> <span class="text-rose-600 font-black text-xs">(已退款)</span>`
-                                            : `<span class="text-rose-600 font-black text-sm font-mono">${formatCurrency(totalAmount)} 幣</span>`}
-                                    </div>
-                                </div>
-                            </div>
-                            ${actionBtn ? `<div class="pt-1">${actionBtn}</div>` : ''}
-                        </div>
-                    `;
+                    return '<div class="bg-white border ' + (isRefunded ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200') + ' rounded-2xl p-4 space-y-3 shadow-xs">' +
+                        '<div class="flex items-center justify-between pb-2.5 border-b border-slate-100">' +
+                            '<div class="flex items-center gap-2">' +
+                                '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 text-sky-800 border border-sky-200 text-xs font-black font-mono">' +
+                                    '<i class="fa-solid fa-receipt text-[10px] text-sky-500"></i>' +
+                                    '<span>' + orderNo + '</span>' +
+                                '</span>' +
+                                (groupStatuses.length > 1 ? '<span class="text-[10px] font-black text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/60">跨 ' + groupStatuses.length + ' 組</span>' : '') +
+                            '</div>' +
+                            '<div>' +
+                                (isRefunded ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black"><i class="fa-solid fa-rotate-left text-[9px]"></i>已退款</span>' : '') +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="space-y-1.5 text-xs">' +
+                            '<div class="flex items-center justify-between text-slate-700">' +
+                                '<span class="font-bold">訂購人: <b class="text-slate-900">' + (primary.buyer_name || primary.account) + '</b> (' + primary.account + ')</span>' +
+                                '<span class="font-mono text-[10px] text-slate-400">' + formatDateTime(primary.created_at) + '</span>' +
+                            '</div>' +
+                            '<div class="bg-white border border-slate-200 rounded-xl p-2.5 space-y-2.5">' +
+                                groupStatuses.map(gs => {
+                                    const canEditThisGroup = !isStudent || studentGroupNo === gs.groupNo;
+                                    return '<div class="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0 space-y-1.5">' +
+                                        '<div class="flex items-center justify-between">' +
+                                            '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 text-[11px] font-black border border-teal-200/60">' +
+                                                '<i class="fa-solid fa-users text-[9px] text-teal-600"></i>第 ' + gs.groupNo + ' 組' +
+                                            '</span>' +
+                                            (gs.isRefunded ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black"><i class="fa-solid fa-rotate-left text-[9px]"></i>已退款</span>'
+                                            : canEditThisGroup ? '<select onchange="updateOrderGroupStatus(\'' + orderNo + '\', ' + gs.groupNo + ', this.value)" class="text-xs font-black rounded-lg px-2 py-1 outline-none border cursor-pointer ' + (gs.status === '已完成' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : gs.status === '待取貨' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200') + '">' +
+                                                '<option value="處理中" ' + (gs.status === '處理中' ? 'selected' : '') + '>處理中</option>' +
+                                                '<option value="待取貨" ' + (gs.status === '待取貨' ? 'selected' : '') + '>待取貨</option>' +
+                                                '<option value="已完成" ' + (gs.status === '已完成' ? 'selected' : '') + '>已完成</option>' +
+                                            '</select>'
+                                            : '<span class="text-xs font-bold text-slate-500">' + gs.status + '</span>') +
+                                        '</div>' +
+                                        '<div class="pl-1 space-y-1">' +
+                                            gs.items.map(it =>
+                                                '<div class="flex items-center justify-between text-xs">' +
+                                                    '<span class="font-bold text-slate-800">' + it.product_name + '</span>' +
+                                                    '<span class="font-mono text-slate-600 text-[11px]">' + formatCurrency(it.unit_price) + ' 幣 × ' + it.quantity + '</span>' +
+                                                '</div>'
+                                            ).join('') +
+                                        '</div>' +
+                                    '</div>';
+                                }).join('') +
+                                (note ? '<div class="text-[10px] text-amber-700 pt-1 border-t border-slate-100 flex items-center gap-1"><i class="fa-regular fa-comment-dots text-amber-500"></i>備註: ' + note + '</div>' : '') +
+                                (isRefunded && refundReason ? '<div class="text-[10px] text-rose-600 pt-1 border-t border-slate-100 flex items-center gap-1"><i class="fa-solid fa-rotate-left text-rose-500"></i>原因: ' + refundReason + '</div>' : '') +
+                            '</div>' +
+                            '<div class="flex items-center justify-between pt-1 font-bold">' +
+                                '<span class="text-slate-500 text-xs">總數量: ' + totalQuantity + ' 件</span>' +
+                                '<div>' +
+                                    '<span class="text-slate-500 text-xs mr-1">合計:</span>' +
+                                    (isRefunded
+                                        ? '<span class="line-through text-slate-400 font-mono">' + formatCurrency(totalAmount) + ' 幣</span> <span class="text-rose-600 font-black text-xs">(已退款)</span>'
+                                        : '<span class="text-rose-600 font-black text-sm font-mono">' + formatCurrency(totalAmount) + ' 幣</span>') +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        (actionBtn ? '<div class="pt-1">' + actionBtn + '</div>' : '') +
+                    '</div>';
                 }).join('');
             }
         }
 
+        async function updateOrderGroupStatus(orderNo, groupNo, newStatus) {
+            try {
+                const parsedGroupNo = parseInt(groupNo, 10);
+                const targetItems = currentOrdersList.filter(o => 
+                    (o.order_no || getOrderNo(o.id)) === orderNo && 
+                    parseInt(o.group_no, 10) === parsedGroupNo
+                );
+                if (targetItems.length === 0) return;
+                const itemIds = targetItems.map(it => it.id);
+
+                const updatePayload = {
+                    status: newStatus,
+                    updated_at: new Date().toISOString()
+                };
+                if (newStatus === '已完成') updatePayload.completed_at = new Date().toISOString();
+
+                const { error } = await client.from('orders').update(updatePayload).in('id', itemIds);
+                if (error) throw error;
+
+                // 即時同步本地快取，防止重新抓取過程狀態閃爍
+                targetItems.forEach(it => {
+                    it.status = newStatus;
+                    it.updated_at = updatePayload.updated_at;
+                    if (newStatus === '已完成') it.completed_at = updatePayload.completed_at;
+                });
+
+                await logAuditRecord("更新組別訂單狀態", { 
+                    訂單編號: orderNo, 
+                    組別: "第 " + groupNo + " 組", 
+                    新狀態: newStatus, 
+                    品項數量: itemIds.length,
+                    品項: targetItems.map(i => i.product_name).join(', ')
+                });
+
+                showMsg("訂單【" + orderNo + "】第 " + groupNo + " 組狀態已更新為【" + newStatus + "】！");
+                loadTeacherDashboard();
+            } catch (e) {
+                showMsg("更新狀態失敗：" + e.message, true);
+            }
+        }
+
         async function updateGroupedOrderStatus(orderNo, newStatus) {
+            const isStudent = currentAuth && currentAuth.role === 'student';
+            if (isStudent) {
+                const studentGroupNo = parseInt(currentAuth.account, 10);
+                return updateOrderGroupStatus(orderNo, studentGroupNo, newStatus);
+            }
             try {
                 const targetItems = currentOrdersList.filter(o => (o.order_no || getOrderNo(o.id)) === orderNo);
                 if (targetItems.length === 0) return;
@@ -2054,8 +2162,14 @@
                 const { error } = await client.from('orders').update(updatePayload).in('id', itemIds);
                 if (error) throw error;
 
+                targetItems.forEach(it => {
+                    it.status = newStatus;
+                    it.updated_at = updatePayload.updated_at;
+                    if (newStatus === '已完成') it.completed_at = updatePayload.completed_at;
+                });
+
                 await logAuditRecord("更新訂單狀態", { 訂單編號: orderNo, 新狀態: newStatus, 品項數量: itemIds.length });
-                showMsg(`訂單【${orderNo}】狀態已更新為【${newStatus}】！`);
+                showMsg("訂單【" + orderNo + "】狀態已更新為【" + newStatus + "】！");
                 loadTeacherDashboard();
             } catch (e) {
                 showMsg("更新狀態失敗：" + e.message, true);
@@ -2208,7 +2322,9 @@
                 const totalQty = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
                 const totalAmt = items.reduce((sum, it) => sum + (it.total_amount || 0), 0);
                 const isAllRefunded = items.every(it => it.status === '已退款');
-                const status = isAllRefunded ? '已退款' : primary.status || '處理中';
+                let status = isAllRefunded ? '已退款' : (primary.status || '處理中');
+                const distinctStatuses = Array.from(new Set(items.map(it => "第" + it.group_no + "組:" + (it.status || "處理中"))));
+                if (distinctStatuses.length > 1) { status = distinctStatuses.join(" | "); }
                 const note = items.find(it => it.note && it.note.trim() && it.note !== '無特別備註' && it.note !== '無')?.note || '';
                 const refundReason = (status === '已退款') ? (items.find(it => it.refund_reason && it.refund_reason !== '正常交易無退款')?.refund_reason || '') : '';
                 const prodDetails = items.map(it => `${it.product_name} (第${it.group_no}組) x${it.quantity}`).join(' + ');
@@ -3945,12 +4061,16 @@
                 const totalQuantity = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
                 const totalAmount = items.reduce((sum, it) => sum + (it.total_amount || 0), 0);
                 const isAllRefunded = items.every(it => it.status === '已退款');
-                const isAnyReady = items.some(it => it.status === '待取貨');
                 const isAllCompleted = items.every(it => it.status === '已完成');
-                let status = primary.status || '處理中';
+                const isAllReady = items.every(it => it.status === '待取貨');
+                const isAnyReady = items.some(it => it.status === '待取貨');
+
+                let status = '處理中';
                 if (isAllRefunded) status = '已退款';
-                else if (isAnyReady) status = '待取貨';
                 else if (isAllCompleted) status = '已完成';
+                else if (isAnyReady) status = '待取貨';
+                else if (items.some(it => it.status === '處理中')) status = '處理中';
+                else status = primary.status || '處理中';
 
                 const note = items.find(it => it.note && it.note.trim() && it.note !== '無特別備註' && it.note !== '無')?.note || null;
                 const refundReason = items.find(it => it.refund_reason && it.refund_reason.trim() && it.refund_reason !== '正常交易無退款')?.refund_reason || null;
@@ -3964,6 +4084,9 @@
                     totalQuantity,
                     totalAmount,
                     status,
+                    isAllReady,
+                    isAnyReady,
+                    isAllCompleted,
                     isRefunded: status === '已退款',
                     note,
                     refundReason,
@@ -3999,117 +4122,116 @@
 
             if (displayed.length === 0) {
                 const filterLabel = currentMyOrderFilter === 'all' ? '全部' : currentMyOrderFilter;
-                listArea.innerHTML = `
-                    <div class="p-12 text-center bg-white border border-slate-200 rounded-3xl space-y-3">
-                        <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 text-2xl">
-                            <i class="fa-solid fa-box-open"></i>
-                        </div>
-                        <div class="text-sm font-black text-slate-700">目前尚無符合「${filterLabel}」條件的訂單</div>
-                        <div class="text-xs text-slate-400">當您在商城選購商品並完成結帳後，訂單處理進度與歷史明細將會在此即時更新。</div>
-                        <button type="button" onclick="switchPage('mall')" class="mt-2 px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-md shadow-brand-600/30">
-                            <i class="fa-solid fa-basket-shopping"></i> 前往商品選購
-                        </button>
-                    </div>
-                `;
+                listArea.innerHTML = '<div class="p-12 text-center bg-white border border-slate-200 rounded-3xl space-y-3">' +
+                    '<div class="w-14 h-14 mx-auto rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 text-2xl">' +
+                        '<i class="fa-solid fa-box-open"></i>' +
+                    '</div>' +
+                    '<div class="text-sm font-black text-slate-700">目前尚無符合「' + filterLabel + '」條件的訂單</div>' +
+                    '<div class="text-xs text-slate-400">當您在商城選購商品並完成結帳後，訂單處理進度與歷史明細將會在此即時更新。</div>' +
+                    '<button type="button" onclick="switchPage(\'mall\')" class="mt-2 px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-md shadow-brand-600/30">' +
+                        '<i class="fa-solid fa-basket-shopping"></i> 前往商品選購' +
+                    '</button>' +
+                '</div>';
                 return;
             }
 
             listArea.innerHTML = displayed.map(order => {
                 let statusBadge = '';
-                if (order.status === '處理中') {
-                    statusBadge = `
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-200">
-                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                            <span>⏳ 處理中（店家備貨中）</span>
-                        </div>
-                    `;
-                } else if (order.status === '待取貨') {
-                    statusBadge = `
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-800 border border-blue-200">
-                            <span class="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></span>
-                            <span>📦 待取貨（商品已備妥，請至攤位取貨）</span>
-                        </div>
-                    `;
-                } else if (order.status === '已完成') {
-                    statusBadge = `
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200">
-                            <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                            <span>✅ 訂單已完成（已成功取貨）</span>
-                        </div>
-                    `;
-                } else if (order.status === '已退款') {
-                    statusBadge = `
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-800 border border-rose-200">
-                            <i class="fa-solid fa-rotate-left text-rose-600"></i>
-                            <span>↩️ 已退款（金額已退回餘額）</span>
-                        </div>
-                    `;
+                if (order.status === '已退款') {
+                    statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-800 border border-rose-200">' +
+                        '<i class="fa-solid fa-rotate-left text-rose-600"></i>' +
+                        '<span>↩️ 已退款（金額已退回餘額）</span>' +
+                    '</div>';
+                } else if (order.isAllCompleted) {
+                    statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200">' +
+                        '<i class="fa-solid fa-circle-check text-emerald-600"></i>' +
+                        '<span>✅ 訂單已完成（全部成功取貨）</span>' +
+                    '</div>';
+                } else if (order.isAllReady) {
+                    statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-800 border border-blue-200 shadow-xs">' +
+                        '<span class="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></span>' +
+                        '<span>📦 待取貨（全部商品已備妥，請至攤位取貨）</span>' +
+                    '</div>';
+                } else if (order.isAnyReady) {
+                    statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-sky-50 text-sky-800 border border-sky-300 shadow-xs">' +
+                        '<span class="w-2 h-2 rounded-full bg-sky-500 animate-bounce"></span>' +
+                        '<span>📦 部分商品待取貨（部分組別已備妥，詳見品項狀態）</span>' +
+                    '</div>';
+                } else {
+                    statusBadge = '<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-200">' +
+                        '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>' +
+                        '<span>⏳ 處理中（店家備貨中）</span>' +
+                    '</div>';
                 }
 
-                const itemsHtml = order.items.map(it => `
-                    <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-b-0 text-xs">
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 font-bold text-[11px] border border-teal-200/60">第 ${it.group_no} 組</span>
-                            <span class="font-black text-slate-800">${it.product_name}</span>
-                        </div>
-                        <div class="flex items-center gap-3 font-bold text-slate-600">
-                            <span>${formatCurrency(it.unit_price)} 幣 × ${it.quantity}</span>
-                            <span class="font-black text-slate-900 w-16 text-right">${formatCurrency(it.total_amount)} 幣</span>
-                        </div>
-                    </div>
-                `).join('');
+                // 每個商品品項獨立顯示其所屬組別與當前狀態
+                const itemsHtml = order.items.map(it => {
+                    let itemStatusBadge = '';
+                    if (it.status === '已退款') {
+                        itemStatusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-rotate-left text-[9px]"></i>已退款</span>';
+                    } else if (it.status === '已完成') {
+                        itemStatusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check text-[9px]"></i>已取貨</span>';
+                    } else if (it.status === '待取貨') {
+                        itemStatusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200 shadow-xs animate-pulse"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>待取貨 (請至攤位)</span>';
+                    } else {
+                        itemStatusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>備貨中</span>';
+                    }
+
+                    return '<div class="flex flex-col sm:flex-row sm:items-center justify-between py-2.5 border-b border-slate-100 last:border-b-0 text-xs gap-2">' +
+                        '<div class="flex items-center gap-2 flex-wrap">' +
+                            '<span class="px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 font-bold text-[11px] border border-teal-200/60 whitespace-nowrap">第 ' + it.group_no + ' 組</span>' +
+                            '<span class="font-black text-slate-800">' + it.product_name + '</span>' +
+                            itemStatusBadge +
+                        '</div>' +
+                        '<div class="flex items-center gap-3 font-bold text-slate-600 self-end sm:self-auto">' +
+                            '<span class="font-mono text-slate-500">' + formatCurrency(it.unit_price) + ' 幣 × ' + it.quantity + '</span>' +
+                            '<span class="font-black text-slate-900 font-mono w-20 text-right">' + formatCurrency(it.total_amount) + ' 幣</span>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
 
                 let noteBadge = '';
                 if (order.note) {
-                    noteBadge = `
-                        <div class="mt-2.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-medium text-slate-700 flex items-start gap-1.5">
-                            <i class="fa-solid fa-comment-dots text-slate-400 mt-0.5"></i>
-                            <span><b>我的備註：</b>${order.note}</span>
-                        </div>
-                    `;
+                    noteBadge = '<div class="mt-2.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-medium text-slate-700 flex items-start gap-1.5">' +
+                        '<i class="fa-solid fa-comment-dots text-slate-400 mt-0.5"></i>' +
+                        '<span><b>我的備註：</b>' + order.note + '</span>' +
+                    '</div>';
                 }
 
                 let refundBadge = '';
                 if (order.isRefunded && order.refundReason) {
-                    refundBadge = `
-                        <div class="mt-2.5 px-3 py-1.5 bg-rose-50/70 border border-rose-200/60 rounded-xl text-xs font-bold text-rose-700 flex items-start gap-1.5">
-                            <i class="fa-solid fa-circle-exclamation text-rose-500 mt-0.5"></i>
-                            <span><b>退款原因：</b>${order.refundReason} ${order.refundedAt ? '(' + formatDateTime(order.refundedAt) + ')' : ''}</span>
-                        </div>
-                    `;
+                    refundBadge = '<div class="mt-2.5 px-3 py-1.5 bg-rose-50/70 border border-rose-200/60 rounded-xl text-xs font-bold text-rose-700 flex items-start gap-1.5">' +
+                        '<i class="fa-solid fa-circle-exclamation text-rose-500 mt-0.5"></i>' +
+                        '<span><b>退款原因：</b>' + order.refundReason + ' ' + (order.refundedAt ? '(' + formatDateTime(order.refundedAt) + ')' : '') + '</span>' +
+                    '</div>';
                 }
 
                 let completedTimeText = '';
                 if (order.status === '已完成' && order.completedAt) {
-                    completedTimeText = `<span class="text-emerald-700 text-[11px] font-bold"><i class="fa-regular fa-clock mr-1"></i>完成時間：${formatDateTime(order.completedAt)}</span>`;
+                    completedTimeText = '<span class="text-emerald-700 text-[11px] font-bold"><i class="fa-regular fa-clock mr-1"></i>完成時間：' + formatDateTime(order.completedAt) + '</span>';
                 }
 
-                return `
-                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md transition">
-                        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
-                            <div class="flex items-center gap-2">
-                                <span class="px-3 py-1 rounded-xl bg-slate-900 text-white font-mono font-black text-xs tracking-wider">${order.orderNo}</span>
-                                <span class="text-xs text-slate-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>下單時間：${formatDateTime(order.createdAt)}</span>
-                            </div>
-                            <div>${statusBadge}</div>
-                        </div>
-
-                        <div class="py-2 divide-y divide-slate-100">
-                            ${itemsHtml}
-                        </div>
-
-                        ${noteBadge}
-                        ${refundBadge}
-
-                        <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100 mt-2 text-xs">
-                            <div>${completedTimeText}</div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-slate-500 font-bold">共 <b class="text-slate-800">${order.totalQuantity}</b> 件商品</span>
-                                <div class="text-sm font-black text-rose-600 font-mono">合計扣除：<span class="text-base">${formatCurrency(order.totalAmount)}</span> 幣</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                return '<div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md transition">' +
+                    '<div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">' +
+                        '<div class="flex items-center gap-2">' +
+                            '<span class="px-3 py-1 rounded-xl bg-slate-900 text-white font-mono font-black text-xs tracking-wider">' + order.orderNo + '</span>' +
+                            '<span class="text-xs text-slate-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>下單時間：' + formatDateTime(order.createdAt) + '</span>' +
+                        '</div>' +
+                        '<div>' + statusBadge + '</div>' +
+                    '</div>' +
+                    '<div class="py-2 divide-y divide-slate-100">' +
+                        itemsHtml +
+                    '</div>' +
+                    noteBadge +
+                    refundBadge +
+                    '<div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100 mt-2 text-xs">' +
+                        '<div>' + completedTimeText + '</div>' +
+                        '<div class="flex items-center gap-3">' +
+                            '<span class="text-slate-500 font-bold">共 <b class="text-slate-800">' + order.totalQuantity + '</b> 件商品</span>' +
+                            '<div class="text-sm font-black text-rose-600 font-mono">合計扣除：<span class="text-base">' + formatCurrency(order.totalAmount) + '</span> 幣</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
             }).join('');
         }
 
