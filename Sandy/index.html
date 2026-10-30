@@ -798,10 +798,9 @@
                                     <tr>
                                         <th class="p-3 w-28 whitespace-nowrap">訂單編號</th>
                                         <th class="p-3 w-24 whitespace-nowrap">訂購人</th>
-                                        <th class="p-3">訂購商品</th>
+                                        <th class="p-3 min-w-[280px]">訂購商品與狀態</th>
                                         <th class="p-3 w-20 text-center whitespace-nowrap">數量</th>
                                         <th class="p-3 w-24 whitespace-nowrap">扣除商GO幣</th>
-                                        <th class="p-3 w-28 text-center whitespace-nowrap">訂單狀態</th>
                                         <th class="p-3 w-36 whitespace-nowrap">下單時間</th>
                                         <th class="p-3 w-28 text-center whitespace-nowrap">操作</th>
                                     </tr>
@@ -1882,7 +1881,7 @@
                 const activeQuantity = activeItems.reduce((sum, it) => sum + (it.quantity || 1), 0);
                 const refundedQuantity = refundedItems.reduce((sum, it) => sum + (it.quantity || 1), 0);
 
-                // 依組別進行分組統計
+                // 依組別進行分組統計，狀態直接附在組別品項卡片上
                 const groups = Array.from(new Set(items.map(it => parseInt(it.group_no, 10)))).sort((a, b) => a - b);
                 const groupStatuses = groups.map(grpNo => {
                     const grpItems = items.filter(it => parseInt(it.group_no, 10) === grpNo);
@@ -1934,7 +1933,7 @@
             const orderCardsView = document.getElementById('teacherOrderCardsView');
             if (groupedOrders.length === 0) {
                 const emptyOrderHtml = '<div class="p-8 text-center text-slate-400 font-bold bg-slate-50 border border-slate-200 rounded-2xl"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>目前無此狀態訂單</div>';
-                oTbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>目前無此狀態訂單</td></tr>';
+                oTbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-receipt text-2xl mb-2 block"></i>目前無此狀態訂單</td></tr>';
                 if (orderCardsView) orderCardsView.innerHTML = emptyOrderHtml;
                 return;
             }
@@ -1954,16 +1953,38 @@
                     actionButtonHtml = '<span class="text-xs text-slate-400 font-bold px-2 py-1">門市處理</span>';
                 }
 
-                // 桌機版商品品項：每一品項均提供「單項商品退貨按鈕」
-                let productsHtml = '';
-                productsHtml = '<div class="space-y-2">' +
-                    groupStatuses.map(gs =>
-                        '<div class="p-2 rounded-xl bg-slate-50 border border-slate-200/70">' +
-                            '<div class="flex items-center justify-between pb-1 mb-1 border-b border-slate-200/60">' +
-                                '<span class="inline-flex items-center gap-1 text-[11px] font-black text-teal-800">' +
-                                    '<i class="fa-solid fa-users text-[9px] text-teal-600"></i>第 ' + gs.groupNo + ' 組品項' +
-                                '</span>' +
-                                '<span class="text-[10px] font-mono text-slate-500 font-bold">' + gs.totalQuantity + ' 件</span>' +
+                // 訂購商品品項卡片：狀態選單直接整合在品項卡片頂部
+                let productsHtml = '<div class="space-y-2.5">' +
+                    groupStatuses.map(gs => {
+                        const canEditThisGroup = !isStudent || studentGroupNo === gs.groupNo;
+
+                        let groupStatusBadgeOrSelect = '';
+                        if (gs.isRefunded) {
+                            groupStatusBadgeOrSelect = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black shadow-2xs">' +
+                                '<i class="fa-solid fa-rotate-left text-[9px]"></i>已退款' +
+                            '</span>';
+                        } else if (canEditThisGroup) {
+                            groupStatusBadgeOrSelect = '<select onchange="updateOrderGroupStatus(\'' + orderNo + '\', ' + gs.groupNo + ', this.value)" class="text-xs font-black rounded-lg px-2.5 py-1 outline-none border transition cursor-pointer shadow-2xs ' +
+                                (gs.status === '已完成' ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : gs.status === '待取貨' ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-blue-50 text-blue-700 border-blue-300') + '">' +
+                                '<option value="處理中" ' + (gs.status === '處理中' ? 'selected' : '') + '>處理中</option>' +
+                                '<option value="待取貨" ' + (gs.status === '待取貨' ? 'selected' : '') + '>待取貨</option>' +
+                                '<option value="已完成" ' + (gs.status === '已完成' ? 'selected' : '') + '>已完成</option>' +
+                            '</select>';
+                        } else {
+                            groupStatusBadgeOrSelect = '<span class="text-xs font-bold text-slate-600 px-2 py-0.5 bg-white border border-slate-200 rounded-lg">' + gs.status + '</span>';
+                        }
+
+                        return '<div class="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 shadow-2xs space-y-2">' +
+                            '<div class="flex items-center justify-between pb-1.5 border-b border-slate-200/70 gap-2">' +
+                                '<div class="flex items-center gap-1.5">' +
+                                    '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 text-[11px] font-black border border-teal-200/60">' +
+                                        '<i class="fa-solid fa-users text-[9px] text-teal-600"></i>第 ' + gs.groupNo + ' 組' +
+                                    '</span>' +
+                                    '<span class="text-[10px] font-mono text-slate-500 font-bold">' + gs.totalQuantity + ' 件</span>' +
+                                '</div>' +
+                                '<div class="shrink-0">' +
+                                    groupStatusBadgeOrSelect +
+                                '</div>' +
                             '</div>' +
                             '<div class="space-y-1.5">' +
                                 gs.items.map(item => {
@@ -1985,41 +2006,9 @@
                                     '</div>';
                                 }).join('') +
                             '</div>' +
-                        '</div>'
-                    ).join('') +
+                        '</div>';
+                    }).join('') +
                 '</div>';
-
-                // 桌機版狀態欄：組別獨立分拆狀態選單
-                let statusControlHtml = '';
-                if (isRefunded) {
-                    statusControlHtml = '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black shadow-xs"><i class="fa-solid fa-rotate-left text-[10px]"></i><span>已退款</span></span>';
-                } else {
-                    statusControlHtml = '<div class="space-y-1.5 min-w-[130px]">' +
-                        groupStatuses.map(gs => {
-                            const canEditThisGroup = !isStudent || studentGroupNo === gs.groupNo;
-                            if (gs.isRefunded) {
-                                return '<div class="flex items-center justify-between gap-1.5 p-1 rounded-lg bg-rose-50 border border-rose-200 text-xs">' +
-                                    '<span class="text-[10px] font-black text-rose-800">第 ' + gs.groupNo + ' 組</span>' +
-                                    '<span class="text-rose-700 font-black text-[11px]">已退款</span>' +
-                                '</div>';
-                            }
-                            if (!canEditThisGroup) {
-                                return '<div class="flex items-center justify-between gap-1.5 p-1 rounded-lg bg-slate-50 border border-slate-200 text-xs">' +
-                                    '<span class="text-[10px] font-black text-slate-600">第 ' + gs.groupNo + ' 組</span>' +
-                                    '<span class="text-xs font-bold text-slate-500">' + gs.status + '</span>' +
-                                '</div>';
-                            }
-                            return '<div class="flex items-center gap-1.5 p-1 rounded-lg ' + (groupStatuses.length > 1 ? 'bg-slate-50 border border-slate-200/80 shadow-xs' : '') + '">' +
-                                (groupStatuses.length > 1 ? '<span class="text-[10px] font-black text-teal-800 whitespace-nowrap px-1 py-0.5 bg-teal-50 rounded border border-teal-200/50">第 ' + gs.groupNo + ' 組</span>' : '') +
-                                '<select onchange="updateOrderGroupStatus(\'' + orderNo + '\', ' + gs.groupNo + ', this.value)" class="w-full text-xs font-black rounded-lg px-2 py-1 outline-none border transition cursor-pointer ' + (gs.status === '已完成' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : gs.status === '待取貨' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200') + '">' +
-                                    '<option value="處理中" ' + (gs.status === '處理中' ? 'selected' : '') + '>處理中</option>' +
-                                    '<option value="待取貨" ' + (gs.status === '待取貨' ? 'selected' : '') + '>待取貨</option>' +
-                                    '<option value="已完成" ' + (gs.status === '已完成' ? 'selected' : '') + '>已完成</option>' +
-                                '</select>' +
-                            '</div>';
-                        }).join('') +
-                    '</div>';
-                }
 
                 return '<tr class="hover:bg-slate-50 transition ' + (isRefunded ? 'bg-rose-50/25' : '') + '">' +
                     '<td class="p-3 border-b border-slate-100 whitespace-nowrap font-mono align-top">' +
@@ -2052,9 +2041,6 @@
                             : hasPartialRefund
                                 ? '<span class="text-rose-600 font-black text-xs font-mono">' + formatCurrency(activeAmount) + ' 幣</span><span class="text-[10px] text-slate-400 font-bold block">(已退 ' + formatCurrency(refundedAmount) + ' 幣)</span>'
                                 : '<span class="text-rose-600 font-black text-xs font-mono">' + formatCurrency(totalAmount) + ' 幣</span>') +
-                    '</td>' +
-                    '<td class="p-3 border-b border-slate-100 align-top">' +
-                        statusControlHtml +
                     '</td>' +
                     '<td class="p-3 border-b border-slate-100 text-slate-500 font-mono text-[11px] whitespace-nowrap align-top">' +
                         '<div>' + formatDateTime(primary.created_at) + '</div>' +
@@ -2235,30 +2221,69 @@
         }
 
         // 開啟退貨退款視窗 (支援單項商品退貨或多項勾選退貨)
-        window.openRefundModal = function(orderNoOrId, specificItemId = null) {
-            const targetItems = currentOrdersList.filter(o => (o.order_no || getOrderNo(o.id)) === orderNoOrId || String(o.id) === String(orderNoOrId));
+        window.openRefundModal = function(orderNoOrId, specificItemId = null, isBuyer = false) {
+            // 合併快取與買家訂單清單尋找目標品項
+            const allAvailableOrders = [...(currentOrdersList || []), ...(currentMyOrdersList || [])];
+            const targetItems = allAvailableOrders.filter(o => 
+                (o.order_no || getOrderNo(o.id)) === orderNoOrId || String(o.id) === String(orderNoOrId)
+            );
             if (targetItems.length === 0) return;
 
-            const isAllRefunded = targetItems.every(it => it.status === '已退款');
+            // 移除重複項目 (以 id 為準)
+            const uniqueItems = Array.from(new Map(targetItems.map(it => [String(it.id), it])).values());
+
+            const isAllRefunded = uniqueItems.every(it => it.status === '已退款');
             if (isAllRefunded) {
                 showMsg("此訂單所有商品先前均已完成退款！", true);
                 return;
             }
 
-            const primary = targetItems[0];
+            const primary = uniqueItems[0];
             const orderNo = primary.order_no || getOrderNo(primary.id);
+
+            // 若為買家主動取消，驗證權限與狀態 (僅能取消自己的訂單，且該品項必須為處理中)
+            if (isBuyer) {
+                if (!currentAuth || primary.account !== currentAuth.account) {
+                    showMsg("操作受限：僅可取消您自己名下的訂單！", true);
+                    return;
+                }
+                const cancellableItems = uniqueItems.filter(it => it.status === '處理中');
+                if (cancellableItems.length === 0) {
+                    showMsg("此訂單商品已在備貨或待取貨中，無法直接由買家端取消，請洽各組門市人員協助！", true);
+                    return;
+                }
+            }
 
             document.getElementById('refundOrderId').value = orderNo;
             document.getElementById('refundOrderNoText').innerText = orderNo;
             document.getElementById('refundBuyerText').innerText = (primary.buyer_name || primary.account) + ' (' + primary.account + ')';
-            document.getElementById('refundReasonInput').value = '買家提出退換貨申請';
+            
+            const reasonInput = document.getElementById('refundReasonInput');
+            if (reasonInput) {
+                reasonInput.value = isBuyer ? '買家自行取消處理中訂單' : '買家提出退換貨申請';
+            }
+
+            const modalTitle = document.querySelector('#refundModal h3');
+            if (modalTitle) {
+                modalTitle.innerText = isBuyer ? '買家取消訂單' : '辦理商品退貨退款';
+            }
 
             const checkboxListEl = document.getElementById('refundItemsCheckboxList');
             if (checkboxListEl) {
-                checkboxListEl.innerHTML = targetItems.map(it => {
+                checkboxListEl.innerHTML = uniqueItems.map(it => {
                     const isItemRefunded = it.status === '已退款';
-                    // 若指定了 specificItemId，則僅勾選該項目；若無指定，則預設勾選所有尚未退款的項目
-                    const isChecked = !isItemRefunded && (specificItemId ? String(it.id) === String(specificItemId) : true);
+                    const isProcessing = it.status === '處理中';
+                    // 若買家操作，非處理中的商品不允許勾選取消
+                    const isDisabledForBuyer = isBuyer && !isProcessing;
+
+                    let isChecked = false;
+                    if (!isItemRefunded) {
+                        if (specificItemId) {
+                            isChecked = String(it.id) === String(specificItemId) && (!isBuyer || isProcessing);
+                        } else {
+                            isChecked = !isBuyer || isProcessing;
+                        }
+                    }
 
                     if (isItemRefunded) {
                         return '<div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200/70 text-xs opacity-60">' +
@@ -2269,6 +2294,18 @@
                                 '<span class="text-rose-600 text-[10px] font-black">(已退款)</span>' +
                             '</div>' +
                             '<span class="font-mono line-through text-slate-400">' + formatCurrency(it.total_amount) + ' 幣</span>' +
+                        '</div>';
+                    }
+
+                    if (isDisabledForBuyer) {
+                        return '<div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200/70 text-xs opacity-75">' +
+                            '<div class="flex items-center gap-2">' +
+                                '<input type="checkbox" disabled class="rounded text-slate-400 focus:ring-0 cursor-not-allowed">' +
+                                '<span class="px-1.5 py-0.2 rounded bg-teal-50 text-teal-800 text-[10px] font-bold">第 ' + it.group_no + ' 組</span>' +
+                                '<span class="font-bold text-slate-700">' + it.product_name + '</span>' +
+                                '<span class="text-blue-600 text-[10px] font-bold">(' + it.status + '，門市備貨中不可自退)</span>' +
+                            '</div>' +
+                            '<span class="font-mono text-slate-500">' + formatCurrency(it.total_amount) + ' 幣</span>' +
                         '</div>';
                     }
 
@@ -2329,7 +2366,7 @@
             }
         };
 
-        // 執行退貨退款 (支援單項或批次勾選退款)
+        // 執行退貨退款 (支援單項或批次勾選退款，支援管理員後台與買家端)
         window.handleConfirmRefund = async function(e) {
             e.preventDefault();
             const orderNo = document.getElementById('refundOrderId').value;
@@ -2341,11 +2378,14 @@
             }
 
             const selectedItemIds = checkedBoxes.map(cb => cb.value);
-            const targetItems = currentOrdersList.filter(o => selectedItemIds.includes(String(o.id)));
+            const allAvailableOrders = [...(currentOrdersList || []), ...(currentMyOrdersList || [])];
+            const targetItems = allAvailableOrders.filter(o => selectedItemIds.includes(String(o.id)));
             if (targetItems.length === 0) return;
 
-            const primary = currentOrdersList.find(o => (o.order_no || getOrderNo(o.id)) === orderNo) || targetItems[0];
+            const primary = allAvailableOrders.find(o => (o.order_no || getOrderNo(o.id)) === orderNo) || targetItems[0];
             const reason = (document.getElementById('refundReasonInput').value || '').trim() || '買家提出退換貨申請';
+
+            const isBuyerSelf = currentAuth && currentAuth.account === primary.account && !isPrivileged();
 
             const btn = document.getElementById('btnConfirmRefundSubmit');
             if (btn) {
@@ -2380,19 +2420,28 @@
                     } catch(uErr) {}
                 }
 
-                await logAuditRecord("商品退貨退款", {
+                await logAuditRecord(isBuyerSelf ? "買家取消訂單" : "商品退貨退款", {
                     訂單編號: orderNo,
                     退款品項: refundedItemNames.join(', '),
                     品項數量: targetItems.length,
                     買家帳號: primary.account,
                     退款總金額: totalRefunded,
                     退款原因: reason,
+                    操作人: isBuyerSelf ? '買家本人' : (currentAuth ? currentAuth.name : '管理者'),
                     狀態: "已退款"
                 });
 
                 closeRefundModal();
-                showMsg("已成功退款 " + formatCurrency(totalRefunded) + " 幣（共 " + targetItems.length + " 項商品）！");
-                await loadTeacherDashboard();
+                showMsg("已成功取消退款 " + formatCurrency(totalRefunded) + " 幣（已退回商GO幣餘額）！");
+                
+                // 同步刷新買家端與後台資料
+                if (canPurchase()) {
+                    await loadMyOrdersData();
+                    refreshUserBalance();
+                }
+                if (isPrivileged() || (currentAuth && currentAuth.role === 'student')) {
+                    await loadTeacherDashboard();
+                }
                 loadProductsData();
             } catch (err) {
                 showMsg("退款操作失敗：" + err.message, true);
@@ -4203,12 +4252,13 @@
                 const isAllCompleted = activeItems.length > 0 && activeItems.every(it => it.status === '已完成');
                 const isAllReady = activeItems.length > 0 && activeItems.every(it => it.status === '待取貨');
                 const isAnyReady = activeItems.some(it => it.status === '待取貨');
+                const hasAnyProcessing = activeItems.some(it => it.status === '處理中');
 
                 let status = '處理中';
                 if (isAllRefunded) status = '已退款';
                 else if (isAllCompleted) status = '已完成';
                 else if (isAnyReady) status = '待取貨';
-                else if (activeItems.some(it => it.status === '處理中')) status = '處理中';
+                else if (hasAnyProcessing) status = '處理中';
                 else status = primary.status || '處理中';
 
                 const note = items.find(it => it.note && it.note.trim() && it.note !== '無特別備註' && it.note !== '無')?.note || null;
@@ -4229,6 +4279,7 @@
                     isAllReady,
                     isAnyReady,
                     isAllCompleted,
+                    hasAnyProcessing,
                     isRefunded: isAllRefunded,
                     hasPartialRefund,
                     note,
@@ -4307,7 +4358,7 @@
                     '</div>';
                 }
 
-                // 每個商品品項獨立顯示其所屬組別與當前狀態
+                // 每個商品品項獨立顯示其所屬組別、當前狀態與單項取消按鈕
                 const itemsHtml = order.items.map(it => {
                     let itemStatusBadge = '';
                     if (it.status === '已退款') {
@@ -4317,10 +4368,11 @@
                     } else if (it.status === '待取貨') {
                         itemStatusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200 shadow-xs animate-pulse"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>待取貨 (請至攤位)</span>';
                     } else {
-                        itemStatusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>備貨中</span>';
+                        itemStatusBadge = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>店家備貨中</span>';
                     }
 
                     const isItemRefunded = it.status === '已退款';
+                    const canBuyerCancelItem = it.status === '處理中';
 
                     return '<div class="flex flex-col sm:flex-row sm:items-center justify-between py-2.5 border-b border-slate-100 last:border-b-0 text-xs gap-2 ' + (isItemRefunded ? 'opacity-65 bg-rose-50/20 px-2 rounded-xl' : '') + '">' +
                         '<div class="flex items-center gap-2 flex-wrap">' +
@@ -4331,6 +4383,11 @@
                         '<div class="flex items-center gap-3 font-bold ' + (isItemRefunded ? 'text-slate-400' : 'text-slate-600') + ' self-end sm:self-auto">' +
                             '<span class="font-mono ' + (isItemRefunded ? 'line-through' : 'text-slate-500') + '">' + formatCurrency(it.unit_price) + ' 幣 × ' + it.quantity + '</span>' +
                             '<span class="font-black ' + (isItemRefunded ? 'line-through text-slate-400' : 'text-slate-900') + ' font-mono w-20 text-right">' + formatCurrency(it.total_amount) + ' 幣</span>' +
+                            (canBuyerCancelItem
+                                ? '<button type="button" onclick="openRefundModal(\'' + order.orderNo + '\', \'' + it.id + '\', true)" title="取消此項商品訂購並退還商GO幣" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-[10px] font-black transition inline-flex items-center gap-1 shadow-2xs">' +
+                                    '<i class="fa-solid fa-xmark text-[9px]"></i>取消此項' +
+                                  '</button>'
+                                : '') +
                         '</div>' +
                     '</div>';
                 }).join('');
@@ -4362,7 +4419,14 @@
                             '<span class="px-3 py-1 rounded-xl bg-slate-900 text-white font-mono font-black text-xs tracking-wider">' + order.orderNo + '</span>' +
                             '<span class="text-xs text-slate-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>下單時間：' + formatDateTime(order.createdAt) + '</span>' +
                         '</div>' +
-                        '<div>' + statusBadge + '</div>' +
+                        '<div class="flex items-center gap-2">' +
+                            (order.hasAnyProcessing
+                                ? '<button type="button" onclick="openRefundModal(\'' + order.orderNo + '\', null, true)" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-full text-xs font-black transition inline-flex items-center gap-1 shadow-2xs">' +
+                                    '<i class="fa-solid fa-xmark text-[10px]"></i>取消訂單' +
+                                  '</button>'
+                                : '') +
+                            statusBadge +
+                        '</div>' +
                     '</div>' +
                     '<div class="py-2 divide-y divide-slate-100">' +
                         itemsHtml +
