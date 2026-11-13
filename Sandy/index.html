@@ -468,6 +468,171 @@
         </div>
     </div>
 
+    <!-- 一鍵重設資料庫確認 Modal -->
+    <div id="resetDbModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeResetDatabaseModal()">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-rose-100 flex flex-col space-y-4 max-h-[90vh]" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between pb-3 border-b border-rose-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black text-lg border border-rose-100">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-rose-950">一鍵重設資料庫至初始設定</h3>
+                        <p class="text-xs text-rose-500 font-bold">高風險操作・資料將回復至活動初始狀態</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeResetDatabaseModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
+            </div>
+
+            <div class="space-y-3 text-xs leading-relaxed text-slate-600 bg-rose-50/50 p-4 rounded-2xl border border-rose-100/70">
+                <p class="font-bold text-rose-800 text-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-exclamation text-rose-600"></i> 執行此操作將依序執行下列重設：
+                </p>
+                <ul class="space-y-1.5 list-disc list-inside font-semibold text-slate-700 pl-1">
+                    <li><strong class="text-rose-700">清空所有訂單</strong>：移除所有買家與組別之購買與歷史訂單。</li>
+                    <li><strong class="text-rose-700">重設訂單編號序列</strong>：訂單編號流水號重新由 001 (SSHS001) 開始計數。</li>
+                    <li><strong class="text-rose-700">清空所有購物車</strong>：重置所有人暫存中的購物車項目。</li>
+                    <li><strong class="text-rose-700">重置全體教職員商GO幣</strong>：178 位教職員餘額全數恢復為 500 點。</li>
+                    <li><strong class="text-rose-700">重置學生組別餘額</strong>：1~6 組學生組別商GO幣歸零 (0 點)。</li>
+                    <li><strong class="text-rose-700">重置操作日誌</strong>：清空歷史修改日誌並記錄本次初始重設。</li>
+                </ul>
+                <div class="pt-2 border-t border-rose-200/60 mt-2">
+                    <label class="flex items-center gap-2 cursor-pointer select-none font-bold text-slate-800">
+                        <input type="checkbox" id="resetClearProductsCheckbox" checked class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300">
+                        <span>同時清空所有商品（取消勾選則保留現有上架商品）</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-black text-slate-700">請輸入「<span class="text-rose-600 font-mono">RESET</span>」以確認執行重設：</label>
+                <input type="text" id="resetConfirmInput" placeholder="請在此輸入 RESET" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeResetDatabaseModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">取消</button>
+                <button type="button" id="btnExecuteResetDb" onclick="executeDatabaseReset()" class="px-5 py-2 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-700 text-white transition shadow-md shadow-rose-600/20 flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> 確認一鍵重設
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改小組實習商店名稱 Modal -->
+    <div id="editStoreNameModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeEditStoreNameModal()">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-lg font-black border border-brand-100">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-800">自訂實習商店品牌名稱</h3>
+                        <p class="text-xs text-slate-400 font-bold" id="editStoreGroupNameHint">設定此組別對外顯示之店鋪店名</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEditStoreNameModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
+            </div>
+
+            <div class="space-y-3">
+                <div id="privilegedStoreGroupSelectWrapper" class="hidden">
+                    <label class="block text-xs font-black text-slate-700 mb-1">選擇設定組別</label>
+                    <select id="selectStoreGroupForEdit" onchange="handleSelectStoreGroupChange()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                        <option value="1">第 1 組</option>
+                        <option value="2">第 2 組</option>
+                        <option value="3">第 3 組</option>
+                        <option value="4">第 4 組</option>
+                        <option value="5">第 5 組</option>
+                        <option value="6">第 6 組</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">自訂商店名稱（系統將自動永久保留「第 X 組」前綴）</label>
+                    <div class="flex items-center gap-2">
+                        <span id="storeNamePrefixBadge" class="px-3.5 py-2.5 bg-slate-100 border border-slate-200 text-brand-700 font-black text-xs rounded-xl shrink-0 select-none">第 1 組 -</span>
+                        <input type="text" id="inputStoreName" maxlength="20" placeholder="例如：幸福手作茶飲、新社漫步咖啡..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1">例如輸入「幸福手作茶飲」，系統將自動儲存為「第 1 組 - 幸福手作茶飲」。</p>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeEditStoreNameModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">取消</button>
+                <button type="button" id="btnSaveStoreName" onclick="handleSaveStoreName()" class="px-5 py-2 rounded-xl text-xs font-black bg-brand-600 hover:bg-brand-700 text-white transition shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> 儲存店名
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批次匯入名單 Modal -->
+    <div id="importUsersModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeImportUsersModal()">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4 max-h-[90vh]" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-black border border-emerald-100">
+                        <i class="fa-solid fa-file-arrow-up"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-800">批次匯入教職員名單</h3>
+                        <p class="text-xs text-slate-400 font-bold">支援直接貼上或上傳 CSV 檔案</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeImportUsersModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition text-sm">✕</button>
+            </div>
+
+            <div class="space-y-3 flex-1 overflow-y-auto custom-scrollbar">
+                <div class="bg-emerald-50/70 border border-emerald-200/60 rounded-2xl p-3 text-xs text-emerald-800 space-y-1">
+                    <div class="font-black flex items-center gap-1"><i class="fa-solid fa-circle-info"></i> 格式說明：</div>
+                    <div class="text-[11px] leading-relaxed">
+                        每行一筆資料，格式為：<code class="bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-mono text-emerald-700">帳號,姓名</code>（支援逗號或 Tab 分隔）。<br>
+                        系統將自動設定身分為<strong>教職員 (staff)</strong>、免密碼登入，並賦予預設額度 <strong>500 商GO幣</strong>（已有帳號則更新姓名）。
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer transition flex items-center gap-1.5 border border-slate-200 shadow-2xs">
+                        <i class="fa-solid fa-upload text-emerald-600"></i>
+                        <span>選擇 CSV 檔案</span>
+                        <input type="file" id="importCsvFileInput" accept=".csv,.txt" onchange="handleImportCsvFile(event)" class="hidden">
+                    </label>
+                    <span id="importCsvFileName" class="text-xs text-slate-400 font-medium">尚未選擇檔案</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">或直接在此貼上名單內容：</label>
+                    <textarea id="importCsvTextarea" oninput="handleImportCsvTextChange()" rows="6" placeholder="範例：&#10;t001,王小明&#10;t002,陳大華&#10;s003,林美美" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-medium text-slate-800 focus:bg-white outline-none focus:ring-2 focus:ring-emerald-500 transition"></textarea>
+                </div>
+
+                <div id="importPreviewArea" class="hidden space-y-2">
+                    <div class="flex items-center justify-between text-xs font-black text-slate-700">
+                        <span><i class="fa-solid fa-list-check text-emerald-600 mr-1"></i> 解析預覽 (<span id="importValidCountBadge">0</span> 筆)</span>
+                    </div>
+                    <div class="max-h-36 overflow-y-auto custom-scrollbar border border-slate-200 rounded-xl">
+                        <table class="w-full text-xs text-left">
+                            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2 w-28">帳號 (代號)</th>
+                                    <th class="p-2">姓名</th>
+                                    <th class="p-2 w-24">身分</th>
+                                    <th class="p-2 w-20">預設額度</th>
+                                </tr>
+                            </thead>
+                            <tbody id="importPreviewTableBody" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeImportUsersModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">取消</button>
+                <button type="button" id="btnExecuteImportUsers" onclick="executeBatchImportUsers()" disabled class="px-5 py-2 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white transition shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> 確認匯入名單
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="authWorkspace" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
         <div class="relative w-full max-w-[390px] bg-white rounded-3xl p-8 shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-4">
@@ -507,45 +672,48 @@
 
     <div id="appWorkspace" class="hidden flex-grow flex flex-col h-full overflow-hidden">
 
-        <header class="bg-slate-900 text-white shrink-0 py-2.5 px-4 sm:px-6 shadow-md z-40">
-            <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-y-2">
-                <div class="flex items-center gap-3">
-                    <img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="校徽" class="w-7 h-7 object-contain drop-shadow">
-                    <span id="userStatusDisplay" class="font-extrabold text-xs sm:text-sm text-slate-200 tracking-wide">系統連線中...</span>
-                    <div id="headerBalancePill" class="hidden items-center gap-1.5 px-3 py-1 bg-amber-400/15 text-amber-300 border border-amber-400/30 rounded-xl text-xs font-black shadow-2xs">
-                        <i class="fa-solid fa-coins text-amber-400"></i>
+        <header class="bg-slate-900 text-white shrink-0 py-2.5 px-3 sm:px-6 shadow-md z-40">
+            <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-y-2 gap-x-2">
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="校徽" class="w-6 h-6 sm:w-7 sm:h-7 object-contain drop-shadow shrink-0">
+                    <span id="userStatusDisplay" class="font-extrabold text-xs sm:text-sm text-slate-200 tracking-wide truncate">系統連線中...</span>
+                    <div id="headerBalancePill" class="hidden items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 bg-amber-400/15 text-amber-300 border border-amber-400/30 rounded-xl text-xs font-black shadow-2xs shrink-0">
+                        <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
                         <span class="text-slate-300 font-medium">商GO幣:</span>
-                        <span id="headerUserBalance" class="text-amber-300 font-mono text-sm font-black">0</span>
-                        <span class="text-[11px] text-amber-400/90 font-bold">幣</span>
+                        <span id="headerUserBalance" class="text-amber-300 font-mono text-xs sm:text-sm font-black">0</span>
+                        <span class="text-[10px] sm:text-[11px] text-amber-400/90 font-bold">幣</span>
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button type="button" id="btnHeaderCart" onclick="openCartModal()" class="hidden relative px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-extrabold rounded-xl text-xs transition shadow-sm items-center gap-1.5">
+                <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+                    <button type="button" id="btnHeaderCart" onclick="openCartModal()" class="hidden relative px-2.5 sm:px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-extrabold rounded-xl text-xs transition shadow-sm items-center gap-1.5 shrink-0">
                         <i class="fa-solid fa-cart-shopping"></i>
                         <span>購物車</span>
                         <span id="cartBadgeCount" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span>
                     </button>
-                    <button type="button" id="btnHeaderMyOrders" onclick="switchPage('my-orders')" class="hidden relative px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-extrabold rounded-xl text-xs transition shadow-sm items-center gap-1.5">
+                    <button type="button" id="btnHeaderMyOrders" onclick="switchPage('my-orders')" class="hidden relative px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-extrabold rounded-xl text-xs transition shadow-sm items-center gap-1.5 shrink-0">
                         <i class="fa-solid fa-receipt text-teal-400"></i>
                         <span>我的訂單</span>
                     </button>
-                    <span id="syncStatusIndicator" class="sync-badge sync-success">
+                    <span id="syncStatusIndicator" class="sync-badge sync-success shrink-0" title="系統已連線">
                         <span class="sync-pulse"></span>
                         <span>系統已連線</span>
                     </span>
-                    <button type="button" onclick="handleLogout()" class="text-xs text-rose-400 hover:text-rose-300 font-extrabold transition flex items-center gap-1 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-700">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> 登出
+                    <button type="button" onclick="handleLogout()" class="text-xs text-rose-400 hover:text-rose-300 font-extrabold transition flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-700 shrink-0" title="登出系統">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span>登出</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <div id="navTabArea" class="bg-white border-b border-slate-200/80 shrink-0 px-4 sm:px-6 py-2 shadow-2xs hidden">
-            <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
-                <div id="navTabButtons" class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200 text-xs font-extrabold gap-1 flex-wrap"></div>
-                <div id="teacherActionGroup" class="hidden">
-                    <button type="button" onclick="resetAllBalances()" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-black transition flex items-center gap-1">
-                        <i class="fa-solid fa-rotate-left"></i> 重置所有商GO幣
+        <div id="navTabArea" class="bg-white border-b border-slate-200/80 shrink-0 px-3 sm:px-6 py-2 shadow-2xs hidden">
+            <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                <div class="overflow-x-auto custom-scrollbar pb-1 sm:pb-0 -mx-1 px-1 flex-1 min-w-0">
+                    <div id="navTabButtons" class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200 text-xs font-extrabold gap-1 whitespace-nowrap"></div>
+                </div>
+                <div id="teacherActionGroup" class="hidden flex items-center justify-end gap-2 shrink-0">
+                    <button type="button" onclick="resetAllBalances()" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-xs font-black transition flex items-center gap-1 shrink-0" title="將全體教職員商GO幣餘額重置為500點">
+                        <i class="fa-solid fa-coins"></i> 重置商GO幣
                     </button>
                 </div>
             </div>
@@ -568,6 +736,39 @@
                             <span class="text-xs font-bold text-slate-500" id="productCountBadge">共 0 項商品</span>
                         </div>
                     </div>
+
+                    <!-- 商品搜尋、排序與小組店鋪篩選工具列 -->
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-xs space-y-3">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                            <div class="relative flex-1">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="mallSearchInput" oninput="handleMallSearchInput()" placeholder="搜尋商品名稱或商品介紹關鍵字..." class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+                                <button type="button" id="btnMallClearSearch" onclick="clearMallSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs w-5 h-5 items-center justify-center">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <label class="text-[11px] font-bold text-slate-400 whitespace-nowrap"><i class="fa-solid fa-arrow-down-wide-short mr-1"></i>排序：</label>
+                                <select id="mallSortSelect" onchange="handleMallSortChange()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 transition">
+                                    <option value="default">最新上架</option>
+                                    <option value="price-asc">價格：由低到高</option>
+                                    <option value="price-desc">價格：由高到低</option>
+                                    <option value="stock-desc">庫存：由多到少</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="mallGroupFilterRow" class="flex items-center gap-1.5 pt-2 border-t border-slate-100 overflow-x-auto custom-scrollbar text-xs font-bold">
+                            <span class="text-slate-400 text-[11px] font-bold mr-1 shrink-0 whitespace-nowrap"><i class="fa-solid fa-store text-[10px] mr-1"></i>小組店鋪：</span>
+                            <button type="button" onclick="setMallGroupFilter('all')" data-mall-group="all" class="mall-group-btn px-3 py-1 rounded-xl bg-brand-600 text-white font-black shadow-xs shrink-0 whitespace-nowrap transition">全部商品</button>
+                            <button type="button" onclick="setMallGroupFilter('1')" data-mall-group="1" class="mall-group-btn px-3 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 shrink-0 whitespace-nowrap transition"><span class="mall-group-btn-label">第 1 組</span></button>
+                            <button type="button" onclick="setMallGroupFilter('2')" data-mall-group="2" class="mall-group-btn px-3 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 shrink-0 whitespace-nowrap transition"><span class="mall-group-btn-label">第 2 組</span></button>
+                            <button type="button" onclick="setMallGroupFilter('3')" data-mall-group="3" class="mall-group-btn px-3 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 shrink-0 whitespace-nowrap transition"><span class="mall-group-btn-label">第 3 組</span></button>
+                            <button type="button" onclick="setMallGroupFilter('4')" data-mall-group="4" class="mall-group-btn px-3 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 shrink-0 whitespace-nowrap transition"><span class="mall-group-btn-label">第 4 組</span></button>
+                            <button type="button" onclick="setMallGroupFilter('5')" data-mall-group="5" class="mall-group-btn px-3 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 shrink-0 whitespace-nowrap transition"><span class="mall-group-btn-label">第 5 組</span></button>
+                            <button type="button" onclick="setMallGroupFilter('6')" data-mall-group="6" class="mall-group-btn px-3 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 shrink-0 whitespace-nowrap transition"><span class="mall-group-btn-label">第 6 組</span></button>
+                        </div>
+                    </div>
+
                     <div id="productListArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
                 </section>
 
@@ -668,17 +869,37 @@
                     </div>
 
                     <div class="flex items-center gap-1.5 pb-2 overflow-x-auto custom-scrollbar border-b border-slate-100 text-xs font-black">
-                        <button type="button" onclick="filterMyOrderStatus('all')" class="my-order-filter-tab px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700 font-black border border-brand-200">全部訂單 (<span id="myOrderFilterCountAll">0</span>)</button>
-                        <button type="button" onclick="filterMyOrderStatus('處理中')" class="my-order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 font-bold">處理中 (<span id="myOrderFilterCountProcessing">0</span>)</button>
-                        <button type="button" onclick="filterMyOrderStatus('待取貨')" class="my-order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 font-bold">待取貨 (<span id="myOrderFilterCountReady">0</span>)</button>
-                        <button type="button" onclick="filterMyOrderStatus('已完成')" class="my-order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 font-bold">已完成 (<span id="myOrderFilterCountCompleted">0</span>)</button>
-                        <button type="button" onclick="filterMyOrderStatus('已退款')" class="my-order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 font-bold">已退款 (<span id="myOrderFilterCountRefunded">0</span>)</button>
+                        <button type="button" onclick="filterMyOrderStatus('all')" class="my-order-filter-tab px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700 font-black border border-brand-200 shrink-0 whitespace-nowrap">全部訂單 (<span id="myOrderFilterCountAll">0</span>)</button>
+                        <button type="button" onclick="filterMyOrderStatus('處理中')" class="my-order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">處理中 (<span id="myOrderFilterCountProcessing">0</span>)</button>
+                        <button type="button" onclick="filterMyOrderStatus('待取貨')" class="my-order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">待取貨 (<span id="myOrderFilterCountReady">0</span>)</button>
+                        <button type="button" onclick="filterMyOrderStatus('已完成')" class="my-order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">已完成 (<span id="myOrderFilterCountCompleted">0</span>)</button>
+                        <button type="button" onclick="filterMyOrderStatus('已退款')" class="my-order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">已退款 (<span id="myOrderFilterCountRefunded">0</span>)</button>
                     </div>
 
                     <div id="myOrdersListArea" class="space-y-3"></div>
                 </section>
 
                 <section id="page-student-publish" class="page-pane hidden space-y-6">
+                    <!-- 小組商店品牌資訊與店名設定 -->
+                    <div class="bg-gradient-to-r from-brand-50 to-slate-50 border border-brand-200/80 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-lg shadow-sm shrink-0">
+                                <i class="fa-solid fa-store"></i>
+                            </div>
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-500">實習商店品牌名稱</div>
+                                <div class="text-sm sm:text-base font-black text-slate-800 flex items-center gap-2">
+                                    <span id="currentGroupStoreNameDisplay">實習商店品牌</span>
+                                    <span id="currentGroupNoBadge" class="text-[10px] font-black px-2 py-0.5 rounded-md bg-brand-100 text-brand-800 border border-brand-200">組別資訊</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="openEditStoreNameModal()" class="px-3.5 py-2 bg-white hover:bg-slate-100 text-brand-700 border border-brand-200 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-2xs shrink-0">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>自訂商店名稱</span>
+                        </button>
+                    </div>
+
                     <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
                             <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
@@ -744,8 +965,9 @@
                                         <th class="p-3 w-20 text-center whitespace-nowrap">組別</th>
                                         <th class="p-3 w-24 whitespace-nowrap">單價</th>
                                         <th class="p-3 w-20 text-center whitespace-nowrap">庫存</th>
+                                        <th class="p-3 w-20 text-center whitespace-nowrap">狀態</th>
                                         <th class="p-3 w-36 whitespace-nowrap">上架時間</th>
-                                        <th class="p-3 w-36 text-center whitespace-nowrap">操作</th>
+                                        <th class="p-3 w-48 text-center whitespace-nowrap">操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="studentProductTableBody" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
@@ -772,23 +994,68 @@
                             </div>
                         </div>
 
+                        <!-- 即時營收與訂單統計看板 (KPI Summary Cards) -->
+                        <div id="orderKpiDashboard" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/80 rounded-2xl p-3.5 shadow-2xs">
+                                <div class="flex items-center justify-between text-emerald-600 mb-1">
+                                    <span class="text-[11px] font-black">累計營業額</span>
+                                    <i class="fa-solid fa-coins text-sm"></i>
+                                </div>
+                                <div class="text-lg sm:text-xl font-black text-emerald-800" id="kpiTotalRevenue">0 <span class="text-xs font-bold text-emerald-600">幣</span></div>
+                                <div class="text-[10px] font-bold text-emerald-600/80 mt-0.5" id="kpiRevenueSub">有效結算金額</div>
+                            </div>
+                            <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-3.5 shadow-2xs">
+                                <div class="flex items-center justify-between text-amber-600 mb-1">
+                                    <span class="text-[11px] font-black">待出貨／待取貨</span>
+                                    <i class="fa-solid fa-clock text-sm"></i>
+                                </div>
+                                <div class="text-lg sm:text-xl font-black text-amber-800" id="kpiPendingOrders">0 <span class="text-xs font-bold text-amber-600">筆</span></div>
+                                <div class="text-[10px] font-bold text-amber-600/80 mt-0.5" id="kpiPendingSub">處理中 / 待取貨</div>
+                            </div>
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/80 rounded-2xl p-3.5 shadow-2xs">
+                                <div class="flex items-center justify-between text-blue-600 mb-1">
+                                    <span class="text-[11px] font-black">已完成訂單</span>
+                                    <i class="fa-solid fa-circle-check text-sm"></i>
+                                </div>
+                                <div class="text-lg sm:text-xl font-black text-blue-800" id="kpiCompletedOrders">0 <span class="text-xs font-bold text-blue-600">筆</span></div>
+                                <div class="text-[10px] font-bold text-blue-600/80 mt-0.5" id="kpiCompletedSub">已送達同仁取件</div>
+                            </div>
+                            <div class="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/80 rounded-2xl p-3.5 shadow-2xs">
+                                <div class="flex items-center justify-between text-purple-600 mb-1">
+                                    <span class="text-[11px] font-black" id="kpiFourthTitle">上架商品數</span>
+                                    <i class="fa-solid fa-boxes-stacked text-sm" id="kpiFourthIcon"></i>
+                                </div>
+                                <div class="text-lg sm:text-xl font-black text-purple-800" id="kpiFourthValue">0 <span class="text-xs font-bold text-purple-600">項</span></div>
+                                <div class="text-[10px] font-bold text-purple-600/80 mt-0.5" id="kpiFourthSub">實習商品品項</div>
+                            </div>
+                        </div>
+
+                        <!-- 各組營業額快速排行（管理員/教師專用） -->
+                        <div id="orderGroupLeaderboard" class="hidden bg-slate-50 border border-slate-200/80 rounded-2xl p-3 mb-4 space-y-2">
+                            <div class="flex items-center justify-between text-xs font-black text-slate-700">
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-ranking-star text-amber-500"></i> 各組實習商店營業額排行榜</span>
+                                <span class="text-[11px] font-bold text-slate-400">即時計算有效營業額</span>
+                            </div>
+                            <div id="leaderboardListArea" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2"></div>
+                        </div>
+
                         <div id="orderGroupFilterRow" class="flex items-center gap-1 pb-2.5 overflow-x-auto custom-scrollbar border-b border-slate-100 text-xs font-black">
-                            <span class="text-slate-400 text-[11px] font-bold mr-1 shrink-0"><i class="fa-solid fa-users text-[10px] mr-1"></i>組別篩選：</span>
-                            <button type="button" onclick="filterOrderGroup('all')" class="order-group-tab px-2.5 py-1 rounded-lg bg-teal-50 text-teal-800 font-black border border-teal-200 shadow-xs">全部組別</button>
-                            <button type="button" onclick="filterOrderGroup('1')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold">第 1 組</button>
-                            <button type="button" onclick="filterOrderGroup('2')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold">第 2 組</button>
-                            <button type="button" onclick="filterOrderGroup('3')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold">第 3 組</button>
-                            <button type="button" onclick="filterOrderGroup('4')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold">第 4 組</button>
-                            <button type="button" onclick="filterOrderGroup('5')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold">第 5 組</button>
-                            <button type="button" onclick="filterOrderGroup('6')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold">第 6 組</button>
+                            <span class="text-slate-400 text-[11px] font-bold mr-1 shrink-0 whitespace-nowrap"><i class="fa-solid fa-users text-[10px] mr-1"></i>組別篩選：</span>
+                            <button type="button" onclick="filterOrderGroup('all')" class="order-group-tab px-2.5 py-1 rounded-lg bg-teal-50 text-teal-800 font-black border border-teal-200 shadow-xs shrink-0 whitespace-nowrap">全部組別</button>
+                            <button type="button" onclick="filterOrderGroup('1')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">第 1 組</button>
+                            <button type="button" onclick="filterOrderGroup('2')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">第 2 組</button>
+                            <button type="button" onclick="filterOrderGroup('3')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">第 3 組</button>
+                            <button type="button" onclick="filterOrderGroup('4')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">第 4 組</button>
+                            <button type="button" onclick="filterOrderGroup('5')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">第 5 組</button>
+                            <button type="button" onclick="filterOrderGroup('6')" class="order-group-tab px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 font-bold shrink-0 whitespace-nowrap">第 6 組</button>
                         </div>
 
                         <div class="flex items-center gap-1 pb-3 overflow-x-auto custom-scrollbar border-b border-slate-100 text-xs font-black">
-                            <button type="button" onclick="filterOrderStatus('all')" class="order-filter-tab px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700">全部訂單</button>
-                            <button type="button" onclick="filterOrderStatus('處理中')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">處理中</button>
-                            <button type="button" onclick="filterOrderStatus('待取貨')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">待取貨</button>
-                            <button type="button" onclick="filterOrderStatus('已完成')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">已完成</button>
-                            <button type="button" onclick="filterOrderStatus('已退款')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">已退款</button>
+                            <button type="button" onclick="filterOrderStatus('all')" class="order-filter-tab px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700 shrink-0 whitespace-nowrap">全部訂單</button>
+                            <button type="button" onclick="filterOrderStatus('處理中')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 shrink-0 whitespace-nowrap">處理中</button>
+                            <button type="button" onclick="filterOrderStatus('待取貨')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 shrink-0 whitespace-nowrap">待取貨</button>
+                            <button type="button" onclick="filterOrderStatus('已完成')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 shrink-0 whitespace-nowrap">已完成</button>
+                            <button type="button" onclick="filterOrderStatus('已退款')" class="order-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 shrink-0 whitespace-nowrap">已退款</button>
                         </div>
 
                         <!-- 電腦版完整表格 -->
@@ -824,6 +1091,9 @@
                             <div class="flex items-center gap-2 w-full sm:w-auto">
                                 <input type="text" id="userSearchInput" oninput="filterUsersList()" placeholder="搜尋帳號、姓名、身分或信箱..." class="w-full sm:w-60 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
                                 <button type="button" onclick="loadUsersTable()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold shrink-0 transition">重新整理</button>
+                                <button type="button" onclick="openImportUsersModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition flex items-center gap-1 shadow-sm shrink-0">
+                                    <i class="fa-solid fa-file-arrow-up"></i> 批次匯入名單
+                                </button>
                                 <button type="button" onclick="openUserModal()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black transition flex items-center gap-1 shadow-sm shrink-0">
                                     <i class="fa-solid fa-user-plus"></i> 新增帳號
                                 </button>
@@ -831,11 +1101,11 @@
                         </div>
 
                         <div class="flex items-center gap-1 pb-3 overflow-x-auto custom-scrollbar border-b border-slate-100 text-xs font-black">
-                            <button type="button" onclick="filterUsersByRole('all')" class="user-filter-tab px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700">全部帳號</button>
-                            <button type="button" onclick="filterUsersByRole('staff')" class="user-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">教職員</button>
-                            <button type="button" onclick="filterUsersByRole('student')" class="user-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">學生組別</button>
-                            <button type="button" onclick="filterUsersByRole('teacher')" class="user-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">任課教師</button>
-                            <button type="button" onclick="filterUsersByRole('admin')" class="user-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100">管理員</button>
+                            <button type="button" onclick="filterUsersByRole('all')" class="user-filter-tab px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700 shrink-0 whitespace-nowrap">全部帳號</button>
+                            <button type="button" onclick="filterUsersByRole('staff')" class="user-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 shrink-0 whitespace-nowrap">教職員</button>
+                            <button type="button" onclick="filterUsersByRole('student')" class="user-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 shrink-0 whitespace-nowrap">學生組別</button>
+                            <button type="button" onclick="filterUsersByRole('teacher')" class="user-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 shrink-0 whitespace-nowrap">任課教師</button>
+                            <button type="button" onclick="filterUsersByRole('admin')" class="user-filter-tab px-3 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 shrink-0 whitespace-nowrap">管理員</button>
                         </div>
                         <!-- 電腦版完整表格 -->
                         <div class="hidden md:block overflow-hidden border border-slate-200 rounded-2xl">
@@ -870,18 +1140,18 @@
                                 </div>
                                 <span id="auditCountText" class="text-xs font-bold text-slate-400 ml-2">共 0 筆紀錄</span>
                             </div>
-                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <input type="text" id="auditSearchInput" oninput="filterAuditLogs()" placeholder="搜尋帳號、商品、修改前後內容..." class="w-full sm:w-60 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
+                                <select id="auditCategorySelect" onchange="setAuditCategoryFilter(this.value)" class="w-full sm:w-auto px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition cursor-pointer shrink-0">
+                                    <option value="all">全部日誌</option>
+                                    <option value="product_diff">商品管理歷程 (前後對照)</option>
+                                    <option value="user_diff">帳號異動歷程</option>
+                                    <option value="order_flow">訂單與購物歷程</option>
+                                    <option value="auth_security">登入與安全性</option>
+                                    <option value="system_reset">系統維護與重設</option>
+                                </select>
+                                <input type="text" id="auditSearchInput" oninput="filterAuditLogs()" placeholder="搜尋帳號、商品、修改前後內容..." class="flex-1 sm:w-60 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
                                 <button type="button" onclick="loadAuditLogs()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold shrink-0 transition">重新整理</button>
                             </div>
-                        </div>
-
-                        <!-- 快速分類標籤 -->
-                        <div class="flex flex-wrap gap-1.5 pt-1">
-                            <button type="button" onclick="setAuditCategoryFilter('all')" id="btnFilterAuditAll" class="audit-filter-btn px-3 py-1 rounded-xl text-xs font-black bg-slate-800 text-white transition shadow-xs">全部日誌</button>
-                            <button type="button" onclick="setAuditCategoryFilter('product_diff')" id="btnFilterAuditProdDiff" class="audit-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">商品修改歷程 (前後對照)</button>
-                            <button type="button" onclick="setAuditCategoryFilter('user_diff')" id="btnFilterAuditUserDiff" class="audit-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">帳號修改歷程</button>
-                            <button type="button" onclick="setAuditCategoryFilter('order_flow')" id="btnFilterAuditOrderFlow" class="audit-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">訂單與退款</button>
                         </div>
 
                         <!-- 電腦版完整表格 -->
@@ -889,8 +1159,8 @@
                             <table class="w-full text-xs text-left border-collapse table-auto">
                                 <thead class="bg-slate-50 text-slate-600 font-black border-b border-slate-200">
                                     <tr>
-                                        <th class="p-3 w-40 whitespace-nowrap">操作時間</th>
-                                        <th class="p-3 w-32 whitespace-nowrap">執行人</th>
+                                        <th class="p-3 w-36 whitespace-nowrap">操作時間</th>
+                                        <th class="p-3 w-28 whitespace-nowrap">執行人</th>
                                         <th class="p-3 w-28 whitespace-nowrap">動作類型</th>
                                         <th class="p-3 w-28 whitespace-nowrap">連線 IP</th>
                                         <th class="p-3">事件詳細資訊</th>
@@ -910,6 +1180,11 @@
 
             </div>
         </main>
+
+        <!-- 回到頂端浮動按鈕 -->
+        <button type="button" id="btnBackToTop" onclick="scrollToTop()" class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50 p-3.5 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center opacity-0 translate-y-4 pointer-events-none group cursor-pointer border border-white/20 active:scale-90" title="回到頂端">
+            <i class="fa-solid fa-arrow-up text-base transition-transform group-hover:-translate-y-0.5"></i>
+        </button>
     </div>
 
     <script>
@@ -1023,7 +1298,10 @@
         }
 
         function formatCurrency(val) {
-            return Number(val || 0).toLocaleString('zh-TW');
+            if (val === null || val === undefined || val === '') return '0';
+            const num = Number(val);
+            if (isNaN(num)) return '0';
+            return num.toLocaleString('zh-TW');
         }
 
         function formatDateTime(val) {
@@ -1101,11 +1379,15 @@
             const targetPane = document.getElementById(`page-${pageKey}`);
             if (targetPane) targetPane.classList.remove('hidden');
 
+            const sc = document.getElementById('scrollContainer');
+            if (sc) sc.scrollTop = 0;
+            window.scrollTo(0, 0);
+
             document.querySelectorAll('.tab-nav-btn').forEach(btn => {
                 if (btn.getAttribute('data-target') === pageKey) {
-                    btn.className = "tab-nav-btn px-4 py-2 rounded-xl bg-white text-brand-700 shadow-sm transition font-black border border-slate-200/50";
+                    btn.className = "tab-nav-btn px-3 sm:px-4 py-2 rounded-xl bg-white text-brand-700 shadow-sm transition font-black border border-slate-200/50 flex items-center gap-1.5 shrink-0 whitespace-nowrap";
                 } else {
-                    btn.className = "tab-nav-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition font-extrabold";
+                    btn.className = "tab-nav-btn px-3 sm:px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition font-extrabold flex items-center gap-1.5 shrink-0 whitespace-nowrap";
                 }
             });
 
@@ -1162,7 +1444,7 @@
             }
 
             navTabButtons.innerHTML = tabs.map(t => `
-                <button type="button" data-target="${t.key}" onclick="switchPage('${t.key}')" class="tab-nav-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition font-extrabold flex items-center gap-1.5">
+                <button type="button" data-target="${t.key}" onclick="switchPage('${t.key}')" class="tab-nav-btn px-3 sm:px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition font-extrabold flex items-center gap-1.5 shrink-0 whitespace-nowrap">
                     <i class="fa-solid ${t.icon}"></i>
                     <span>${t.label}</span>
                 </button>
@@ -1255,8 +1537,9 @@
             const descSection = document.getElementById('detailDescriptionSection');
             const descEl = document.getElementById('detailDescription');
             if (descSection && descEl) {
-                if (p.description && p.description.trim()) {
-                    descEl.innerText = p.description.trim();
+                const cleanDesc = cleanProductDescription(p.description);
+                if (cleanDesc) {
+                    descEl.innerText = cleanDesc;
                     descSection.classList.remove('hidden');
                 } else {
                     descEl.innerText = '';
@@ -1573,8 +1856,8 @@
                                     <div class="flex items-center gap-3 p-2 bg-white rounded-xl text-xs">
                                         <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCartItemSelection('${cart.id}', this.checked)" class="cart-item-checkbox w-4 h-4 rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
                                         <img src="${imgThumb}" class="w-12 h-12 object-cover rounded-xl border border-slate-200">
-                                        <div class="flex-1 pr-2">
-                                            <div class="font-black text-slate-800 leading-snug text-xs sm:text-sm">${prod.name}</div>
+                                        <div class="flex-1 min-w-0 pr-2">
+                                            <div class="font-black text-slate-800 leading-snug text-xs sm:text-sm truncate" title="${prod.name}">${prod.name}</div>
                                             <div class="text-[11px] text-rose-600 font-black mt-0.5">${formatCurrency(prod.price)} 幣</div>
                                         </div>
                                         <div class="flex items-center gap-2">
@@ -1630,10 +1913,13 @@
 
         async function removeCartItem(cartId) {
             try {
+                const target = userRawCarts.find(c => c.id === cartId);
+                const prodName = target?.products?.name || "商品";
                 await client.from('carts').delete().eq('id', cartId);
                 selectedCartItemIds.delete(cartId);
                 updateCartBadges();
                 await renderCartModal();
+                await logAuditRecord("移除購物車商品", { 商品名稱: prodName });
             } catch (e) {
                 showMsg("移除失敗：" + e.message, true);
             }
@@ -1642,10 +1928,12 @@
         async function clearCart() {
             if (!confirm("確定要清空購物車嗎？")) return;
             try {
+                const count = userRawCarts.length;
                 await client.from('carts').delete().eq('account', currentAuth.account);
                 selectedCartItemIds.clear();
                 updateCartBadges();
                 await renderCartModal();
+                await logAuditRecord("清空購物車", { 清空品項數: count });
             } catch (e) {
                 showMsg("清空失敗：" + e.message, true);
             }
@@ -1675,12 +1963,12 @@
                 const sub = prod.price * c.quantity;
                 total += sub;
                 return `
-                    <div class="flex justify-between items-center py-2 text-xs">
-                        <div>
-                            <div class="font-black text-slate-800">${prod.name}</div>
-                            <div class="text-[11px] text-slate-400 font-bold">第 ${prod.group_no} 組 ｜ 單價: ${prod.price} 幣 x ${c.quantity}</div>
+                    <div class="flex justify-between items-center py-2 text-xs gap-2">
+                        <div class="min-w-0 flex-1 pr-1">
+                            <div class="font-black text-slate-800 truncate" title="${prod.name}">${prod.name}</div>
+                            <div class="text-[11px] text-slate-400 font-bold truncate">第 ${prod.group_no} 組 ｜ 單價: ${prod.price} 幣 x ${c.quantity}</div>
                         </div>
-                        <div class="font-black text-rose-600">${formatCurrency(sub)} 幣</div>
+                        <div class="font-black text-rose-600 shrink-0 font-mono">${formatCurrency(sub)} 幣</div>
                     </div>
                 `;
             }).join('');
@@ -1735,6 +2023,33 @@
                 btn.disabled = true;
                 btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>訂單處理中...`;
             }
+
+            // 結帳前即時二次校驗最新庫存，防止同仁併發搶購產生超賣
+            try {
+                const selectedCarts = userRawCarts.filter(c => selectedCartItemIds.has(c.id));
+                const prodIds = Array.from(new Set(selectedCarts.map(c => c.products?.id || c.product_id).filter(Boolean)));
+                if (prodIds.length > 0) {
+                    const { data: latestProds } = await client.from('products').select('id, name, stock').in('id', prodIds);
+                    if (latestProds && latestProds.length > 0) {
+                        const prodMap = new Map(latestProds.map(p => [p.id, p]));
+                        for (const cartItem of selectedCarts) {
+                            const pid = cartItem.products?.id || cartItem.product_id;
+                            const p = prodMap.get(pid);
+                            if (p && p.stock !== undefined && p.stock !== null && p.stock >= 0) {
+                                if (cartItem.quantity > p.stock) {
+                                    if (btn) {
+                                        btn.disabled = false;
+                                        btn.innerHTML = `<i class="fa-solid fa-credit-card mr-1.5"></i>確認扣款並成立訂單`;
+                                    }
+                                    showMsg(`結帳失敗！商品「${p.name}」目前庫存不足（僅剩 ${p.stock} 件，您欲結帳 ${cartItem.quantity} 件），請調整數量後再結帳！`, true);
+                                    loadProductsData();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (stockErr) {}
 
             const holdKey = 'hold_' + currentAuth.account;
             const unselectedCartItemIds = userRawCarts
@@ -1824,7 +2139,86 @@
             renderOrdersTable();
         }
 
+        function renderOrderKpis(ordersList) {
+            const isStudent = currentAuth && currentAuth.role === 'student';
+            const studentGroupNo = isStudent ? parseInt(currentAuth.account, 10) : null;
+            const allActiveItems = ordersList.filter(o => o.status !== '已退款');
+
+            let totalRevenue = 0;
+            let pendingCount = 0;
+            let completedCount = 0;
+
+            if (isStudent && studentGroupNo) {
+                const myItems = ordersList.filter(o => parseInt(o.group_no, 10) === studentGroupNo);
+                const myActive = myItems.filter(o => o.status !== '已退款');
+                totalRevenue = myActive.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
+                pendingCount = myActive.filter(o => o.status === '處理中' || o.status === '待取貨').length;
+                completedCount = myActive.filter(o => o.status === '已完成').length;
+
+                const myProdsCount = currentProductsList.filter(p => parseInt(p.group_no, 10) === studentGroupNo).length;
+                const kpi4Title = document.getElementById('kpiFourthTitle');
+                const kpi4Val = document.getElementById('kpiFourthValue');
+                const kpi4Sub = document.getElementById('kpiFourthSub');
+                if (kpi4Title) kpi4Title.innerText = "上架商品數";
+                if (kpi4Val) kpi4Val.innerHTML = `${myProdsCount} <span class="text-xs font-bold text-purple-600">項</span>`;
+                if (kpi4Sub) kpi4Sub.innerText = "本組實習商品規格";
+
+                const lb = document.getElementById('orderGroupLeaderboard');
+                if (lb) lb.classList.add('hidden');
+            } else {
+                totalRevenue = allActiveItems.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
+                pendingCount = allActiveItems.filter(o => o.status === '處理中' || o.status === '待取貨').length;
+                completedCount = allActiveItems.filter(o => o.status === '已完成').length;
+
+                const kpi4Title = document.getElementById('kpiFourthTitle');
+                const kpi4Val = document.getElementById('kpiFourthValue');
+                const kpi4Sub = document.getElementById('kpiFourthSub');
+                if (kpi4Title) kpi4Title.innerText = "全校商品總數";
+                if (kpi4Val) kpi4Val.innerHTML = `${currentProductsList.length} <span class="text-xs font-bold text-purple-600">項</span>`;
+                if (kpi4Sub) kpi4Sub.innerText = "1~6組已上架規格";
+
+                const lb = document.getElementById('orderGroupLeaderboard');
+                const lbList = document.getElementById('leaderboardListArea');
+                if (lb && lbList) {
+                    lb.classList.remove('hidden');
+                    const groupRevs = [];
+                    for (let g = 1; g <= 6; g++) {
+                        const gItems = allActiveItems.filter(o => parseInt(o.group_no, 10) === g);
+                        const gRev = gItems.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
+                        const gStore = groupStoreNameMap[String(g)] || `第 ${g} 組`;
+                        groupRevs.push({ groupNo: g, revenue: gRev, storeName: gStore });
+                    }
+                    groupRevs.sort((a, b) => b.revenue - a.revenue);
+
+                    lbList.innerHTML = groupRevs.map((gr, idx) => {
+                        const medals = ['🥇', '🥈', '🥉', '4.', '5.', '6.'];
+                        const rankColor = idx === 0 ? 'bg-amber-100 text-amber-900 border-amber-300' :
+                                          idx === 1 ? 'bg-slate-100 text-slate-800 border-slate-300' :
+                                          idx === 2 ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                                          'bg-white text-slate-700 border-slate-200';
+                        return `
+                            <div class="p-2.5 rounded-xl border ${rankColor} flex flex-col justify-between shadow-2xs">
+                                <div class="flex items-center justify-between text-xs font-black">
+                                    <span>${medals[idx]} 第 ${gr.groupNo} 組</span>
+                                    <span class="text-[10px] text-slate-500 max-w-[65px] truncate" title="${gr.storeName}">${gr.storeName}</span>
+                                </div>
+                                <div class="mt-1 text-sm font-black text-slate-900">${formatCurrency(gr.revenue)} <span class="text-[10px] font-bold text-slate-400">幣</span></div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            const elRev = document.getElementById('kpiTotalRevenue');
+            const elPend = document.getElementById('kpiPendingOrders');
+            const elComp = document.getElementById('kpiCompletedOrders');
+            if (elRev) elRev.innerHTML = `${formatCurrency(totalRevenue)} <span class="text-xs font-bold text-emerald-600">幣</span>`;
+            if (elPend) elPend.innerHTML = `${pendingCount} <span class="text-xs font-bold text-amber-600">筆</span>`;
+            if (elComp) elComp.innerHTML = `${completedCount} <span class="text-xs font-bold text-blue-600">筆</span>`;
+        }
+
         function renderOrdersTable() {
+            renderOrderKpis(currentOrdersList || []);
             const oTbody = document.getElementById('teacherOrderTableBody');
             const countBadge = document.getElementById('orderTotalCountBadge');
             const orderTitle = document.getElementById('orderManagementTitle');
@@ -2081,9 +2475,9 @@
                             '</div>' +
                         '</div>' +
                         '<div class="space-y-1.5 text-xs">' +
-                            '<div class="flex items-center justify-between text-slate-700">' +
-                                '<span class="font-bold">訂購人: <b class="text-slate-900">' + (primary.buyer_name || primary.account) + '</b> (' + primary.account + ')</span>' +
-                                '<span class="font-mono text-[10px] text-slate-400">' + formatDateTime(primary.created_at) + '</span>' +
+                            '<div class="flex flex-wrap items-center justify-between gap-1 text-slate-700">' +
+                                '<div class="font-bold min-w-0">訂購人: <b class="text-slate-900">' + (primary.buyer_name || primary.account) + '</b> (' + primary.account + ')</div>' +
+                                '<div class="font-mono text-[10px] text-slate-400 shrink-0">' + formatDateTime(primary.created_at) + '</div>' +
                             '</div>' +
                             '<div class="bg-white border border-slate-200 rounded-xl p-2.5 space-y-2.5">' +
                                 groupStatuses.map(gs => {
@@ -2424,7 +2818,7 @@
                     訂單編號: orderNo,
                     退款品項: refundedItemNames.join(', '),
                     品項數量: targetItems.length,
-                    買家帳號: primary.account,
+                    買家: (primary.buyer_name ? `${primary.buyer_name} (${primary.account})` : primary.account),
                     退款總金額: totalRefunded,
                     退款原因: reason,
                     操作人: isBuyerSelf ? '買家本人' : (currentAuth ? currentAuth.name : '管理者'),
@@ -2531,6 +2925,7 @@
             a.click();
             URL.revokeObjectURL(url);
             showMsg(`CSV 報表匯出成功 (${groupLabel})！`);
+            logAuditRecord("匯出訂單CSV報表", { 匯出範圍: groupLabel, 訂單筆數: csvGroupMap.size });
         }
 
         function parseImages(rawUrl) {
@@ -2860,26 +3255,313 @@
             }
         }
 
-        async function deleteProduct(productId) {
-            if (!confirm("確定要將這項商品下架嗎？")) return;
-            const targetProd = (currentProductsList || []).find(p => String(p.id) === String(productId));
-            const prodName = targetProd ? targetProd.name : '';
-            const prodGroup = targetProd ? targetProd.group_no : '';
-            const { error } = await client.from('products').delete().eq('id', productId);
-            if (error) {
-                showMsg("下架失敗，可能已有訂單紀錄：" + error.message, true);
-                return;
-            }
-            await logAuditRecord("下架商品", {
-                商品名稱: prodName || '未命名商品',
-                ...(prodGroup ? { 組別: prodGroup } : {}),
-                商品ID: productId
-            });
-            showMsg("商品已下架！");
-            loadProductsData();
+        // ==============================================================
+        // 商品「下架 (保留不公開)」與「永久刪除」管理
+        // ==============================================================
+        function isProductOffShelf(p) {
+            if (!p) return false;
+            if (p.is_active === false || p.status === 'inactive' || p.status === 'off_shelf') return true;
+            if (p.description && typeof p.description === 'string' && p.description.includes('[OFF_SHELF]')) return true;
+            return false;
         }
 
+        function cleanProductDescription(desc) {
+            if (!desc || typeof desc !== 'string') return '';
+            return desc.replace(/\[OFF_SHELF\]\s*/g, '').trim();
+        }
+
+        window.toggleProductShelf = async function(productId, toPublish) {
+            const p = (currentProductsList || []).find(item => String(item.id) === String(productId));
+            if (!p) return;
+
+            const actionText = toPublish ? "重新上架" : "下架";
+            const confirmMsg = toPublish
+                ? `確定要將商品「${p.name}」【重新上架】嗎？\n\n上架後買家即可在商城即時選購此商品。`
+                : `確定要將商品「${p.name}」【下架】嗎？\n\n下架後商品資料仍會完整保留於後台，但買家將無法在商城看見或選購此商品。`;
+
+            if (!confirm(confirmMsg)) return;
+
+            let desc = p.description || '';
+            if (toPublish) {
+                desc = desc.replace(/\[OFF_SHELF\]\s*/g, '').trim();
+            } else {
+                if (!desc.includes('[OFF_SHELF]')) {
+                    desc = ('[OFF_SHELF] ' + desc).trim();
+                }
+            }
+
+            try {
+                const updatePayload = { description: desc };
+                let { error } = await client.from('products').update(updatePayload).eq('id', productId);
+                if (error) throw error;
+
+                await logAuditRecord(toPublish ? "商品重新上架" : "商品下架", {
+                    商品名稱: p.name,
+                    組別: `第 ${p.group_no} 組`,
+                    狀態: toPublish ? "販售中" : "已下架",
+                    商品ID: productId,
+                    說明: toPublish ? "已開放商城選購" : "保留於後台但對買家隱藏"
+                });
+
+                showMsg(`商品「${p.name}」已成功${actionText}！`);
+                await loadProductsData();
+            } catch (err) {
+                showMsg(`${actionText}失敗：` + err.message, true);
+            }
+        };
+
+        window.deleteProductPermanently = async function(productId) {
+            const targetProd = (currentProductsList || []).find(p => String(p.id) === String(productId));
+            const prodName = targetProd ? targetProd.name : '商品';
+            const prodGroup = targetProd ? targetProd.group_no : '';
+
+            if (!confirm(`⚠️ 確定要徹底【永久刪除】商品「${prodName}」嗎？\n\n此動作將把該商品從資料庫完全刪除且無法復原！\n（若只是暫時不想讓買家選購，請使用【下架】功能）`)) return;
+
+            try {
+                const { error } = await client.from('products').delete().eq('id', productId);
+                if (error) {
+                    showMsg("永久刪除失敗（該商品可能已有歷史訂單紀錄關聯，為保護帳務資料請改用【下架】功能）：" + error.message, true);
+                    return;
+                }
+
+                await logAuditRecord("刪除商品", {
+                    商品名稱: prodName,
+                    ...(prodGroup ? { 組別: `第 ${prodGroup} 組` } : {}),
+                    商品ID: productId,
+                    操作備註: "完全自資料庫刪除"
+                });
+
+                showMsg(`商品「${prodName}」已完全自資料庫刪除！`);
+                await loadProductsData();
+            } catch (err) {
+                showMsg("刪除失敗：" + err.message, true);
+            }
+        };
+
+        // 向下相容舊呼叫
+        window.deleteProduct = function(productId) {
+            toggleProductShelf(productId, false);
+        };
+
+        // ==============================================================
+        // 商城小組店鋪、篩選、搜尋與排序管理
+        // ==============================================================
+        let currentMallGroupFilter = 'all';
+        let currentMallSearchKeyword = '';
+        let currentMallSort = 'default';
+        let groupStoreNameMap = {};
+
+        async function fetchGroupStoreNames() {
+            try {
+                const { data: students } = await client.from('users').select('account, name').eq('role', 'student');
+                if (students && students.length > 0) {
+                    students.forEach(s => {
+                        const grpNo = String(s.account).trim();
+                        const storeName = (s.name && s.name.trim()) ? s.name.trim() : `第 ${grpNo} 組`;
+                        groupStoreNameMap[grpNo] = storeName;
+                    });
+                }
+            } catch (e) {
+                for (let i = 1; i <= 6; i++) {
+                    if (!groupStoreNameMap[String(i)]) groupStoreNameMap[String(i)] = `第 ${i} 組`;
+                }
+            }
+
+            // 更新商城工具列的組別按鈕標籤
+            for (let i = 1; i <= 6; i++) {
+                const btnLabel = document.querySelector(`button[data-mall-group="${i}"] .mall-group-btn-label`);
+                if (btnLabel) {
+                    const rawName = groupStoreNameMap[String(i)] || `第 ${i} 組`;
+                    btnLabel.innerText = rawName;
+                    btnLabel.title = rawName;
+                }
+                const orderGrpBtn = document.querySelector(`button[onclick="filterOrderGroup('${i}')"]`);
+                if (orderGrpBtn && groupStoreNameMap[String(i)]) {
+                    orderGrpBtn.innerText = groupStoreNameMap[String(i)];
+                }
+            }
+
+            // 更新商品發布頁的小組商店抬頭
+            const displayElem = document.getElementById('currentGroupStoreNameDisplay');
+            const badgeElem = document.getElementById('currentGroupNoBadge');
+            if (displayElem && badgeElem) {
+                if (currentAuth && currentAuth.role === 'student') {
+                    const grp = String(currentAuth.account).trim();
+                    displayElem.innerText = groupStoreNameMap[grp] || currentAuth.name || `第 ${grp} 組`;
+                    badgeElem.innerText = `第 ${grp} 組`;
+                } else if (isPrivileged()) {
+                    displayElem.innerText = "全校實習商店總覽 (1~6組)";
+                    badgeElem.innerText = "教師/管理員模式";
+                } else {
+                    displayElem.innerText = "新社高中實習商城";
+                    badgeElem.innerText = "商經科";
+                }
+            }
+        }
+
+        window.setMallGroupFilter = function(grpNo) {
+            currentMallGroupFilter = String(grpNo);
+            document.querySelectorAll('.mall-group-btn').forEach(btn => {
+                const target = btn.getAttribute('data-mall-group');
+                if (target === currentMallGroupFilter) {
+                    btn.className = "mall-group-btn px-3 py-1 rounded-xl bg-brand-600 text-white font-black shadow-xs shrink-0 whitespace-nowrap transition";
+                } else {
+                    btn.className = "mall-group-btn px-3 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 shrink-0 whitespace-nowrap transition";
+                }
+            });
+            loadStaffMall();
+        };
+
+        window.handleMallSearchInput = function() {
+            const input = document.getElementById('mallSearchInput');
+            const clearBtn = document.getElementById('btnMallClearSearch');
+            currentMallSearchKeyword = (input ? input.value : '').trim().toLowerCase();
+            if (clearBtn) {
+                if (currentMallSearchKeyword) {
+                    clearBtn.classList.remove('hidden');
+                    clearBtn.classList.add('flex');
+                } else {
+                    clearBtn.classList.remove('flex');
+                    clearBtn.classList.add('hidden');
+                }
+            }
+            loadStaffMall();
+        };
+
+        window.clearMallSearch = function() {
+            const input = document.getElementById('mallSearchInput');
+            const clearBtn = document.getElementById('btnMallClearSearch');
+            if (input) input.value = '';
+            currentMallSearchKeyword = '';
+            if (clearBtn) {
+                clearBtn.classList.remove('flex');
+                clearBtn.classList.add('hidden');
+            }
+            loadStaffMall();
+        };
+
+        window.handleMallSortChange = function() {
+            const select = document.getElementById('mallSortSelect');
+            currentMallSort = select ? select.value : 'default';
+            loadStaffMall();
+        };
+
+        // ==============================================================
+        // 實習商店店名管理 Modal
+        // ==============================================================
+        window.openEditStoreNameModal = function() {
+            const modal = document.getElementById('editStoreNameModal');
+            if (!modal) return;
+
+            const privWrapper = document.getElementById('privilegedStoreGroupSelectWrapper');
+            const groupSelect = document.getElementById('selectStoreGroupForEdit');
+            const input = document.getElementById('inputStoreName');
+            const prefixBadge = document.getElementById('storeNamePrefixBadge');
+            const hint = document.getElementById('editStoreGroupNameHint');
+
+            let targetGroup = '1';
+            if (isPrivileged()) {
+                if (privWrapper) privWrapper.classList.remove('hidden');
+                targetGroup = groupSelect ? groupSelect.value : '1';
+                if (hint) hint.innerText = "身為教師/管理員，您可以設定各組別對外顯示之實習商店名稱";
+            } else {
+                if (privWrapper) privWrapper.classList.add('hidden');
+                targetGroup = (currentAuth && currentAuth.account) ? String(currentAuth.account).trim() : '1';
+                if (hint) hint.innerText = `設定第 ${targetGroup} 組對外顯示之實習商店名稱`;
+            }
+
+            if (prefixBadge) {
+                prefixBadge.innerText = `第 ${targetGroup} 組 -`;
+            }
+
+            if (input) {
+                const fullName = groupStoreNameMap[targetGroup] || `第 ${targetGroup} 組`;
+                const customOnly = fullName.replace(/^第\s*[0-9一二三四五六1-6]\s*組(\s*-\s*|\s*)?/, '').trim();
+                input.value = customOnly;
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeEditStoreNameModal = function() {
+            const modal = document.getElementById('editStoreNameModal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.handleSelectStoreGroupChange = function() {
+            const groupSelect = document.getElementById('selectStoreGroupForEdit');
+            const input = document.getElementById('inputStoreName');
+            const prefixBadge = document.getElementById('storeNamePrefixBadge');
+            const targetGroup = groupSelect ? groupSelect.value : '1';
+            if (prefixBadge) {
+                prefixBadge.innerText = `第 ${targetGroup} 組 -`;
+            }
+            if (input) {
+                const fullName = groupStoreNameMap[targetGroup] || `第 ${targetGroup} 組`;
+                const customOnly = fullName.replace(/^第\s*[0-9一二三四五六1-6]\s*組(\s*-\s*|\s*)?/, '').trim();
+                input.value = customOnly;
+            }
+        };
+
+        window.handleSaveStoreName = async function() {
+            const input = document.getElementById('inputStoreName');
+            const groupSelect = document.getElementById('selectStoreGroupForEdit');
+            const btn = document.getElementById('btnSaveStoreName');
+
+            let targetGroup = '1';
+            if (isPrivileged()) {
+                targetGroup = groupSelect ? groupSelect.value : '1';
+            } else {
+                targetGroup = (currentAuth && currentAuth.account) ? String(currentAuth.account).trim() : '1';
+            }
+
+            let rawInput = (input ? input.value : '').trim();
+            // 自動過濾使用者可能重複輸入的「第X組」或「-」
+            let cleanCustom = rawInput.replace(/^第\s*[0-9一二三四五六1-6]\s*組(\s*-\s*|\s*)?/, '').trim();
+            cleanCustom = cleanCustom.replace(/^[-–—]\s*/, '').trim();
+
+            // 嚴格自動保留並格式化為「第 X 組」或「第 X 組 - 自訂名稱」
+            const newName = cleanCustom ? `第 ${targetGroup} 組 - ${cleanCustom}` : `第 ${targetGroup} 組`;
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>儲存中...`;
+            }
+
+            try {
+                const { error } = await client.from('users').update({ name: newName }).eq('account', targetGroup);
+                if (error) throw error;
+
+                groupStoreNameMap[targetGroup] = newName;
+                if (currentAuth && String(currentAuth.account).trim() === targetGroup) {
+                    currentAuth.name = newName;
+                    updateUserBalanceDisplays();
+                }
+
+                await logAuditRecord("更新商店名稱", {
+                    組別: `第 ${targetGroup} 組`,
+                    新店名: newName,
+                    操作人: currentAuth ? currentAuth.name : '管理者'
+                });
+
+                showMsg(`已成功將第 ${targetGroup} 組店名更新為「${newName}」！`);
+                closeEditStoreNameModal();
+                await fetchGroupStoreNames();
+                loadStaffMall();
+                loadStudentProducts();
+                renderOrdersTable();
+            } catch (err) {
+                showMsg("儲存商店名稱失敗：" + err.message, true);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i> 儲存店名`;
+                }
+            }
+        };
+
         async function loadProductsData() {
+            await fetchGroupStoreNames();
             const { data: products } = await client.from('products').select('*').order('created_at', { ascending: false });
             currentProductsList = products || [];
 
@@ -2890,15 +3572,53 @@
         function loadStaffMall() {
             const listArea = document.getElementById('productListArea');
             const countBadge = document.getElementById('productCountBadge');
-            if (countBadge) countBadge.innerText = `共 ${currentProductsList.length} 項商品`;
             if (!listArea) return;
+
+            // 買家商城僅顯示「販售中」商品，已下架商品自動對買家隱藏
+            let displayedProds = currentProductsList.filter(p => !isProductOffShelf(p));
+            if (currentMallGroupFilter !== 'all') {
+                const targetGrp = parseInt(currentMallGroupFilter, 10);
+                displayedProds = displayedProds.filter(p => parseInt(p.group_no, 10) === targetGrp);
+            }
+
+            if (currentMallSearchKeyword) {
+                displayedProds = displayedProds.filter(p => {
+                    const nameMatch = (p.name || '').toLowerCase().includes(currentMallSearchKeyword);
+                    const descMatch = (p.description || '').toLowerCase().includes(currentMallSearchKeyword);
+                    return nameMatch || descMatch;
+                });
+            }
+
+            if (currentMallSort === 'price-asc') {
+                displayedProds.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+            } else if (currentMallSort === 'price-desc') {
+                displayedProds.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+            } else if (currentMallSort === 'stock-desc') {
+                displayedProds.sort((a, b) => (Number(b.stock) || 0) - (Number(a.stock) || 0));
+            }
+
+            if (countBadge) countBadge.innerText = `共 ${displayedProds.length} 項商品`;
 
             if (currentProductsList.length === 0) {
                 listArea.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200"><i class="fa-solid fa-store-slash text-3xl mb-2 block text-slate-300"></i>目前尚無商品</div>`;
                 return;
             }
 
-            listArea.innerHTML = currentProductsList.map(p => {
+            if (displayedProds.length === 0) {
+                listArea.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200 space-y-3">
+                        <i class="fa-solid fa-magnifying-glass text-3xl mb-1 block text-slate-300"></i>
+                        <div class="text-sm font-black text-slate-600">查無符合條件的商品</div>
+                        <div class="text-xs text-slate-400">請嘗試更換關鍵字或切換至「全部商品」瀏覽。</div>
+                        <button type="button" onclick="clearMallSearch(); setMallGroupFilter('all');" class="mt-2 px-4 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 border border-brand-200">
+                            <i class="fa-solid fa-rotate-left"></i> 重置篩選條件
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            listArea.innerHTML = displayedProds.map(p => {
                 const images = parseImages(p.image_url);
                 const firstImg = images.length > 0 ? images[0] : '';
                 const stock = p.stock !== undefined ? p.stock : -1;
@@ -2920,6 +3640,7 @@
 
                 const displayStock = isUnlimited ? '無限制' : stock;
                 const maxAttr = isUnlimited ? '' : `max="${stock}"`;
+                const groupLabel = groupStoreNameMap[String(p.group_no)] || `第 ${p.group_no} 組`;
 
                 return `
                     <div class="product-card bg-white border border-slate-200/80 rounded-3xl shadow-xs flex flex-col justify-between overflow-hidden">
@@ -2927,7 +3648,7 @@
                         <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                             <div class="cursor-pointer" onclick="openProductDetailPage('${p.id}')">
                                 <div class="flex items-center justify-between mb-2">
-                                    <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200">第 ${p.group_no} 組</span>
+                                    <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200 max-w-[130px] truncate" title="${groupLabel}">${groupLabel}</span>
                                     <span class="text-[11px] font-bold ${isOutOfStock ? 'text-rose-600' : 'text-slate-400'}">庫存: ${displayStock}</span>
                                 </div>
                                 <h4 class="font-black text-sm text-slate-800 leading-snug hover:text-brand-600 transition">${p.name}</h4>
@@ -2953,6 +3674,19 @@
             const groupSelectWrapper = document.getElementById('newProdGroupField');
             if (!tbody || !currentAuth) return;
 
+            const displayElem = document.getElementById('currentGroupStoreNameDisplay');
+            const badgeElem = document.getElementById('currentGroupNoBadge');
+            if (displayElem && badgeElem) {
+                if (currentAuth && currentAuth.role === 'student') {
+                    const grp = String(currentAuth.account).trim();
+                    displayElem.innerText = groupStoreNameMap[grp] || currentAuth.name || `第 ${grp} 組`;
+                    badgeElem.innerText = `第 ${grp} 組`;
+                } else if (isPrivileged()) {
+                    displayElem.innerText = "全校實習商店總覽 (1~6組)";
+                    badgeElem.innerText = "教師/管理員模式";
+                }
+            }
+
             if (isPrivileged()) groupSelectWrapper.classList.remove('hidden');
             else groupSelectWrapper.classList.add('hidden');
 
@@ -2976,11 +3710,12 @@
                 const stockVal = p.stock !== undefined ? p.stock : -1;
                 const stockDisplay = stockVal < 0 ? '無限制' : stockVal;
                 const stockClass = (stockVal >= 0 && stockVal <= 0) ? 'text-rose-600 font-black' : 'text-slate-700 font-black';
+                const offShelf = isProductOffShelf(p);
 
                 return `
-                    <tr class="hover:bg-slate-50 transition">
+                    <tr class="hover:bg-slate-50 transition ${offShelf ? 'bg-slate-50/50 opacity-80' : ''}">
                         <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap">
-                            ${firstImg ? `<div class="relative inline-block cursor-pointer" onclick="openProductDetailPage('${p.id}')"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-xl">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full font-bold">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">暫無照片</span>`}
+                            ${firstImg ? `<div class="relative inline-block cursor-pointer" onclick="openProductDetailPage('${p.id}')"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-xl ${offShelf ? 'grayscale' : ''}">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full font-bold">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">暫無照片</span>`}
                         </td>
                         <td class="p-3 border-b border-slate-100">
                             <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailPage('${p.id}')">${p.name}</span>
@@ -2988,12 +3723,19 @@
                         <td class="p-3 border-b border-slate-100 text-center font-black text-brand-600 whitespace-nowrap">第 ${p.group_no} 組</td>
                         <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs whitespace-nowrap">${formatCurrency(p.price)} 幣</td>
                         <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap ${stockClass}">${stockDisplay}</td>
+                        <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap">
+                            ${offShelf ? `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-bold border border-slate-200 text-xs">已下架</span>` : `<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-black border border-emerald-200 text-xs">販售中</span>`}
+                        </td>
                         <td class="p-3 border-b border-slate-100 text-slate-400 font-mono text-[11px] whitespace-nowrap">${formatDateTime(p.created_at)}</td>
                         <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap space-x-1">
-                            <button type="button" onclick="openProductDetailPage('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
-                            <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
-                            <button type="button" onclick="openProductHistoryModal('${p.id}')" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-black transition inline-flex items-center gap-1" title="查看商品版本與修改前後歷程"><i class="fa-solid fa-clock-rotate-left text-[10px]"></i><span>歷程</span></button>
-                            <button type="button" onclick="deleteProduct('${p.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">下架</button>
+                            <button type="button" onclick="openProductDetailPage('${p.id}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">檢視</button>
+                            <button type="button" onclick="openEditProductModal('${p.id}')" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition">編輯</button>
+                            <button type="button" onclick="openProductHistoryModal('${p.id}')" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-black transition inline-flex items-center gap-0.5" title="查看商品版本與修改前後歷程"><i class="fa-solid fa-clock-rotate-left text-[10px]"></i><span>歷程</span></button>
+                            ${offShelf 
+                                ? `<button type="button" onclick="toggleProductShelf('${p.id}', true)" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-black transition inline-flex items-center gap-0.5" title="恢復在商城公開選購"><i class="fa-solid fa-arrow-up text-[10px]"></i><span>上架</span></button>`
+                                : `<button type="button" onclick="toggleProductShelf('${p.id}', false)" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-black transition inline-flex items-center gap-0.5" title="對買家隱藏，保留於後台"><i class="fa-solid fa-arrow-down text-[10px]"></i><span>下架</span></button>`
+                            }
+                            <button type="button" onclick="deleteProductPermanently('${p.id}')" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition inline-flex items-center gap-0.5" title="徹底自資料庫刪除"><i class="fa-solid fa-trash-can text-[10px]"></i><span>刪除</span></button>
                         </td>
                     </tr>
                 `;
@@ -3025,11 +3767,15 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-4 gap-1.5 pt-1 border-t border-slate-200/60">
-                                <button type="button" onclick="openProductDetailPage('${p.id}')" class="py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition text-center">檢視</button>
-                                <button type="button" onclick="openEditProductModal('${p.id}')" class="py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition text-center">編輯</button>
-                                <button type="button" onclick="openProductHistoryModal('${p.id}')" class="py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold transition text-center">歷程</button>
-                                <button type="button" onclick="deleteProduct('${p.id}')" class="py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition text-center">下架</button>
+                            <div class="grid grid-cols-5 gap-1 pt-1 border-t border-slate-200/60 text-[11px]">
+                                <button type="button" onclick="openProductDetailPage('${p.id}')" class="py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-bold transition text-center">檢視</button>
+                                <button type="button" onclick="openEditProductModal('${p.id}')" class="py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl font-bold transition text-center">編輯</button>
+                                <button type="button" onclick="openProductHistoryModal('${p.id}')" class="py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl font-bold transition text-center">歷程</button>
+                                ${isProductOffShelf(p)
+                                    ? `<button type="button" onclick="toggleProductShelf('${p.id}', true)" class="py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-black transition text-center">上架</button>`
+                                    : `<button type="button" onclick="toggleProductShelf('${p.id}', false)" class="py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl font-black transition text-center">下架</button>`
+                                }
+                                <button type="button" onclick="deleteProductPermanently('${p.id}')" class="py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl font-bold transition text-center">刪除</button>
                             </div>
                         </div>
                     `;
@@ -3050,6 +3796,142 @@
             }
             renderOrdersTable();
         }
+
+        // ==============================================================
+        // 批次匯入教職員名單管理 (Batch Import Staff Users)
+        // ==============================================================
+        let parsedImportUsers = [];
+
+        window.openImportUsersModal = function() {
+            parsedImportUsers = [];
+            const modal = document.getElementById('importUsersModal');
+            const text = document.getElementById('importCsvTextarea');
+            const file = document.getElementById('importCsvFileInput');
+            const fileName = document.getElementById('importCsvFileName');
+            const preview = document.getElementById('importPreviewArea');
+            const btn = document.getElementById('btnExecuteImportUsers');
+
+            if (text) text.value = '';
+            if (file) file.value = '';
+            if (fileName) fileName.innerText = '尚未選擇檔案';
+            if (preview) preview.classList.add('hidden');
+            if (btn) btn.disabled = true;
+
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeImportUsersModal = function() {
+            const modal = document.getElementById('importUsersModal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.handleImportCsvFile = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const fileName = document.getElementById('importCsvFileName');
+            if (fileName) fileName.innerText = file.name;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                const textElem = document.getElementById('importCsvTextarea');
+                if (textElem) textElem.value = content;
+                parseAndPreviewCsv(content);
+            };
+            reader.readAsText(file);
+        };
+
+        window.handleImportCsvTextChange = function() {
+            const textElem = document.getElementById('importCsvTextarea');
+            parseAndPreviewCsv(textElem ? textElem.value : '');
+        };
+
+        function parseAndPreviewCsv(rawText) {
+            parsedImportUsers = [];
+            const lines = (rawText || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            const tbody = document.getElementById('importPreviewTableBody');
+            const badge = document.getElementById('importValidCountBadge');
+            const preview = document.getElementById('importPreviewArea');
+            const btn = document.getElementById('btnExecuteImportUsers');
+
+            lines.forEach(line => {
+                if (/^(account|帳號|代號|序號)/i.test(line)) return;
+                const parts = line.split(/[,\t]+/).map(p => p.trim());
+                if (parts.length >= 2) {
+                    const acc = parts[0];
+                    const name = parts[1];
+                    if (acc && name) {
+                        parsedImportUsers.push({
+                            account: acc,
+                            name: name,
+                            role: 'staff',
+                            balance: 500,
+                            password: ''
+                        });
+                    }
+                }
+            });
+
+            if (badge) badge.innerText = parsedImportUsers.length;
+
+            if (parsedImportUsers.length > 0) {
+                if (preview) preview.classList.remove('hidden');
+                if (btn) btn.disabled = false;
+                if (tbody) {
+                    tbody.innerHTML = parsedImportUsers.slice(0, 100).map(u => `
+                        <tr>
+                            <td class="p-2 font-mono font-bold text-slate-800">${u.account}</td>
+                            <td class="p-2 font-bold text-slate-800">${u.name}</td>
+                            <td class="p-2"><span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">教職員</span></td>
+                            <td class="p-2 font-black text-rose-600">500 幣</td>
+                        </tr>
+                    `).join('') + (parsedImportUsers.length > 100 ? `<tr><td colspan="4" class="p-2 text-center text-slate-400 font-bold">...還有 ${parsedImportUsers.length - 100} 筆未顯示</td></tr>` : '');
+                }
+            } else {
+                if (preview) preview.classList.add('hidden');
+                if (btn) btn.disabled = true;
+            }
+        }
+
+        window.executeBatchImportUsers = async function() {
+            if (parsedImportUsers.length === 0) {
+                showMsg("沒有可供匯入的有效名單資料！", true);
+                return;
+            }
+
+            const btn = document.getElementById('btnExecuteImportUsers');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>正在匯入 ${parsedImportUsers.length} 筆資料...`;
+            }
+
+            try {
+                const batchSize = 50;
+                for (let i = 0; i < parsedImportUsers.length; i += batchSize) {
+                    const batch = parsedImportUsers.slice(i, i + batchSize);
+                    const { error } = await client.from('users').upsert(batch, { onConflict: 'account' });
+                    if (error) throw error;
+                }
+
+                await logAuditRecord("批次匯入名單", {
+                    匯入筆數: parsedImportUsers.length,
+                    預設身分: "教職員 (staff)",
+                    預設額度: 500,
+                    操作人: currentAuth ? currentAuth.name : '管理者'
+                });
+
+                showMsg(`🎉 成功匯入 / 更新 ${parsedImportUsers.length} 位教職員名單！`);
+                closeImportUsersModal();
+                await loadUsersTable();
+            } catch (err) {
+                showMsg("匯入失敗：" + err.message, true);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> 確認匯入名單`;
+                }
+            }
+        };
 
         window.openUserModal = function(userId = null) {
             document.getElementById('modalUserId').value = '';
@@ -3369,6 +4251,85 @@
             loadAuditLogs();
         }
 
+        window.openResetDatabaseModal = function() {
+            const input = document.getElementById('resetConfirmInput');
+            if (input) input.value = '';
+            const modal = document.getElementById('resetDbModal');
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeResetDatabaseModal = function() {
+            const modal = document.getElementById('resetDbModal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.executeDatabaseReset = async function() {
+            const confirmInput = document.getElementById('resetConfirmInput').value.trim();
+            if (confirmInput !== 'RESET' && confirmInput !== '確定重設') {
+                showMsg('請輸入正確的確認字樣「RESET」！', true);
+                return;
+            }
+
+            const clearProducts = document.getElementById('resetClearProductsCheckbox').checked;
+            const btn = document.getElementById('btnExecuteResetDb');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>重設中...`;
+            }
+
+            try {
+                // 先嘗試呼叫 RPC 預存程序 (可完整還原 Sequence 自 001/SSHS001 開始)
+                let resetRes = await client.rpc('clean_test_data_and_reset_orders', { p_clear_products: clearProducts });
+                if (resetRes.error) {
+                    resetRes = await client.rpc('reset_database_to_initial_state', { p_clear_products: clearProducts });
+                }
+
+                if (resetRes.error) {
+                    console.warn('RPC reset failed, falling back to direct table resets:', resetRes.error.message);
+                    // 備援方案：前端直接向資料表批次執行重設
+                    // 1. 清空訂單
+                    await client.from('orders').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                    // 2. 清空購物車
+                    await client.from('carts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                    // 3. 清空商品 (若勾選)
+                    if (clearProducts) {
+                        await client.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                    }
+                    // 4. 重設教職員餘額為 500
+                    await client.from('users').update({ balance: 500 }).eq('role', 'staff');
+                    // 5. 重設學生組別餘額為 0
+                    await client.from('users').update({ balance: 0 }).eq('role', 'student');
+                    // 6. 清除歷史日誌並記錄
+                    await client.from('audit_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                    await logAuditRecord("資料庫初始化重設", { 清空商品: clearProducts, 訂單重設起始: 'SSHS001', 執行身分: currentAuth?.name });
+                }
+
+                orderNoMap = {};
+                closeResetDatabaseModal();
+                showMsg("🎉 資料庫已成功重設至初始狀態！訂單編號已重設從 001 (SSHS001) 開始。");
+
+                // 重新載入所有相關資料
+                if (typeof loadMallProducts === 'function') loadMallProducts();
+                if (typeof loadTeacherDashboard === 'function') loadTeacherDashboard();
+                if (typeof loadAllUsers === 'function') loadAllUsers();
+                if (typeof loadAuditLogs === 'function') loadAuditLogs();
+                if (typeof loadTeacherMonitorOrders === 'function') loadTeacherMonitorOrders();
+                if (typeof loadMyOrders === 'function') loadMyOrders();
+
+                if (currentAuth) {
+                    const { data: latestUser } = await client.from('users').select('*').ilike('account', currentAuth.account).maybeSingle();
+                    if (latestUser) activateUserSession(latestUser);
+                }
+            } catch (err) {
+                showMsg("重設失敗：" + err.message, true);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-rotate-left"></i> 確認一鍵重設`;
+                }
+            }
+        };
+
         async function fetchExternalIP() {
             const apis = [
                 'https://api64.ipify.org?format=json',
@@ -3413,6 +4374,12 @@
                     await loadTeacherDashboard();
                 } catch (e) {}
             }
+            if (!allUsersList || allUsersList.length === 0) {
+                try {
+                    const { data: uData } = await client.from('users').select('*');
+                    if (uData) allUsersList = uData;
+                } catch(e) {}
+            }
             const { data } = await client.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(100);
             allAuditLogs = data || [];
             renderAuditLogs(allAuditLogs);
@@ -3443,7 +4410,17 @@
                 }
             }
 
-            const priorityKeys = ['商品名稱', '修改差異', '修改項目', '變更內容', '組別', '買家帳號', '帳號', '姓名', '角色', '訂單編號', '訂單ID', '新狀態', '狀態', 'status', '單價', '定價', '金額', '結算金額', '扣除後餘額', '退款金額', '數量', '庫存', '原下單時間', '時間', '日期', '重置額度'];
+            const priorityKeys = [
+                '商品名稱', '訂單編號', '訂單ID', 'orderId', '重置額度',
+                '修改差異', '修改項目', '變更內容',
+                '買家', '買家帳號', '帳號', '姓名', '角色',
+                '新狀態', '狀態', 'status',
+                '品項', '退款品項', '商品清單', '品項數量',
+                '組別',
+                '金額', '結算金額', '扣除後餘額', '退款金額', '單價', '定價', '數量', '庫存',
+                '原因', '退款原因', '取消原因', '說明', '備註',
+                '原下單時間', '時間', '日期'
+            ];
             const rawEntries = Object.entries(obj);
             const hasProdName = Boolean(obj['商品名稱']);
             const prodId = obj['商品ID'] || obj['productId'];
@@ -3477,7 +4454,7 @@
                 return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
             });
 
-            return `<div class="flex flex-wrap gap-1.5 items-center py-0.5">` + entries.map(([key, val]) => {
+            const capsules = entries.map(([key, val]) => {
                 const lowerKey = key.toLowerCase();
                 const strVal = String(val);
 
@@ -3486,7 +4463,7 @@
                     const badgeClass = isDelisted ? "bg-slate-100 text-slate-600 border-slate-200" : "bg-emerald-50 text-emerald-800 border-emerald-200";
                     const icon = isDelisted ? "fa-solid fa-box-archive text-slate-400" : "fa-solid fa-tag text-emerald-600";
                     const tooltip = prodId ? ` title="商品編號: ${prodId}"` : '';
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs ${badgeClass} font-bold shadow-xs cursor-help whitespace-nowrap shrink-0"${tooltip}><i class="${icon} text-[10px] shrink-0"></i><span class="opacity-80 font-medium whitespace-nowrap">商品:</span><span class="font-black whitespace-nowrap">${strVal}</span></span>`;
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs ${badgeClass} font-bold shadow-xs cursor-help max-w-full break-words"${tooltip}><i class="${icon} text-[10px] shrink-0"></i><span class="opacity-80 font-medium shrink-0">商品:</span><span class="font-black break-words">${strVal}</span></span>`;
                 }
 
                 if (key === '修改差異' || key === '修改項目' || key === '變更內容') {
@@ -3498,11 +4475,15 @@
                     ` : '';
                     const parts = strVal.split(/[、；]/).map(s => s.trim()).filter(Boolean);
                     if (parts.length > 1) {
-                        return `<div class="inline-flex flex-wrap items-center gap-1.5 py-0.5">` +
-                            parts.map(p => `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs bg-amber-50 text-amber-900 border-amber-300 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-pen-to-square text-amber-600 text-[10px] shrink-0"></i><span>${p}</span></span>`).join('') +
+                        return `<div class="inline-flex flex-wrap items-center gap-1.5 py-0.5 max-w-full">` +
+                            parts.map(p => `<span class="inline-flex flex-wrap items-center gap-1 px-2.5 py-1 rounded-lg border text-xs bg-amber-50 text-amber-900 border-amber-300 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-pen-to-square text-amber-600 text-[10px] shrink-0"></i><span class="break-words">${p}</span></span>`).join('') +
                             diffBtn + `</div>`;
                     }
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs bg-amber-50 text-amber-900 border-amber-300 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-pen-to-square text-amber-600 text-[11px] shrink-0"></i><span class="text-amber-700 font-medium whitespace-nowrap shrink-0">修改內容:</span><span class="font-black text-amber-950 whitespace-nowrap shrink-0">${strVal}</span>${diffBtn}</span>`;
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs bg-amber-50 text-amber-900 border-amber-300 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-pen-to-square text-amber-600 text-[11px] shrink-0"></i><span class="text-amber-700 font-medium shrink-0">修改內容:</span><span class="font-black text-amber-950 break-words">${strVal}</span>${diffBtn}</span>`;
+                }
+
+                if (key === '品項' || key === '退款品項' || key === '商品清單') {
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs bg-amber-50/70 text-amber-900 border-amber-200 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-basket-shopping text-amber-600 text-[10px] shrink-0"></i><span class="opacity-80 font-medium shrink-0">${key}:</span><span class="font-bold text-amber-950 break-words">${strVal}</span></span>`;
                 }
 
                 if (key === '組別') {
@@ -3522,11 +4503,16 @@
                     return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-info-circle text-sky-500 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
                 }
 
+                if (key.includes('原因') || key.includes('理由') || key.includes('說明') || key.includes('備註')) {
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs bg-slate-50 text-slate-700 border-slate-200 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-comment-dots text-slate-400 text-[10px] shrink-0"></i><span class="opacity-80 font-medium shrink-0">${key}:</span><span class="font-bold text-slate-800 break-words">${strVal}</span></span>`;
+                }
+
                 if (key === '重置額度') {
                     return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-rotate text-purple-500 text-[10px] shrink-0"></i><span class="font-medium opacity-80 whitespace-nowrap">全體重置:</span><span class="font-mono font-black whitespace-nowrap">${formatCurrency(val)} 幣</span></span>`;
                 }
 
-                if (key.includes('金額') || key.includes('單價') || key.includes('定價') || key.includes('餘額') || key.includes('退款')) {
+                const isNumberVal = val !== '' && val !== null && val !== undefined && !isNaN(Number(val));
+                if (key.includes('金額') || key.includes('單價') || key.includes('定價') || key.includes('餘額') || (key.includes('退款') && isNumberVal)) {
                     let colorClass = "bg-rose-50 text-rose-700 border-rose-200";
                     let icon = "fa-solid fa-circle-dollar-to-slot text-rose-500";
                     if (key.includes('餘額')) {
@@ -3539,8 +4525,8 @@
                     return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] ${colorClass} font-mono font-black shadow-xs whitespace-nowrap shrink-0"><i class="${icon} text-[10px] shrink-0"></i><span class="font-sans opacity-80 font-medium whitespace-nowrap">${key}:</span><span class="whitespace-nowrap">${formatCurrency(val)} 幣</span></span>`;
                 }
 
-                if (key === '數量') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-boxes-stacked text-indigo-400 text-[10px] shrink-0"></i><span class="opacity-80 font-medium whitespace-nowrap">數量:</span><span class="font-black whitespace-nowrap">${val} 件</span></span>`;
+                if (key === '數量' || key === '品項數量') {
+                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-boxes-stacked text-indigo-400 text-[10px] shrink-0"></i><span class="opacity-80 font-medium whitespace-nowrap">${key}:</span><span class="font-black whitespace-nowrap">${val} 件</span></span>`;
                 }
 
                 if (key === '庫存') {
@@ -3563,12 +4549,29 @@
                     return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-[11px] font-bold shadow-xs cursor-help whitespace-nowrap shrink-0" title="完整訂單編號: ${strVal}"><i class="fa-solid fa-receipt text-[10px] text-sky-500 shrink-0"></i><span>訂單 ${displayNo}</span></span>`;
                 }
 
-                if (key === '買家帳號' || key === '帳號') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-user text-[10px] text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium whitespace-nowrap">${key}:</span><span class="font-mono text-slate-800 whitespace-nowrap">${val}</span></span>`;
+                if (key === '買家' || key === '買家帳號' || key === '帳號') {
+                    let displayName = '';
+                    if (obj['買家姓名']) displayName = obj['買家姓名'];
+                    else if (obj['姓名']) displayName = obj['姓名'];
+                    else {
+                        const matchedUser = (allUsersList || []).find(u => (u.account || '').toLowerCase() === String(val).toLowerCase());
+                        if (matchedUser && matchedUser.name) displayName = matchedUser.name;
+                    }
+
+                    let formattedBuyer = String(val);
+                    if (!formattedBuyer.includes('(')) {
+                        formattedBuyer = displayName ? `${displayName} (${val})` : String(val);
+                    }
+
+                    const label = (key === '買家' || key === '買家帳號') ? '買家' : '帳號';
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-user text-[10px] text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium shrink-0">${label}:</span><span class="font-bold text-slate-800 break-words">${formattedBuyer}</span></span>`;
                 }
 
-                if (key === '姓名') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-id-badge text-[10px] text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium whitespace-nowrap">姓名:</span><span class="text-slate-900 whitespace-nowrap">${val}</span></span>`;
+                if (key === '姓名' || key === '買家姓名') {
+                    if (obj['買家帳號'] || obj['帳號'] || obj['買家']) {
+                        return '';
+                    }
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-id-badge text-[10px] text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium shrink-0">姓名:</span><span class="text-slate-900 break-words">${val}</span></span>`;
                 }
 
                 if (key === '角色') {
@@ -3587,8 +4590,13 @@
                     return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-700 shadow-xs whitespace-nowrap shrink-0"><i class="fa-regular fa-clock text-slate-400 text-[10px] shrink-0"></i><span class="font-sans opacity-80 font-medium whitespace-nowrap">${key}:</span><span class="font-bold whitespace-nowrap">${formatted}</span></span>`;
                 }
 
-                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[11px] bg-slate-50 text-slate-700 border-slate-200 shadow-xs whitespace-nowrap shrink-0"><span class="text-slate-400 font-medium whitespace-nowrap">${key}:</span><span class="font-bold text-slate-700 whitespace-nowrap">${strVal}</span></span>`;
-            }).join('') + `</div>`;
+                return `<span class="inline-flex flex-wrap items-center gap-1 px-2 py-0.5 rounded-lg border text-[11px] bg-slate-50 text-slate-700 border-slate-200 shadow-xs max-w-full break-words"><span class="text-slate-400 font-medium shrink-0">${key}:</span><span class="font-bold text-slate-700 break-words">${strVal}</span></span>`;
+            }).filter(Boolean);
+
+            if (capsules.length === 0) return '<span class="text-slate-300 font-normal">-</span>';
+            return `<div class="flex flex-col items-start gap-1.5 py-0.5 w-full max-w-full">` +
+                capsules.map(c => `<div class="w-full max-w-full break-words">${c}</div>`).join('') +
+                `</div>`;
         }
 
         function renderAuditLogs(logs) {
@@ -3649,19 +4657,19 @@
 
                 return `
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 border-b border-slate-100 font-mono text-[11px] text-slate-400 whitespace-nowrap">${formatDateTime(l.created_at)}</td>
-                        <td class="p-3 border-b border-slate-100 whitespace-nowrap">
+                        <td class="p-3 border-b border-slate-100 font-mono text-[11px] text-slate-400 whitespace-nowrap align-top">${formatDateTime(l.created_at)}</td>
+                        <td class="p-3 border-b border-slate-100 whitespace-nowrap align-top">
                             <span class="font-black text-slate-800 text-xs">${l.operator_name || '-'}</span>
                             <span class="text-[10px] text-slate-400 block font-mono font-medium">${l.account || '-'}</span>
                         </td>
-                        <td class="p-3 border-b border-slate-100 whitespace-nowrap">
+                        <td class="p-3 border-b border-slate-100 whitespace-nowrap align-top">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg font-black text-[10px] border shadow-xs ${actCfg.color}">
                                 <i class="${actCfg.icon} text-[10px]"></i>
                                 <span>${actCfg.label}</span>
                             </span>
                         </td>
-                        <td class="p-3 border-b border-slate-100 font-mono text-brand-600 font-black text-xs whitespace-nowrap">${l.ip_address || '127.0.0.1'}</td>
-                        <td class="p-3 border-b border-slate-100 text-xs">${formatAuditDetails(l.details, l)}</td>
+                        <td class="p-3 border-b border-slate-100 font-mono text-brand-600 font-black text-xs whitespace-nowrap align-top">${l.ip_address || '127.0.0.1'}</td>
+                        <td class="p-3 border-b border-slate-100 text-xs align-top">${formatAuditDetails(l.details, l)}</td>
                     </tr>
                 `;
             }).join('');
@@ -3683,11 +4691,11 @@
                                 </span>
                                 <span class="font-mono text-[10px] text-slate-400">${formatDateTime(l.created_at)}</span>
                             </div>
-                            <div class="flex items-center justify-between text-slate-600 text-[11px]">
+                            <div class="flex flex-wrap items-center justify-between gap-1 text-slate-600 text-[11px]">
                                 <span>執行人: <b class="text-slate-800">${l.operator_name || '-'}</b> (${l.account || '-'})</span>
-                                <span class="font-mono text-slate-400">IP: ${l.ip_address || '127.0.0.1'}</span>
+                                <span class="font-mono text-slate-400 shrink-0">IP: ${l.ip_address || '127.0.0.1'}</span>
                             </div>
-                            <div class="pt-1 border-t border-slate-100">
+                            <div class="pt-1 border-t border-slate-100 break-words">
                                 ${formatAuditDetails(l.details, l)}
                             </div>
                         </div>
@@ -3815,16 +4823,9 @@
 
         function setAuditCategoryFilter(cat) {
             currentAuditFilterCategory = cat;
-            document.querySelectorAll('.audit-filter-btn').forEach(btn => {
-                btn.className = "audit-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition";
-            });
-            const activeBtn = document.getElementById(
-                cat === 'product_diff' ? 'btnFilterAuditProdDiff' :
-                cat === 'user_diff' ? 'btnFilterAuditUserDiff' :
-                cat === 'order_flow' ? 'btnFilterAuditOrderFlow' : 'btnFilterAuditAll'
-            );
-            if (activeBtn) {
-                activeBtn.className = "audit-filter-btn px-3 py-1 rounded-xl text-xs font-black bg-slate-800 text-white transition shadow-xs";
+            const selectEl = document.getElementById('auditCategorySelect');
+            if (selectEl && selectEl.value !== cat) {
+                selectEl.value = cat;
             }
             filterAuditLogs();
         }
@@ -4066,11 +5067,20 @@
             let filtered = allAuditLogs || [];
 
             if (currentAuditFilterCategory === 'product_diff') {
-                filtered = filtered.filter(l => l.action_type === '修改商品' || l.action_type === '新增商品' || l.action_type === '下架商品');
+                const types = ['修改商品', '新增商品', '下架商品', '更新商店名稱'];
+                filtered = filtered.filter(l => types.includes(l.action_type));
             } else if (currentAuditFilterCategory === 'user_diff') {
-                filtered = filtered.filter(l => l.action_type === '修改使用者資料' || l.action_type === '新增使用者' || l.action_type === '刪除使用者');
+                const types = ['修改使用者資料', '新增使用者', '刪除使用者', '批次匯入名單', '重置商GO幣餘額'];
+                filtered = filtered.filter(l => types.includes(l.action_type));
             } else if (currentAuditFilterCategory === 'order_flow') {
-                filtered = filtered.filter(l => l.action_type === '更新訂單狀態' || l.action_type === '訂單退款' || l.action_type === '結帳');
+                const types = ['更新訂單狀態', '更新組別訂單狀態', '訂單退款', '商品退貨退款', '買家取消訂單', '結帳', '加入購物車', '移除購物車商品', '清空購物車', '匯出訂單CSV報表'];
+                filtered = filtered.filter(l => types.includes(l.action_type));
+            } else if (currentAuditFilterCategory === 'auth_security') {
+                const types = ['使用者登入', '使用者登出', '登入失敗'];
+                filtered = filtered.filter(l => types.includes(l.action_type));
+            } else if (currentAuditFilterCategory === 'system_reset') {
+                const types = ['資料庫初始化重設', '清理測試資料', '重置商GO幣餘額'];
+                filtered = filtered.filter(l => types.includes(l.action_type));
             }
 
             if (kw) {
@@ -4535,12 +5545,14 @@
 
                 if (!usersList || usersList.length === 0) {
                     showLoginError("查無此帳號，請確認帳號或組別是否正確！");
+                    await logAuditRecord("登入失敗", { 嘗試帳號: rawAccount, 失敗原因: "查無此帳號" });
                     return;
                 }
 
                 const user = usersList[0];
                 if (user.role !== 'staff' && (user.password || '').trim() !== rawPassword) {
                     showLoginError("密碼錯誤，請重新輸入！");
+                    await logAuditRecord("登入失敗", { 嘗試帳號: rawAccount, 失敗原因: "密碼錯誤" });
                     return;
                 }
 
@@ -4590,12 +5602,15 @@
             appWorkspace.classList.remove('hidden');
 
             let roleTitle = "";
-            if (currentAuth.role === 'staff') roleTitle = `您好，<b class="text-amber-300 font-black">${currentAuth.name}</b> ｜ 教職員 (${currentAuth.account})`;
-            else if (currentAuth.role === 'student') roleTitle = `您好，第 <b class="text-amber-300 font-black">${currentAuth.account}</b> 組 ｜ 學生`;
-            else if (currentAuth.role === 'teacher') roleTitle = `您好，<b class="text-amber-300 font-black">${currentAuth.name}</b> ｜ 任課教師 (全權限)`;
+            if (currentAuth.role === 'staff') roleTitle = `您好，<b class="text-amber-300 font-black">${currentAuth.name}</b><span class="text-slate-300"> ｜ 教職員 (${currentAuth.account})</span>`;
+            else if (currentAuth.role === 'student') roleTitle = `您好，第 <b class="text-amber-300 font-black">${currentAuth.account}</b> 組<span class="text-slate-300"> ｜ 學生</span>`;
+            else if (currentAuth.role === 'teacher') roleTitle = `您好，<b class="text-amber-300 font-black">${currentAuth.name}</b><span class="text-slate-300"> ｜ 任課教師 (全權限)</span>`;
             else if (currentAuth.role === 'admin') roleTitle = `您好，<b class="text-amber-300 font-black">系統管理員</b>`;
 
-            if (userStatusDisplay) userStatusDisplay.innerHTML = roleTitle;
+            if (userStatusDisplay) {
+                userStatusDisplay.innerHTML = roleTitle;
+                userStatusDisplay.title = `${currentAuth.name || ''} (${currentAuth.account || ''})`;
+            }
             updateUserBalanceDisplays();
 
             const btnHeaderMyOrders = document.getElementById('btnHeaderMyOrders');
@@ -4637,10 +5652,41 @@
             }
         });
 
+        function scrollToTop() {
+            const sc = document.getElementById('scrollContainer');
+            if (sc) {
+                sc.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function initBackToTop() {
+            const btn = document.getElementById('btnBackToTop');
+            const sc = document.getElementById('scrollContainer');
+            if (!btn) return;
+
+            const handleScroll = () => {
+                const scrollTop = (sc ? sc.scrollTop : 0) || window.pageYOffset || document.documentElement.scrollTop || 0;
+                if (scrollTop > 200) {
+                    btn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                    btn.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                } else {
+                    btn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                    btn.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                }
+            };
+
+            if (sc) {
+                sc.addEventListener('scroll', handleScroll, { passive: true });
+            }
+            window.addEventListener('scroll', handleScroll, { passive: true });
+        }
+
         window.addEventListener('hashchange', () => {
             if (currentAuth) handleHashRouting();
         });
 
+        initBackToTop();
         restoreSessionFromStorage();
     </script>
 </body>
