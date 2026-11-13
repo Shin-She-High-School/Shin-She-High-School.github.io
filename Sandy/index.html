@@ -2365,7 +2365,7 @@
                                 '<option value="已完成" ' + (gs.status === '已完成' ? 'selected' : '') + '>已完成</option>' +
                             '</select>';
                         } else {
-                            groupStatusBadgeOrSelect = '<span class="text-xs font-bold text-slate-600 px-2 py-0.5 bg-white border border-slate-200 rounded-lg">' + gs.status + '</span>';
+                            groupStatusBadgeOrSelect = window.renderStatusPill(gs.status);
                         }
 
                         return '<div class="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 shadow-2xs space-y-2">' +
@@ -2493,7 +2493,7 @@
                                                 '<option value="待取貨" ' + (gs.status === '待取貨' ? 'selected' : '') + '>待取貨</option>' +
                                                 '<option value="已完成" ' + (gs.status === '已完成' ? 'selected' : '') + '>已完成</option>' +
                                             '</select>'
-                                            : '<span class="text-xs font-bold text-slate-500">' + gs.status + '</span>') +
+                                            : window.renderStatusPill(gs.status)) +
                                         '</div>' +
                                         '<div class="pl-1 space-y-1.5">' +
                                             gs.items.map(it => {
@@ -2548,6 +2548,7 @@
                 );
                 if (targetItems.length === 0) return;
                 const itemIds = targetItems.map(it => it.id);
+                const oldStatus = targetItems[0] ? targetItems[0].status : "處理中";
 
                 const updatePayload = {
                     status: newStatus,
@@ -2568,7 +2569,9 @@
                 await logAuditRecord("更新組別訂單狀態", { 
                     訂單編號: orderNo, 
                     組別: "第 " + groupNo + " 組", 
-                    新狀態: newStatus, 
+                    原狀態: oldStatus,
+                    新狀態: newStatus,
+                    狀態變更: `${oldStatus} ➔ ${newStatus}`,
                     品項數量: itemIds.length,
                     品項: targetItems.map(i => i.product_name).join(', ')
                 });
@@ -2606,7 +2609,8 @@
                     if (newStatus === '已完成') it.completed_at = updatePayload.completed_at;
                 });
 
-                await logAuditRecord("更新訂單狀態", { 訂單編號: orderNo, 新狀態: newStatus, 品項數量: itemIds.length });
+                const oldStatus = targetItems[0] ? targetItems[0].status : "處理中";
+                await logAuditRecord("更新訂單狀態", { 訂單編號: orderNo, 原狀態: oldStatus, 新狀態: newStatus, 狀態變更: `${oldStatus} ➔ ${newStatus}`, 品項數量: itemIds.length });
                 showMsg("訂單【" + orderNo + "】狀態已更新為【" + newStatus + "】！");
                 loadTeacherDashboard();
             } catch (e) {
@@ -3295,10 +3299,15 @@
                 let { error } = await client.from('products').update(updatePayload).eq('id', productId);
                 if (error) throw error;
 
+                const oldShelfStatus = toPublish ? "已下架" : "販售中";
+                const newShelfStatus = toPublish ? "販售中" : "已下架";
                 await logAuditRecord(toPublish ? "商品重新上架" : "商品下架", {
                     商品名稱: p.name,
                     組別: `第 ${p.group_no} 組`,
-                    狀態: toPublish ? "販售中" : "已下架",
+                    原狀態: oldShelfStatus,
+                    新狀態: newShelfStatus,
+                    狀態變更: `${oldShelfStatus} ➔ ${newShelfStatus}`,
+                    狀態: newShelfStatus,
                     商品ID: productId,
                     說明: toPublish ? "已開放商城選購" : "保留於後台但對買家隱藏"
                 });
@@ -3724,7 +3733,7 @@
                         <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs whitespace-nowrap">${formatCurrency(p.price)} 幣</td>
                         <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap ${stockClass}">${stockDisplay}</td>
                         <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap">
-                            ${offShelf ? `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-bold border border-slate-200 text-xs">已下架</span>` : `<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-black border border-emerald-200 text-xs">販售中</span>`}
+                            ${window.renderStatusPill(offShelf ? '已下架' : '販售中')}
                         </td>
                         <td class="p-3 border-b border-slate-100 text-slate-400 font-mono text-[11px] whitespace-nowrap">${formatDateTime(p.created_at)}</td>
                         <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap space-x-1">
@@ -4385,6 +4394,31 @@
             renderAuditLogs(allAuditLogs);
         }
 
+        window.renderStatusPill = function(statusText) {
+            if (!statusText) return '<span class="text-slate-300 font-normal">-</span>';
+            const s = String(statusText).trim();
+            if (s.includes('登出')) {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-right-from-bracket text-slate-400 text-[10px]"></i><span>${s}</span></span>`;
+            } else if (s.includes('登入成功') || s === '登入成功' || s === '已完成' || (s.includes('成功') && !s.includes('失敗'))) {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i><span>${s}</span></span>`;
+            } else if (s.includes('待取貨') || s.includes('可取貨')) {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-box text-sky-500 text-[10px]"></i><span>${s}</span></span>`;
+            } else if (s.includes('處理中') || s.includes('備貨中')) {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-300 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-clock text-amber-600 text-[10px]"></i><span>${s}</span></span>`;
+            } else if (s.includes('退款') || s.includes('已退款')) {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-rotate-left text-rose-600 text-[10px]"></i><span>${s}</span></span>`;
+            } else if (s.includes('取消') || s.includes('已取消')) {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-circle-xmark text-slate-400 text-[10px]"></i><span>${s}</span></span>`;
+            } else if (s.includes('失敗') || s.includes('錯誤') || s.includes('查無')) {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-triangle-exclamation text-rose-600 text-[10px]"></i><span>${s}</span></span>`;
+            } else if (s.includes('已下架')) {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-eye-slash text-slate-400 text-[10px]"></i><span>${s}</span></span>`;
+            } else if (s.includes('販售中') || s.includes('已上架')) {
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-tag text-emerald-600 text-[10px]"></i><span>販售中</span></span>`;
+            }
+            return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 text-slate-700 border border-slate-200 text-xs font-black shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-info-circle text-slate-400 text-[10px]"></i><span>${s}</span></span>`;
+        };
+
         function formatAuditDetails(details, logItem = null) {
             if (!details) return '<span class="text-slate-300 font-normal">-</span>';
             let obj = details;
@@ -4411,14 +4445,21 @@
             }
 
             const priorityKeys = [
-                '商品名稱', '訂單編號', '訂單ID', 'orderId', '重置額度',
+                'message', '訊息', '系統訊息', '系統說明',
+                'reset_order_no_start', '訂單重設起始', '訂單起算編號',
+                'cleaned_at', '清理時間', '重置時間', '重設時間', 'timestamp',
+                '商品名稱', '訂單編號', '訂單ID', 'orderId',
+                '原狀態', '新狀態', '狀態', 'status',
                 '修改差異', '修改項目', '變更內容',
+                '新店名', '商店名稱',
                 '買家', '買家帳號', '帳號', '姓名', '角色',
-                '新狀態', '狀態', 'status',
                 '品項', '退款品項', '商品清單', '品項數量',
                 '組別',
-                '金額', '結算金額', '扣除後餘額', '退款金額', '單價', '定價', '數量', '庫存',
+                '結算金額', '扣除後餘額', '退款金額', '金額', '單價', '定價', '重置額度',
+                '數量', '庫存',
+                'staff_count', '教職員人數', 'staff_initial_balance', '初始購物金', 'cleared_products', '清空商品',
                 '原因', '退款原因', '取消原因', '說明', '備註',
+                '嘗試帳號', '失敗原因',
                 '原下單時間', '時間', '日期'
             ];
             const rawEntries = Object.entries(obj);
@@ -4458,97 +4499,215 @@
                 const lowerKey = key.toLowerCase();
                 const strVal = String(val);
 
-                if (key === '商品名稱') {
-                    const isDelisted = strVal === '已下架商品';
-                    const badgeClass = isDelisted ? "bg-slate-100 text-slate-600 border-slate-200" : "bg-emerald-50 text-emerald-800 border-emerald-200";
-                    const icon = isDelisted ? "fa-solid fa-box-archive text-slate-400" : "fa-solid fa-tag text-emerald-600";
-                    const tooltip = prodId ? ` title="商品編號: ${prodId}"` : '';
-                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs ${badgeClass} font-bold shadow-xs cursor-help max-w-full break-words"${tooltip}><i class="${icon} text-[10px] shrink-0"></i><span class="opacity-80 font-medium shrink-0">商品:</span><span class="font-black break-words">${strVal}</span></span>`;
+                // 系統作業成果說明訊息 (如清空測試資料、重設完成通知)
+                if (key === 'message' || key === '訊息' || key === '系統訊息' || key === '系統說明') {
+                    return `<div class="w-full p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200/90 text-emerald-950 font-bold text-xs shadow-2xs flex items-start gap-2.5 my-1">
+                        <div class="w-6 h-6 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                            <i class="fa-solid fa-circle-check text-xs"></i>
+                        </div>
+                        <div class="leading-relaxed break-words flex-1">
+                            <span class="block text-[11px] font-black text-emerald-800 tracking-wide mb-0.5">系統作業成果</span>
+                            <span class="text-xs font-bold text-slate-800">${strVal}</span>
+                        </div>
+                    </div>`;
                 }
 
+                // 訂單編號重設起算標籤
+                if (key === 'reset_order_no_start' || key === '訂單重設起始' || key === '訂單起算編號') {
+                    return `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-brand-600 to-teal-600 text-white text-xs font-black shadow-2xs whitespace-nowrap">
+                        <i class="fa-solid fa-hashtag text-[11px] text-amber-200"></i>
+                        <span>訂單編號重設起號：<b class="font-mono tracking-wider text-amber-200">${strVal}</b></span>
+                    </span>`;
+                }
+
+                // 清理 / 重設時間
+                if (key === 'cleaned_at' || key === '清理時間' || key === '重置時間' || key === '重設時間') {
+                    const formatted = formatDateTime(val);
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs whitespace-nowrap">
+                        <i class="fa-regular fa-clock text-slate-500 text-xs"></i>
+                        <span class="text-slate-500 font-medium">重設完成時間：</span>
+                        <span class="font-mono text-slate-800">${formatted}</span>
+                    </span>`;
+                }
+
+                // 教職員統計與初始額度
+                if (key === 'staff_count' || key === '教職員人數') {
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold shadow-2xs whitespace-nowrap">
+                        <i class="fa-solid fa-user-group text-blue-500 text-xs"></i>
+                        <span>全校教職員：<b class="font-mono text-blue-950 font-black">${val} 人</b></span>
+                    </span>`;
+                }
+
+                if (key === 'staff_initial_balance' || key === '初始購物金') {
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold shadow-2xs whitespace-nowrap">
+                        <i class="fa-solid fa-coins text-amber-500 text-xs"></i>
+                        <span>初始購物金：<b class="font-mono font-black text-rose-600">${formatCurrency(val)} 幣</b></span>
+                    </span>`;
+                }
+
+                if (key === 'cleared_products' || key === '清空商品') {
+                    const isClr = val === true || val === 'true';
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold shadow-2xs whitespace-nowrap ${isClr ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-slate-100 border-slate-200 text-slate-700'}">
+                        <i class="${isClr ? 'fa-solid fa-trash-can text-rose-500' : 'fa-solid fa-box-archive text-slate-400'} text-xs"></i>
+                        <span>清空商品：${isClr ? '是（已全數清空）' : '否（保留現有商品）'}</span>
+                    </span>`;
+                }
+
+                // 自訂商店名稱
+                if (key === '新店名' || key === '商店名稱') {
+                    return `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs font-bold shadow-2xs max-w-full break-words">
+                        <i class="fa-solid fa-store text-amber-600 text-xs shrink-0"></i>
+                        <span class="text-amber-800 font-medium shrink-0">自訂店名：</span>
+                        <span class="font-black text-amber-950 break-words">${strVal}</span>
+                    </span>`;
+                }
+
+                // 登入失敗 / 嘗試帳號
+                if (key === '嘗試帳號' || key === '失敗原因') {
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold shadow-2xs max-w-full break-words">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500 text-xs shrink-0"></i>
+                        <span class="opacity-80 shrink-0">${key}：</span>
+                        <span class="font-black text-rose-900 break-words">${strVal}</span>
+                    </span>`;
+                }
+
+                // 商品名稱
+                if (key === '商品名稱') {
+                    const isDelisted = strVal === '已下架商品';
+                    const badgeClass = isDelisted ? "bg-slate-100 text-slate-600 border-slate-200" : "bg-emerald-50 text-emerald-900 border-emerald-200";
+                    const icon = isDelisted ? "fa-solid fa-box-archive text-slate-400" : "fa-solid fa-tag text-emerald-600";
+                    const tooltip = prodId ? ` title="商品編號: ${prodId}"` : '';
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs ${badgeClass} font-bold shadow-2xs cursor-help max-w-full break-words"${tooltip}><i class="${icon} text-xs shrink-0"></i><span class="text-slate-500 font-medium shrink-0">商品：</span><span class="font-black break-words">${strVal}</span></span>`;
+                }
+
+                // 修改內容與前後對照
                 if (key === '修改差異' || key === '修改項目' || key === '變更內容') {
                     const diffBtn = (logItem && logItem.id) ? `
-                        <button type="button" onclick="openDiffModalByLogId('${logItem.id}')" class="px-2 py-0.5 bg-amber-200/80 hover:bg-amber-300 text-amber-950 rounded-md text-[10px] font-black transition inline-flex items-center gap-1 shadow-2xs whitespace-nowrap shrink-0">
-                            <i class="fa-solid fa-code-compare text-[9px] shrink-0"></i>
+                        <button type="button" onclick="openDiffModalByLogId('${logItem.id}')" class="px-2.5 py-1 bg-amber-200/90 hover:bg-amber-300 text-amber-950 rounded-lg text-[10px] font-black transition inline-flex items-center gap-1 shadow-2xs whitespace-nowrap shrink-0">
+                            <i class="fa-solid fa-code-compare text-[10px] shrink-0"></i>
                             <span>前後對照</span>
                         </button>
                     ` : '';
                     const parts = strVal.split(/[、；]/).map(s => s.trim()).filter(Boolean);
                     if (parts.length > 1) {
-                        return `<div class="inline-flex flex-wrap items-center gap-1.5 py-0.5 max-w-full">` +
-                            parts.map(p => `<span class="inline-flex flex-wrap items-center gap-1 px-2.5 py-1 rounded-lg border text-xs bg-amber-50 text-amber-900 border-amber-300 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-pen-to-square text-amber-600 text-[10px] shrink-0"></i><span class="break-words">${p}</span></span>`).join('') +
+                        return `<div class="flex flex-wrap items-center gap-1.5 py-0.5 max-w-full">` +
+                            parts.map(p => `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs bg-amber-50 text-amber-950 border-amber-300 font-bold shadow-2xs max-w-full break-words"><i class="fa-solid fa-pen-to-square text-amber-600 text-[10px] shrink-0"></i><span class="break-words">${p}</span></span>`).join('') +
                             diffBtn + `</div>`;
                     }
-                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs bg-amber-50 text-amber-900 border-amber-300 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-pen-to-square text-amber-600 text-[11px] shrink-0"></i><span class="text-amber-700 font-medium shrink-0">修改內容:</span><span class="font-black text-amber-950 break-words">${strVal}</span>${diffBtn}</span>`;
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs bg-amber-50 text-amber-950 border-amber-300 font-bold shadow-2xs max-w-full break-words"><i class="fa-solid fa-pen-to-square text-amber-600 text-xs shrink-0"></i><span class="text-amber-800 font-medium shrink-0">修改內容：</span><span class="font-black text-amber-950 break-words">${strVal}</span>${diffBtn}</span>`;
                 }
 
+                // 品項清單
                 if (key === '品項' || key === '退款品項' || key === '商品清單') {
-                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs bg-amber-50/70 text-amber-900 border-amber-200 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-basket-shopping text-amber-600 text-[10px] shrink-0"></i><span class="opacity-80 font-medium shrink-0">${key}:</span><span class="font-bold text-amber-950 break-words">${strVal}</span></span>`;
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs bg-amber-50/70 text-amber-950 border-amber-200 font-bold shadow-2xs max-w-full break-words"><i class="fa-solid fa-basket-shopping text-amber-600 text-xs shrink-0"></i><span class="text-amber-800 font-medium shrink-0">${key}：</span><span class="font-bold text-amber-950 break-words">${strVal}</span></span>`;
                 }
 
+                // 組別
                 if (key === '組別') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] bg-teal-50 text-teal-800 border-teal-200 font-black shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-users text-teal-600 text-[10px] shrink-0"></i><span>第 ${val} 組</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs bg-teal-50 text-teal-900 border-teal-200 font-black shadow-2xs whitespace-nowrap shrink-0">
+                        <i class="fa-solid fa-users text-teal-600 text-xs shrink-0"></i>
+                        <span>第 ${val} 組</span>
+                    </span>`;
+                }
+
+                // 狀態變更 (原狀態 ➔ 新狀態 或 狀態變更 欄位)
+                if (key === '狀態變更' || (key === '原狀態' && obj['新狀態'])) {
+                    const fromStatus = obj['原狀態'] || (strVal.includes('➔') ? strVal.split('➔')[0].trim() : '');
+                    const toStatus = obj['新狀態'] || (strVal.includes('➔') ? strVal.split('➔')[1].trim() : strVal);
+                    return `<div class="inline-flex flex-wrap items-center gap-2 p-2 px-3.5 rounded-2xl bg-gradient-to-r from-slate-50 via-teal-50/30 to-slate-50 border border-slate-200/90 text-xs font-bold shadow-2xs max-w-full my-0.5">
+                        <span class="text-slate-600 font-black shrink-0 flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrow-right-arrow-left text-teal-600 text-xs"></i>
+                            <span>狀態變更：</span>
+                        </span>
+                        ${window.renderStatusPill(fromStatus)}
+                        <i class="fa-solid fa-arrow-right text-slate-400 text-xs shrink-0"></i>
+                        ${window.renderStatusPill(toStatus)}
+                    </div>`;
+                }
+                if (key === '新狀態' && (obj['原狀態'] || obj['狀態變更'])) {
+                    return ''; // 已在原狀態/狀態變更中呈現
+                }
+                if (key === '原狀態' && obj['狀態變更']) {
+                    return '';
                 }
 
                 if (key === '狀態' || key === 'status' || key === '新狀態') {
-                    if (strVal.includes('登出')) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-arrow-right-from-bracket text-slate-400 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
-                    } else if (strVal.includes('登入') || strVal.includes('成功') || strVal.includes('完成')) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-circle-check text-emerald-500 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
-                    } else if (strVal.includes('待取貨') || strVal.includes('處理中')) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-clock text-amber-500 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
-                    } else if (strVal.includes('失敗') || strVal.includes('取消') || strVal.includes('退款')) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-circle-xmark text-rose-500 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
-                    }
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-info-circle text-sky-500 text-[10px] shrink-0"></i><span>${strVal}</span></span>`;
+                    return window.renderStatusPill(strVal);
                 }
 
+                // 原因、備註
                 if (key.includes('原因') || key.includes('理由') || key.includes('說明') || key.includes('備註')) {
-                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs bg-slate-50 text-slate-700 border-slate-200 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-comment-dots text-slate-400 text-[10px] shrink-0"></i><span class="opacity-80 font-medium shrink-0">${key}:</span><span class="font-bold text-slate-800 break-words">${strVal}</span></span>`;
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs bg-slate-50 text-slate-700 border-slate-200 font-bold shadow-2xs max-w-full break-words"><i class="fa-solid fa-comment-dots text-slate-400 text-xs shrink-0"></i><span class="text-slate-500 font-medium shrink-0">${key}：</span><span class="font-bold text-slate-800 break-words">${strVal}</span></span>`;
                 }
 
                 if (key === '重置額度') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-rotate text-purple-500 text-[10px] shrink-0"></i><span class="font-medium opacity-80 whitespace-nowrap">全體重置:</span><span class="font-mono font-black whitespace-nowrap">${formatCurrency(val)} 幣</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-rotate text-purple-500 text-xs shrink-0"></i><span class="font-medium opacity-80 whitespace-nowrap">全體重置：</span><span class="font-mono font-black whitespace-nowrap">${formatCurrency(val)} 幣</span></span>`;
+                }
+
+                // 財務金額與餘額
+                if (key === '結算金額') {
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-black shadow-2xs whitespace-nowrap">
+                        <i class="fa-solid fa-cart-shopping text-rose-500 text-xs shrink-0"></i>
+                        <span>結算扣除：<b class="font-mono text-rose-600">${formatCurrency(val)} 幣</b></span>
+                    </span>`;
+                }
+                if (key === '扣除後餘額') {
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs font-black shadow-2xs whitespace-nowrap">
+                        <i class="fa-solid fa-wallet text-blue-500 text-xs shrink-0"></i>
+                        <span>扣款後餘額：<b class="font-mono text-blue-900">${formatCurrency(val)} 幣</b></span>
+                    </span>`;
+                }
+                if (key === '退款金額') {
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black shadow-2xs whitespace-nowrap">
+                        <i class="fa-solid fa-rotate-left text-emerald-500 text-xs shrink-0"></i>
+                        <span>退款回補：<b class="font-mono text-emerald-700">${formatCurrency(val)} 幣</b></span>
+                    </span>`;
                 }
 
                 const isNumberVal = val !== '' && val !== null && val !== undefined && !isNaN(Number(val));
                 if (key.includes('金額') || key.includes('單價') || key.includes('定價') || key.includes('餘額') || (key.includes('退款') && isNumberVal)) {
-                    let colorClass = "bg-rose-50 text-rose-700 border-rose-200";
+                    let colorClass = "bg-rose-50 text-rose-800 border-rose-200";
                     let icon = "fa-solid fa-circle-dollar-to-slot text-rose-500";
                     if (key.includes('餘額')) {
-                        colorClass = "bg-blue-50 text-blue-700 border-blue-200";
+                        colorClass = "bg-blue-50 text-blue-800 border-blue-200";
                         icon = "fa-solid fa-wallet text-blue-500";
                     } else if (key.includes('退款')) {
-                        colorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                        colorClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
                         icon = "fa-solid fa-rotate-left text-emerald-500";
                     }
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] ${colorClass} font-mono font-black shadow-xs whitespace-nowrap shrink-0"><i class="${icon} text-[10px] shrink-0"></i><span class="font-sans opacity-80 font-medium whitespace-nowrap">${key}:</span><span class="whitespace-nowrap">${formatCurrency(val)} 幣</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs ${colorClass} font-mono font-black shadow-2xs whitespace-nowrap shrink-0"><i class="${icon} text-xs shrink-0"></i><span class="font-sans text-slate-500 font-medium whitespace-nowrap">${key}：</span><span class="whitespace-nowrap">${formatCurrency(val)} 幣</span></span>`;
                 }
 
+                // 數量與庫存
                 if (key === '數量' || key === '品項數量') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-boxes-stacked text-indigo-400 text-[10px] shrink-0"></i><span class="opacity-80 font-medium whitespace-nowrap">${key}:</span><span class="font-black whitespace-nowrap">${val} 件</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-boxes-stacked text-indigo-400 text-xs shrink-0"></i><span class="text-slate-500 font-medium whitespace-nowrap">${key}：</span><span class="font-black whitespace-nowrap">${val} 件</span></span>`;
                 }
 
                 if (key === '庫存') {
                     const isUnlimited = val === -1 || val === '-1';
                     if (isUnlimited) {
-                        return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-[11px] font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-infinity text-slate-400 text-[10px] shrink-0"></i><span>無限制</span></span>`;
+                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-infinity text-slate-400 text-xs shrink-0"></i><span>無限制</span></span>`;
                     }
                     const isOut = val <= 0;
-                    const stockClass = isOut ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-sky-50 text-sky-700 border-sky-200";
+                    const stockClass = isOut ? "bg-rose-50 text-rose-800 border-rose-200" : "bg-sky-50 text-sky-800 border-sky-200";
                     const icon = isOut ? "fa-solid fa-triangle-exclamation text-rose-500" : "fa-solid fa-warehouse text-sky-500";
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] ${stockClass} font-bold shadow-xs whitespace-nowrap shrink-0"><i class="${icon} text-[10px] shrink-0"></i><span class="opacity-80 font-medium whitespace-nowrap">庫存:</span><span class="font-black whitespace-nowrap">${val} 件</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs ${stockClass} font-bold shadow-2xs whitespace-nowrap shrink-0"><i class="${icon} text-xs shrink-0"></i><span class="text-slate-500 font-medium whitespace-nowrap">庫存：</span><span class="font-black whitespace-nowrap">${val} 件</span></span>`;
                 }
 
+                // 訂單編號
                 if (key === '訂單ID' || key === 'orderId' || key === '訂單編號') {
                     if (key === '訂單編號' && (obj['訂單ID'] || obj['orderId'])) {
                         return '';
                     }
                     const strVal = String(val);
                     const displayNo = obj['訂單編號'] || getOrderNo(strVal);
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-[11px] font-bold shadow-xs cursor-help whitespace-nowrap shrink-0" title="完整訂單編號: ${strVal}"><i class="fa-solid fa-receipt text-[10px] text-sky-500 shrink-0"></i><span>訂單 ${displayNo}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-sky-50 border border-sky-200 text-sky-900 text-xs font-black shadow-2xs cursor-help whitespace-nowrap shrink-0" title="完整訂單編號: ${strVal}">
+                        <i class="fa-solid fa-receipt text-sky-500 text-xs shrink-0"></i>
+                        <span>訂單編號：<b class="font-mono text-sky-800">${displayNo}</b></span>
+                    </span>`;
                 }
 
+                // 買家與帳號
                 if (key === '買家' || key === '買家帳號' || key === '帳號') {
                     let displayName = '';
                     if (obj['買家姓名']) displayName = obj['買家姓名'];
@@ -4564,40 +4723,62 @@
                     }
 
                     const label = (key === '買家' || key === '買家帳號') ? '買家' : '帳號';
-                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-user text-[10px] text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium shrink-0">${label}:</span><span class="font-bold text-slate-800 break-words">${formattedBuyer}</span></span>`;
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-700 font-bold shadow-2xs max-w-full break-words"><i class="fa-solid fa-user text-xs text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium shrink-0">${label}：</span><span class="font-black text-slate-800 break-words">${formattedBuyer}</span></span>`;
                 }
 
                 if (key === '姓名' || key === '買家姓名') {
                     if (obj['買家帳號'] || obj['帳號'] || obj['買家']) {
                         return '';
                     }
-                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-700 font-bold shadow-xs max-w-full break-words"><i class="fa-solid fa-id-badge text-[10px] text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium shrink-0">姓名:</span><span class="text-slate-900 break-words">${val}</span></span>`;
+                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 font-bold shadow-2xs max-w-full break-words"><i class="fa-solid fa-id-badge text-xs text-slate-400 shrink-0"></i><span class="text-slate-500 font-medium shrink-0">姓名：</span><span class="text-slate-900 break-words">${val}</span></span>`;
                 }
 
+                // 角色
                 if (key === '角色') {
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-[11px] text-indigo-700 font-bold shadow-xs whitespace-nowrap shrink-0"><i class="fa-solid fa-shield-halved text-[10px] text-indigo-400 shrink-0"></i><span>${ROLE_NAMES[val] || val}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold shadow-2xs whitespace-nowrap shrink-0"><i class="fa-solid fa-shield-halved text-xs text-indigo-400 shrink-0"></i><span>${ROLE_NAMES[val] || val}</span></span>`;
                 }
 
                 if (lowerKey.includes('id')) {
                     const shortVal = strVal.length > 8 ? `#${strVal.slice(0, 8)}...` : strVal;
-                    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80 text-[10px] text-slate-400 font-mono cursor-help whitespace-nowrap shrink-0" title="${strVal}"><span class="font-sans font-medium text-slate-400 whitespace-nowrap">${key}:</span><span>${shortVal}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 font-mono cursor-help whitespace-nowrap shrink-0" title="${strVal}"><span class="font-sans font-medium text-slate-400 whitespace-nowrap">${key}：</span><span>${shortVal}</span></span>`;
                 }
 
                 const isIsoDate = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/.test(val);
                 const isDateKey = key.includes('時間') || key.includes('日期') || lowerKey.includes('date') || lowerKey.includes('time') || lowerKey.endsWith('_at');
                 if (isIsoDate || isDateKey) {
                     const formatted = formatDateTime(val);
-                    return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-700 shadow-xs whitespace-nowrap shrink-0"><i class="fa-regular fa-clock text-slate-400 text-[10px] shrink-0"></i><span class="font-sans opacity-80 font-medium whitespace-nowrap">${key}:</span><span class="font-bold whitespace-nowrap">${formatted}</span></span>`;
+                    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-700 shadow-2xs whitespace-nowrap shrink-0"><i class="fa-regular fa-clock text-slate-400 text-xs shrink-0"></i><span class="font-sans text-slate-400 font-medium whitespace-nowrap">${key}：</span><span class="font-bold whitespace-nowrap">${formatted}</span></span>`;
                 }
 
-                return `<span class="inline-flex flex-wrap items-center gap-1 px-2 py-0.5 rounded-lg border text-[11px] bg-slate-50 text-slate-700 border-slate-200 shadow-xs max-w-full break-words"><span class="text-slate-400 font-medium shrink-0">${key}:</span><span class="font-bold text-slate-700 break-words">${strVal}</span></span>`;
+                // 中英文常見欄位對照
+                const keyMap = {
+                    'account': '帳號',
+                    'operator': '操作者',
+                    'action': '動作',
+                    'price': '單價',
+                    'amount': '金額',
+                    'quantity': '數量',
+                    'stock': '庫存',
+                    'reason': '原因',
+                    'note': '備註',
+                    'buyer': '買家',
+                    'created_at': '建立時間',
+                    'updated_at': '更新時間'
+                };
+                const friendlyKey = keyMap[lowerKey] || key;
+
+                return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs bg-slate-50 text-slate-700 border-slate-200 shadow-2xs max-w-full break-words">
+                    <span class="text-slate-400 font-medium shrink-0">${friendlyKey}：</span>
+                    <span class="font-bold text-slate-800 break-words">${strVal}</span>
+                </span>`;
             }).filter(Boolean);
 
             if (capsules.length === 0) return '<span class="text-slate-300 font-normal">-</span>';
-            return `<div class="flex flex-col items-start gap-1.5 py-0.5 w-full max-w-full">` +
+            return `<div class="flex flex-col items-start gap-2 py-1 w-full max-w-full">` +
                 capsules.map(c => `<div class="w-full max-w-full break-words">${c}</div>`).join('') +
                 `</div>`;
         }
+
 
         function renderAuditLogs(logs) {
             const tbody = document.getElementById('auditLogTableBody');
@@ -4712,6 +4893,25 @@
             }
             if (!obj || typeof obj !== 'object') return [];
 
+            // 0. State transition records (原狀態 ➔ 新狀態)
+            if (obj['原狀態'] && obj['新狀態']) {
+                const fieldName = obj['組別'] ? (String(obj['組別']).includes('組') ? `${obj['組別']}狀態` : `第 ${obj['組別']} 組狀態`) : (l.action_type && l.action_type.includes('商品') ? '商品狀態' : '訂單狀態');
+                return [{
+                    field: fieldName,
+                    before: String(obj['原狀態']),
+                    after: String(obj['新狀態'])
+                }];
+            }
+            if (obj['狀態變更'] && typeof obj['狀態變更'] === 'string' && obj['狀態變更'].includes('➔')) {
+                const parts = obj['狀態變更'].split('➔').map(s => s.trim());
+                const fieldName = obj['組別'] ? (String(obj['組別']).includes('組') ? `${obj['組別']}狀態` : `第 ${obj['組別']} 組狀態`) : (l.action_type && l.action_type.includes('商品') ? '商品狀態' : '訂單狀態');
+                return [{
+                    field: fieldName,
+                    before: parts[0],
+                    after: parts[1]
+                }];
+            }
+
             // 1. Structured diff records array
             if (Array.isArray(obj['異動項目']) && obj['異動項目'].length > 0) {
                 return obj['異動項目'].map(item => ({
@@ -4783,6 +4983,14 @@
                         } else if (left.startsWith('餘額')) {
                             field = '商GO幣餘額';
                             left = left.replace(/^餘額\s*/, '');
+                        } else if (left.startsWith('狀態「') && left.endsWith('」')) {
+                            field = '商品狀態';
+                            left = left.replace(/^狀態「/, '').replace(/」$/, '');
+                            right = right.replace(/^「/, '').replace(/」$/, '');
+                        } else if (left.startsWith('狀態') || left.startsWith('訂單狀態')) {
+                            field = '狀態';
+                            left = left.replace(/^(訂單)?狀態\s*/, '');
+                            right = right.replace(/^(訂單)?狀態\s*/, '');
                         }
                         results.push({ field, before: left, after: right });
                     } else if (p.includes('詳細介紹')) {
@@ -4861,7 +5069,11 @@
                         <span>變更欄位清單 (${diffItems.length} 個欄位異動)</span>
                         <span class="text-[11px] text-slate-400 font-normal">Before ➔ After</span>
                     </div>
-                    ${diffItems.map(item => `
+                    ${diffItems.map(item => {
+                        const isStatus = item.field.includes('狀態');
+                        const beforeDisplay = isStatus ? window.renderStatusPill(item.before) : `<div class="font-medium text-rose-900 whitespace-pre-line break-words leading-relaxed ${item.before === '(未填寫)' ? 'italic text-rose-400' : ''}">${item.before}</div>`;
+                        const afterDisplay = isStatus ? window.renderStatusPill(item.after) : `<div class="font-black text-emerald-950 whitespace-pre-line break-words leading-relaxed">${item.after}</div>`;
+                        return `
                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
                             <div class="font-black text-slate-800 text-xs flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-brand-500"></span>
@@ -4873,18 +5085,18 @@
                                         <i class="fa-solid fa-clock-rotate-left text-[9px]"></i>
                                         <span>修改前 (舊資料)</span>
                                     </div>
-                                    <div class="font-medium text-rose-900 whitespace-pre-line break-words leading-relaxed ${item.before === '(未填寫)' ? 'italic text-rose-400' : ''}">${item.before}</div>
+                                    ${beforeDisplay}
                                 </div>
                                 <div class="p-2.5 bg-emerald-50/80 border border-emerald-300 rounded-xl space-y-1">
                                     <div class="text-[10px] font-black text-emerald-600 uppercase flex items-center gap-1">
                                         <i class="fa-solid fa-arrow-right text-[9px]"></i>
                                         <span>修改後 (新資料)</span>
                                     </div>
-                                    <div class="font-black text-emerald-950 whitespace-pre-line break-words leading-relaxed">${item.after}</div>
+                                    ${afterDisplay}
                                 </div>
                             </div>
                         </div>
-                    `).join('')}
+                    `; }).join('')}
                 </div>
             `;
         };
@@ -5004,6 +5216,22 @@
                                                             </div>
                                                             <div class="font-black text-emerald-950 whitespace-pre-line break-words leading-relaxed">${item.after}</div>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }
+
+                                        if (item.field.includes('狀態')) {
+                                            return `
+                                                <div class="p-2.5 bg-slate-50/80 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                                                    <span class="inline-flex items-center gap-1 font-black text-slate-700 shrink-0">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                        ${item.field}
+                                                    </span>
+                                                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                                        ${window.renderStatusPill(item.before)}
+                                                        <i class="fa-solid fa-arrow-right text-slate-400 text-xs"></i>
+                                                        ${window.renderStatusPill(item.after)}
                                                     </div>
                                                 </div>
                                             `;
