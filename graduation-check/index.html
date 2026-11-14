@@ -261,83 +261,53 @@ html, body {
 .card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
 .btn-group { 
-	display: grid; 
-	grid-template-columns: repeat(2, 1fr); 
-	gap: 8px; 
-	margin-top: 15px; 
-	width: 100%; 
+	display: flex !important; 
+	flex-wrap: wrap !important; 
+	gap: 8px !important; 
+	margin-top: 15px !important; 
+	width: 100% !important; 
+}
+.btn-group > * {
+	flex: 1 1 calc(50% - 8px) !important;
+	min-width: 0 !important;
 }
 
-
-.btn-group[data-btn-count="9"] {
-	grid-template-columns: repeat(3, 1fr);
-	gap: 8px;
-}
 @media (min-width: 640px) {
-	.btn-group[data-btn-count="9"] {
-		grid-template-columns: repeat(3, 1fr);
-		gap: 10px;
+	.btn-group {
+		gap: 10px !important;
+	}
+	.btn-group[data-btn-count="9"] > * {
+		flex: 1 1 calc(33.333% - 10px) !important;
+	}
+	.btn-group[data-btn-count="8"] > * {
+		flex: 1 1 calc(25% - 10px) !important;
+	}
+	.btn-group[data-btn-count="7"] > * {
+		flex: 1 1 calc(25% - 10px) !important;
 	}
 }
-
-
-.btn-group[data-btn-count="8"] {
-	grid-template-columns: repeat(2, 1fr);
-	gap: 8px;
-}
-@media (min-width: 640px) {
-	.btn-group[data-btn-count="8"] {
-		grid-template-columns: repeat(4, 1fr);
-		gap: 10px;
-	}
-}
-
-
-.btn-group[data-btn-count="7"] {
-	grid-template-columns: repeat(2, 1fr);
-	gap: 8px;
-}
-.btn-group[data-btn-count="7"] > *:last-child {
-	grid-column: span 2;
-}
-@media (min-width: 640px) {
-	.btn-group[data-btn-count="7"] {
-		grid-template-columns: repeat(4, 1fr);
-		gap: 10px;
-	}
-	.btn-group[data-btn-count="7"] > *:last-child {
-		grid-column: span 2;
-	}
-}
-
 
 @media (min-width: 1024px) {
 	.btn-group {
-		display: flex !important;
-		flex-direction: row !important;
-		flex-wrap: nowrap !important;
-		align-items: stretch !important;
-		gap: 6px !important;
+		gap: 10px !important;
 	}
-	.btn-group > * {
-		flex: 1 1 0px !important;
-		min-width: 0 !important;
-		width: 100% !important;
-		grid-column: auto !important;
+	.btn-group[data-btn-count="9"] > * {
+		flex: 1 1 calc(20% - 10px) !important;
 	}
-}
-@media (min-width: 1280px) {
-	.btn-group {
-		gap: 8px !important;
+	.btn-group[data-btn-count="8"] > * {
+		flex: 1 1 calc(25% - 10px) !important;
+	}
+	.btn-group[data-btn-count="7"] > * {
+		flex: 1 1 calc(25% - 10px) !important;
 	}
 }
 
 .action-btn { 
 	width: 100%; 
-	padding: 10px 3px; 
+	padding: 10px 6px; 
 	border: none; 
 	border-radius: 12px; 
-	font-size: 0.78rem; 
+	font-size: 0.8rem; 
 	font-weight: 800; 
 	cursor: pointer; 
 	color: white; 
@@ -345,18 +315,17 @@ html, body {
 	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
 	white-space: nowrap; 
 	text-align: center; 
-	text-overflow: ellipsis; 
-	overflow: hidden; 
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 3px;
+	gap: 5px;
 	min-width: 0;
 }
-@media (min-width: 400px) { .action-btn { font-size: 0.8rem; padding: 11px 4px; } }
-@media (min-width: 768px) { .action-btn { font-size: 0.82rem; padding: 11px 5px; } }
-@media (min-width: 1280px) { .action-btn { font-size: 0.86rem; padding: 11px 8px; } }
-@media (min-width: 1536px) { .action-btn { font-size: 0.9rem; padding: 12px 10px; } }
+@media (min-width: 400px) { .action-btn { font-size: 0.82rem; padding: 11px 8px; } }
+@media (min-width: 768px) { .action-btn { font-size: 0.84rem; padding: 11px 10px; } }
+@media (min-width: 1024px) { .action-btn { font-size: 0.85rem; padding: 12px 10px; } }
+@media (min-width: 1280px) { .action-btn { font-size: 0.88rem; padding: 12px 12px; } }
+@media (min-width: 1536px) { .action-btn { font-size: 0.9rem; padding: 12px 14px; } }
 .btn-pass-all { background: linear-gradient(135deg, #059669, #047857); }
 .btn-fail-all { background: linear-gradient(135deg, #64748b, #475569); }
 .btn-help { background: linear-gradient(135deg, #0891b2, #0e7490); }
@@ -800,12 +769,12 @@ html, body {
 					<label class="!mb-0">帳號</label>
 					<span id="authRoleHint" class="text-xs font-black text-emerald-600"></span>
 				</div>
-				<input type="text" id="authID" placeholder="請輸入帳號(學號/教職員編號)" oninput="checkAuthIdRoleHint()">
+				<input type="text" id="authID" placeholder="請輸入帳號(學號/教職員編號)" oninput="checkAuthIdRoleHint()" onkeydown="if(event.key==='Enter'){event.preventDefault();handleAuth();}">
 			</div>
 			<div id="regFields" style="display:none">
 				<div class="auth-form-group">
 					<label>姓名</label>
-					<input type="text" id="authName" placeholder="請輸入真實姓名">
+					<input type="text" id="authName" placeholder="請輸入真實姓名" onkeydown="if(event.key==='Enter'){event.preventDefault();handleAuth();}">
 				</div>
 				<div class="auth-form-group" id="regTeacherRoleGroup" style="display:none">
 					<label>請選擇身份</label>
@@ -826,9 +795,9 @@ html, body {
 			</div>
 			<div class="auth-form-group">
 				<label>密碼</label>
-				<input type="password" id="authPassword" placeholder="請輸入密碼">
+				<input type="password" id="authPassword" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter'){event.preventDefault();handleAuth();}">
 			</div>
-			<button class="auth-btn-primary" onclick="handleAuth()">確認登入</button>
+			<button type="button" class="auth-btn-primary !mt-4" onclick="handleAuth()">確認登入</button>
 			<div id="authSwitchLink" class="auth-switch-link" onclick="switchAuthMode()">尚未有帳號？點此註冊</div>
 			<div class="mt-4 border-t border-slate-100 pt-3">
 				<a href="https://lin.ee/8lAX4cB5" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#06C755] hover:bg-[#05b34c] text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-sm transition-all w-full text-center">
@@ -888,7 +857,10 @@ html, body {
 							<button class="action-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="showMissingCreditsModal()">未得學分清單</button>
 							<button class="action-btn" style="background: linear-gradient(135deg, #eab308, #ca8a04);" onclick="openIndependentPage('announceView')">📢 系統公告</button>
 							<button class="action-btn btn-feedback" onclick="openFeedbackModal()">💡 意見回饋</button>
-							<button id="pdfImportBtn" type="button" class="action-btn" style="display: none !important; background: linear-gradient(135deg, #0284c7, #0369a1);" onclick="toggleUIModal(true, 'pdfImportModal')">📄 上傳 PDF 成績單</button>
+							<button id="pdfImportBtn" type="button" class="action-btn inline-flex items-center justify-center gap-1.5" style="background: linear-gradient(135deg, #0284c7, #0369a1);" onclick="openPdfImportModal()" title="上傳 PDF 成績單 (測試功能)">
+								<span>📄 上傳 PDF 成績單</span>
+								<span class="bg-amber-400 text-slate-900 text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase leading-none shadow-xs shrink-0">測試功能</span>
+							</button>
 							<button id="saveBtn" class="action-btn btn-cloud" style="display: none;" onclick="handleMainAction()">班級資料</button>
 							<button class="action-btn btn-pass-all" onclick="confirmSetAllStatus(true)">全部及格</button>
 							<button class="action-btn btn-fail-all" onclick="confirmSetAllStatus(false)">學分歸零</button>
@@ -1310,26 +1282,49 @@ html, body {
 	<div id="pdfImportModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-lg !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-2">
-				<span class="font-black text-slate-800 text-lg flex items-center gap-2">
+				<span class="font-black text-slate-800 text-lg flex items-center gap-2 flex-wrap">
 					<span class="w-2.5 h-5 rounded-full bg-sky-600"></span>
 					📄 上傳 PDF 成績單自動匯入
+					<span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold border border-amber-300">測試功能</span>
 				</span>
 				<span class="close-modal-btn" onclick="toggleUIModal(false, 'pdfImportModal')">&times;</span>
 			</div>
-			<div class="modal-body space-y-4">
-				<div class="p-4 bg-sky-50 border border-sky-200 rounded-xl space-y-2">
-					<div class="text-xs font-black text-sky-900">👉 操作說明：</div>
-					<p class="text-xs text-sky-950/80 font-semibold leading-relaxed">
-						請上傳教務處下載的官方成績單 PDF（如 <code class="bg-white px-1 py-0.5 rounded border border-sky-200 font-mono text-[11px]">A0259R1.pdf</code>）。系統將自動辨識各科成績及狀態（包含重修及格 R），自動幫您打勾並計算學分！
+			<div class="modal-body space-y-3" id="pdfModalInitialView">
+				<div class="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1">
+					<div class="text-xs font-black text-amber-900 flex items-center gap-1.5">
+						<i class="fa-solid fa-flask-vial text-amber-600"></i> 【測試功能說明】
+					</div>
+					<p class="text-xs text-amber-950/80 font-medium leading-relaxed">
+						此功能目前為測試版本，專為學校標準成績單（報表代號 <code class="bg-white px-1.5 py-0.5 rounded border border-amber-300 font-mono text-[11px] font-bold text-amber-800">A0259R1.pdf</code>）設計。匯入後請務必於預覽畫面核對科目與學分，正式畢業學分資格仍以學校教務處成績審查為準。
+					</p>
+				</div>
+				<div class="p-3.5 bg-sky-50 border border-sky-200 rounded-xl space-y-1.5">
+					<div class="text-xs font-black text-sky-900 flex items-center gap-1.5">
+						<i class="fa-solid fa-circle-info text-sky-600"></i> 操作說明：
+					</div>
+					<p class="text-xs text-sky-950/80 font-medium leading-relaxed">
+						請上傳由學校成績系統下載之官方成績單 PDF（如 <code class="bg-white px-1.5 py-0.5 rounded border border-sky-200 font-mono text-[11px] font-bold text-sky-700">A0259R1.pdf</code>）。系統將精確辨識補考及格（*）、重修及格（R）、學年及格（&amp;）與各學期學分，提供預覽核對後一鍵套用！
 					</p>
 				</div>
 				<div class="input-group mb-0">
 					<label class="text-xs font-black text-slate-700 mb-1">選擇成績單 PDF 檔案</label>
-					<input type="file" id="pdfFileInput" accept=".pdf" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer border border-slate-300 rounded-xl p-1 bg-white">
+					<input type="file" id="pdfFileInput" accept=".pdf" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer border border-slate-300 rounded-xl p-1 bg-white" onchange="handlePdfFileSelected()">
 				</div>
-				<button type="button" id="parsePdfBtn" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-sm shadow-md transition" onclick="handlePdfImport()">
-					⚡ 解析 PDF 並自動同步學分
+				<button type="button" id="parsePdfBtn" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-sm shadow-md transition disabled:opacity-50" onclick="handlePdfImport()">
+					⚡ 開始解析 PDF 成績單
 				</button>
+			</div>
+			<div class="modal-body space-y-3 hidden" id="pdfModalPreviewView">
+				<!-- Dynamically generated preview -->
+				<div id="pdfParsedPreviewContainer"></div>
+				<div class="flex items-center gap-2 pt-2">
+					<button type="button" class="flex-1 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-extrabold text-xs transition" onclick="resetPdfModalView()">
+						← 重新選擇檔案
+					</button>
+					<button type="button" id="applyPdfCreditsBtn" class="flex-2 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-1.5" onclick="applyPdfParsedCredits()">
+						<i class="fa-solid fa-check"></i> 確認套用成績至檢核表
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -5063,6 +5058,25 @@ window.initCopyrightYear = function() {
 };
 
 window.addEventListener('keydown', function(e) {
+	const authWorkspace = document.getElementById('authWorkspace');
+	if (authWorkspace && authWorkspace.style.display !== 'none') {
+		const authScreen = document.getElementById('authScreen');
+		if (authScreen && authScreen.contains(e.target) && e.key === 'Enter') {
+			e.preventDefault();
+			handleAuth();
+			return;
+		}
+	}
+	const forceChangeModal = document.getElementById('forceChangePasswordModal');
+	if (forceChangeModal && forceChangeModal.style.display === 'flex') {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			if (typeof submitForceChangePassword === 'function') {
+				submitForceChangePassword();
+			}
+			return;
+		}
+	}
 	const confirmModal = document.getElementById('confirmModal');
 	if (confirmModal && confirmModal.style.display === 'flex') {
 		if (e.key === 'Enter') {
@@ -5150,6 +5164,54 @@ if (document.readyState === 'loading') {
 	startApplication();
 }
 
+let pendingPdfParsedData = null;
+
+window.openPdfImportModal = function() {
+	resetPdfModalView();
+	toggleUIModal(true, 'pdfImportModal');
+};
+
+window.resetPdfModalView = function() {
+	pendingPdfParsedData = null;
+	const fileInput = document.getElementById('pdfFileInput');
+	if (fileInput) fileInput.value = '';
+	const initView = document.getElementById('pdfModalInitialView');
+	const prevView = document.getElementById('pdfModalPreviewView');
+	if (initView) initView.classList.remove('hidden');
+	if (prevView) prevView.classList.add('hidden');
+	const parseBtn = document.getElementById('parsePdfBtn');
+	if (parseBtn) {
+		parseBtn.disabled = false;
+		parseBtn.innerHTML = '⚡ 開始解析 PDF 成績單';
+	}
+};
+
+window.handlePdfFileSelected = function() {
+	const fileInput = document.getElementById('pdfFileInput');
+	const parseBtn = document.getElementById('parsePdfBtn');
+	if (fileInput && fileInput.files && fileInput.files.length > 0 && parseBtn) {
+		parseBtn.disabled = false;
+	}
+};
+
+function parseScoreSshs(s) {
+	if (!s) return { str: '', passed: false };
+	s = String(s).trim();
+	if (s.includes('R') || s.includes('&') || s.includes('%')) {
+		return { str: s, passed: true };
+	}
+	const num = parseFloat(s.replace(/[^\d.]/g, ''));
+	return { str: s, passed: !isNaN(num) && num >= 60 };
+}
+
+function parseCreditsFromFraction(cStr) {
+	if (!cStr) return [0, 0];
+	const parts = cStr.split('/');
+	const c1 = parseInt(parts[0], 10) || 0;
+	const c2 = parseInt(parts[1], 10) || 0;
+	return [c1, c2];
+}
+
 window.handlePdfImport = async function() {
 	const fileInput = document.getElementById('pdfFileInput');
 	if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
@@ -5158,10 +5220,9 @@ window.handlePdfImport = async function() {
 	}
 	const file = fileInput.files[0];
 	const parseBtn = document.getElementById('parsePdfBtn');
-	const originalText = parseBtn ? parseBtn.innerHTML : '';
 	if (parseBtn) {
 		parseBtn.disabled = true;
-		parseBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> 正在解析 PDF 成績單...';
+		parseBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> 正在解析官方成績單...';
 	}
 
 	try {
@@ -5170,46 +5231,279 @@ window.handlePdfImport = async function() {
 		}
 		const arrayBuffer = await file.arrayBuffer();
 		const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-		let fullText = '';
-		for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-			const page = await pdf.getPage(pageNum);
-			const textContent = await page.getTextContent();
-			const pageText = textContent.items.map(item => item.str).join(' ');
-			fullText += ' ' + pageText;
+		const page1 = await pdf.getPage(1);
+		const viewport = page1.getViewport({ scale: 1.0 });
+		const pageHeight = viewport.height;
+		const textContent = await page1.getTextContent();
+
+		const items = [];
+		textContent.items.forEach(it => {
+			const str = (it.str || '').trim();
+			if (!str) return;
+			const x = it.transform[4];
+			const y = pageHeight - it.transform[5];
+			items.push({ str, x, y });
+		});
+
+		const fullText = items.map(i => i.str).join(' ');
+
+		let studentId = '', studentName = '', className = '', seatNo = '';
+		const mSid = fullText.match(/學號[：:\s]*(\w+)/) || fullText.match(/(\d{6})/);
+		const mName = fullText.match(/姓名[：:\s]*([\u4e00-\u9fa5]{2,4})/);
+		const mClass = fullText.match(/班級[：:\s]*([\u4e00-\u9fa50-9]+)/);
+		const mSeat = fullText.match(/座號[：:\s]*(\d+)/);
+
+		if (mSid) studentId = mSid[1];
+		if (mName) studentName = mName[1];
+		if (mClass) className = mClass[1];
+		if (mSeat) seatNo = mSeat[1];
+
+		let entryYear = '113';
+		if (fullText.includes('114 學年度') && !fullText.includes('113 學年度')) entryYear = '114';
+		else if (fullText.includes('113 學年度')) entryYear = '113';
+		else if (studentId.startsWith('4')) entryYear = '114';
+		else if (studentId.startsWith('3')) entryYear = '113';
+
+		const deptMap = { '商': '商經科-9', '資': '資處科-10', '農': '農經科-7', '園': '園藝科-8', '體': '體育班-5', '普': '普通科(理工生醫群)-1' };
+		let detectedDept = '商經科-9';
+		for (const [k, v] of Object.entries(deptMap)) {
+			if (className.includes(k)) { detectedDept = v; break; }
 		}
 
-		let matchedCount = 0;
-		document.querySelectorAll('.toggle-checkbox').forEach(chk => {
-			const courseName = (chk.dataset.name || '').replace(/\s+/g, '');
-			if (!courseName) return;
-			if (fullText.includes(courseName)) {
-				const idx = fullText.indexOf(courseName);
-				const snippet = fullText.slice(idx, idx + courseName.length + 30);
-				const hasPass = /\b(100|[6-9]\d)\b|及格|通過|R/i.test(snippet);
-				if (hasPass) {
-					chk.checked = true;
-					matchedCount++;
+		const rowsByY = {};
+		items.forEach(it => {
+			if (it.y < 120 || it.y > 720) return;
+			let matchedY = null;
+			for (const ry of Object.keys(rowsByY)) {
+				if (Math.abs(it.y - parseFloat(ry)) < 6) {
+					matchedY = ry; break;
 				}
+			}
+			if (matchedY === null) {
+				matchedY = String(it.y);
+				rowsByY[matchedY] = [];
+			}
+			rowsByY[matchedY].push(it);
+		});
+
+		const semCourses = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [] };
+
+		Object.keys(rowsByY).map(Number).sort((a, b) => a - b).forEach(ry => {
+			const rWords = rowsByY[String(ry)].sort((a, b) => a.x - b.x);
+			const courseName = rWords.filter(w => w.x < 95).map(w => w.str).join('').trim();
+			if (!courseName || ['加權', '學業成績', '班級', '年級', '名次', '此為電子'].some(k => courseName.includes(k))) return;
+
+			// 113 block (sem 0 & sem 1)
+			const c113Str = rWords.filter(w => w.x >= 95 && w.x < 125).map(w => w.str).join('');
+			const s0Score = rWords.filter(w => w.x >= 125 && w.x < 155).map(w => w.str).join('');
+			const s1Score = rWords.filter(w => w.x >= 175 && w.x < 205).map(w => w.str).join('');
+			const [c113Up, c113Down] = parseCreditsFromFraction(c113Str);
+
+			if (c113Up > 0) {
+				const sc = parseScoreSshs(s0Score);
+				semCourses[0].push({ name: courseName, credits: c113Up, score: sc.str, passed: sc.passed });
+			}
+			if (c113Down > 0) {
+				const sc = parseScoreSshs(s1Score);
+				semCourses[1].push({ name: courseName, credits: c113Down, score: sc.str, passed: sc.passed });
+			}
+
+			// 114 block (sem 2 & sem 3)
+			const c114Str = rWords.filter(w => w.x >= 255 && w.x < 285).map(w => w.str).join('');
+			const s2Score = rWords.filter(w => w.x >= 285 && w.x < 315).map(w => w.str).join('');
+			const s3Score = rWords.filter(w => w.x >= 335 && w.x < 365).map(w => w.str).join('');
+			const [c114Up, c114Down] = parseCreditsFromFraction(c114Str);
+
+			if (c114Up > 0) {
+				const sc = parseScoreSshs(s2Score);
+				semCourses[2].push({ name: courseName, credits: c114Up, score: sc.str, passed: sc.passed });
+			}
+			if (c114Down > 0) {
+				const sc = parseScoreSshs(s3Score);
+				semCourses[3].push({ name: courseName, credits: c114Down, score: sc.str, passed: sc.passed });
+			}
+
+			// 115 block (sem 4 & sem 5)
+			const c115Str = rWords.filter(w => w.x >= 415 && w.x < 445).map(w => w.str).join('');
+			const s4Score = rWords.filter(w => w.x >= 445 && w.x < 475).map(w => w.str).join('');
+			const s5Score = rWords.filter(w => w.x >= 495 && w.x < 525).map(w => w.str).join('');
+			const [c115Up, c115Down] = parseCreditsFromFraction(c115Str);
+
+			if (c115Up > 0) {
+				const sc = parseScoreSshs(s4Score);
+				semCourses[4].push({ name: courseName, credits: c115Up, score: sc.str, passed: sc.passed });
+			}
+			if (c115Down > 0) {
+				const sc = parseScoreSshs(s5Score);
+				semCourses[5].push({ name: courseName, credits: c115Down, score: sc.str, passed: sc.passed });
 			}
 		});
 
-		calculate();
-		renderTable();
-		debouncedSaveToCloud({ actionType: "PDF成績單自動匯入" });
+		let totalTaken = 0, totalEarned = 0;
+		for (let i = 0; i < 6; i++) {
+			semCourses[i].forEach(c => {
+				totalTaken += c.credits;
+				if (c.passed) totalEarned += c.credits;
+			});
+		}
 
-		showMsg(`已成功解析 PDF 並標記 ${matchedCount} 門科目學分！`);
-		toggleUIModal(false, 'pdfImportModal');
+		if (totalTaken === 0) {
+			throw new Error("未能自 PDF 中辨識出有效成績項目，請確認上傳之 PDF 是否為標準成績表！");
+		}
+
+		pendingPdfParsedData = {
+			studentId, studentName, className, seatNo, entryYear, detectedDept,
+			semCourses, totalTaken, totalEarned
+		};
+
+		renderPdfPreview(pendingPdfParsedData);
 	} catch (e) {
 		showMsg("解析 PDF 失敗：" + e.message, "error");
-	} finally {
 		if (parseBtn) {
 			parseBtn.disabled = false;
-			parseBtn.innerHTML = originalText;
+			parseBtn.innerHTML = '⚡ 開始解析 PDF 成績單';
 		}
 	}
 };
 
+function renderPdfPreview(data) {
+	const initView = document.getElementById('pdfModalInitialView');
+	const prevView = document.getElementById('pdfModalPreviewView');
+	const container = document.getElementById('pdfParsedPreviewContainer');
+	if (!container || !initView || !prevView) return;
 
+	initView.classList.add('hidden');
+	prevView.classList.remove('hidden');
+
+	const semNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
+	let semCardsHtml = '';
+
+	for (let i = 0; i < 6; i++) {
+		const list = data.semCourses[i] || [];
+		if (list.length === 0) continue;
+		const sTaken = list.reduce((a, b) => a + b.credits, 0);
+		const sEarned = list.filter(c => c.passed).reduce((a, b) => a + b.credits, 0);
+		const failedList = list.filter(c => !c.passed);
+
+		let failedHtml = '';
+		if (failedList.length > 0) {
+			failedHtml = `<div class="mt-1.5 pt-1.5 border-t border-slate-200 text-[11px] text-red-600 font-bold">
+				未得學分科目：${failedList.map(f => `${escapeHtml(f.name)}(${f.credits}學分·${escapeHtml(f.score)})`).join('、')}
+			</div>`;
+		} else {
+			failedHtml = `<div class="mt-1 text-[11px] text-emerald-600 font-black">🎉 本學期全數及格取得學分！</div>`;
+		}
+
+		semCardsHtml += `
+			<div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+				<div class="flex items-center justify-between text-xs font-black text-slate-700">
+					<span>📅 ${semNames[i]}</span>
+					<span class="${sEarned === sTaken ? 'text-emerald-600' : 'text-amber-600'}">實得 ${sEarned} / ${sTaken} 學分</span>
+				</div>
+				${failedHtml}
+			</div>
+		`;
+	}
+
+	container.innerHTML = `
+		<div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+			<div>
+				<div class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
+					<i class="fa-solid fa-id-card text-emerald-600"></i>
+					<span>${escapeHtml(data.studentName || '學生')}</span>
+					<span class="text-[11px] text-emerald-700 font-normal">(${escapeHtml(data.studentId || '')} ｜ ${escapeHtml(data.className || '')})</span>
+				</div>
+				<div class="text-[11px] text-emerald-700 font-extrabold mt-0.5">
+					建議檢核版本：${escapeHtml(data.entryYear)} 年入學 ｜ ${escapeHtml(data.detectedDept)}
+				</div>
+			</div>
+			<div class="flex flex-col items-end gap-1 shrink-0">
+				<span class="text-[11px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-lg shadow-xs">解析成功</span>
+				<span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded border border-amber-300">測試功能試算</span>
+			</div>
+		</div>
+		<div class="grid grid-cols-2 gap-2">
+			<div class="p-2.5 bg-slate-100/80 border border-slate-200 rounded-xl text-center">
+				<div class="text-[10px] font-black text-slate-500">累計實得學分數</div>
+				<div class="text-xl font-black text-emerald-600">${data.totalEarned} <span class="text-xs font-bold text-slate-500">學分</span></div>
+			</div>
+			<div class="p-2.5 bg-slate-100/80 border border-slate-200 rounded-xl text-center">
+				<div class="text-[10px] font-black text-slate-500">累計修習學分數</div>
+				<div class="text-xl font-black text-slate-700">${data.totalTaken} <span class="text-xs font-bold text-slate-500">學分</span></div>
+			</div>
+		</div>
+		<div class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+			${semCardsHtml}
+		</div>
+		<div class="p-2 bg-amber-50/80 border border-amber-200 rounded-xl text-[11px] text-amber-900 font-medium leading-relaxed flex items-center gap-1.5">
+			<i class="fa-solid fa-triangle-exclamation text-amber-600 shrink-0"></i>
+			<span>【測試功能提醒】此試算結果由 PDF 自動萃取，套用後請核對各學期勾選；正式資格依學校教務處公告為準。</span>
+		</div>
+	`;
+}
+
+function matchCourseCheckbox(pdfCourseName, semIdx, domCheckboxes) {
+	const cleanPdfName = pdfCourseName.replace(/\(彈性\)|\(校定\)|\(必修\)|\(選修\)|\s+/g, '');
+	for (const chk of domCheckboxes) {
+		if (parseInt(chk.dataset.sem, 10) !== semIdx) continue;
+		const domName = (chk.dataset.name || '').replace(/\s+/g, '');
+		if (domName === cleanPdfName) return chk;
+		if (cleanPdfName === '閩南語文' && domName === '本土語文') return chk;
+		if (domName.includes('跨群選修') && ['香菇產銷實務', '生活園藝實務', '蔬果加工', '農園場實務'].includes(cleanPdfName)) return chk;
+		if (domName.includes('彈性選修') && (cleanPdfName.includes('田野在走') || cleanPdfName.includes('讀懂一篇好報告') || cleanPdfName.includes('果樹產業') || cleanPdfName.includes('達人訪談') || cleanPdfName.includes('簡報達人'))) return chk;
+		if (domName.includes(cleanPdfName) || cleanPdfName.includes(domName)) return chk;
+	}
+	return null;
+}
+
+window.applyPdfParsedCredits = async function() {
+	if (!pendingPdfParsedData) return;
+	const { entryYear, detectedDept, semCourses, totalEarned, studentName, studentId } = pendingPdfParsedData;
+
+	// Check if current curriculum matches; if not, select the parsed version
+	if (currentYear !== entryYear || currentDept !== detectedDept) {
+		selectCurriculum(entryYear, detectedDept);
+		const yrSel = document.getElementById('dashSelectYear');
+		const dpSel = document.getElementById('dashSelectDept');
+		if (yrSel) yrSel.value = entryYear;
+		if (dpSel) dpSel.value = detectedDept;
+		renderTable();
+	}
+
+	const domCheckboxes = Array.from(document.querySelectorAll('.toggle-checkbox'));
+	domCheckboxes.forEach(chk => { chk.checked = false; });
+	let appliedCount = 0;
+
+	for (let sIdx = 0; sIdx < 6; sIdx++) {
+		const list = semCourses[sIdx] || [];
+		list.forEach(c => {
+			const chk = matchCourseCheckbox(c.name, sIdx, domCheckboxes);
+			if (chk) {
+				chk.checked = c.passed;
+				appliedCount++;
+			}
+		});
+	}
+
+	calculate();
+	if (typeof updateAllSemesterCardsProgress === 'function') {
+		updateAllSemesterCardsProgress();
+	}
+	syncDomChecksToRecord();
+	await flushPendingSave();
+	await debouncedSaveToCloud({
+		actionType: "PDF成績單自動匯入",
+		details: {
+			student_name: studentName,
+			student_id: studentId,
+			total_earned: totalEarned,
+			matched_courses: appliedCount
+		}
+	});
+
+	toggleUIModal(false, 'pdfImportModal');
+	showMsg(`🎉 成功匯入 ${escapeHtml(studentName || '學生')} 的成績單！共取得 ${totalEarned} 學分！`);
+};
 </script>
 </body>
 </html>
