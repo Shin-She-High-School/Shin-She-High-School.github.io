@@ -26,11 +26,9 @@
 *, *::before, *::after {
 	box-sizing: border-box;
 }
-
 html, body, input, select, button, textarea {
 	font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
 }
-
 html, body {
 	margin: 0;
 	padding: 0;
@@ -44,181 +42,171 @@ html, body {
 	width: 100%;
 	max-width: 100vw;
 }
-
 #scrollContainer {
 	overflow-x: hidden !important;
 }
-
 @media (min-width: 768px) { html, body { font-size: 16px; } }
 @media (min-width: 1600px) { html, body { font-size: 17px; } }
 @media (min-width: 1920px) { html, body { font-size: 18px; } }
-
-.app-container { 
-	width: 100%; 
-	max-width: 1680px; 
-	margin: 0 auto; 
-	padding: 0 12px; 
+.app-container {
+	width: 100%;
+	max-width: 1680px;
+	margin: 0 auto;
+	padding: 0 12px;
 }
 @media (min-width: 640px) { .app-container { padding: 0 20px; } }
 @media (min-width: 1600px) { .app-container { padding: 0 32px; } }
-
 .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
-#authWorkspace { 
-	position: fixed; 
-	inset: 0; 
-	background: linear-gradient(135deg, #052e16 0%, #022c22 40%, #091a14 100%); 
-	display: flex; 
-	align-items: center; 
-	justify-content: center; 
-	padding: 20px; 
-	z-index: 9999; 
-	overflow: hidden; 
+#authWorkspace {
+	position: fixed;
+	inset: 0;
+	background: linear-gradient(135deg, #052e16 0%, #022c22 40%, #091a14 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	z-index: 9999;
+	overflow: hidden;
 }
 .auth-glow-1 { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0) 70%); top: -150px; right: -150px; pointer-events: none; }
 .auth-glow-2 { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, rgba(56, 189, 248, 0) 70%); bottom: -200px; left: -200px; pointer-events: none; }
-.auth-card { 
-	background: rgba(255, 255, 255, 0.98); 
-	backdrop-filter: blur(12px); 
-	width: 100%; 
-	max-width: 400px; 
-	border-radius: 24px; 
-	padding: 30px 25px; 
-	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.05); 
-	border: 1px solid rgba(255, 255, 255, 0.5); 
-	position: relative; 
-	z-index: 2; 
-	animation: cardSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); 
+.auth-card {
+	background: rgba(255, 255, 255, 0.98);
+	backdrop-filter: blur(12px);
+	width: 100%;
+	max-width: 400px;
+	border-radius: 24px;
+	padding: 30px 25px;
+	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	position: relative;
+	z-index: 2;
+	animation: cardSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-@keyframes cardSlideUp { 
-	from { opacity: 0; transform: translateY(30px); } 
-	to { opacity: 1; transform: translateY(0); } 
+@keyframes cardSlideUp {
+	from { opacity: 0; transform: translateY(30px); }
+	to { opacity: 1; transform: translateY(0); }
 }
 .auth-title { font-size: 1.45rem; font-weight: 800; color: #0f291e; margin: 0; letter-spacing: 0.5px; text-align: center; }
 .auth-subtitle { font-size: 0.85rem; color: #334155; margin-top: 6px; margin-bottom: 25px; text-align: center; font-weight: 600; }
 .auth-form-group { margin-bottom: 16px; text-align: left; }
 .auth-form-group label { display: block; font-size: 0.85rem; font-weight: 800; color: #1e293b; margin-bottom: 6px; letter-spacing: 0.5px; }
-.auth-form-group input, .auth-form-group select { 
-	width: 100%; 
-	padding: 11px 14px; 
-	border: 1.5px solid #94a3b8; 
-	border-radius: 10px; 
-	font-size: 0.95rem; 
-	color: #0f172a; 
-	background-color: #fff; 
-	outline: none; 
-	transition: all 0.2s ease; 
-	font-weight: 600; 
+.auth-form-group input, .auth-form-group select {
+	width: 100%;
+	padding: 11px 14px;
+	border: 1.5px solid #94a3b8;
+	border-radius: 10px;
+	font-size: 0.95rem;
+	color: #0f172a;
+	background-color: #fff;
+	outline: none;
+	transition: all 0.2s ease;
+	font-weight: 600;
 }
-.auth-form-group input:focus, .auth-form-group select:focus { 
-	border-color: #10b981; 
-	box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); 
+.auth-form-group input:focus, .auth-form-group select:focus {
+	border-color: #10b981;
+	box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
 }
-.auth-btn-primary { 
-	background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-	width: 100%; 
-	color: white; 
-	border: none; 
-	padding: 12.5px; 
-	border-radius: 12px; 
-	font-size: 0.98rem; 
-	font-weight: 800; 
-	cursor: pointer; 
-	box-shadow: 0 6px 15px rgba(5, 150, 105, 0.2); 
-	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-	margin-top: 10px; 
-	letter-spacing: 1px; 
+.auth-btn-primary {
+	background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+	width: 100%;
+	color: white;
+	border: none;
+	padding: 12.5px;
+	border-radius: 12px;
+	font-size: 0.98rem;
+	font-weight: 800;
+	cursor: pointer;
+	box-shadow: 0 6px 15px rgba(5, 150, 105, 0.2);
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	margin-top: 10px;
+	letter-spacing: 1px;
 }
-.auth-btn-primary:hover { 
-	transform: translateY(-2px); 
-	box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3); 
-	filter: brightness(1.05); 
+.auth-btn-primary:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
+	filter: brightness(1.05);
 }
 .auth-switch-link { text-align: center; margin-top: 20px; font-size: 0.88rem; color: #334155; cursor: pointer; font-weight: 700; transition: color 0.2s; }
 .auth-switch-link:hover { color: #059669; text-decoration: underline; }
-
-#statusHeader { 
-	background: linear-gradient(135deg, #0f172a, #020617); 
-	color: #f8fafc; 
-	padding-top: calc(12px + env(safe-area-inset-top, 0px)); 
-	padding-bottom: 12px; 
-	box-shadow: 0 2px 10px rgba(0,0,0,0.15); 
+#statusHeader {
+	background: linear-gradient(135deg, #0f172a, #020617);
+	color: #f8fafc;
+	padding-top: calc(12px + env(safe-area-inset-top, 0px));
+	padding-bottom: 12px;
+	box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
-#userStatusDisplay { 
-	font-size: 0.92rem; 
-	font-weight: 600; 
-	color: #e2e8f0; 
-	display: flex; 
-	align-items: center; 
-	justify-content: space-between; 
-	flex-wrap: wrap; 
-	gap: 10px; 
-	width: 100%; 
+#userStatusDisplay {
+	font-size: 0.92rem;
+	font-weight: 600;
+	color: #e2e8f0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 10px;
+	width: 100%;
 }
 .user-info-actions { display: flex; align-items: center; gap: 12px; }
 #userStatusDisplay a { color: #38bdf8; text-decoration: none; font-weight: 800; transition: color 0.2s; }
 #userStatusDisplay a:hover { color: #7dd3fc; text-decoration: underline; }
-
-.marquee-container { 
-	background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); 
-	color: #f1f5f9; 
-	padding: 8px 16px; 
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
-	font-size: 0.85rem; 
-	display: flex; 
-	align-items: center; 
-	gap: 12px; 
-	overflow: hidden; 
-	position: relative; 
+.marquee-container {
+	background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+	color: #f1f5f9;
+	padding: 8px 16px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	font-size: 0.85rem;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	overflow: hidden;
+	position: relative;
 }
-.marquee-content { 
-	display: flex; 
-	align-items: center; 
-	gap: 24px; 
-	white-space: nowrap; 
-	animation: marqueeScroll 25s linear infinite; 
+.marquee-content {
+	display: flex;
+	align-items: center;
+	gap: 24px;
+	white-space: nowrap;
+	animation: marqueeScroll 25s linear infinite;
 }
 .marquee-container:hover .marquee-content { animation-play-state: paused; }
-@keyframes marqueeScroll { 
-	0% { transform: translateX(100%); } 
-	100% { transform: translateX(-100%); } 
+@keyframes marqueeScroll {
+	0% { transform: translateX(100%); }
+	100% { transform: translateX(-100%); }
 }
-
-.sync-badge { 
-	font-size: 0.78rem; 
-	font-weight: 800; 
-	padding: 4px 10px; 
-	border-radius: 20px; 
-	background-color: rgba(255, 255, 255, 0.15); 
-	color: #cbd5e1; 
-	display: inline-flex; 
-	align-items: center; 
-	gap: 6px; 
-	transition: all 0.3s; 
+.sync-badge {
+	font-size: 0.78rem;
+	font-weight: 800;
+	padding: 4px 10px;
+	border-radius: 20px;
+	background-color: rgba(255, 255, 255, 0.15);
+	color: #cbd5e1;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	transition: all 0.3s;
 }
 .sync-offline { color: #fca5a5; background-color: rgba(239, 68, 68, 0.25); }
 .sync-saving { color: #93c5fd; background-color: rgba(59, 130, 246, 0.25); }
 .sync-success { color: #6ee7b7; background-color: rgba(16, 185, 129, 0.25); }
-
-.status-bar { 
-	text-align: center; 
-	font-size: 1rem; 
-	font-weight: 900; 
-	padding: 12px; 
-	margin-bottom: 15px; 
-	border-radius: 12px; 
-	color: white; 
-	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); 
-	letter-spacing: 1px; 
-	transition: all 0.3s; 
+.status-bar {
+	text-align: center;
+	font-size: 1rem;
+	font-weight: 900;
+	padding: 12px;
+	margin-bottom: 15px;
+	border-radius: 12px;
+	color: white;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+	letter-spacing: 1px;
+	transition: all 0.3s;
 }
 @media (min-width: 768px) { .status-bar { font-size: 1.25rem; } }
 .status-pass { background: linear-gradient(135deg, #059669, #047857); }
 .status-fail { background: linear-gradient(135deg, #dc2626, #b91c1c); }
-
 .admin-edit-banner {
 	background: #4f46e5;
 	color: white;
@@ -229,49 +217,45 @@ html, body {
 	margin-bottom: 16px;
 	box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
 }
-
-.result-grid { 
-	display: grid; 
-	gap: 10px; 
-	margin: 10px 0 20px 0; 
-	width: 100%; 
+.result-grid {
+	display: grid;
+	gap: 10px;
+	margin: 10px 0 20px 0;
+	width: 100%;
 }
 .result-grid.grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 640px) { .result-grid.grid-cols-4 { grid-template-columns: repeat(4, 1fr); } }
 .result-grid.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 480px) { .result-grid.grid-cols-3 { grid-template-columns: repeat(1, 1fr); } }
-
-.result-card { 
-	background-color: #fff; 
-	padding: 16px 12px; 
-	border: 1.5px solid #cbd5e1; 
-	border-radius: 16px; 
-	text-align: center; 
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03); 
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-	display: flex; 
-	flex-direction: column; 
-	justify-content: space-between; 
-	min-height: 100px; 
-	min-width: 0; 
+.result-card {
+	background-color: #fff;
+	padding: 16px 12px;
+	border: 1.5px solid #cbd5e1;
+	border-radius: 16px;
+	text-align: center;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	min-height: 100px;
+	min-width: 0;
 }
 .result-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08); border-color: #94a3b8; }
 .card-title { font-size: 0.78rem; font-weight: 800; color: #334155; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-progress-bg { width: 100%; background-color: #cbd5e1; height: 7px; border-radius: 4px; margin-top: 8px; overflow: hidden; }
 .card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-
-.btn-group { 
-	display: flex !important; 
-	flex-wrap: wrap !important; 
-	gap: 8px !important; 
-	margin-top: 15px !important; 
-	width: 100% !important; 
+.btn-group {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: 8px !important;
+	margin-top: 15px !important;
+	width: 100% !important;
 }
 .btn-group > * {
 	flex: 1 1 calc(50% - 8px) !important;
 	min-width: 0 !important;
 }
-
 @media (min-width: 640px) {
 	.btn-group {
 		gap: 10px !important;
@@ -286,7 +270,6 @@ html, body {
 		flex: 1 1 calc(25% - 10px) !important;
 	}
 }
-
 @media (min-width: 1024px) {
 	.btn-group {
 		gap: 10px !important;
@@ -301,20 +284,19 @@ html, body {
 		flex: 1 1 calc(25% - 10px) !important;
 	}
 }
-
-.action-btn { 
-	width: 100%; 
-	padding: 10px 6px; 
-	border: none; 
-	border-radius: 12px; 
-	font-size: 0.8rem; 
-	font-weight: 800; 
-	cursor: pointer; 
-	color: white; 
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08); 
-	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-	white-space: nowrap; 
-	text-align: center; 
+.action-btn {
+	width: 100%;
+	padding: 10px 6px;
+	border: none;
+	border-radius: 12px;
+	font-size: 0.8rem;
+	font-weight: 800;
+	cursor: pointer;
+	color: white;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	white-space: nowrap;
+	text-align: center;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -332,116 +314,110 @@ html, body {
 .btn-feedback { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 .btn-cloud { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 .btn-admin { background: linear-gradient(135deg, #4f46e5, #4338ca); }
-
-.mobile-cards-grid { 
-	display: grid !important; 
-	grid-template-columns: 1fr; 
-	gap: 16px; 
-	margin-top: 15px; 
-	margin-bottom: 30px; 
+.mobile-cards-grid {
+	display: grid !important;
+	grid-template-columns: 1fr;
+	gap: 16px;
+	margin-top: 15px;
+	margin-bottom: 30px;
 }
 @media (min-width: 768px) { .mobile-cards-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 @media (min-width: 1400px) { .mobile-cards-grid { grid-template-columns: repeat(3, 1fr) !important; } }
-
-.mobile-card, .semester-card { 
-	background-color: white; 
-	border: 1.5px solid #cbd5e1; 
-	border-radius: 16px; 
-	padding: 18px; 
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03); 
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-	min-width: 0; 
+.mobile-card, .semester-card {
+	background-color: white;
+	border: 1.5px solid #cbd5e1;
+	border-radius: 16px;
+	padding: 18px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	min-width: 0;
 }
 .mobile-semesters-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 @media (min-width: 480px) { .mobile-semesters-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; } }
 .mobile-sem-item { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; }
 .mobile-sem-label { font-size: 0.78rem; color: #334155; font-weight: 700; }
-.mobile-score-box { 
-	width: 100%; 
-	height: 42px; 
-	border-radius: 8px; 
-	overflow: hidden; 
-	display: flex; 
-	align-items: center; 
-	justify-content: center; 
-	background-color: transparent; 
-	position: relative; 
+.mobile-score-box {
+	width: 100%;
+	height: 42px;
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: transparent;
+	position: relative;
 }
-
 .toggle-checkbox { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
 .toggle-checkbox.sem-checkbox { position: absolute !important; opacity: 0 !important; width: 0 !important; height: 0 !important; pointer-events: none !important; }
-.sem-item-row { 
-	background-color: #fef2f2; 
-	border: 1.5px solid #fca5a5; 
-	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-	cursor: pointer; 
-	border-radius: 12px; 
+.sem-item-row {
+	background-color: #fef2f2;
+	border: 1.5px solid #fca5a5;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	cursor: pointer;
+	border-radius: 12px;
 }
 .sem-item-row:hover { border-color: #f87171; background-color: #fee2e2; }
-.sem-item-row:has(.sem-checkbox:checked) { 
-	background-color: #f0fdf4 !important; 
-	border-color: #86efac !important; 
-	box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08); 
+.sem-item-row:has(.sem-checkbox:checked) {
+	background-color: #f0fdf4 !important;
+	border-color: #86efac !important;
+	box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08);
 }
-.sem-item-row:has(.sem-checkbox:checked) .custom-check-box { 
-	background-color: #10b981; 
-	border-color: #10b981; 
-	transform: scale(1.05); 
+.sem-item-row:has(.sem-checkbox:checked) .custom-check-box {
+	background-color: #10b981;
+	border-color: #10b981;
+	transform: scale(1.05);
 }
-.sem-item-row:has(.sem-checkbox:checked) .custom-check-box i { 
-	opacity: 1; 
-	transform: scale(1); 
+.sem-item-row:has(.sem-checkbox:checked) .custom-check-box i {
+	opacity: 1;
+	transform: scale(1);
 }
-.custom-check-box { 
-	border-color: #f87171; 
-	background-color: #ffffff; 
+.custom-check-box {
+	border-color: #f87171;
+	background-color: #ffffff;
 }
-
-.score-label { 
-	display: flex; 
-	align-items: center; 
-	justify-content: center; 
-	width: 100%; 
-	height: 100%; 
-	cursor: pointer; 
-	font-weight: 900; 
-	font-size: 1.15rem; 
-	position: relative; 
-	border-radius: 8px; 
-	transition: all 0.15s ease; 
-	border: 2px solid transparent; 
+.score-label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
+	font-weight: 900;
+	font-size: 1.15rem;
+	position: relative;
+	border-radius: 8px;
+	transition: all 0.15s ease;
+	border: 2px solid transparent;
 }
-.toggle-checkbox:checked + .score-label { 
-	background-color: #dcfce7; 
-	color: #14532d; 
-	border: 2px solid #059669; 
+.toggle-checkbox:checked + .score-label {
+	background-color: #dcfce7;
+	color: #14532d;
+	border: 2px solid #059669;
 }
-.toggle-checkbox:checked + .score-label::after { 
-	content: '✔'; 
-	font-size: 0.75em; 
-	color: #059669; 
-	font-weight: 900; 
-	position: absolute; 
-	right: 4px; 
-	top: 4px; 
-	line-height: 1; 
+.toggle-checkbox:checked + .score-label::after {
+	content: '✔';
+	font-size: 0.75em;
+	color: #059669;
+	font-weight: 900;
+	position: absolute;
+	right: 4px;
+	top: 4px;
+	line-height: 1;
 }
-.toggle-checkbox:not(:checked) + .score-label { 
-	background-color: #fef2f2; 
-	color: #991b1b; 
-	border: 1.5px solid #fca5a5; 
+.toggle-checkbox:not(:checked) + .score-label {
+	background-color: #fef2f2;
+	color: #991b1b;
+	border: 1.5px solid #fca5a5;
 }
-.toggle-checkbox:not(:checked) + .score-label:hover { 
-	background-color: #fee2e2; 
-	border-color: #f87171; 
+.toggle-checkbox:not(:checked) + .score-label:hover {
+	background-color: #fee2e2;
+	border-color: #f87171;
 }
 .zero-score { color: #94a3b8; font-size: 1.1em; background: #f1f5f9; border: 1.5px dashed #cbd5e1; font-weight: 800; }
-
 .mobile-badge { font-size: 0.78rem; font-weight: 800; padding: 4px 9px; border-radius: 8px; display: inline-flex; align-items: center; white-space: nowrap; }
 .bg-dept-main { background-color: #fee2e2 !important; color: #7f1d1d !important; border: 1px solid #fca5a5 !important; }
 .bg-sch-req-main { background-color: #dcfce7 !important; color: #14532d !important; border: 1px solid #86efac !important; }
 .bg-sch-opt-main { background-color: #dbeafe !important; color: #1e3a8a !important; border: 1px solid #93c5fd !important; }
-
 .btn-course-note {
 	display: inline-flex;
 	align-items: center;
@@ -473,7 +449,6 @@ html, body {
 	font-size: 9px;
 	display: inline-block;
 }
-
 .audit-details-card {
 	display: inline-flex;
 	flex-wrap: wrap;
@@ -509,99 +484,96 @@ html, body {
 	font-weight: 500;
 	font-style: italic;
 }
-
-.modal-overlay { 
-	display: none; 
-	position: fixed !important; 
-	z-index: 99999 !important; 
-	left: 0; 
-	top: 0; 
-	width: 100vw; 
-	height: 100vh; 
-	height: 100dvh; 
-	background-color: rgba(15, 23, 42, 0.75); 
-	backdrop-filter: blur(4px); 
-	align-items: center; 
-	justify-content: center; 
-	padding: 16px; 
+.modal-overlay {
+	display: none;
+	position: fixed !important;
+	z-index: 99999 !important;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+	height: 100dvh;
+	background-color: rgba(15, 23, 42, 0.75);
+	backdrop-filter: blur(4px);
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
 }
-.modal-content { 
-	background-color: #fff; 
-	width: 100%; 
-	max-width: 500px; 
-	border-radius: 16px; 
-	padding: 24px; 
-	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); 
-	position: relative; 
-	max-height: 80dvh; 
-	overflow-y: auto; 
-	animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); 
-	margin: auto; 
+.modal-content {
+	background-color: #fff;
+	width: 100%;
+	max-width: 500px;
+	border-radius: 16px;
+	padding: 24px;
+	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+	position: relative;
+	max-height: 80dvh;
+	overflow-y: auto;
+	animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+	margin: auto;
 }
-.modal-header { 
-	font-size: 1.3rem; 
-	font-weight: 800; 
-	margin-bottom: 18px; 
-	border-bottom: 1.5px solid #cbd5e1; 
-	padding-bottom: 14px; 
-	display: flex; 
-	justify-content: space-between; 
-	align-items: center; 
-	color: #0f172a; 
+.modal-header {
+	font-size: 1.3rem;
+	font-weight: 800;
+	margin-bottom: 18px;
+	border-bottom: 1.5px solid #cbd5e1;
+	padding-bottom: 14px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: #0f172a;
 }
 .close-modal-btn { font-size: 2rem; color: #64748b; cursor: pointer; line-height: 1; padding: 0 5px; transition: color 0.2s; font-weight: 800; }
 .close-modal-btn:hover { color: #0f172a; }
 .modal-body { font-size: 1rem; line-height: 1.7; color: #334155; font-weight: 500; }
-
-.admin-backend { 
-	display: none; 
-	padding: 16px; 
-	background: white; 
-	margin: 15px 0; 
-	border-radius: 16px; 
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); 
-	border: 1.5px solid #cbd5e1; 
+.admin-backend {
+	display: none;
+	padding: 16px;
+	background: white;
+	margin: 15px 0;
+	border-radius: 16px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+	border: 1.5px solid #cbd5e1;
 }
 @media (min-width: 640px) { .admin-backend { padding: 24px; } }
-.admin-header { 
-	font-size: 1.4rem; 
-	font-weight: 800; 
-	margin-bottom: 20px; 
-	color: #0f172a; 
-	border-left: 6px solid #4f46e5; 
-	padding-left: 15px; 
-	display: flex; 
-	justify-content: space-between; 
-	align-items: center; 
-	flex-wrap: wrap; 
-	gap: 10px; 
+.admin-header {
+	font-size: 1.4rem;
+	font-weight: 800;
+	margin-bottom: 20px;
+	color: #0f172a;
+	border-left: 6px solid #4f46e5;
+	padding-left: 15px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
 }
-.admin-toolbar { 
-	display: flex; 
-	flex-wrap: wrap; 
-	gap: 12px; 
-	margin-bottom: 20px; 
-	background: #f1f5f9; 
-	padding: 16px; 
-	border-radius: 12px; 
-	border: 1.5px solid #cbd5e1; 
+.admin-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-bottom: 20px;
+	background: #f1f5f9;
+	padding: 16px;
+	border-radius: 12px;
+	border: 1.5px solid #cbd5e1;
 }
 .admin-toolbar > * { flex: 1; min-width: 130px; }
-@media (max-width: 640px) { 
-	.admin-toolbar > * { flex: 1 1 calc(50% - 6px) !important; } 
-	#adminSearchInput { flex: 1 1 100% !important; } 
+@media (max-width: 640px) {
+	.admin-toolbar > * { flex: 1 1 calc(50% - 6px) !important; }
+	#adminSearchInput { flex: 1 1 100% !important; }
 }
-
 .admin-table-container { display: none; width: 100%; overflow-x: hidden; }
 .admin-table { width: 100%; border-collapse: collapse; table-layout: auto; }
-.admin-table th, .admin-table td { 
-	border-bottom: 1px solid #cbd5e1; 
-	padding: 8px 8px; 
-	text-align: left; 
-	font-size: 0.84rem; 
-	color: #1e293b; 
-	font-weight: 600; 
-	vertical-align: middle; 
+.admin-table th, .admin-table td {
+	border-bottom: 1px solid #cbd5e1;
+	padding: 8px 8px;
+	text-align: left;
+	font-size: 0.84rem;
+	color: #1e293b;
+	font-weight: 600;
+	vertical-align: middle;
 }
 @media (min-width: 1440px) {
 	.admin-table th, .admin-table td {
@@ -615,22 +587,21 @@ html, body {
 @media (min-width: 640px) and (max-width: 1024px) { .admin-cards-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 @media (min-width: 1025px) { .admin-table-container { display: block !important; } }
 @media (max-width: 1024px) { .admin-cards-grid { display: grid !important; } }
-
-.btn-mini { 
-	display: inline-flex; 
-	align-items: center; 
-	justify-content: center; 
-	padding: 0 5px; 
-	height: 28px; 
-	border-radius: 6px; 
-	border: none; 
-	cursor: pointer; 
-	font-size: 0.75rem; 
-	color: white; 
-	font-weight: 800; 
-	transition: opacity 0.2s, transform 0.1s; 
-	text-align: center; 
-	white-space: nowrap; 
+.btn-mini {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 5px;
+	height: 28px;
+	border-radius: 6px;
+	border: none;
+	cursor: pointer;
+	font-size: 0.75rem;
+	color: white;
+	font-weight: 800;
+	transition: opacity 0.2s, transform 0.1s;
+	text-align: center;
+	white-space: nowrap;
 }
 @media (min-width: 1440px) {
 	.btn-mini {
@@ -639,92 +610,86 @@ html, body {
 		font-size: 0.78rem;
 	}
 }
-	text-align: center; 
-	white-space: nowrap; 
+	text-align: center;
+	white-space: nowrap;
 }
 .btn-mini:hover { opacity: 0.92; transform: translateY(-1px); }
-
 .input-group { margin-bottom: 16px; text-align: left; }
 .input-group label { display: block; margin-bottom: 6px; font-weight: 800; font-size: 0.92rem; color: #1e293b; }
-.input-group input, .input-group select, .input-group textarea { 
-	width: 100%; 
-	padding: 10px 12px; 
-	border: 1.5px solid #94a3b8; 
-	border-radius: 8px; 
-	font-size: 0.95rem; 
-	color: #0f172a; 
-	background-color: #fff; 
-	outline: none; 
-	transition: border-color 0.2s; 
-	font-weight: 600; 
+.input-group input, .input-group select, .input-group textarea {
+	width: 100%;
+	padding: 10px 12px;
+	border: 1.5px solid #94a3b8;
+	border-radius: 8px;
+	font-size: 0.95rem;
+	color: #0f172a;
+	background-color: #fff;
+	outline: none;
+	transition: border-color 0.2s;
+	font-weight: 600;
 }
 .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: #4f46e5; }
 .input-group select:disabled { background-color: #e2e8f0; cursor: not-allowed; color: #475569; font-weight: 700; }
-
-.sort-select, .admin-filter-input { 
-	padding: 10px; 
-	border-radius: 8px; 
-	border: 1.5px solid #94a3b8; 
-	font-size: 0.92rem; 
-	outline: none; 
-	color: #0f172a; 
-	background-color: #fff; 
-	font-weight: 600; 
+.sort-select, .admin-filter-input {
+	padding: 10px;
+	border-radius: 8px;
+	border: 1.5px solid #94a3b8;
+	font-size: 0.92rem;
+	outline: none;
+	color: #0f172a;
+	background-color: #fff;
+	font-weight: 600;
 }
 .sort-select:focus, .admin-filter-input:focus { border-color: #4f46e5; }
-
-.role-badge { 
-	padding: 4px 10px; 
-	border-radius: 6px; 
-	font-size: 0.78rem; 
-	color: white; 
-	font-weight: 800; 
-	box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
-	white-space: nowrap; 
-	display: inline-block; 
-	text-align: center; 
+.role-badge {
+	padding: 4px 10px;
+	border-radius: 6px;
+	font-size: 0.78rem;
+	color: white;
+	font-weight: 800;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+	white-space: nowrap;
+	display: inline-block;
+	text-align: center;
 }
 .badge-admin { background-color: #1e293b; }
 .badge-tutor { background-color: #e11d48; }
 .badge-teacher { background-color: #0ea5e9; }
 .badge-counselor { background-color: #8b5cf6; }
 .badge-student { background-color: #10b981; }
-
-.btn-table-action { 
-	height: 28px; 
-	width: 28px; 
-	display: inline-flex; 
-	align-items: center; 
-	justify-content: center; 
-	border-radius: 6px; 
-	font-size: 11px; 
-	font-weight: bold; 
-	transition: all 0.15s; 
+.btn-table-action {
+	height: 28px;
+	width: 28px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: bold;
+	transition: all 0.15s;
 }
 .btn-table-action:hover { filter: brightness(0.95); transform: translateY(-1px); }
-
-#msgBox { 
-	position: fixed; 
-	bottom: 24px; 
-	left: 50%; 
-	transform: translateX(-50%); 
-	padding: 14px 28px; 
-	border-radius: 50px; 
-	color: white; 
-	font-weight: 800; 
-	display: none; 
-	z-index: 100000 !important; 
-	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); 
-	font-size: 0.98rem; 
+#msgBox {
+	position: fixed;
+	bottom: 24px;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 14px 28px;
+	border-radius: 50px;
+	color: white;
+	font-weight: 800;
+	display: none;
+	z-index: 100000 !important;
+	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+	font-size: 0.98rem;
 }
-
-@keyframes fadeIn { 
-	from { opacity: 0; } 
-	to { opacity: 1; } 
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
 }
-@keyframes scaleUp { 
-	from { transform: scale(0.95); opacity: 0; } 
-	to { transform: scale(1); opacity: 1; } 
+@keyframes scaleUp {
+	from { transform: scale(0.95); opacity: 0; }
+	to { transform: scale(1); opacity: 1; }
 }
 .admin-table th:nth-child(1), .admin-table td:nth-child(1),
 .admin-table th:nth-child(2), .admin-table td:nth-child(2),
@@ -742,17 +707,14 @@ html, body {
 .admin-table th:nth-child(5), .admin-table td:nth-child(5) {
 	text-align: left !important;
 }
-
 @media (max-width: 480px) {
 	.modal-content { padding: 18px 14px; border-radius: 14px; }
 	.modal-header { font-size: 1.15rem; margin-bottom: 14px; padding-bottom: 10px; }
 }
 	</style>
-    
 </head>
 <body class="bg-[#f4f6f9] text-slate-800 h-[100dvh] overflow-hidden flex flex-col">
 	<div id="msgBox"></div>
-
 	<div id="authWorkspace">
 		<div class="auth-glow-1"></div>
 		<div class="auth-glow-2"></div>
@@ -769,12 +731,12 @@ html, body {
 					<label class="!mb-0">帳號</label>
 					<span id="authRoleHint" class="text-xs font-black text-emerald-600"></span>
 				</div>
-				<input type="text" id="authID" placeholder="請輸入帳號(學號/教職員編號)" oninput="checkAuthIdRoleHint()" onkeydown="if(event.key==='Enter'){event.preventDefault();handleAuth();}">
+				<input type="text" id="authID" placeholder="請輸入帳號(學號/教職員編號)" oninput="checkAuthIdRoleHint()" onkeydown="handleAuthInputKeyDown(event, 'authID')">
 			</div>
 			<div id="regFields" style="display:none">
 				<div class="auth-form-group">
 					<label>姓名</label>
-					<input type="text" id="authName" placeholder="請輸入真實姓名" onkeydown="if(event.key==='Enter'){event.preventDefault();handleAuth();}">
+					<input type="text" id="authName" placeholder="請輸入真實姓名" onkeydown="handleAuthInputKeyDown(event, 'authName')">
 				</div>
 				<div class="auth-form-group" id="regTeacherRoleGroup" style="display:none">
 					<label>請選擇身份</label>
@@ -795,7 +757,12 @@ html, body {
 			</div>
 			<div class="auth-form-group">
 				<label>密碼</label>
-				<input type="password" id="authPassword" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter'){event.preventDefault();handleAuth();}">
+				<div class="relative">
+					<input type="password" id="authPassword" placeholder="請輸入密碼" class="w-full pr-10" onkeydown="handleAuthInputKeyDown(event, 'authPassword')">
+					<button type="button" onclick="togglePasswordVisibility('authPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer" aria-label="切換密碼顯示">
+						<i class="fa-solid fa-eye text-sm"></i>
+					</button>
+				</div>
 			</div>
 			<button type="button" class="auth-btn-primary !mt-4" onclick="handleAuth()">確認登入</button>
 			<div id="authSwitchLink" class="auth-switch-link" onclick="switchAuthMode()">尚未有帳號？點此註冊</div>
@@ -809,7 +776,6 @@ html, body {
 			</div>
 		</div>
 	</div>
-
 	<div id="appWorkspace" style="display: none;" class="flex-grow flex flex-col h-full overflow-hidden">
 		<div id="statusHeader" class="shrink-0" style="display: none;">
 			<div class="app-container">
@@ -827,7 +793,6 @@ html, body {
 				</div>
 			</div>
 		</div>
-
 		<div id="scrollContainer" class="flex-grow overflow-y-auto custom-scrollbar pb-[calc(96px+env(safe-area-inset-bottom,24px))]">
 			<div id="mainDashboardView">
 				<div id="dashboardSection" class="app-container mt-4" style="display: none;">
@@ -870,19 +835,25 @@ html, body {
 						</div>
 					</div>
 				</div>
-
 				<div id="layoutSwitcherArea" class="app-container mt-3 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
-					<span class="text-sm font-extrabold text-slate-700 shrink-0 text-center md:text-left">檢視版面切換：</span>
-					<div class="inline-flex rounded-xl p-1 bg-slate-200 border border-slate-300">
-						<button id="btnLayoutSubject" onclick="setLayoutMode('subject')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900">
-							按科目檢視
-						</button>
-						<button id="btnLayoutSemester" onclick="setLayoutMode('semester')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md">
-							按學期檢視
+					<div class="flex items-center gap-2 flex-wrap justify-center md:justify-start">
+						<span class="text-sm font-extrabold text-slate-700 shrink-0">檢視版面切換：</span>
+						<div class="inline-flex rounded-xl p-1 bg-slate-200 border border-slate-300">
+							<button id="btnLayoutSubject" onclick="setLayoutMode('subject')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900">
+								按科目檢視
+							</button>
+							<button id="btnLayoutSemester" onclick="setLayoutMode('semester')" class="flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md">
+								按學期檢視
+							</button>
+						</div>
+					</div>
+					<div class="flex items-center gap-2 justify-center md:justify-end">
+						<button id="btnFilterUnearned" type="button" onclick="toggleOnlyUnearnedFilter()" class="px-3.5 py-2 text-xs font-extrabold rounded-xl border transition-all flex items-center gap-1.5 bg-white text-slate-700 border-slate-300 hover:bg-slate-50 shadow-2xs cursor-pointer">
+							<i class="fa-solid fa-filter text-[11px] text-slate-400"></i>
+							<span>僅顯示未取得學分</span>
 						</button>
 					</div>
 				</div>
-
 				<div class="app-container mt-2">
 					<div id="adminBackend" class="admin-backend">
 						<div class="admin-header">
@@ -987,7 +958,6 @@ html, body {
 						</div>
 						<div id="adminCardsContainer" class="admin-cards-grid"></div>
 					</div>
-
 					<div id="unsetNoticeBox" class="hidden app-container my-6">
 						<div class="bg-white border-2 border-amber-300 rounded-2xl p-8 text-center shadow-md max-w-xl mx-auto">
 							<div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black">⚠️</div>
@@ -1000,16 +970,13 @@ html, body {
 							</a>
 						</div>
 					</div>
-
 					<div id="underConstructionBox" class="hidden bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm my-6">
 						<h3 class="text-xl font-bold text-slate-800 mb-2">課程資料建置中！</h3>
 						<p class="text-slate-500 text-sm">目前選擇的年度與科別（<span id="constYearDept" class="font-bold text-[#059669]"></span>）課程資料建置中！</p>
 					</div>
-
 					<div id="mobileCardsContainer" class="mobile-cards-grid"></div>
 				</div>
 			</div>
-
 			<div id="pageAnnounceView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
@@ -1022,7 +989,6 @@ html, body {
 					<div id="independentAnnounceList" class="space-y-3"></div>
 				</div>
 			</div>
-
 			<div id="pageAuditLogView" class="app-container mt-4 hidden pb-12">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
@@ -1035,7 +1001,6 @@ html, body {
 					<div class="mb-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
 						<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 							<input type="text" id="auditSearchInput" class="admin-filter-input w-full text-xs" placeholder="🔍 搜尋姓名、學號或 IP" oninput="renderAuditLogList()">
-							
 							<div class="relative flex-1 min-w-[130px]" id="ms-wrap-audit-action">
 								<div class="sort-select flex justify-between items-center cursor-pointer bg-white h-full text-xs" onclick="toggleMS(event, 'audit-action')">
 									<span class="truncate pr-2 font-bold text-slate-700" id="ms-text-audit-action">所有異動項目</span>
@@ -1052,29 +1017,24 @@ html, body {
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="批次學分歸零" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 批次學分歸零</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="單學期全選及格" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 單學期全選及格</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="單學期學分歸零" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 單學期學分歸零</label>
-									
 									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">📝 帳號與個人資料</div>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更改帳號資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更改帳號資料</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="重設帳號密碼" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 重設帳號密碼</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新個人資料" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新個人資料</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新輔導教師授權" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新輔導教師授權</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="送出系統回饋" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 送出系統回饋</label>
-
 									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">📢 系統公告</div>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="發布系統公告" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 發布系統公告</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="編輯系統公告" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 編輯系統公告</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="更新公告排序" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 更新公告排序</label>
-
 									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">🔑 系統登入與安全</div>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="使用者登入" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 使用者登入</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="使用者登出" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 使用者登出</label>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="使用者註冊" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 使用者註冊</label>
-
 									<div class="text-[10px] font-black text-slate-400 px-1 pt-1.5 border-t border-slate-100">⚠️ 刪除與警示</div>
 									<label class="flex items-center gap-2 p-1 hover:bg-slate-50 cursor-pointer rounded text-xs font-bold text-slate-700"><input type="checkbox" value="刪除帳號" class="ms-opt-audit-action rounded text-indigo-600" onchange="handleMSOpt('audit-action')"> 刪除帳號</label>
 								</div>
 							</div>
-
 							<select id="auditFilterOperatorRole" class="sort-select text-xs bg-white" onchange="renderAuditLogList()">
 								<option value="all">所有操作身分</option>
 								<option value="admin">👑 管理員</option>
@@ -1091,12 +1051,16 @@ html, body {
 								<input type="date" id="auditEndDate" class="admin-filter-input text-xs py-1 px-2 bg-white" onchange="renderAuditLogList()">
 							</div>
 							<div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-								<button type="button" class="text-xs font-extrabold text-slate-600 hover:text-slate-900 bg-white border border-slate-300 px-3 py-1.5 rounded-lg shadow-sm transition" onclick="resetAuditFilters()">重設篩選</button>
+								<button type="button" class="text-xs font-extrabold text-slate-600 hover:text-slate-900 bg-white border border-slate-300 px-3 py-1.5 rounded-lg shadow-sm transition cursor-pointer" onclick="resetAuditFilters()">重設篩選</button>
+								<button type="button" class="text-xs font-extrabold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-lg shadow-sm transition flex items-center gap-1.5 cursor-pointer" onclick="exportAuditLogsToCsv()">
+									<i class="fa-solid fa-file-csv"></i>
+									<span>匯出 CSV</span>
+								</button>
 								<span id="auditCountText" class="text-xs font-bold text-slate-500">共 0 筆紀錄</span>
 							</div>
 						</div>
 					</div>
-					<div id="auditLogTableContainer" class="overflow-x-hidden overflow-y-auto w-full custom-scrollbar max-h-[60dvh] border border-slate-200 rounded-xl relative">
+					<div id="auditLogTableContainer" class="overflow-x-auto overflow-y-auto w-full custom-scrollbar max-h-[60dvh] border border-slate-200 rounded-xl relative">
 						<table class="w-full border-collapse text-left text-xs">
 							<thead class="sticky top-0 z-20 bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200 shadow-xs">
 								<tr>
@@ -1112,7 +1076,6 @@ html, body {
 					</div>
 				</div>
 			</div>
-
 			<div id="pageFeedbackListView" class="app-container mt-4 hidden">
 				<div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
 					<div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
@@ -1168,7 +1131,6 @@ html, body {
 					</div>
 				</div>
 			</div>
-
 			<div id="pageAnnounceMgmtView" class="app-container mt-4 hidden pb-28">
 				<div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6 gap-3 flex-wrap">
 					<div class="flex items-center gap-3">
@@ -1264,21 +1226,17 @@ html, body {
 					</div>
 				</div>
 			</div>
-
 			<footer class="mt-12 mb-6 text-center text-xs text-slate-400 font-semibold border-t border-slate-200/80 pt-6 space-y-1">
 				<div>© <span class="copyright-year"></span> 臺中市立新社高級中學 ． 教務處 ＆ 系統開發團隊 版權所有</div>
 				<div class="text-[11px] text-slate-400/80">本系統資料僅供學分試算與檢核參考，正式資格依學校教務處成績審查公告為準</div>
 			</footer>
 		</div>
-
 		<button id="backToTopBtn" class="fixed bottom-[calc(88px+env(safe-area-inset-bottom,16px))] md:bottom-[calc(24px+env(safe-area-inset-bottom,16px))] right-6 z-40 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none flex items-center justify-center border border-emerald-400" onclick="scrollToTop()">
 			<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path>
 			</svg>
 		</button>
 	</div>
-
-	
 	<div id="pdfImportModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-lg !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-2">
@@ -1308,7 +1266,12 @@ html, body {
 				</div>
 				<div class="input-group mb-0">
 					<label class="text-xs font-black text-slate-700 mb-1">選擇成績單 PDF 檔案</label>
-					<input type="file" id="pdfFileInput" accept=".pdf" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer border border-slate-300 rounded-xl p-1 bg-white" onchange="handlePdfFileSelected()">
+					<div id="pdfDropZone" class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-4 text-center transition-all bg-white hover:bg-sky-50/40 cursor-pointer flex flex-col items-center justify-center gap-1.5" onclick="document.getElementById('pdfFileInput').click()">
+						<i class="fa-solid fa-cloud-arrow-up text-2xl text-sky-500 mb-0.5"></i>
+						<span class="text-xs font-bold text-slate-600">點擊選擇檔案，或直接將 PDF 拖曳至此處</span>
+						<input type="file" id="pdfFileInput" accept=".pdf" class="hidden" onchange="handlePdfFileSelected()">
+						<span id="pdfFileNameDisplay" class="text-[11px] font-mono text-sky-700 font-extrabold mt-1 hidden"></span>
+					</div>
 				</div>
 				<button type="button" id="parsePdfBtn" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-sm shadow-md transition disabled:opacity-50" onclick="handlePdfImport()">
 					⚡ 開始解析 PDF 成績單
@@ -1328,7 +1291,64 @@ html, body {
 			</div>
 		</div>
 	</div>
-
+	<div id="auditDetailModal" class="modal-overlay" onclick="handleOutsideClick(event)" style="display: none; z-index: 999999 !important;">
+		<div class="modal-content !max-w-2xl !w-full !p-6" onclick="event.stopPropagation()">
+			<div class="modal-header !mb-3 !pb-3 border-b border-slate-100 flex items-center justify-between">
+				<div class="flex items-center gap-2.5">
+					<div id="auditModalActionIcon" class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center text-xl shrink-0 shadow-2xs">
+						📜
+					</div>
+					<div>
+						<div class="flex items-center gap-2 flex-wrap">
+							<span class="font-black text-slate-800 text-lg leading-tight">詳細稽核日誌紀錄</span>
+							<span id="auditModalActionBadge" class="text-xs px-2.5 py-0.5 rounded-full font-bold shadow-2xs"></span>
+						</div>
+						<div id="auditModalTime" class="text-xs font-mono text-slate-400 font-bold mt-0.5 flex items-center gap-1.5"></div>
+					</div>
+				</div>
+				<span class="close-modal-btn" onclick="toggleUIModal(false, 'auditDetailModal')">&times;</span>
+			</div>
+			<div class="modal-body space-y-3.5 max-h-[70vh] overflow-y-auto custom-scrollbar pr-1" id="auditDetailModalBody">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+					<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+						<div class="text-[11px] font-black text-slate-400 mb-1 flex items-center gap-1">
+							<i class="fa-solid fa-user-shield text-slate-500"></i> 操作人員資訊
+						</div>
+						<div id="auditModalOperator" class="font-black text-sm text-slate-800"></div>
+						<div id="auditModalOperatorMeta" class="text-xs text-slate-500 font-semibold mt-0.5"></div>
+					</div>
+					<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+						<div class="text-[11px] font-black text-slate-400 mb-1 flex items-center gap-1">
+							<i class="fa-solid fa-graduation-cap text-slate-500"></i> 目標對象
+						</div>
+						<div id="auditModalTarget" class="font-black text-sm text-slate-800"></div>
+						<div id="auditModalTargetMeta" class="text-xs text-slate-500 font-semibold mt-0.5"></div>
+					</div>
+				</div>
+				<div id="auditModalMetricsBanner" class="hidden"></div>
+				<div class="flex items-center justify-between border-b border-slate-200 pb-1.5 pt-1">
+					<div class="flex items-center gap-1.5">
+						<button type="button" id="tabAuditStructured" class="px-3 py-1.5 text-xs font-black rounded-lg bg-indigo-600 text-white transition shadow-2xs" onclick="switchAuditDetailTab('structured')">
+							📋 結構化異動明細
+						</button>
+						<button type="button" id="tabAuditRaw" class="px-3 py-1.5 text-xs font-extrabold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition" onclick="switchAuditDetailTab('raw')">
+							{ } 原始日誌資料 (Payload)
+						</button>
+					</div>
+					<div id="auditModalChangeCount" class="text-xs font-bold text-slate-500"></div>
+				</div>
+				<div id="auditDetailStructuredContainer" class="space-y-3"></div>
+				<div id="auditDetailRawContainer" class="hidden">
+					<pre id="auditDetailRawJson" class="p-3.5 bg-slate-900 text-emerald-400 text-xs font-mono rounded-xl overflow-x-auto custom-scrollbar max-h-60 leading-relaxed"></pre>
+				</div>
+			</div>
+			<div class="modal-footer mt-4 pt-3 border-t border-slate-100 flex justify-end">
+				<button type="button" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl transition" onclick="toggleUIModal(false, 'auditDetailModal')">
+					關閉視窗
+				</button>
+			</div>
+		</div>
+	</div>
 	<div id="forceChangePasswordModal" class="modal-overlay" style="display: none; z-index: 999999 !important;">
 		<div class="modal-content !max-w-md !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3 border-b border-amber-200">
@@ -1355,7 +1375,6 @@ html, body {
 			</div>
 		</div>
 	</div>
-
 	<div id="courseNoteModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-md !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3">
@@ -1373,7 +1392,6 @@ html, body {
 			</div>
 		</div>
 	</div>
-
 	<div id="feedbackModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:420px;">
 			<div class="modal-header">
@@ -1401,7 +1419,6 @@ html, body {
 			</div>
 		</div>
 	</div>
-
 	<div id="profileModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:400px;">
 			<div class="modal-header"><span>個人資料管理</span><span class="close-modal-btn" onclick="toggleUIModal(false,'profileModal')">&times;</span></div>
@@ -1431,7 +1448,6 @@ html, body {
 			</div>
 		</div>
 	</div>
-
 	<div id="adminUserModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content" style="max-width:520px;">
 			<div class="modal-header"><span>更改帳號資料</span><span class="close-modal-btn" onclick="toggleUIModal(false,'adminUserModal')">&times;</span></div>
@@ -1447,7 +1463,6 @@ html, body {
 					<option value="admin">管理員</option>
 				</select>
 			</div>
-
 			<div id="editUserStandardClassGroup">
 				<div class="input-group">
 					<label id="editUserEntryYearLabel">負責班級入學年</label>
@@ -1458,7 +1473,6 @@ html, body {
 					<select id="editUserEntryDept"><option value="未設定">未設定</option></select>
 				</div>
 			</div>
-
 			<div id="editTutorSection" class="input-group">
 				<label id="editTutorLabel">導師</label>
 				<div id="editTutorWrapper"></div>
@@ -1479,8 +1493,6 @@ html, body {
 			<button class="action-btn btn-admin" style="width:100%; margin-top: 15px;" onclick="saveAdminUserEdit()">儲存帳號修改</button>
 		</div>
 	</div>
-
-	
 	<div id="counselorScopeModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-xl !w-full !p-6" onclick="event.stopPropagation()">
 			<div class="modal-header !mb-3 !pb-3">
@@ -1511,7 +1523,6 @@ html, body {
 			</div>
 		</div>
 	</div>
-
 	<div id="missingCreditsModal" class="modal-overlay" onclick="handleOutsideClick(event)">
 		<div class="modal-content !max-w-md !w-full">
 			<div class="modal-header">
@@ -1530,7 +1541,6 @@ html, body {
 			</div>
 		</div>
 	</div>
-
 	<div id="confirmModal" class="modal-overlay">
 		<div class="modal-content" style="max-width:320px; text-align:center;">
 			<div class="modal-header"><span>確認操作</span></div>
@@ -1541,7 +1551,6 @@ html, body {
 			</div>
 		</div>
 	</div>
-
 	<div id="helpModal" class="modal-overlay">
 		<div class="modal-content !max-w-xl !w-full !p-6 md:!p-8" onclick="event.stopPropagation()">
 			<div class="modal-header" style="border-bottom: none; margin-bottom: 8px; padding-bottom: 0;">
@@ -1678,18 +1687,14 @@ html, body {
 			</div>
 		</div>
 	</div>
-
-	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 	<script>
 		pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 	</script>
 	<script>
-
 const SB_URL = "https://tsavuxtqwfugoraomoyc.supabase.co";
 const SB_KEY = "sb_publishable_ojrdIB0TeCnl8eZXbzWsdQ_2W3JB3xT";
 const EMAIL_DOMAIN = "@sshs.tc.edu.tw";
-
 const mapping = {
 	cat: {
 		"dept": { text: "部定必修", class: "bg-dept-main" },
@@ -1700,14 +1705,12 @@ const mapping = {
 	type: { 1: "一般科目", 2: "專業科目", 3: "實習科目" },
 	role: { student: "學生", teacher: "教師", counselor: "輔導教師", admin: "管理員" }
 };
-
 const ANNOUNCE_CATEGORIES = [
 	{ value: "大會公告", label: "🎓 大會公告" },
 	{ value: "教務通知", label: "📋 教務通知" },
 	{ value: "系統維護", label: "🛠️ 系統維護" },
 	{ value: "重要提醒", label: "⚠️ 重要提醒" }
 ];
-
 const ANNOUNCE_STATUS_FILTERS = [
 	{ value: "all", label: "全部狀態" },
 	{ value: "active", label: "● 公開中" },
@@ -1715,7 +1718,6 @@ const ANNOUNCE_STATUS_FILTERS = [
 	{ value: "expired", label: "⌛ 已過期" },
 	{ value: "inactive", label: "○ 已手動下架" }
 ];
-
 const AUDIT_ACTION_OPTIONS = [
 	{ group: "📘 學分與課綱類", items: ["變更學分紀錄", "切換版本", "批次全部及格", "批次學分歸零", "單學期全選及格", "單學期學分歸零"] },
 	{ group: "📝 帳號與個人資料", items: ["更改帳號資料", "重設帳號密碼", "更新個人資料", "更新輔導教師授權", "送出系統回饋"] },
@@ -1723,7 +1725,6 @@ const AUDIT_ACTION_OPTIONS = [
 	{ group: "🔑 系統登入與安全", items: ["使用者登入", "使用者登出", "使用者註冊"] },
 	{ group: "⚠️ 刪除與警示", items: ["刪除帳號", "刪除學生帳號"] }
 ];
-
 let dbClient = null;
 window.ensureDbClient = function() {
 	if (dbClient) return dbClient;
@@ -1738,26 +1739,22 @@ window.ensureDbClient = function() {
 	}
 	return dbClient;
 };
-
 let currentUser = null;
 let userDBRecord = null;
 let activeStudentDBRecord = null;
 let editingStudentId = null;
 let isViewingClassList = false;
 let currentIndependentPage = null;
-
 let adminListData = [];
 let auditLogsData = [];
 let userFeedbacksData = [];
 let announcementsData = [];
 let teacherNames = [];
 let currentUncheckedCredits = [];
-
 let currentYear = "113";
 let currentDept = "普通科(理工生醫群)-1";
 let currentLayoutMode = "semester";
 let DEPT_THRESHOLD = 0;
-
 let autoSaveDebounceTimer = null;
 let saveBaselineChecks = null;
 let saveBaselineTotal = null;
@@ -1767,10 +1764,8 @@ let confirmAction = null;
 let lastUserId = null;
 let hasLoadedInitialData = false;
 let lastLoadedStudentId = null;
-
 const teacherCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000;
-
 window.escapeHtml = function(str) {
 	if (str === null || str === undefined) return '';
 	return String(str)
@@ -1780,7 +1775,6 @@ window.escapeHtml = function(str) {
 		.replace(/"/g, '&quot;')
 		.replace(/'/g, '&#039;');
 };
-
 window.translateError = function(msg) {
 	if (!msg) return "發生未知錯誤";
 	if (msg.includes("Invalid login credentials")) return "帳號或密碼錯誤，請重新確認！";
@@ -1788,7 +1782,6 @@ window.translateError = function(msg) {
 	if (msg.includes("Password should be at least")) return "密碼長度太短！";
 	return msg;
 };
-
 window.formatDateTime = function(isoStr) {
 	if (!isoStr) return '-';
 	const d = new Date(isoStr);
@@ -1796,7 +1789,6 @@ window.formatDateTime = function(isoStr) {
 	const pad = (n) => String(n).padStart(2, '0');
 	return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
-
 window.formatDateTimeInput = function(isoStr) {
 	if (!isoStr) return '';
 	const d = new Date(isoStr);
@@ -1804,7 +1796,6 @@ window.formatDateTimeInput = function(isoStr) {
 	const pad = (n) => String(n).padStart(2, '0');
 	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
-
 window.showMsg = function(txt, type = 'info') {
 	const b = document.getElementById('msgBox');
 	if (!b) return;
@@ -1813,20 +1804,22 @@ window.showMsg = function(txt, type = 'info') {
 	b.style.display = 'block';
 	setTimeout(() => { b.style.display = 'none'; }, 2500);
 };
-
 window.updateSyncStatusIndicator = function(status) {
+	window.isSyncSaving = (status === 'saving');
 	const badge = document.getElementById('syncStatusIndicator');
 	if (!badge) return;
 	badge.className = "sync-badge " + (status === 'offline' ? 'sync-offline' : (status === 'saving' ? 'sync-saving' : (status === 'dirty' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'sync-success')));
 	const label = status === 'offline' ? '同步失敗，請聯繫管理員！' : (status === 'saving' ? '正在儲存...' : (status === 'dirty' ? '● 變更未儲存...' : '同步成功'));
 	badge.innerHTML = `<span>${label}</span>`;
+	if (status === 'success') {
+		const timeTag = document.getElementById('lastUpdateTimeTag');
+		if (timeTag) timeTag.textContent = '最後更新：' + formatDateTime(new Date().toISOString());
+	}
 };
-
 window.scrollToTop = function() {
 	document.getElementById('scrollContainer')?.scrollTo({ top: 0, behavior: 'smooth' });
 	window.scrollTo({ top: 0, behavior: 'smooth' });
 };
-
 window.toggleUIModal = function(show, modalId) {
 	const modal = document.getElementById(modalId);
 	if (modal) {
@@ -1839,7 +1832,6 @@ window.toggleUIModal = function(show, modalId) {
 		if (helpScroll) helpScroll.scrollTop = 0;
 	}
 };
-
 window.showConfirmModal = function(msg, title, action, confirmBtnText, confirmBtnBg) {
 	const btn = document.querySelector('#confirmModal .btn-pass-all');
 	if (btn) {
@@ -1853,11 +1845,9 @@ window.showConfirmModal = function(msg, title, action, confirmBtnText, confirmBt
 	confirmAction = action;
 	toggleUIModal(true, 'confirmModal');
 };
-
 window.triggerConfirmAction = function() {
 	if (confirmAction) confirmAction();
 };
-
 window.handleOutsideClick = function(event) {
 	if (event.target.classList.contains('modal-overlay')) {
 		if (!currentUser && event.target.id === 'authWorkspace') return;
@@ -1870,7 +1860,6 @@ window.handleOutsideClick = function(event) {
 		});
 	}
 };
-
 window.toggleMS = function(event, type) {
 	event.stopPropagation();
 	const drop = document.getElementById(`ms-drop-${type}`);
@@ -1885,7 +1874,6 @@ window.toggleMS = function(event, type) {
 		drop.classList.add('flex');
 	}
 };
-
 window.handleMSAll = function(type, chk) {
 	if (chk.checked) {
 		document.querySelectorAll(`.ms-opt-${type}`).forEach(c => { c.checked = false; });
@@ -1894,7 +1882,6 @@ window.handleMSAll = function(type, chk) {
 	if (type === 'audit-action') renderAuditLogList();
 	else fetchAdminList(true);
 };
-
 window.handleMSOpt = function(type) {
 	const opts = document.querySelectorAll(`.ms-opt-${type}:checked`);
 	const allBox = document.querySelector(`.ms-all-${type}`);
@@ -1903,7 +1890,6 @@ window.handleMSOpt = function(type) {
 	if (type === 'audit-action') renderAuditLogList();
 	else fetchAdminList(true);
 };
-
 window.updateMSText = function(type) {
 	const opts = document.querySelectorAll(`.ms-opt-${type}:checked`);
 	const textEl = document.getElementById(`ms-text-${type}`);
@@ -1920,14 +1906,12 @@ window.updateMSText = function(type) {
 		textEl.classList.add('text-indigo-700');
 	}
 };
-
 window.getMSValues = function(type) {
 	const allChk = document.querySelector(`.ms-all-${type}`);
 	if (allChk && allChk.checked) return ['all'];
 	const checkedOpts = Array.from(document.querySelectorAll(`.ms-opt-${type}:checked`)).map(o => o.value);
 	return checkedOpts.length === 0 ? ['all'] : checkedOpts;
 };
-
 window.getUserCounselorClasses = function(record) {
 	if (!record) return [];
 	let allowedClasses = [];
@@ -1946,7 +1930,6 @@ window.getUserCounselorClasses = function(record) {
 	}
 	return Array.isArray(allowedClasses) ? allowedClasses : [];
 };
-
 window.clearAppRuntimeState = function() {
 	teacherCache.clear();
 	adminListData = [];
@@ -1971,25 +1954,21 @@ window.clearAppRuntimeState = function() {
 		autoSaveDebounceTimer = null;
 	}
 };
-
 document.addEventListener('visibilitychange', () => {
 	if (document.visibilityState === 'hidden') {
 		flushPendingSave();
 	}
 });
-
 window.addEventListener('blur', () => {
 	flushPendingSave();
 });
-
 window.addEventListener('beforeunload', function(e) {
 	flushPendingSave();
-	if (isDirty || autoSaveDebounceTimer !== null) {
+	if (isDirty || autoSaveDebounceTimer !== null || window.isSyncSaving) {
 		e.preventDefault();
 		e.returnValue = '';
 	}
 });
-
 const CurriculumService = {
 	years: ["113", "114"],
 	departments: [
@@ -2036,17 +2015,13 @@ const CurriculumService = {
 		return 'vocational';
 	}
 };
-
 let curriculum = [];
-
 window.getTrackType = function(deptName) {
 	return CurriculumService.getTrackType(deptName);
 };
-
 window.getChkId = function(name, sIdx) {
 	return `chk_${name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}_${sIdx}`;
 };
-
 window.showCourseNote = function(event, courseName, noteText) {
 	if (event) {
 		event.preventDefault();
@@ -2058,7 +2033,6 @@ window.showCourseNote = function(event, courseName, noteText) {
 	if (contentEl) contentEl.innerText = noteText || '暫無額外備註。';
 	toggleUIModal(true, 'courseNoteModal');
 };
-
 window.fetchCloudCurriculums = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -2069,7 +2043,6 @@ window.fetchCloudCurriculums = async function() {
 		}
 	} catch (e) {}
 };
-
 window.initThresholds = function() {
 	let maxDept = 0;
 	curriculum.forEach(i => {
@@ -2077,7 +2050,6 @@ window.initThresholds = function() {
 	});
 	DEPT_THRESHOLD = Math.ceil(maxDept * 0.85);
 };
-
 window.determineCurriculumVersion = function(record) {
 	if (!record) return { year: currentYear, dept: currentDept, locked: false };
 	const role = record.role || 'student';
@@ -2099,7 +2071,6 @@ window.determineCurriculumVersion = function(record) {
 		return { year: vYear, dept: vDept, locked: false };
 	}
 };
-
 window.selectCurriculum = function(yr, dept) {
 	if (!CurriculumService.years.includes(String(yr))) {
 		yr = '113';
@@ -2114,7 +2085,6 @@ window.selectCurriculum = function(yr, dept) {
 	updateCurriculumSelectorVisibility();
 	updateHelpModalDetails();
 };
-
 window.updateCurriculumSelectorVisibility = function() {
 	const selectorArea = document.getElementById('curriculumSelectorArea');
 	if (!selectorArea) return;
@@ -2126,7 +2096,6 @@ window.updateCurriculumSelectorVisibility = function() {
 	if (ySelect) ySelect.value = currentYear;
 	if (dSelect) dSelect.value = currentDept;
 };
-
 window.calculateStats = function(checksSource = null) {
 	let total = 0, dept = 0, prof = 0, prac = 0;
 	let reqEarned = 0, optEarned = 0;
@@ -2185,7 +2154,6 @@ window.calculateStats = function(checksSource = null) {
 		return { total, pass: (total >= 160 && dept >= DEPT_THRESHOLD && prof >= 60 && prac >= 45), dept, prof, prac, trackType };
 	}
 };
-
 window.buildCardContent = function(title, value, target, isTotalCard = false) {
 	const percentage = (value === null || target === null) ? 0 : Math.min(100, Math.round((value / target) * 100));
 	let barColor = '#d97706';
@@ -2203,7 +2171,6 @@ window.buildCardContent = function(title, value, target, isTotalCard = false) {
 		<div class="flex items-baseline justify-center gap-1 text-lg xs:text-xl md:text-2xl font-black text-slate-900"><span>${value === null ? "-" : value}</span><span style="font-size: 0.85rem; color: #475569; font-weight: 700;">/ ${target === null ? "-" : target}</span></div>
 		<div class="card-progress-bg"><div class="card-progress-fill" style="width: ${percentage}%; background-color: ${barColor};"></div></div>`;
 };
-
 window.calculate = function() {
 	const isNullState = curriculum.length === 0;
 	const stats = isNullState ? { total: null, pass: false } : calculateStats();
@@ -2262,7 +2229,23 @@ window.calculate = function() {
 		updateAllSemesterCardsProgress();
 	}
 };
-
+window.showOnlyUnearnedCourses = false;
+window.toggleOnlyUnearnedFilter = function() {
+	window.showOnlyUnearnedCourses = !window.showOnlyUnearnedCourses;
+	const btn = document.getElementById('btnFilterUnearned');
+	if (btn) {
+		if (window.showOnlyUnearnedCourses) {
+			btn.className = "px-3.5 py-2 text-xs font-extrabold rounded-xl border transition-all flex items-center gap-1.5 bg-amber-500 text-white border-amber-600 shadow-sm cursor-pointer";
+			const icon = btn.querySelector('i');
+			if (icon) icon.className = "fa-solid fa-filter text-[11px] text-white";
+		} else {
+			btn.className = "px-3.5 py-2 text-xs font-extrabold rounded-xl border transition-all flex items-center gap-1.5 bg-white text-slate-700 border-slate-300 hover:bg-slate-50 shadow-2xs cursor-pointer";
+			const icon = btn.querySelector('i');
+			if (icon) icon.className = "fa-solid fa-filter text-[11px] text-slate-400";
+		}
+	}
+	renderTable();
+};
 window.renderMobileCards = function(checkedStates) {
 	const container = document.getElementById("mobileCardsContainer");
 	if (!container) return;
@@ -2270,6 +2253,15 @@ window.renderMobileCards = function(checkedStates) {
 	container.innerHTML = "";
 	const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
 	curriculum.forEach(item => {
+		if (window.showOnlyUnearnedCourses) {
+			const hasUnearned = item.credits.some((c, sIdx) => {
+				if (c <= 0) return false;
+				const id = getChkId(item.name, sIdx);
+				const isChecked = checkedStates[id] !== undefined ? checkedStates[id] : (!item.defaultUnchecked);
+				return !isChecked;
+			});
+			if (!hasUnearned) return;
+		}
 		const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700 border border-slate-200" };
 		const card = document.createElement("div");
 		card.className = "mobile-card";
@@ -2294,7 +2286,6 @@ window.renderMobileCards = function(checkedStates) {
 			}
 		});
 		semGridHtml += `</div>`;
-
 		const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
 		const noteTagHtml = hasNote ? `
 			<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">
@@ -2302,7 +2293,6 @@ window.renderMobileCards = function(checkedStates) {
 				<span>備註</span>
 			</button>
 		` : '';
-
 		card.innerHTML = `
 			<div class="flex items-start justify-between gap-2 mb-3 pb-2 border-b border-slate-100">
 				<div class="flex items-center flex-wrap gap-1.5 min-w-0 flex-1">
@@ -2319,7 +2309,6 @@ window.renderMobileCards = function(checkedStates) {
 		container.appendChild(card);
 	});
 };
-
 window.updateSemesterProgress = function(input, sIdx) {
 	const card = input ? input.closest('.semester-card') : null;
 	if (!card) {
@@ -2347,7 +2336,6 @@ window.updateSemesterProgress = function(input, sIdx) {
 		}
 	}
 };
-
 window.updateAllSemesterCardsProgress = function() {
 	document.querySelectorAll('.semester-card').forEach(card => {
 		let semMax = 0, semEarned = 0;
@@ -2372,7 +2360,6 @@ window.updateAllSemesterCardsProgress = function() {
 		}
 	});
 };
-
 window.renderSemesterCards = function(checkedStates) {
 	const container = document.getElementById("mobileCardsContainer");
 	if (!container) return;
@@ -2393,8 +2380,8 @@ window.renderSemesterCards = function(checkedStates) {
 					isChecked = !item.defaultUnchecked;
 				}
 				if (isChecked) semEarned += c;
+				if (window.showOnlyUnearnedCourses && isChecked) return;
 				const catInfo = mapping.cat[item.cat] || { text: item.cat, class: "bg-slate-100 text-slate-700 border border-slate-200" };
-				
 				const hasNote = Boolean(item.note && String(item.note).trim().length > 0);
 				const noteTagHtml = hasNote ? `
 					<button type="button" class="btn-course-note" title="${escapeHtml(item.note)}" onclick="showCourseNote(event, '${escapeHtml(item.name)}', '${escapeHtml(item.note)}')">
@@ -2402,7 +2389,6 @@ window.renderSemesterCards = function(checkedStates) {
 						<span>備註</span>
 					</button>
 				` : '';
-
 				itemsHtml += `
 					<div class="sem-item-row flex items-center justify-between p-2.5 rounded-xl transition-all gap-2 cursor-pointer select-none">
 						<input type="checkbox" id="${escapeHtml(id)}" class="toggle-checkbox sem-checkbox sr-only" data-cat="${escapeHtml(item.cat)}" data-type="${escapeHtml(item.type)}" data-val="${c}" data-sem="${sIdx}" data-name="${escapeHtml(item.name)}" data-default-unchecked="${item.defaultUnchecked ? 'true' : 'false'}" ${isChecked ? 'checked' : ''} onchange="calculate(); updateSemesterProgress(this, ${sIdx}); debouncedSaveToCloud();">
@@ -2446,7 +2432,6 @@ window.renderSemesterCards = function(checkedStates) {
 		container.appendChild(card);
 	});
 };
-
 window.renderTable = function(incomingChecks = null) {
 	const mobileContainer = document.getElementById("mobileCardsContainer"), constructionBox = document.getElementById("underConstructionBox");
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
@@ -2461,7 +2446,6 @@ window.renderTable = function(incomingChecks = null) {
 	const activeRec = editingStudentId ? activeStudentDBRecord : userDBRecord;
 	const recordChecks = activeRec?.credits_json || {};
 	const domCheckboxes = document.querySelectorAll(".toggle-checkbox");
-	
 	if (incomingChecks && Object.keys(incomingChecks).length > 0) {
 		Object.assign(checkedStates, incomingChecks);
 	} else if (domCheckboxes.length > 0) {
@@ -2475,7 +2459,6 @@ window.renderTable = function(incomingChecks = null) {
 			if (cached) Object.assign(checkedStates, JSON.parse(cached));
 		} catch (e) {}
 	}
-
 	if (curriculum.length === 0) {
 		if (mobileContainer) { mobileContainer.style.display = "none"; mobileContainer.innerHTML = ""; }
 		constructionBox?.classList.remove("hidden");
@@ -2493,7 +2476,6 @@ window.renderTable = function(incomingChecks = null) {
 		updateAllSemesterCardsProgress();
 	}
 };
-
 window.changeDashCurriculum = function() {
 	syncDomChecksToRecord();
 	const yr = document.getElementById('dashSelectYear').value, dept = document.getElementById('dashSelectDept').value;
@@ -2502,38 +2484,33 @@ window.changeDashCurriculum = function() {
 	sessionStorage.setItem('tempSelectedDept', dept);
 	selectCurriculum(yr, dept);
 	applyLoadedChecks((editingStudentId ? activeStudentDBRecord : userDBRecord)?.credits_json || {});
-	debouncedSaveToCloud({ 
-		actionType: "切換版本", 
-		details: { 
-			old_version: `${oldYr}年 ${oldDept}`, 
-			new_version: `${yr}年 ${dept}` 
-		} 
+	debouncedSaveToCloud({
+		actionType: "切換版本",
+		details: {
+			old_version: `${oldYr}年 ${oldDept}`,
+			new_version: `${yr}年 ${dept}`
+		}
 	});
 };
-
 window.setLayoutMode = function(mode) {
 	syncDomChecksToRecord();
 	currentLayoutMode = mode;
 	sessionStorage.setItem('tempLayoutMode', mode);
-	
 	const btnSub = document.getElementById('btnLayoutSubject');
 	const btnSem = document.getElementById('btnLayoutSemester');
 	const activeClass = "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md";
 	const inactiveClass = "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900";
-
 	if (btnSub) btnSub.className = (mode === 'subject') ? activeClass : inactiveClass;
 	if (btnSem) btnSem.className = (mode === 'semester') ? activeClass : inactiveClass;
-
 	renderTable();
 	calculate();
-	debouncedSaveToCloud({ 
-		actionType: "切換版面配置", 
-		details: { 
-			layout_mode: mode === 'subject' ? '按科目檢視' : '按學期檢視' 
-		} 
+	debouncedSaveToCloud({
+		actionType: "切換版面配置",
+		details: {
+			layout_mode: mode === 'subject' ? '按科目檢視' : '按學期檢視'
+		}
 	});
 };
-
 window.evaluateStudentStatus = function(s) {
 	const ey = (s.entry_year && s.entry_year !== '未設定') ? s.entry_year : '113';
 	const ed = (s.entry_dept && s.entry_dept !== '未設定' && !String(s.entry_dept).startsWith('[')) ? s.entry_dept : '普通科(理工生醫群)-1';
@@ -2575,7 +2552,6 @@ window.evaluateStudentStatus = function(s) {
 	else if (total >= 120) return { status: 'completion', total, statusText: '📜 修業證明資格', badgeClass: 'bg-amber-100 text-amber-800 border border-amber-300' };
 	else return { status: 'fail', total, statusText: '⚠️ 需重補修/成績證明', badgeClass: 'bg-rose-100 text-rose-800 border border-rose-300' };
 };
-
 window.checkIsTeacherAccount = async function(cleanSid) {
 	if (!cleanSid) return false;
 	const lowerSid = cleanSid.toLowerCase().trim();
@@ -2598,7 +2574,6 @@ window.checkIsTeacherAccount = async function(cleanSid) {
 		return false;
 	}
 };
-
 window.handleTeacherTypeChange = function() {
 	const teacherType = document.getElementById('authTeacherType')?.value;
 	const regYearGroup = document.getElementById('regYearGroup');
@@ -2611,7 +2586,6 @@ window.handleTeacherTypeChange = function() {
 		if (regDeptGroup) regDeptGroup.style.display = 'none';
 	}
 };
-
 let checkHintDebounceTimer = null;
 window.checkAuthIdRoleHint = function() {
 	clearTimeout(checkHintDebounceTimer);
@@ -2621,12 +2595,10 @@ window.checkAuthIdRoleHint = function() {
 		const regTeacherRoleGroup = document.getElementById('regTeacherRoleGroup');
 		const regYearGroup = document.getElementById('regYearGroup');
 		const regDeptGroup = document.getElementById('regDeptGroup');
-
 		if (!isReg) {
 			if (hintEl) hintEl.textContent = '';
 			return;
 		}
-
 		const sidInput = document.getElementById('authID')?.value.trim();
 		if (!sidInput) {
 			if (hintEl) hintEl.textContent = '';
@@ -2651,7 +2623,31 @@ window.checkAuthIdRoleHint = function() {
 		}
 	}, 200);
 };
-
+window.handleAuthInputKeyDown = function(event, field) {
+	if (event.key === 'Enter' || event.keyCode === 13) {
+		event.preventDefault();
+		if (field === 'authID' || field === 'authName') {
+			const pwdInput = document.getElementById('authPassword');
+			if (pwdInput && !pwdInput.value) {
+				pwdInput.focus();
+				return;
+			}
+		}
+		handleAuth();
+	}
+};
+window.togglePasswordVisibility = function(id, btn) {
+	const inp = document.getElementById(id);
+	if (!inp) return;
+	const icon = btn.querySelector('i');
+	if (inp.type === 'password') {
+		inp.type = 'text';
+		if (icon) icon.className = 'fa-solid fa-eye-slash text-sm';
+	} else {
+		inp.type = 'password';
+		if (icon) icon.className = 'fa-solid fa-eye text-sm';
+	}
+};
 window.switchAuthMode = function() {
 	const regFields = document.getElementById('regFields');
 	const authTitle = document.getElementById('authTitle');
@@ -2671,7 +2667,6 @@ window.switchAuthMode = function() {
 	}
 	checkAuthIdRoleHint();
 };
-
 window.handleAuth = async function() {
 	const client = ensureDbClient();
 	if (!client) { showMsg("無法進行登入 or 註冊！請聯絡管理員。", "error"); return; }
@@ -2679,17 +2674,15 @@ window.handleAuth = async function() {
 	if (!sid) { showMsg("請輸入帳號！", "error"); return; }
 	const cleanSid = sid.split('@')[0].toLowerCase().trim(), email = `${cleanSid}${EMAIL_DOMAIN}`;
 	const isReg = document.getElementById('regFields').style.display === 'block';
-
 	if (isReg) {
 		if (!pwd || pwd.length < 6) {
 			showMsg("密碼強度不足：長度至少需 6 個字元！", "error");
 			return;
 		}
 	}
-
 	try {
-		updateSyncStatusIndicator('saving');
 		if (isReg) {
+			updateSyncStatusIndicator('saving');
 			const isTeacher = await checkIsTeacherAccount(cleanSid);
 			const name = document.getElementById('authName').value.trim();
 			if (!name) throw new Error("請輸入姓名！");
@@ -2721,15 +2714,15 @@ window.handleAuth = async function() {
 				matchedTutor = await findTutorByYearDept(entryYear, entryDept);
 			}
 			const { data: signUpData, error } = await client.auth.signUp({
-				email, password: pwd, options: { 
-					data: { 
-						full_name: name, 
-						student_id: cleanSid, 
-						role: role, 
-						tutor: matchedTutor, 
-						entry_year: entryYear, 
-						entry_dept: entryDept 
-					} 
+				email, password: pwd, options: {
+					data: {
+						full_name: name,
+						student_id: cleanSid,
+						role: role,
+						tutor: matchedTutor,
+						entry_year: entryYear,
+						entry_dept: entryDept
+					}
 				}
 			});
 			if (error) throw error;
@@ -2737,15 +2730,15 @@ window.handleAuth = async function() {
 			if (newUserId) {
 				try {
 					await client.from('grad_checks').upsert({
-						id: newUserId, 
-						student_id: cleanSid, 
-						full_name: name, 
+						id: newUserId,
+						student_id: cleanSid,
+						full_name: name,
 						entry_year: entryYear,
-						entry_dept: entryDept, 
-						role: role, 
-						tutor: matchedTutor, 
-						credits_json: {}, 
-						total_credits: 0, 
+						entry_dept: entryDept,
+						role: role,
+						tutor: matchedTutor,
+						credits_json: {},
+						total_credits: 0,
 						must_change_password: false,
 						updated_at: new Date().toISOString()
 					});
@@ -2794,9 +2787,8 @@ window.handleAuth = async function() {
 		}
 	} catch (e) { updateSyncStatusIndicator('offline'); showMsg(translateError(e.message), 'error'); }
 };
-
-window.handleLogout = async function() { 
-	try { 
+window.handleLogout = async function() {
+	try {
 		if (currentUser) {
 			const curRec = userDBRecord || currentUser?.user_metadata || {};
 			const curSid = (curRec.student_id || currentUser.email?.split('@')[0] || '未知帳號').toLowerCase().trim();
@@ -2806,12 +2798,11 @@ window.handleLogout = async function() {
 		cleanupRealtimeSubscriptions();
 		window.clearAppRuntimeState();
 		const client = ensureDbClient();
-		if (client) await client.auth.signOut(); 
-		window.location.hash = ''; 
-		window.location.reload(); 
-	} catch (e) { showMsg("登出失敗", 'error'); } 
+		if (client) await client.auth.signOut();
+		window.location.hash = '';
+		window.location.reload();
+	} catch (e) { showMsg("登出失敗", 'error'); }
 };
-
 window.openProfile = function() {
 	if (!currentUser) return;
 	const curData = userDBRecord || currentUser.user_metadata, role = curData.role || 'student';
@@ -2826,7 +2817,6 @@ window.openProfile = function() {
 	document.getElementById('profPassword').value = '';
 	toggleUIModal(true, 'profileModal');
 };
-
 window.updateProfile = async function() {
 	const n = document.getElementById('profName').value, p = document.getElementById('profPassword').value, d = { data: { full_name: n } };
 	if (p) {
@@ -2850,14 +2840,11 @@ window.updateProfile = async function() {
 		updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), 'error');
 	}
 };
-
 window.submitForceChangePassword = async function() {
 	const client = ensureDbClient();
 	if (!client || !currentUser) return;
-
 	const newPwd = document.getElementById('forceNewPassword')?.value.trim();
 	const confirmPwd = document.getElementById('forceConfirmPassword')?.value.trim();
-
 	if (!newPwd || !confirmPwd) {
 		showMsg("請填寫新密碼與確認密碼！", "error");
 		return;
@@ -2870,54 +2857,42 @@ window.submitForceChangePassword = async function() {
 		showMsg("兩次輸入的密碼不相符！", "error");
 		return;
 	}
-
 	try {
 		updateSyncStatusIndicator('saving');
-
 		const { error: authErr } = await client.auth.updateUser({ password: newPwd });
 		if (authErr) throw authErr;
-
 		const { error: dbErr } = await client.from('grad_checks').update({
 			must_change_password: false,
 			updated_at: new Date().toISOString()
 		}).eq('id', currentUser.id);
 		if (dbErr) throw dbErr;
-
 		if (userDBRecord) {
 			userDBRecord.must_change_password = false;
 		}
-
 		updateSyncStatusIndicator('success');
 		showMsg("密碼修改成功！已解除鎖定。");
 		toggleUIModal(false, 'forceChangePasswordModal');
-
 		document.getElementById('forceNewPassword').value = '';
 		document.getElementById('forceConfirmPassword').value = '';
-
 		const curRec = userDBRecord || currentUser?.user_metadata || {};
 		logAuditRecord("強制首次更改密碼", curRec.student_id, curRec.full_name, { status: "修改成功" });
-
 	} catch (err) {
 		updateSyncStatusIndicator('offline');
 		showMsg("密碼修改失敗：" + translateError(err.message), "error");
 	}
 };
-
 window.getDeptBadgeInfo = function(deptName) {
 	if (deptName.includes('普通科')) return { tag: '普通科', class: 'bg-blue-50 text-blue-700 border-blue-200' };
 	if (deptName.includes('體育班')) return { tag: '體育班', class: 'bg-amber-50 text-amber-800 border-amber-200' };
 	if (deptName.includes('農經科') || deptName.includes('園藝科')) return { tag: '農業群', class: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
 	return { tag: '商管群', class: 'bg-purple-50 text-purple-700 border-purple-200' };
 };
-
 window.renderCounselorClassCheckboxes = function(selectedClassKeys = [], containerId = 'counselorScopeModalChecklist') {
 	let container = document.getElementById(containerId);
 	if (!container) return;
-
 	const selectedSet = new Set(selectedClassKeys);
 	const yearLabels = { "113": "高三 (113學年度)", "114": "高二 (114學年度)" };
 	let html = '';
-
 	CurriculumService.years.forEach(y => {
 		let itemsHtml = '';
 		CurriculumService.departments.forEach(d => {
@@ -2925,7 +2900,6 @@ window.renderCounselorClassCheckboxes = function(selectedClassKeys = [], contain
 			const isChecked = selectedSet.has(key);
 			const badge = getDeptBadgeInfo(d);
 			const activeClass = isChecked ? 'border-indigo-400 bg-indigo-50/50 ring-1 ring-indigo-300' : 'border-slate-200 bg-white hover:border-slate-300';
-
 			itemsHtml += `
 				<label class="counselor-checkbox-card flex items-center justify-between p-2 rounded-xl border cursor-pointer transition select-none ${activeClass}">
 					<div class="flex items-center gap-2 min-w-0 flex-1 mr-1">
@@ -2936,7 +2910,6 @@ window.renderCounselorClassCheckboxes = function(selectedClassKeys = [], contain
 				</label>
 			`;
 		});
-
 		html += `
 			<div class="bg-slate-100/70 p-2.5 rounded-xl border border-slate-200/80 mb-2.5">
 				<div class="flex items-center justify-between mb-2">
@@ -2956,11 +2929,9 @@ window.renderCounselorClassCheckboxes = function(selectedClassKeys = [], contain
 			</div>
 		`;
 	});
-
 	container.innerHTML = html;
 	updateCounselorSelectedCounter();
 };
-
 window.updateCounselorSelectedCounter = function() {
 	const checkedCount = document.querySelectorAll('.counselor-class-item:checked').length;
 	const badge = document.getElementById('counselorScopeCountBadge');
@@ -2975,7 +2946,6 @@ window.updateCounselorSelectedCounter = function() {
 		}
 	}
 };
-
 window.handleCounselorItemCheckboxChange = function(inputEl) {
 	const labelCard = inputEl.closest('.counselor-checkbox-card');
 	if (labelCard) {
@@ -2989,21 +2959,18 @@ window.handleCounselorItemCheckboxChange = function(inputEl) {
 	}
 	updateCounselorSelectedCounter();
 };
-
 window.toggleAllCounselorClasses = function(checkAll) {
 	document.querySelectorAll('.counselor-class-item').forEach(chk => {
 		chk.checked = checkAll;
 		handleCounselorItemCheckboxChange(chk);
 	});
 };
-
 window.toggleYearCounselorClasses = function(yearStr, checkAll) {
 	document.querySelectorAll(`.counselor-class-item[data-year="${yearStr}"]`).forEach(chk => {
 		chk.checked = checkAll;
 		handleCounselorItemCheckboxChange(chk);
 	});
 };
-
 window.getCounselorSelectedClasses = function() {
 	const selected = [];
 	document.querySelectorAll('.counselor-class-item:checked').forEach(chk => {
@@ -3011,7 +2978,6 @@ window.getCounselorSelectedClasses = function() {
 	});
 	return selected;
 };
-
 window.openCounselorScopeModal = function(index) {
 	const s = applyFilters()[index];
 	if (!s) return;
@@ -3021,16 +2987,13 @@ window.openCounselorScopeModal = function(index) {
 	renderCounselorClassCheckboxes(assignedClasses, 'counselorScopeModalChecklist');
 	toggleUIModal(true, 'counselorScopeModal');
 };
-
 window.saveCounselorScopeModal = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
 	const id = document.getElementById('counselorScopeUserId').value;
 	const targetRecord = adminListData.find(item => item.id === id);
 	if (!targetRecord) return;
-
 	const counselorClasses = getCounselorSelectedClasses();
-
 	try {
 		updateSyncStatusIndicator('saving');
 		let currentJson = targetRecord.credits_json || {};
@@ -3038,24 +3001,19 @@ window.saveCounselorScopeModal = async function() {
 			try { currentJson = JSON.parse(currentJson); } catch (e) { currentJson = {}; }
 		}
 		currentJson._counselor_classes = counselorClasses;
-
 		const payload = {
 			entry_dept: JSON.stringify(counselorClasses),
 			credits_json: currentJson,
 			updated_at: new Date().toISOString()
 		};
-
 		const { error } = await client.from('grad_checks').update(payload).eq('id', id);
 		if (error) throw error;
-
 		targetRecord.credits_json = currentJson;
 		targetRecord.entry_dept = JSON.stringify(counselorClasses);
-
 		if (userDBRecord && userDBRecord.id === id) {
 			userDBRecord.credits_json = currentJson;
 			userDBRecord.entry_dept = JSON.stringify(counselorClasses);
 		}
-
 		updateSyncStatusIndicator('success');
 		showMsg(`已成功更新「${targetRecord.full_name}」負責授權班級（共 ${counselorClasses.length} 班）！`);
 		logAuditRecord("更新輔導教師授權", targetRecord.student_id, targetRecord.full_name, { counselorClassesCount: counselorClasses.length, classes: counselorClasses });
@@ -3066,7 +3024,6 @@ window.saveCounselorScopeModal = async function() {
 		showMsg(translateError(err.message), 'error');
 	}
 };
-
 window.renderAdminStats = function(filteredList) {
 	const panel = document.getElementById('adminStatsPanel');
 	if (!panel) return;
@@ -3112,7 +3069,6 @@ window.renderAdminStats = function(filteredList) {
 		</div>
 	`;
 };
-
 window.applyFilters = function() {
 	const searchEl = document.getElementById('adminSearchInput');
 	const searchText = (searchEl ? searchEl.value : '').toLowerCase().trim();
@@ -3124,7 +3080,6 @@ window.applyFilters = function() {
 	const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
 	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
 	let filtered = [...adminListData];
-
 	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
 		filtered = filtered.filter(s => String(s.entry_year).trim() === String(myYear).trim() && String(s.entry_dept).trim() === String(myDept).trim() && s.role === 'student');
 	} else if (role === 'counselor') {
@@ -3138,7 +3093,6 @@ window.applyFilters = function() {
 	} else if (role === 'teacher') {
 		filtered = filtered.filter(s => s.role === 'student');
 	}
-
 	if (searchText) {
 		filtered = filtered.filter(s => (s.full_name && String(s.full_name).toLowerCase().includes(searchText)) || (s.student_id && String(s.student_id).toLowerCase().includes(searchText)));
 	}
@@ -3188,11 +3142,9 @@ window.applyFilters = function() {
 	});
 	return filtered;
 };
-
 window.fetchAdminList = async function(isClientOnly = false) {
 	const client = ensureDbClient();
 	if (!client) return;
-	updateSyncStatusIndicator('saving');
 	try {
 		if (!isClientOnly) {
 			const { data, error } = await client.from('grad_checks').select('*');
@@ -3201,10 +3153,8 @@ window.fetchAdminList = async function(isClientOnly = false) {
 			teacherNames = adminListData.filter(u => u.role === 'teacher' || u.role === 'counselor').map(u => u.full_name);
 		}
 		renderAdminTable();
-		updateSyncStatusIndicator('success');
-	} catch (err) { updateSyncStatusIndicator('offline'); }
+	} catch (err) { console.error("載入名單失敗:", err); }
 };
-
 window.renderAdminTable = function() {
 	const tableBody = document.getElementById('adminListBody'), cardsContainer = document.getElementById('adminCardsContainer');
 	if (!tableBody || !cardsContainer) return;
@@ -3215,7 +3165,6 @@ window.renderAdminTable = function() {
 	renderAdminStats(filtered);
 	const curRole = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 	const canModifyAccount = (curRole === 'admin');
-
 	filtered.forEach((s, i) => {
 		const isTutor = (s.role === 'teacher' && s.entry_year !== '未設定' && s.entry_dept !== '未設定');
 		let roleClass = 'badge-student';
@@ -3225,13 +3174,11 @@ window.renderAdminTable = function() {
 		else if (s.role === 'teacher') roleClass = 'badge-teacher';
 		let roleDisplayName = mapping.role[s.role] || '使用者';
 		if (isTutor) roleDisplayName = '導師';
-
 		let classInfo = (s.entry_year === '未設定' || s.entry_dept === '未設定' || String(s.entry_dept).startsWith('[')) ? '未設定' : `${s.entry_year}年/${s.entry_dept}`;
 		if (s.role === 'counselor') {
 			const allowedCount = getUserCounselorClasses(s).length;
 			classInfo = `已授權 ${allowedCount} 班`;
 		}
-
 		const evalRes = s.role === 'student' ? evaluateStudentStatus(s) : null;
 		const statusTagHtml = evalRes ? `<span class="text-xs font-black px-2.5 py-1 rounded-lg inline-flex items-center gap-1.5 whitespace-nowrap shadow-2xs ${evalRes.badgeClass}"><span>${escapeHtml(evalRes.statusText)}</span><span class="opacity-85 font-mono font-black">(${evalRes.total}學分)</span></span>` : '<span class="text-xs text-slate-400 font-semibold whitespace-nowrap">-</span>';
 		const tr = document.createElement('tr');
@@ -3250,13 +3197,11 @@ window.renderAdminTable = function() {
 							<button class="btn-mini flex-auto min-w-0 text-xs px-1.5 text-center font-bold" style="background:#ef4444" onclick="deleteStudentData('${escapeHtml(s.id)}','${escapeHtml(s.full_name)}')">刪除</button>`;
 		}
 		btnsDesktop += '</div>';
-
 		tr.innerHTML = `<td class="whitespace-nowrap text-left">
 			<div class="font-black text-slate-900 text-sm leading-snug">${escapeHtml(s.full_name)}</div>
 			<div class="text-[11px] font-mono text-slate-400 font-bold leading-tight mt-0.5">${escapeHtml(s.student_id || '-')}</div>
 		</td><td class="text-center whitespace-nowrap"><span class="role-badge ${roleClass}">${escapeHtml(roleDisplayName)}</span></td><td class="whitespace-nowrap text-left"><span class="font-bold text-slate-800 whitespace-nowrap">${escapeHtml(classInfo)}</span></td><td class="whitespace-nowrap text-left">${statusTagHtml}</td><td>${btnsDesktop}</td>`;
 		tableBody.appendChild(tr);
-
 		const card = document.createElement('div');
 		card.className = "mobile-card p-4 flex flex-col gap-3";
 		let btnsMobile = '';
@@ -3284,7 +3229,6 @@ window.renderAdminTable = function() {
 		cardsContainer.appendChild(card);
 	});
 };
-
 window.deleteStudentData = function(id, name) {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3320,12 +3264,10 @@ window.deleteStudentData = function(id, name) {
 		}
 	}, "確認刪除資料", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
-
 window.toggleAdminUserRoleFields = function(roleVal) {
 	const standardGroup = document.getElementById('editUserStandardClassGroup');
 	const yrLabel = document.getElementById('editUserEntryYearLabel');
 	const deptLabel = document.getElementById('editUserEntryDeptLabel');
-
 	if (roleVal === 'counselor') {
 		if (standardGroup) standardGroup.style.display = 'none';
 	} else {
@@ -3340,7 +3282,6 @@ window.toggleAdminUserRoleFields = function(roleVal) {
 	}
 	toggleAdminTutorField(roleVal);
 };
-
 window.openAdminUserEdit = function(index) {
 	const s = applyFilters()[index];
 	if (!s) return;
@@ -3349,7 +3290,6 @@ window.openAdminUserEdit = function(index) {
 	document.getElementById('editUserName').value = s.full_name || '';
 	document.getElementById('editUserEntryYear').value = s.entry_year || '未設定';
 	document.getElementById('editUserEntryDept').value = String(s.entry_dept).startsWith('[') ? '未設定' : (s.entry_dept || '未設定');
-	
 	const roleSelect = document.getElementById('editUserRole');
 	if (roleSelect && !roleSelect.querySelector('option[value="counselor"]')) {
 		const opt = document.createElement('option');
@@ -3362,7 +3302,6 @@ window.openAdminUserEdit = function(index) {
 	document.getElementById('editUserCustomPassword').value = '';
 	toggleUIModal(true, 'adminUserModal');
 };
-
 window.toggleAdminTutorField = function(roleVal, currentTutor = '') {
 	const sec = document.getElementById('editTutorSection');
 	const wrapper = document.getElementById('editTutorWrapper');
@@ -3377,7 +3316,6 @@ window.toggleAdminTutorField = function(roleVal, currentTutor = '') {
 		sec.style.display = 'none'; wrapper.innerHTML = '';
 	}
 };
-
 window.saveAdminUserEdit = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3385,21 +3323,16 @@ window.saveAdminUserEdit = async function() {
 	const sid = document.getElementById('editUserSid').value.split('@')[0].toLowerCase().trim();
 	const name = document.getElementById('editUserName').value.trim();
 	const role = document.getElementById('editUserRole').value;
-
 	const targetRecord = adminListData.find(item => item.id === id);
-
 	let year = document.getElementById('editUserEntryYear').value;
 	let dept = document.getElementById('editUserEntryDept').value;
 	let tutor = (role === 'student') ? (document.getElementById('editUserTutor')?.value || '未設定') : '免設定';
-
 	if (!sid || !name) { showMsg("請填寫完整帳號與姓名", "error"); return; }
-
 	if (role === 'counselor') {
 		year = '未設定';
 		dept = targetRecord?.entry_dept || '[]';
 		if (!String(dept).startsWith('[')) dept = '[]';
 	}
-
 	try {
 		updateSyncStatusIndicator('saving');
 		const { error } = await client.rpc('admin_update_user_sid', {
@@ -3412,7 +3345,6 @@ window.saveAdminUserEdit = async function() {
 			new_tutor: tutor
 		});
 		if (error) throw error;
-
 		updateSyncStatusIndicator('success');
 		showMsg("帳號資料修改成功！");
 		logAuditRecord("更改帳號資料", sid, name, { year, dept, role });
@@ -3423,7 +3355,6 @@ window.saveAdminUserEdit = async function() {
 		showMsg(translateError(err.message), 'error');
 	}
 };
-
 window.directResetPasswordToSid = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3438,11 +3369,9 @@ window.directResetPasswordToSid = async function() {
 			updateSyncStatusIndicator('saving');
 			const { error } = await client.rpc('admin_reset_user_password', { target_user_id: id, new_password: sid });
 			if (error) throw error;
-			
 			await client.from('grad_checks').update({ must_change_password: true, updated_at: new Date().toISOString() }).eq('id', id);
 			const rec = adminListData.find(s => s.id === id);
 			if (rec) rec.must_change_password = true;
-
 			updateSyncStatusIndicator('success');
 			showMsg(`已成功將「${name}」的密碼重置為「${sid}」！`);
 			logAuditRecord("重設帳號密碼", sid, name, { method: "一鍵重設為帳號", must_change_password: true });
@@ -3450,7 +3379,6 @@ window.directResetPasswordToSid = async function() {
 		} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
 	});
 };
-
 window.customResetPassword = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3463,11 +3391,9 @@ window.customResetPassword = async function() {
 			updateSyncStatusIndicator('saving');
 			const { error } = await client.rpc('admin_reset_user_password', { target_user_id: id, new_password: newPwd });
 			if (error) throw error;
-			
 			await client.from('grad_checks').update({ must_change_password: true, updated_at: new Date().toISOString() }).eq('id', id);
 			const rec = adminListData.find(s => s.id === id);
 			if (rec) rec.must_change_password = true;
-
 			updateSyncStatusIndicator('success');
 			showMsg(`已成功將「${name}」的密碼重置！`);
 			logAuditRecord("重設帳號密碼", sid, name, { method: "自訂密碼", must_change_password: true });
@@ -3476,7 +3402,6 @@ window.customResetPassword = async function() {
 		} catch (err) { updateSyncStatusIndicator('offline'); showMsg(translateError(err.message), "error"); toggleUIModal(false, 'confirmModal'); }
 	});
 };
-
 window.openIndependentPage = function(pageType) {
 	flushPendingSave();
 	currentIndependentPage = pageType;
@@ -3506,7 +3431,6 @@ window.openIndependentPage = function(pageType) {
 	}
 	updateHash();
 };
-
 window.closeIndependentPage = function() {
 	const mainDashboard = document.getElementById('mainDashboardView');
 	const announcePage = document.getElementById('pageAnnounceView');
@@ -3521,7 +3445,6 @@ window.closeIndependentPage = function() {
 	currentIndependentPage = null;
 	updateHash();
 };
-
 window.renderIndependentAnnouncements = function() {
 	const container = document.getElementById('independentAnnounceList');
 	if (!container) return;
@@ -3545,11 +3468,9 @@ window.renderIndependentAnnouncements = function() {
 		</div>`;
 	}).join('');
 };
-
 window.openEditAnnouncement = function(id) {
 	const item = announcementsData.find(a => String(a.id) === String(id));
 	if (!item) return;
-
 	document.getElementById('editingAnnounceId').value = item.id;
 	document.getElementById('newAnnounceTitle').value = item.title || '';
 	const titleCnt = document.getElementById('announceTitleCount');
@@ -3561,20 +3482,17 @@ window.openEditAnnouncement = function(id) {
 	document.getElementById('newAnnounceEndAt').value = formatDateTimeInput(item.end_at);
 	document.getElementById('newAnnounceMarquee').checked = !!item.is_marquee;
 	document.getElementById('newAnnounceActive').checked = !!item.is_active;
-
 	document.getElementById('announceFormIcon').innerText = '✏️';
 	document.getElementById('announceFormTitle').innerHTML = '編輯中：<span class="text-amber-600 font-black truncate max-w-[180px] inline-block align-bottom">' + escapeHtml(item.title || '') + '</span>';
 	const submitBtn = document.getElementById('submitAnnounceBtn');
 	submitBtn.innerText = '儲存修改內容';
 	submitBtn.className = "w-full py-3 rounded-xl font-extrabold text-white text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all";
 	document.getElementById('cancelAnnounceEditBtn').style.display = 'inline-block';
-
 	const formCard = document.getElementById('announceFormCard');
 	if (formCard) {
 		formCard.classList.add('ring-4', 'ring-amber-400/80', 'shadow-md');
 	}
 };
-
 window.cancelAnnounceEdit = function() {
 	document.getElementById('editingAnnounceId').value = '';
 	document.getElementById('newAnnounceTitle').value = '';
@@ -3587,7 +3505,6 @@ window.cancelAnnounceEdit = function() {
 	document.getElementById('newAnnounceEndAt').value = '';
 	document.getElementById('newAnnounceMarquee').checked = true;
 	document.getElementById('newAnnounceActive').checked = true;
-
 	document.getElementById('announceFormIcon').innerText = '✨';
 	document.getElementById('announceFormTitle').innerText = '發布新公告';
 	const submitBtn = document.getElementById('submitAnnounceBtn');
@@ -3596,7 +3513,6 @@ window.cancelAnnounceEdit = function() {
 	document.getElementById('cancelAnnounceEditBtn').style.display = 'none';
 	document.getElementById('announceFormCard')?.classList.remove('ring-4', 'ring-amber-400/80', 'shadow-md');
 };
-
 window.renderAdminAnnounceList = function() {
 	const container = document.getElementById('adminAnnounceList');
 	const countText = document.getElementById('announceCountText');
@@ -3606,7 +3522,6 @@ window.renderAdminAnnounceList = function() {
 	if (!container) return;
 	const now = Date.now();
 	let activeCount = 0, scheduledCount = 0, expiredCount = 0, inactiveCount = 0;
-
 	announcementsData.forEach(a => {
 		const isInactive = !a.is_active;
 		const isScheduled = (a.published_at && new Date(a.published_at).getTime() > now) || (a.start_at && new Date(a.start_at).getTime() > now);
@@ -3616,7 +3531,6 @@ window.renderAdminAnnounceList = function() {
 		else if (isScheduled) scheduledCount++;
 		else activeCount++;
 	});
-
 	if (metricContainer) {
 		metricContainer.innerHTML = `
 			<div class="bg-white border border-emerald-200 rounded-xl p-2.5 text-center shadow-2xs"><div class="text-[10px] font-bold text-emerald-800">公開中</div><div class="text-base font-black text-emerald-600 mt-0.5">${activeCount}</div></div>
@@ -3625,7 +3539,6 @@ window.renderAdminAnnounceList = function() {
 			<div class="bg-white border border-rose-200 rounded-xl p-2.5 text-center shadow-2xs"><div class="text-[10px] font-bold text-rose-800">手動下架</div><div class="text-base font-black text-rose-600 mt-0.5">${inactiveCount}</div></div>
 		`;
 	}
-
 	let filtered = [...announcementsData];
 	if (searchTxt) {
 		filtered = filtered.filter(a => (a.title && a.title.toLowerCase().includes(searchTxt)) || (a.content && a.content.toLowerCase().includes(searchTxt)) || (a.category && a.category.toLowerCase().includes(searchTxt)));
@@ -3648,14 +3561,12 @@ window.renderAdminAnnounceList = function() {
 		container.innerHTML = `<div class="bg-white border border-slate-200 rounded-2xl p-10 text-center text-slate-400 font-bold space-y-2"><div class="text-3xl">📭</div><div class="text-xs">查無符合條件之系統公告事項</div></div>`;
 		return;
 	}
-
 	container.innerHTML = filtered.map((a, idx) => {
 		const pubDate = a.published_at || a.created_at;
 		const pubFormatted = formatDateTime(pubDate);
 		const [pubDatePart, pubTimePart] = pubFormatted.includes(' ') ? pubFormatted.split(' ') : [pubFormatted, ''];
 		let statusBadge = !a.is_active ? '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-rose-50 text-rose-700 border border-rose-200 shrink-0">○ 已下架</span>' : ((a.published_at && new Date(a.published_at).getTime() > now) ? '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-amber-50 text-amber-700 border border-amber-200 shrink-0">⏳ 預約中</span>' : (a.start_at && new Date(a.start_at).getTime() > now ? '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-sky-50 text-sky-700 border border-sky-200 shrink-0">⏳ 未開始</span>' : (a.end_at && new Date(a.end_at).getTime() < now ? '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-slate-100 text-slate-600 border border-slate-300 shrink-0">⌛ 已過期</span>' : '<span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-emerald-50 text-emerald-700 border border-emerald-300 shrink-0">● 公開中</span>')));
 		let categoryColor = (a.category === '重要提醒') ? 'bg-rose-50 text-rose-800 border-rose-200' : ((a.category === '教務通知') ? 'bg-blue-50 text-blue-800 border-blue-200' : ((a.category === '系統維護') ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-slate-100 text-slate-700 border-slate-200'));
-
 		return `
 			<div class="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 shadow-2xs hover:shadow-xs transition space-y-3">
 				<div class="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
@@ -3686,7 +3597,6 @@ window.renderAdminAnnounceList = function() {
 		`;
 	}).join('');
 };
-
 window.submitNewAnnouncement = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3747,7 +3657,6 @@ window.submitNewAnnouncement = async function() {
 		showMsg("公告作業失敗：" + translateError(err.message), "error");
 	}
 };
-
 window.toggleAnnounceStatus = async function(id, newStatus) {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3763,7 +3672,6 @@ window.toggleAnnounceStatus = async function(id, newStatus) {
 		showMsg("操作失敗：" + translateError(err.message), "error");
 	}
 };
-
 window.deleteAnnouncement = function(id, title) {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3783,7 +3691,6 @@ window.deleteAnnouncement = function(id, title) {
 		}
 	}, "確認刪除", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
-
 window.getClientIP = async function() {
 	try {
 		const controller = new AbortController();
@@ -3795,7 +3702,6 @@ window.getClientIP = async function() {
 		return '內網/無法取得 IP';
 	}
 };
-
 window.logAuditRecord = async function(actionType, targetSid, targetName, details) {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3828,13 +3734,11 @@ window.logAuditRecord = async function(actionType, targetSid, targetName, detail
 		}
 	} catch (e) {}
 };
-
 window.openFeedbackModal = function() {
 	document.getElementById('fbContent').value = '';
 	document.getElementById('fbCategory').value = '功能建議';
 	toggleUIModal(true, 'feedbackModal');
 };
-
 window.submitUserFeedback = async function() {
 	const client = ensureDbClient();
 	if (!client) { showMsg("資料庫連線異常，無法送出！", "error"); return; }
@@ -3859,7 +3763,6 @@ window.submitUserFeedback = async function() {
 		showMsg("送出失敗，請確認資料表已建立！", "error");
 	}
 };
-
 window.refreshFeedbackList = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3874,7 +3777,6 @@ window.refreshFeedbackList = async function() {
 		if (listBody) listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-500 font-bold">⚠️ 載入失敗！</td></tr>`;
 	}
 };
-
 window.renderFeedbackList = function() {
 	const searchTxt = (document.getElementById('fbSearchInput')?.value || '').toLowerCase().trim();
 	const catFilter = document.getElementById('fbFilterCategory')?.value || 'all';
@@ -3913,7 +3815,6 @@ window.renderFeedbackList = function() {
 		listBody.appendChild(tr);
 	});
 };
-
 window.deleteFeedback = function(id, name) {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3935,7 +3836,6 @@ window.deleteFeedback = function(id, name) {
 		}
 	}, "確認刪除", "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
-
 window.openAuditLogModal = async function(filterStudentId = null) {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3947,7 +3847,50 @@ window.openAuditLogModal = async function(filterStudentId = null) {
 	else if (searchInput) searchInput.value = '';
 	await refreshAuditLogs();
 };
-
+window.exportAuditLogsToCsv = function() {
+	const list = window.currentViewingAuditFilteredList || auditLogsData || [];
+	if (!list || list.length === 0) {
+		showMsg("目前篩選條件下無任何紀錄可匯出！", "error");
+		return;
+	}
+	const escapeCsv = (val) => {
+		if (val === null || val === undefined) return '""';
+		const s = String(val).replace(/"/g, '""');
+		return `"${s}"`;
+	};
+	const headers = ['紀錄時間', '操作人員', '角色', '目標學生姓名', '目標學號', '操作項目', '詳細內容', 'IP位址'];
+	const rows = [headers.join(',')];
+	list.forEach(log => {
+		let detailsText = '';
+		if (typeof log.details === 'object' && log.details !== null) {
+			try { detailsText = JSON.stringify(log.details); } catch (e) { detailsText = String(log.details); }
+		} else {
+			detailsText = String(log.details || '');
+		}
+		rows.push([
+			escapeCsv(formatDateTime(log.created_at)),
+			escapeCsv(log.operator_name || ''),
+			escapeCsv(mapping.role[log.operator_role] || log.operator_role || ''),
+			escapeCsv(log.target_student_name || ''),
+			escapeCsv(log.target_student_id || ''),
+			escapeCsv(log.action_type || ''),
+			escapeCsv(detailsText),
+			escapeCsv(log.ip_address || '')
+		].join(','));
+	});
+	const csvContent = '\uFEFF' + rows.join('\r\n');
+	const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+	a.download = `新社高中畢業檢核_稽核日誌_${dateStr}.csv`;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+	showMsg(`已成功匯出 ${list.length} 筆稽核日誌！`);
+};
 window.refreshAuditLogs = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -3972,7 +3915,6 @@ window.refreshAuditLogs = async function() {
 	auditLogsData = allLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 	renderAuditLogList();
 };
-
 window.resetAuditFilters = function() {
 	const sInput = document.getElementById('auditSearchInput');
 	if (sInput) sInput.value = '';
@@ -3988,63 +3930,53 @@ window.resetAuditFilters = function() {
 	if (eDate) eDate.value = '';
 	renderAuditLogList();
 };
-
 window.toggleAuditLogExpand = function(event, expandId) {
 	if (event) {
 		event.preventDefault();
 		event.stopPropagation();
 	}
 	const el = document.getElementById(expandId);
-	const btn = document.getElementById(`btn-${expandId}`);
+	const btn = document.getElementById('btn-' + expandId);
 	if (!el) return;
 	const isHidden = el.classList.contains('hidden');
 	if (isHidden) {
 		el.classList.remove('hidden');
-		if (btn) btn.innerText = "▲ (點擊收合)";
+		if (btn) btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> 收合';
 	} else {
 		el.classList.add('hidden');
-		if (btn) btn.innerText = "▼ (點擊展開)";
+		if (btn) btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> 展開';
 	}
 };
-
-window.renderAuditLogList = function() {
-	const searchTxt = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
-	const filterActions = getMSValues('audit-action');
-	const roleFilter = document.getElementById('auditFilterOperatorRole')?.value || 'all';
-	const startDate = document.getElementById('auditStartDate')?.value;
-	const endDate = document.getElementById('auditEndDate')?.value;
-	const listBody = document.getElementById('auditLogListBody');
-	const countText = document.getElementById('auditCountText');
-	if (!listBody) return;
-	let filtered = [...auditLogsData];
-
-	if (searchTxt) {
-		filtered = filtered.filter(l => (l.operator_name && l.operator_name.toLowerCase().includes(searchTxt)) || (l.target_student_name && l.target_student_name.toLowerCase().includes(searchTxt)) || (l.target_student_id && l.target_student_id.toLowerCase().includes(searchTxt)) || (l.action_type && l.action_type.toLowerCase().includes(searchTxt)) || (l.ip_address && l.ip_address.toLowerCase().includes(searchTxt)));
+window.currentViewingAuditLog = null;
+window.currentViewingAuditFilteredList = [];
+window.switchAuditDetailTab = function(tab) {
+	const structuredTab = document.getElementById('tabAuditStructured');
+	const rawTab = document.getElementById('tabAuditRaw');
+	const structuredCont = document.getElementById('auditDetailStructuredContainer');
+	const rawCont = document.getElementById('auditDetailRawContainer');
+	if (!structuredTab || !rawTab || !structuredCont || !rawCont) return;
+	if (tab === 'structured') {
+		structuredTab.className = "px-3 py-1.5 text-xs font-black rounded-lg bg-indigo-600 text-white transition shadow-2xs";
+		rawTab.className = "px-3 py-1.5 text-xs font-extrabold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition";
+		structuredCont.classList.remove('hidden');
+		rawCont.classList.add('hidden');
+	} else {
+		rawTab.className = "px-3 py-1.5 text-xs font-black rounded-lg bg-indigo-600 text-white transition shadow-2xs";
+		structuredTab.className = "px-3 py-1.5 text-xs font-extrabold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition";
+		rawCont.classList.remove('hidden');
+		structuredCont.classList.add('hidden');
 	}
-	if (filterActions.length > 0 && !filterActions.includes('all')) {
-		filtered = filtered.filter(l => filterActions.includes(l.action_type));
-	}
-	if (roleFilter !== 'all') filtered = filtered.filter(l => l.operator_role === roleFilter);
-	if (startDate) {
-		const startMs = new Date(startDate + 'T00:00:00').getTime();
-		filtered = filtered.filter(l => new Date(l.created_at).getTime() >= startMs);
-	}
-	if (endDate) {
-		const endMs = new Date(endDate + 'T23:59:59').getTime();
-		filtered = filtered.filter(l => new Date(l.created_at).getTime() <= endMs);
-	}
-	if (countText) countText.innerText = `共 ${filtered.length} 筆紀錄`;
-	listBody.innerHTML = '';
-	if (filtered.length === 0) {
-		listBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 font-bold">目前資料庫尚無符合條件的稽核異動紀錄</td></tr>`;
-		return;
-	}
-
+};
+window.openAuditLogDetailModal = function(indexInFiltered) {
+	const log = window.currentViewingAuditFilteredList[indexInFiltered];
+	if (!log) return;
+	window.currentViewingAuditLog = log;
 	const actionConfig = {
 		'使用者登入': { icon: '🔑', class: 'bg-emerald-600 text-white font-bold' },
 		'使用者登出': { icon: '🚪', class: 'bg-slate-600 text-white font-bold' },
 		'使用者註冊': { icon: '✨', class: 'bg-teal-600 text-white font-bold' },
 		'變更學分紀錄': { icon: '📘', class: 'bg-blue-600 text-white font-bold' },
+		'PDF成績單自動匯入': { icon: '📄', class: 'bg-sky-600 text-white font-bold' },
 		'切換版本': { icon: '🔄', class: 'bg-sky-600 text-white font-bold' },
 		'切換版面配置': { icon: '📌', class: 'bg-slate-700 text-white font-bold' },
 		'批次全部及格': { icon: '✅', class: 'bg-emerald-600 text-white font-bold' },
@@ -4063,106 +3995,437 @@ window.renderAuditLogList = function() {
 		'編輯系統公告': { icon: '✏️', class: 'bg-blue-600 text-white font-bold' },
 		'更新公告排序': { icon: '↕️', class: 'bg-indigo-600 text-white font-bold' }
 	};
-
-	const detailKeyLabels = { 
-		role: '身份', year: '入學年', dept: '科別班級', status: '狀態', 
-		category: '回饋類別', method: '重設方式', passwordChanged: '密碼變更', 
-		fromOrder: '原始順序', toOrder: '新順序', isMarquee: '跑馬燈', 
-		isActive: '公開狀態', counselorClassesCount: '授權班級數', layout_mode: '版面模式' 
+	const cfg = actionConfig[log.action_type] || { icon: '📌', class: 'bg-slate-700 text-white font-bold' };
+	const iconEl = document.getElementById('auditModalActionIcon');
+	const badgeEl = document.getElementById('auditModalActionBadge');
+	const timeEl = document.getElementById('auditModalTime');
+	if (iconEl) iconEl.innerText = cfg.icon;
+	if (badgeEl) {
+		badgeEl.className = 'text-xs px-2.5 py-0.5 rounded-full font-black shadow-2xs ' + cfg.class;
+		badgeEl.innerText = log.action_type;
+	}
+	if (timeEl) {
+		const fullTime = formatDateTime(log.created_at);
+		timeEl.innerHTML = '<i class="fa-regular fa-clock"></i> <span>' + escapeHtml(fullTime) + '</span>';
+	}
+	const opEl = document.getElementById('auditModalOperator');
+	const opMetaEl = document.getElementById('auditModalOperatorMeta');
+	if (opEl) opEl.innerText = log.operator_name || '系統自動操作';
+	if (opMetaEl) {
+		const rLabel = mapping.role[log.operator_role] || log.operator_role || '未知身分';
+		const ipStr = log.ip_address ? 'IP: ' + log.ip_address : '未知 IP';
+		opMetaEl.innerText = rLabel + ' ｜ ' + ipStr;
+	}
+	const tgEl = document.getElementById('auditModalTarget');
+	const tgMetaEl = document.getElementById('auditModalTargetMeta');
+	if (tgEl) tgEl.innerText = log.target_student_name || '無指定對象';
+	if (tgMetaEl) {
+		const sidStr = log.target_student_id ? '學號: ' + log.target_student_id : '全域系統紀錄';
+		tgMetaEl.innerText = sidStr;
+	}
+	const d = log.details || {};
+	// Metrics banner
+	const bannerEl = document.getElementById('auditModalMetricsBanner');
+	if (bannerEl) {
+		bannerEl.className = 'hidden';
+		bannerEl.innerHTML = '';
+		let bannerItems = [];
+		if (d.old_total !== undefined && d.new_total !== undefined) {
+			const diff = d.new_total - d.old_total;
+			const isUp = diff > 0;
+			const isDown = diff < 0;
+			const diffBadge = isUp ? `<span class="text-xs px-2 py-0.5 rounded-full font-black bg-emerald-100 text-emerald-800 border border-emerald-300">+ ${diff} 學分</span>`
+				: (isDown ? `<span class="text-xs px-2 py-0.5 rounded-full font-black bg-rose-100 text-rose-800 border border-rose-300">- ${Math.abs(diff)} 學分</span>`
+				: `<span class="text-xs px-2 py-0.5 rounded-full font-black bg-slate-100 text-slate-700 border border-slate-300">學分無變化</span>`);
+			bannerItems.push(`
+				<div class="flex-1 p-3 bg-gradient-to-br from-indigo-50/60 to-slate-50 border border-indigo-100 rounded-xl flex items-center justify-between">
+					<div>
+						<div class="text-[11px] font-black text-slate-500 mb-0.5">學分變更對照</div>
+						<div class="flex items-center gap-2">
+							<span class="text-sm font-black text-slate-600">${d.old_total} 學分</span>
+							<i class="fa-solid fa-arrow-right text-xs text-indigo-500"></i>
+							<span class="text-base font-black text-indigo-700">${d.new_total} 學分</span>
+						</div>
+					</div>
+					<div>${diffBadge}</div>
+				</div>
+			`);
+		}
+		if (log.action_type === 'PDF成績單自動匯入' || d.student_name || d.matched_courses) {
+			bannerItems.push(`
+				<div class="flex-1 p-3 bg-sky-50 border border-sky-200 rounded-xl flex items-center justify-between">
+					<div>
+						<div class="text-[11px] font-black text-sky-900 mb-0.5">📄 PDF 成績單匯入資訊</div>
+						<div class="text-xs font-black text-sky-950">
+							<span>${escapeHtml(d.student_name || log.target_student_name || '學生')}</span>
+							<span class="text-slate-500 font-normal">(${escapeHtml(d.student_id || log.target_student_id || '')})</span>
+						</div>
+					</div>
+					<div class="text-right">
+						<div class="text-xs font-black text-sky-700">實得 ${d.total_earned ?? d.new_total ?? '-'} 學分</div>
+						<div class="text-[10px] text-slate-500 font-semibold">配對 ${d.matched_courses ?? '-'} 門科目</div>
+					</div>
+				</div>
+			`);
+		}
+		if (d.old_version && d.new_version) {
+			bannerItems.push(`
+				<div class="flex-1 p-3 bg-sky-50 border border-sky-200 rounded-xl flex items-center justify-between">
+					<div>
+						<div class="text-[11px] font-black text-sky-900 mb-0.5">課綱版本異動</div>
+						<div class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+							<span>${escapeHtml(d.old_version)}</span>
+							<span class="text-sky-600 font-black">➔</span>
+							<span class="font-extrabold text-indigo-700">${escapeHtml(d.new_version)}</span>
+						</div>
+					</div>
+				</div>
+			`);
+		}
+		if (bannerItems.length > 0) {
+			bannerEl.className = 'grid grid-cols-1 sm:grid-cols-' + bannerItems.length + ' gap-2.5';
+			bannerEl.innerHTML = bannerItems.join('');
+		}
+	}
+	// Change count label
+	const countEl = document.getElementById('auditModalChangeCount');
+	if (countEl) {
+		const totalChanged = (d.changed_fields && Array.isArray(d.changed_fields)) ? d.changed_fields.length : 0;
+		countEl.innerText = totalChanged > 0 ? `共 ${totalChanged} 門科目異動` : '';
+	}
+	// Structured Container
+	const structCont = document.getElementById('auditDetailStructuredContainer');
+	if (structCont) {
+		structCont.innerHTML = '';
+		if (d.changed_fields && Array.isArray(d.changed_fields) && d.changed_fields.length > 0) {
+			const gains = d.changed_fields.filter(f => f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格'));
+			const losses = d.changed_fields.filter(f => !gains.includes(f));
+			let changeSections = '';
+			if (gains.length > 0) {
+				changeSections += `
+					<div class="border border-emerald-200 bg-emerald-50/40 rounded-xl p-3">
+						<div class="text-xs font-black text-emerald-900 flex items-center justify-between pb-2 mb-2 border-b border-emerald-100">
+							<span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> 及格取得學分科目</span>
+							<span class="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">${gains.length} 門</span>
+						</div>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+							${gains.map(f => `
+								<div class="p-2 bg-white border border-emerald-200 rounded-lg shadow-2xs flex items-center justify-between gap-2">
+									<div class="text-xs font-bold text-slate-800 break-words flex-1 leading-snug">${escapeHtml(f.field)}</div>
+									<div class="flex items-center gap-1 shrink-0 text-[11px] font-black">
+										<s class="opacity-40 font-normal">${escapeHtml(f.oldVal)}</s>
+										<span class="text-emerald-600">➔</span>
+										<span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">${escapeHtml(f.newVal)}</span>
+									</div>
+								</div>
+							`).join('')}
+						</div>
+					</div>
+				`;
+			}
+			if (losses.length > 0) {
+				changeSections += `
+					<div class="border border-rose-200 bg-rose-50/40 rounded-xl p-3">
+						<div class="text-xs font-black text-rose-900 flex items-center justify-between pb-2 mb-2 border-b border-rose-100">
+							<span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark text-rose-600"></i> 未及格 / 取消學分科目</span>
+							<span class="bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">${losses.length} 門</span>
+						</div>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+							${losses.map(f => `
+								<div class="p-2 bg-white border border-rose-200 rounded-lg shadow-2xs flex items-center justify-between gap-2">
+									<div class="text-xs font-bold text-slate-800 break-words flex-1 leading-snug">${escapeHtml(f.field)}</div>
+									<div class="flex items-center gap-1 shrink-0 text-[11px] font-black">
+										<s class="opacity-40 font-normal">${escapeHtml(f.oldVal)}</s>
+										<span class="text-rose-600">➔</span>
+										<span class="text-rose-700 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">${escapeHtml(f.newVal)}</span>
+									</div>
+								</div>
+							`).join('')}
+						</div>
+					</div>
+				`;
+			}
+			structCont.innerHTML = changeSections;
+		} else {
+			const detailKeyLabels = {
+				role: '身分權限', year: '入學學年度', dept: '科別班級', status: '帳號狀態',
+				category: '回饋類別', method: '重設方式', passwordChanged: '密碼變更紀錄',
+				fromOrder: '原始排序權重', toOrder: '新排序權重', isMarquee: '跑馬燈顯示',
+				isActive: '公開狀態', counselorClassesCount: '授權班級數', layout_mode: '版面檢視模式',
+				student_name: '學生姓名', student_id: '學生學號', total_earned: '實得學分', matched_courses: '配對科目數'
+			};
+			const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode', 'layout_mode'].includes(k));
+			if (metaKeys.length > 0) {
+				structCont.innerHTML = `
+					<div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+						<div class="text-xs font-black text-slate-700 mb-2.5 flex items-center gap-1.5">
+							<i class="fa-solid fa-list-check text-indigo-600"></i> 詳細參數設定明細
+						</div>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+							${metaKeys.map(k => {
+								const label = detailKeyLabels[k] || k;
+								let rawVal = d[k];
+								let valStr = typeof rawVal === 'boolean' ? (rawVal ? '是' : '否') : String(rawVal ?? '未設定');
+								return `
+									<div class="p-2.5 bg-white border border-slate-200 rounded-lg flex items-center justify-between text-xs">
+										<span class="text-slate-500 font-bold">${escapeHtml(label)}</span>
+										<span class="font-black text-slate-800 font-mono">${escapeHtml(valStr)}</span>
+									</div>
+								`;
+							}).join('')}
+						</div>
+					</div>
+				`;
+			} else {
+				structCont.innerHTML = `
+					<div class="p-6 text-center text-slate-400 font-bold text-xs bg-slate-50 border border-slate-200 rounded-xl">
+						此筆日誌無額外細項變更參數
+					</div>
+				`;
+			}
+		}
+	}
+	// Raw JSON Container
+	const rawJsonEl = document.getElementById('auditDetailRawJson');
+	if (rawJsonEl) {
+		rawJsonEl.textContent = JSON.stringify(log, null, 2);
+	}
+	switchAuditDetailTab('structured');
+	toggleUIModal(true, 'auditDetailModal');
+};
+window.auditLogDisplayLimit = 150;
+window.renderAllAuditLogs = function() {
+	window.auditLogDisplayLimit = 999999;
+	renderAuditLogList();
+};
+window.renderAuditLogList = function() {
+	const searchTxt = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
+	const filterActions = getMSValues('audit-action');
+	const roleFilter = document.getElementById('auditFilterOperatorRole')?.value || 'all';
+	const startDate = document.getElementById('auditStartDate')?.value;
+	const endDate = document.getElementById('auditEndDate')?.value;
+	const listBody = document.getElementById('auditLogListBody');
+	const countText = document.getElementById('auditCountText');
+	if (!listBody) return;
+	let filtered = [...auditLogsData];
+	if (searchTxt) {
+		filtered = filtered.filter(l => (l.operator_name && l.operator_name.toLowerCase().includes(searchTxt)) || (l.target_student_name && l.target_student_name.toLowerCase().includes(searchTxt)) || (l.target_student_id && l.target_student_id.toLowerCase().includes(searchTxt)) || (l.action_type && l.action_type.toLowerCase().includes(searchTxt)) || (l.ip_address && l.ip_address.toLowerCase().includes(searchTxt)));
+	}
+	if (filterActions.length > 0 && !filterActions.includes('all')) {
+		filtered = filtered.filter(l => filterActions.includes(l.action_type));
+	}
+	if (roleFilter !== 'all') filtered = filtered.filter(l => l.operator_role === roleFilter);
+	if (startDate) {
+		const startMs = new Date(startDate + 'T00:00:00').getTime();
+		filtered = filtered.filter(l => new Date(l.created_at).getTime() >= startMs);
+	}
+	if (endDate) {
+		const endMs = new Date(endDate + 'T23:59:59').getTime();
+		filtered = filtered.filter(l => new Date(l.created_at).getTime() <= endMs);
+	}
+	if (countText) countText.innerText = `共 ${filtered.length} 筆紀錄`;
+	window.currentViewingAuditFilteredList = filtered;
+	listBody.innerHTML = '';
+	if (filtered.length === 0) {
+		listBody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold text-xs bg-slate-50/50">目前查無符合條件之稽核日誌紀錄</td></tr>`;
+		return;
+	}
+	const actionConfig = {
+		'使用者登入': { icon: '🔑', class: 'bg-emerald-600 text-white font-bold' },
+		'使用者登出': { icon: '🚪', class: 'bg-slate-600 text-white font-bold' },
+		'使用者註冊': { icon: '✨', class: 'bg-teal-600 text-white font-bold' },
+		'變更學分紀錄': { icon: '📘', class: 'bg-blue-600 text-white font-bold' },
+		'PDF成績單自動匯入': { icon: '📄', class: 'bg-sky-600 text-white font-bold' },
+		'切換版本': { icon: '🔄', class: 'bg-sky-600 text-white font-bold' },
+		'切換版面配置': { icon: '📌', class: 'bg-slate-700 text-white font-bold' },
+		'批次全部及格': { icon: '✅', class: 'bg-emerald-600 text-white font-bold' },
+		'批次學分歸零': { icon: '🧹', class: 'bg-amber-600 text-white font-bold' },
+		'單學期全選及格': { icon: '✔', class: 'bg-teal-600 text-white font-bold' },
+		'單學期學分歸零': { icon: '⚠️', class: 'bg-orange-600 text-white font-bold' },
+		'更改帳號資料': { icon: '📝', class: 'bg-indigo-600 text-white font-bold' },
+		'重設帳號密碼': { icon: '⚡', class: 'bg-violet-600 text-white font-bold' },
+		'強制首次更改密碼': { icon: '🔒', class: 'bg-amber-600 text-white font-bold' },
+		'刪除帳號': { icon: '🗑️', class: 'bg-rose-600 text-white font-bold' },
+		'刪除學生帳號': { icon: '🗑️', class: 'bg-rose-600 text-white font-bold' },
+		'更新個人資料': { icon: '👤', class: 'bg-purple-600 text-white font-bold' },
+		'更新輔導教師授權': { icon: '🔑', class: 'bg-violet-600 text-white font-bold' },
+		'送出系統回饋': { icon: '💡', class: 'bg-pink-600 text-white font-bold' },
+		'發布系統公告': { icon: '📢', class: 'bg-amber-600 text-white font-bold' },
+		'編輯系統公告': { icon: '✏️', class: 'bg-blue-600 text-white font-bold' },
+		'更新公告排序': { icon: '↕️', class: 'bg-indigo-600 text-white font-bold' }
 	};
-
-	filtered.forEach((log, logIdx) => {
+	const frag = document.createDocumentFragment();
+	const limit = window.auditLogDisplayLimit || 150;
+	const displayItems = filtered.slice(0, limit);
+	displayItems.forEach((log, logIdx) => {
 		const timeStr = formatDateTime(log.created_at);
 		const [datePart, timePart] = timeStr.includes(' ') ? timeStr.split(' ') : [timeStr, ''];
 		const tr = document.createElement('tr');
-		tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
+		tr.className = 'hover:bg-slate-50/90 transition-colors border-b border-slate-100/80';
+		const d = log.details || {};
 		let diffHtml = '';
-
 		if (log.action_type.includes('刪除')) {
-			const d = log.details || {};
-			diffHtml = `<div class="inline-flex items-center gap-2 p-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-xs font-bold"><span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px]">已刪除</span><span>姓名：${escapeHtml(d.deleted_name || log.target_student_name || '未知')}</span><span>帳號：${escapeHtml(d.deleted_sid || log.target_student_id || '未知')}</span></div>`;
+			diffHtml = `
+				<div class="inline-flex items-center gap-2 p-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-xs font-bold shadow-2xs">
+					<span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px]">已刪除</span>
+					<span>姓名：${escapeHtml(d.deleted_name || log.target_student_name || '未知')}</span>
+					<span class="text-slate-500 font-mono">(${escapeHtml(d.deleted_sid || log.target_student_id || '未知')})</span>
+				</div>
+			`;
+		} else if (log.action_type === 'PDF成績單自動匯入') {
+			const matched = d.matched_courses || (d.changed_fields ? d.changed_fields.length : 0);
+			diffHtml = `
+				<div class="flex items-center gap-2 flex-wrap">
+					<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 text-sky-900 text-xs font-bold shadow-2xs">
+						<i class="fa-solid fa-file-pdf text-sky-600"></i>
+						<span>匯入學生: ${escapeHtml(d.student_name || log.target_student_name || '學生')}</span>
+						<span class="text-sky-700 font-mono">(${escapeHtml(d.student_id || log.target_student_id || '')})</span>
+						<span class="text-sky-600 font-black">實得 ${d.total_earned ?? d.new_total ?? '-'} 學分</span>
+						${matched > 0 ? `<span class="text-slate-500 font-semibold">(配對 ${matched} 門)</span>` : ''}
+					</div>
+					${matched > 1 ? `
+					<button type="button" class="btn-mini text-xs px-2.5 py-1 bg-white hover:bg-slate-100 text-indigo-700 border border-indigo-200 font-black rounded-lg transition shadow-2xs cursor-pointer inline-flex items-center gap-1" onclick="openAuditLogDetailModal(${logIdx})">
+						<i class="fa-solid fa-magnifying-glass"></i>
+						<span>詳細日誌 (${matched}門)</span>
+					</button>
+					` : ''}
+				</div>
+			`;
 		} else if (log.action_type === '切換版面配置') {
-			const mode = log.details?.layout_mode || '版面配置變更';
-			diffHtml = `<span class="px-2 py-1 rounded bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold">切換版面：<b>${escapeHtml(mode)}</b></span>`;
-		} else if (log.details && typeof log.details === 'object') {
-			const d = log.details;
+			const mode = d.layout_mode || '版面配置變更';
+			diffHtml = `<span class="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold inline-flex items-center gap-1 shadow-2xs"><i class="fa-solid fa-table-columns text-slate-500"></i> 切換版面：<b>${escapeHtml(mode)}</b></span>`;
+		} else {
 			let headerChips = [];
-
 			if (d.old_version && d.new_version) {
-				headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-sky-50 border border-sky-200 text-xs font-bold text-slate-700"><span>原版本: <b>${escapeHtml(d.old_version)}</b></span><span class="text-sky-600 font-black">➔</span><span class="text-indigo-700">新版本: <b>${escapeHtml(d.new_version)}</b></span></div>`);
+				headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 text-xs font-bold text-slate-700 shadow-2xs"><span>${escapeHtml(d.old_version)}</span><span class="text-sky-600 font-black">➔</span><span class="text-indigo-700 font-black">${escapeHtml(d.new_version)}</span></div>`);
 			}
-
 			if (log.action_type !== '切換版本' && d.old_total !== undefined && d.new_total !== undefined) {
-				const isIncreased = d.new_total > d.old_total;
-				const totalBadgeColor = isIncreased ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (d.new_total < d.old_total ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-700');
-				headerChips.push(`<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-bold ${totalBadgeColor}"><span>舊學分: ${escapeHtml(d.old_total)}</span><span class="opacity-60">➔</span><span>新學分: <b>${escapeHtml(d.new_total)}</b></span></div>`);
+				const diff = d.new_total - d.old_total;
+				const isUp = diff > 0;
+				const isDown = diff < 0;
+				const totalBadgeColor = isUp ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (isDown ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-700');
+				const diffTxt = isUp ? ` (+ ${diff})` : (isDown ? ` (- ${Math.abs(diff)})` : '');
+				headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold shadow-2xs ${totalBadgeColor}"><span>舊: ${escapeHtml(d.old_total)}</span><span class="opacity-60 font-black">➔</span><span>新: <b>${escapeHtml(d.new_total)}</b>${diffTxt}</span></div>`);
 			}
-
 			if (d.semester) {
-				headerChips.push(`<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">📅 ${escapeHtml(d.semester)}</div>`);
+				headerChips.push(`<div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shadow-2xs"><i class="fa-regular fa-calendar"></i> ${escapeHtml(d.semester)}</div>`);
 			}
-
-			if (headerChips.length > 0) diffHtml += `<div class="flex flex-wrap gap-1.5 mb-1.5">${headerChips.join('')}</div>`;
-
-			if (d.changed_fields && Array.isArray(d.changed_fields) && d.changed_fields.length > 0) {
-				const expandId = `audit-expand-${logIdx}`;
-				diffHtml += `
-					<button type="button" id="btn-${expandId}" class="text-xs font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 px-2 py-0.5 rounded transition cursor-pointer" onclick="toggleAuditLogExpand(event, '${expandId}')">▼ (點擊展開)</button>
-					<div id="${expandId}" class="hidden w-full flex flex-wrap gap-1.5 mt-1.5 pt-1.5 border-t border-dashed border-slate-200">
-				`;
-				d.changed_fields.forEach(f => {
-					const isGain = f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格');
-					const badgeStyle = isGain ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-rose-50 text-rose-900 border-rose-300';
-					diffHtml += `<div class="inline-flex items-center gap-1 border px-2 py-0.5 rounded text-[11px] font-bold ${badgeStyle}"><span>${escapeHtml(f.field)}:</span><s class="opacity-50 font-normal">${escapeHtml(f.oldVal)}</s><span>➔</span><b>${escapeHtml(f.newVal)}</b></div>`;
-				});
-				diffHtml += `</div>`;
+			const changedList = (d.changed_fields && Array.isArray(d.changed_fields)) ? d.changed_fields : [];
+			if (changedList.length === 1) {
+				// Only 1 item changed: display completely without clipping or truncation!
+				const f = changedList[0];
+				const isPass = f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格');
+				const badgeClass = isPass ? 'text-emerald-700 font-black bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200' : 'text-rose-700 font-black bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200';
+				headerChips.push(`
+					<div class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-800 shadow-2xs leading-relaxed break-words">
+						<span class="font-extrabold text-slate-900 break-words">${escapeHtml(f.field)}</span>
+						<span class="text-slate-400 font-normal">：</span>
+						<s class="opacity-40 text-slate-500 font-normal shrink-0">${escapeHtml(f.oldVal)}</s>
+						<span class="text-indigo-600 font-black shrink-0">➔</span>
+						<span class="${badgeClass} shrink-0">${escapeHtml(f.newVal)}</span>
+					</div>
+				`);
+			} else if (changedList.length > 1) {
+				// Multiple items changed: keep the modal button to inspect full list
+				headerChips.push(`
+					<button type="button" class="btn-mini text-xs px-2.5 py-1 bg-white hover:bg-slate-100 text-indigo-700 border border-indigo-200 font-black rounded-lg transition shadow-2xs cursor-pointer inline-flex items-center gap-1" onclick="openAuditLogDetailModal(${logIdx})">
+						<i class="fa-solid fa-list-check"></i>
+						<span>詳細日誌 (${changedList.length}筆變更)</span>
+					</button>
+				`);
 			} else {
-				const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode', 'layout_mode'].includes(k));
-				if (metaKeys.length > 0) {
-					diffHtml += `<div class="flex flex-wrap gap-1.5 items-center">`;
-					metaKeys.forEach(k => {
-						const labelText = detailKeyLabels[k] || k;
-						let rawVal = d[k];
-
-						const isClassArray = (k === 'dept' || k === 'classes') && (Array.isArray(rawVal) || (typeof rawVal === 'string' && rawVal.startsWith('[')));
-						if (isClassArray) {
-							let parsedClasses = [];
-							try {
-								parsedClasses = Array.isArray(rawVal) ? rawVal : JSON.parse(rawVal);
-							} catch (e) { parsedClasses = []; }
-
-							const expandClassId = `audit-classes-${logIdx}`;
-							diffHtml += `
-								<div class="inline-flex items-center gap-1 border border-violet-200 bg-violet-50 text-violet-900 px-2 py-0.5 rounded text-xs font-bold">
-									<span>授權班級名冊：</span>
-									<button type="button" id="btn-${expandClassId}" class="text-violet-700 underline font-extrabold hover:text-violet-900 cursor-pointer" onclick="toggleAuditLogExpand(event, '${expandClassId}')">▼ (點擊展開)</button>
-								</div>
-								<div id="${expandClassId}" class="hidden w-full p-2 bg-slate-50 border border-slate-200 rounded-lg mt-1 text-xs text-slate-700 leading-relaxed font-semibold break-words">
-									${parsedClasses.map(c => `<span class="inline-block px-1.5 py-0.5 bg-white border border-slate-200 rounded mr-1 mb-1">${escapeHtml(c)}</span>`).join('')}
-								</div>
-							`;
-						} else {
-							let valStr = typeof rawVal === 'boolean' ? (rawVal ? '是' : '否') : String(rawVal || '未設定');
-							diffHtml += `<span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700"><b>${escapeHtml(labelText)}</b>: ${escapeHtml(valStr)}</span>`;
-						}
-					});
-					diffHtml += `</div>`;
+				// 0 changed_fields: handle action types directly inline without modal button
+				if (log.action_type === '使用者登入') {
+					headerChips.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs"><i class="fa-solid fa-circle-check text-emerald-600"></i> ${escapeHtml(d.status || '登入成功')}</span>`);
+				} else if (log.action_type === '使用者登出') {
+					headerChips.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs"><i class="fa-solid fa-right-from-bracket text-slate-500"></i> ${escapeHtml(d.status || '登出成功')}</span>`);
+				} else if (log.action_type === '使用者註冊') {
+					headerChips.push(`<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 text-teal-900 text-xs font-bold shadow-2xs"><span>註冊身分: <b>${escapeHtml(mapping.role[d.role] || d.role || '-')}</b></span><span>入學: <b>${escapeHtml(d.year || '-')}</b> / <b>${escapeHtml(d.dept || '-')}</b></span></div>`);
+				} else if (log.action_type === '強制首次更改密碼') {
+					headerChips.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shadow-2xs"><i class="fa-solid fa-shield-halved text-amber-600"></i> 密碼首次重設完成</span>`);
+				} else if (log.action_type === '重設帳號密碼') {
+					headerChips.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-violet-50 border border-violet-200 text-violet-800 text-xs font-bold shadow-2xs"><i class="fa-solid fa-key text-violet-600"></i> 重設方式: <b>${escapeHtml(d.method || '一鍵重設')}</b></span>`);
+				} else if (log.action_type === '更改帳號資料') {
+					headerChips.push(`<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-bold shadow-2xs"><span>入學年: <b>${escapeHtml(d.year || '-')}</b></span><span>科別: <b>${escapeHtml(d.dept || '-')}</b></span><span>身分: <b>${escapeHtml(mapping.role[d.role] || d.role || '-')}</b></span></div>`);
+				} else if (log.action_type === '更新個人資料') {
+					headerChips.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 text-purple-800 text-xs font-bold shadow-2xs"><i class="fa-solid fa-user-pen text-purple-600"></i> 個人資料更新${d.passwordChanged ? ' (含密碼變更)' : ''}</span>`);
+				} else if (log.action_type === '更新輔導教師授權') {
+					if (d.classes && d.classes.length > 3) {
+						headerChips.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-violet-50 border border-violet-200 text-violet-800 text-xs font-bold shadow-2xs"><i class="fa-solid fa-user-check text-violet-600"></i> 授權 ${d.classes.length} 個班級</span>`);
+						headerChips.push(`<button type="button" class="btn-mini text-xs px-2.5 py-1 bg-white hover:bg-slate-100 text-indigo-700 border border-indigo-200 font-black rounded-lg transition shadow-2xs cursor-pointer inline-flex items-center gap-1" onclick="openAuditLogDetailModal(${logIdx})"><i class="fa-solid fa-list-check"></i><span>詳細清單</span></button>`);
+					} else {
+						headerChips.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-violet-50 border border-violet-200 text-violet-800 text-xs font-bold shadow-2xs"><i class="fa-solid fa-user-check text-violet-600"></i> 授權班級: <b>${(d.classes && d.classes.length) ? escapeHtml(d.classes.join(', ')) : (d.counselorClassesCount ? d.counselorClassesCount + ' 個班級' : '0 個班級')}</b></span>`);
+					}
+				} else if (log.action_type === '送出系統回饋') {
+					headerChips.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-50 border border-pink-200 text-pink-800 text-xs font-bold shadow-2xs"><i class="fa-solid fa-comment-dots text-pink-600"></i> 回饋分類: <b>${escapeHtml(d.category || '一般回饋')}</b></span>`);
+				} else if (log.action_type === '發布系統公告' || log.action_type === '編輯系統公告') {
+					headerChips.push(`<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold shadow-2xs"><span>分類: <b>${escapeHtml(d.category || '一般')}</b></span>${d.isMarquee ? '<span class="text-amber-700 bg-amber-100 px-1 rounded text-[10px]">跑馬燈</span>' : ''}${d.isActive === false ? '<span class="text-slate-500 text-[10px]">未公開</span>' : '<span class="text-emerald-700 text-[10px]">已公開</span>'}</div>`);
+				} else if (log.action_type === '更新公告排序') {
+					headerChips.push(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold shadow-2xs"><i class="fa-solid fa-arrow-down-wide-short text-indigo-600"></i> 排序權重: <b>${escapeHtml(d.fromOrder ?? '-')}</b> ➔ <b>${escapeHtml(d.toOrder ?? '-')}</b></span>`);
+				} else if (log.action_type !== '切換版本' && headerChips.length === 0) {
+					const remainingKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'semester', 'mode', 'layout_mode'].includes(k));
+					if (remainingKeys.length > 0) {
+						const summaryStr = remainingKeys.slice(0, 3).map(k => `${k}: ${d[k]}`).join(' ｜ ');
+						headerChips.push(`<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs">${escapeHtml(summaryStr)}</span>`);
+					} else {
+						headerChips.push(`<span class="text-slate-400 text-xs font-semibold">無細項異動</span>`);
+					}
 				}
 			}
+			diffHtml = `
+				<div class="flex items-center gap-2 flex-wrap">
+					${headerChips.join('')}
+				</div>
+			`;
 		}
-
 		const cfg = actionConfig[log.action_type] || { icon: '📌', class: 'bg-slate-700 text-white font-bold' };
+		const rClass = log.operator_role === 'admin' ? 'badge-admin' : (log.operator_role === 'counselor' ? 'badge-counselor' : (log.operator_role === 'teacher' ? 'badge-teacher' : 'badge-student'));
 		tr.innerHTML = `
-			<td class="p-2.5 text-slate-500 font-mono text-[11px] leading-tight text-center whitespace-nowrap"><div>${escapeHtml(datePart)}</div><div>${escapeHtml(timePart)}</div></td>
-			<td class="p-2.5 font-bold text-xs"><div class="text-slate-800">${escapeHtml(log.operator_name || '系統')} <span class="text-[10px] text-slate-400">(${escapeHtml(mapping.role[log.operator_role] || log.operator_role)})</span></div><div class="text-[10px] font-mono text-slate-400 mt-0.5">${escapeHtml(log.ip_address || '未知 IP')}</div></td>
-			<td class="p-2.5 text-xs"><div class="text-slate-900 font-bold truncate max-w-[120px]">${escapeHtml(log.target_student_name || '-')}</div><div class="text-slate-500 font-mono text-[10px] mt-0.5">${escapeHtml(log.target_student_id || '-')}</div></td>
-			<td class="p-2.5"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs whitespace-nowrap ${cfg.class}"><span>${cfg.icon}</span><span>${escapeHtml(log.action_type)}</span></span></td>
-			<td class="p-2.5 text-slate-700 text-xs">${diffHtml}</td>
+			<td class="p-3 text-slate-500 font-mono text-xs leading-snug text-center whitespace-nowrap">
+				<div class="font-extrabold text-slate-800">${escapeHtml(datePart)}</div>
+				<div class="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1 mt-0.5">
+					<i class="fa-regular fa-clock text-[10px]"></i> ${escapeHtml(timePart)}
+				</div>
+			</td>
+			<td class="p-3 text-xs whitespace-nowrap">
+				<div class="font-black text-slate-900">${escapeHtml(log.operator_name || '系統操作')}</div>
+				<div class="mt-1 flex items-center gap-1.5 flex-wrap">
+					<span class="role-badge ${rClass} !text-[10px] !px-1.5 !py-0.2">${escapeHtml(mapping.role[log.operator_role] || log.operator_role)}</span>
+					<span class="text-[10px] font-mono text-slate-400 font-semibold">${escapeHtml(log.ip_address || '-')}</span>
+				</div>
+			</td>
+			<td class="p-3 text-xs whitespace-nowrap">
+				<div class="font-black text-slate-900 whitespace-nowrap">${escapeHtml(log.target_student_name || '-')}</div>
+				<div class="text-[11px] font-mono text-slate-400 font-bold mt-0.5">${escapeHtml(log.target_student_id || '-')}</div>
+			</td>
+			<td class="p-3 whitespace-nowrap">
+				<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black shadow-2xs whitespace-nowrap ${cfg.class}">
+					<span>${cfg.icon}</span>
+					<span>${escapeHtml(log.action_type)}</span>
+				</span>
+			</td>
+			<td class="p-3 text-slate-700 text-xs">
+				${diffHtml}
+			</td>
 		`;
-		listBody.appendChild(tr);
+		frag.appendChild(tr);
 	});
+	if (filtered.length > limit) {
+		const moreTr = document.createElement('tr');
+		moreTr.innerHTML = `
+			<td colspan="5" class="p-4 text-center bg-slate-50/80 border-t border-slate-200">
+				<div class="flex items-center justify-center gap-3 flex-wrap">
+					<span class="text-xs text-slate-500 font-bold">已顯示最新 ${limit} 筆紀錄（共 ${filtered.length} 筆）</span>
+					<button type="button" class="px-3.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg text-xs font-black text-indigo-700 shadow-2xs transition" onclick="window.renderAllAuditLogs()">
+						載入全部紀錄 (${filtered.length} 筆)
+					</button>
+				</div>
+			</td>
+		`;
+		frag.appendChild(moreTr);
+	}
+	listBody.appendChild(frag);
 };
-
 window.confirmSetAllStatus = function(p) {
 	if (curriculum.length === 0) { showMsg("目前版本的課表尚未建置！", "error"); return; }
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
@@ -4175,7 +4438,6 @@ window.confirmSetAllStatus = function(p) {
 	const msg = p ? "您確定要將所有課程學分一次設為「及格」嗎？" : "您確定要將所有及格學分「全部歸零」嗎？";
 	showConfirmModal(msg, p ? "確認全部及格" : "確認學分歸零", () => { setAllStatus(p); toggleUIModal(false, 'confirmModal'); }, p ? "確認全部及格" : "確認學分歸零", p ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" : "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)");
 };
-
 window.syncDomChecksToRecord = function() {
 	const curRecord = editingStudentId ? (activeStudentDBRecord || (activeStudentDBRecord = {})) : (userDBRecord || (userDBRecord = {}));
 	if (!curRecord) return;
@@ -4197,7 +4459,6 @@ window.syncDomChecksToRecord = function() {
 		} catch (e) {}
 	}
 };
-
 window.flushPendingSave = async function() {
 	syncDomChecksToRecord();
 	if (autoSaveDebounceTimer) {
@@ -4210,7 +4471,6 @@ window.flushPendingSave = async function() {
 		await executeDeferredSave(actionToSend);
 	}
 };
-
 window.setAllStatus = function(p) {
 	document.querySelectorAll(".toggle-checkbox").forEach(chk => { chk.checked = p; });
 	syncDomChecksToRecord();
@@ -4220,7 +4480,6 @@ window.setAllStatus = function(p) {
 	}
 	debouncedSaveToCloud({ actionType: p ? "批次全部及格" : "批次學分歸零" });
 };
-
 window.setSemesterStatus = function(sIdx, p) {
 	if (curriculum.length === 0) return;
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
@@ -4240,7 +4499,6 @@ window.setSemesterStatus = function(sIdx, p) {
 	showMsg(p ? `已將 ${semNames[sIdx]} 設為全部及格` : `已將 ${semNames[sIdx]} 學分歸零`);
 	debouncedSaveToCloud({ actionType: p ? "單學期全選及格" : "單學期學分歸零", details: { semester: semNames[sIdx] } });
 };
-
 window.debouncedSaveToCloud = function(bulkActionInfo = null) {
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 	if (editingStudentId && (role === 'teacher' || role === 'counselor')) {
@@ -4265,7 +4523,6 @@ window.debouncedSaveToCloud = function(bulkActionInfo = null) {
 		executeDeferredSave(actionToSend);
 	}, 1500);
 };
-
 async function executeDeferredSave(bulkActionInfo = null) {
 	const client = ensureDbClient();
 	if (!currentUser || !client || curriculum.length === 0) {
@@ -4287,7 +4544,6 @@ async function executeDeferredSave(bulkActionInfo = null) {
 	const oldChecks = saveBaselineChecks !== null ? saveBaselineChecks : (curRecord?.credits_json || {});
 	saveBaselineChecks = null;
 	saveBaselineTotal = null;
-
 	const checks = {};
 	const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
 	const changedFields = [];
@@ -4308,17 +4564,14 @@ async function executeDeferredSave(bulkActionInfo = null) {
 	} else if (curRecord && curRecord.credits_json && Object.keys(curRecord.credits_json).length > 0) {
 		Object.assign(checks, curRecord.credits_json);
 	}
-
 	const version = determineCurriculumVersion(curRecord);
 	const newViewYr = version.locked ? entryYear : currentYear;
 	const newViewDept = version.locked ? entryDept : currentDept;
 	checks['_view_year'] = newViewYr;
 	checks['_view_dept'] = newViewDept;
 	checks['_layout_mode'] = currentLayoutMode;
-
 	const res = (domCheckboxes.length > 0) ? calculateStats() : calculateStats(checks);
 	let matchedTutor = curRecord?.tutor || (targetRole === 'student' ? await findTutorByYearDept(entryYear, entryDept) : (targetRole === 'admin' ? '管理員免設定' : (targetRole === 'counselor' ? '輔導教師免設定' : '教師帳號免設定')));
-
 	try {
 		const payload = {
 			student_id: targetSid,
@@ -4331,14 +4584,11 @@ async function executeDeferredSave(bulkActionInfo = null) {
 			total_credits: res.total || 0,
 			updated_at: new Date().toISOString()
 		};
-
 		if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId)) {
 			payload.id = targetId;
 		}
-
 		const { error: upsertErr } = await client.from('grad_checks').upsert(payload, { onConflict: 'student_id' });
 		if (upsertErr) throw upsertErr;
-
 		isDirty = false;
 		autoSaveDebounceTimer = null;
 		updateSyncStatusIndicator('success');
@@ -4355,14 +4605,12 @@ async function executeDeferredSave(bulkActionInfo = null) {
 		showMsg("學分資料儲存失敗：" + translateError(err.message), "error");
 	}
 }
-
 window.loadFromCloud = async function(tid = null) {
 	if (isDirty || autoSaveDebounceTimer !== null) {
 		await flushPendingSave();
 	}
 	const client = ensureDbClient();
 	if (!currentUser || !client) return;
-	updateSyncStatusIndicator('saving');
 	try {
 		if (tid) {
 			const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tid);
@@ -4396,17 +4644,14 @@ window.loadFromCloud = async function(tid = null) {
 			const version = determineCurriculumVersion(userDBRecord);
 			selectCurriculum(version.year, version.dept);
 			applyLoadedChecks(userDBRecord.credits_json || {});
-
 			if (userDBRecord?.must_change_password) {
 				toggleUIModal(true, 'forceChangePasswordModal');
 			}
 		}
 		renderUserStatusDisplay();
 		updateHelpModalDetails();
-		updateSyncStatusIndicator('success');
-	} catch (err) { updateSyncStatusIndicator('offline'); }
+	} catch (err) { console.error("載入學分資料失敗:", err); }
 };
-
 window.applyLoadedChecks = function(checks) {
 	renderTable(checks);
 	document.querySelectorAll(".toggle-checkbox").forEach(c => {
@@ -4414,7 +4659,6 @@ window.applyLoadedChecks = function(checks) {
 	});
 	calculate();
 };
-
 window.enterAdminEditMode = async function(id, name) {
 	await flushPendingSave();
 	if (currentIndependentPage) closeIndependentPage();
@@ -4423,13 +4667,11 @@ window.enterAdminEditMode = async function(id, name) {
 	if (targetEl) targetEl.innerText = `${name || '學生'} (資料讀取中...)`;
 	updateUI(); loadFromCloud(id);
 };
-
 window.exitAdminEditMode = async function() {
 	await flushPendingSave();
 	editingStudentId = null; activeStudentDBRecord = null; lastLoadedStudentId = null; isViewingClassList = true;
 	updateUI();
 };
-
 window.handleMainAction = async function() {
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 	if (role === 'admin' || role === 'teacher' || role === 'counselor') {
@@ -4439,7 +4681,6 @@ window.handleMainAction = async function() {
 		updateUI();
 	}
 };
-
 window.handleReturnToTrial = async function() {
 	await flushPendingSave();
 	if (currentIndependentPage) closeIndependentPage();
@@ -4450,7 +4691,6 @@ window.handleReturnToTrial = async function() {
 	selectCurriculum(version.year, version.dept);
 	updateUI();
 };
-
 window.showMissingCreditsModal = function() {
 	if (curriculum.length === 0) { showMsg("目前版本的課表尚未建置！", "error"); return; }
 	const semFullNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
@@ -4470,26 +4710,22 @@ window.showMissingCreditsModal = function() {
 	renderMissingCreditsFiltered();
 	toggleUIModal(true, 'missingCreditsModal');
 };
-
 window.toggleSingleCreditFromMissingModal = function(chkId) {
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 	const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
 	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
-
 	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定' && editingStudentId) {
 		if (activeStudentDBRecord && (activeStudentDBRecord.entry_year !== myYear || activeStudentDBRecord.entry_dept !== myDept)) {
 			showMsg("班級導師僅能修改所屬班級學生學分！", "error");
 			return;
 		}
 	}
-
 	if (role === 'counselor' && editingStudentId) {
 		if (activeStudentDBRecord && !isUserAuthorizedForStudent(activeStudentDBRecord)) {
 			showMsg("超出管理權限：您未被授權修改該學生學分！", "error");
 			return;
 		}
 	}
-
 	const targetChk = document.getElementById(chkId);
 	if (!targetChk) return;
 	targetChk.checked = true;
@@ -4497,7 +4733,6 @@ window.toggleSingleCreditFromMissingModal = function(chkId) {
 	showMsg(`已將「${targetChk.dataset.name || '該科目'}」標記為修習及格！`);
 	showMissingCreditsModal();
 };
-
 window.renderMissingCreditsFiltered = function() {
 	const filterVal = document.getElementById("missingCreditsFilter").value;
 	const listContainer = document.getElementById("missingCreditsList");
@@ -4523,16 +4758,13 @@ window.renderMissingCreditsFiltered = function() {
 		listContainer.innerHTML = html;
 	}
 };
-
 window.isWebSocketAllowed = function() {
 	return typeof WebSocket !== 'undefined';
 };
-
 let realtimeGradChecksChannel = null;
 let realtimeFeedbacksChannel = null;
 let realtimeAuditLogsChannel = null;
 let realtimeAnnouncementsChannel = null;
-
 window.setupRealtimeSubscriptions = function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -4564,7 +4796,6 @@ window.setupRealtimeSubscriptions = function() {
 				}
 			})
 			.subscribe();
-
 		realtimeFeedbacksChannel = client
 			.channel('realtime_user_feedbacks')
 			.on('postgres_changes', { event: '*', schema: 'public', table: 'user_feedbacks' }, (payload) => {
@@ -4581,7 +4812,6 @@ window.setupRealtimeSubscriptions = function() {
 				if (currentIndependentPage === 'feedbackListView') renderFeedbackList();
 			})
 			.subscribe();
-
 		realtimeAuditLogsChannel = client
 			.channel('realtime_audit_logs')
 			.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'audit_logs' }, (payload) => {
@@ -4591,7 +4821,6 @@ window.setupRealtimeSubscriptions = function() {
 				}
 			})
 			.subscribe();
-
 		realtimeAnnouncementsChannel = client
 			.channel('realtime_announcements')
 			.on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
@@ -4600,7 +4829,6 @@ window.setupRealtimeSubscriptions = function() {
 			.subscribe();
 	} catch (e) {}
 };
-
 window.cleanupRealtimeSubscriptions = function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -4615,7 +4843,6 @@ window.cleanupRealtimeSubscriptions = function() {
 	realtimeAuditLogsChannel = null;
 	realtimeAnnouncementsChannel = null;
 };
-
 window.isAnnouncementVisibleNow = function(a) {
 	if (!a.is_active) return false;
 	const now = new Date().getTime();
@@ -4624,7 +4851,6 @@ window.isAnnouncementVisibleNow = function(a) {
 	if (a.end_at && now > new Date(a.end_at).getTime()) return false;
 	return true;
 };
-
 window.fetchAnnouncements = async function() {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -4644,7 +4870,6 @@ window.fetchAnnouncements = async function() {
 		}
 	} catch (e) {}
 };
-
 window.renderMarquee = function() {
 	const marqueeEl = document.getElementById('marqueeContent');
 	if (!marqueeEl) return;
@@ -4656,7 +4881,6 @@ window.renderMarquee = function() {
 	let html = marqueeItems.map(a => `<span class="inline-flex items-center gap-1.5"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-extrabold text-[10px]">${escapeHtml(a.category || '🎓 公告')}</span><b>${escapeHtml(a.title)}</b>: ${escapeHtml(a.content)}</span>`).join('<span class="opacity-40 px-3">丨</span>');
 	marqueeEl.innerHTML = html;
 };
-
 window.moveAnnouncementOrder = async function(index, direction) {
 	const client = ensureDbClient();
 	if (!client) return;
@@ -4691,7 +4915,6 @@ window.moveAnnouncementOrder = async function(index, direction) {
 		fetchAnnouncements();
 	}
 };
-
 window.renderUserStatusDisplay = function() {
 	const userStatusDisplay = document.getElementById('userStatusDisplay');
 	if (!userStatusDisplay || !currentUser) return;
@@ -4702,7 +4925,6 @@ window.renderUserStatusDisplay = function() {
 	const myDept = userDBRecord?.entry_dept || m?.entry_dept || '未設定';
 	let roleTitle = mapping.role[role] || '使用者';
 	if (role === 'teacher') roleTitle = (myYear !== '未設定' && myDept !== '未設定') ? '導師' : '教師';
-	
 	let roleBadgeText = roleTitle;
 	if (role === 'teacher' && myYear !== '未設定' && myDept !== '未設定') {
 		roleBadgeText = `${myYear}年 ${myDept} 導師`;
@@ -4712,13 +4934,14 @@ window.renderUserStatusDisplay = function() {
 	} else if (role === 'student' && myYear !== '未設定' && myDept !== '未設定') {
 		roleBadgeText = `${myYear}年 ${myDept} 學生`;
 	}
-
 	let roleColorClass = 'bg-slate-700/80 text-slate-200 border-slate-600';
 	if (role === 'admin') roleColorClass = 'bg-amber-500/20 text-amber-200 border-amber-400/40';
 	else if (role === 'teacher') roleColorClass = 'bg-sky-500/20 text-sky-200 border-sky-400/40';
 	else if (role === 'counselor') roleColorClass = 'bg-purple-500/20 text-purple-200 border-purple-400/40';
 	else if (role === 'student') roleColorClass = 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40';
-
+	const curRec = editingStudentId ? activeStudentDBRecord : userDBRecord;
+	const lastUpdateStr = curRec?.updated_at ? formatDateTime(curRec.updated_at) : '';
+	const lastUpdateHtml = lastUpdateStr ? `<span id="lastUpdateTimeTag" class="text-[11px] font-mono text-slate-300 hidden md:inline whitespace-nowrap">最後更新：${escapeHtml(lastUpdateStr)}</span>` : '<span id="lastUpdateTimeTag" class="text-[11px] font-mono text-slate-300 hidden md:inline whitespace-nowrap"></span>';
 	userStatusDisplay.innerHTML = `
 		<div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 w-full text-xs sm:text-sm">
 			<div class="flex items-center gap-2 whitespace-nowrap shrink-0 max-w-full">
@@ -4728,6 +4951,7 @@ window.renderUserStatusDisplay = function() {
 				</span>
 			</div>
 			<div class="user-info-actions flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap">
+				${lastUpdateHtml}
 				<span id="syncStatusIndicator" class="sync-badge sync-success whitespace-nowrap"><span>同步成功</span></span>
 				<a href="javascript:void(0)" onclick="openFeedbackModal()" class="text-amber-300 hover:text-amber-200 font-extrabold transition whitespace-nowrap">💡 意見回饋</a>
 				<a href="javascript:void(0)" onclick="openProfile()" class="text-sky-400 hover:text-sky-300 font-extrabold transition whitespace-nowrap">👤 個人資料</a>
@@ -4735,7 +4959,6 @@ window.renderUserStatusDisplay = function() {
 			</div>
 		</div>`;
 };
-
 window.adjustBtnGroupLayout = function() {
 	const btnGroup = document.querySelector('.btn-group');
 	if (!btnGroup) return;
@@ -4747,7 +4970,6 @@ window.adjustBtnGroupLayout = function() {
 	});
 	btnGroup.setAttribute('data-btn-count', String(count || 8));
 };
-
 window.updateUI = function() {
 	const mobileContainer = document.getElementById('mobileCardsContainer'), adminBackend = document.getElementById('adminBackend'),
 		dashboard = document.getElementById('dashboardSection'), saveBtn = document.getElementById('saveBtn'),
@@ -4757,15 +4979,12 @@ window.updateUI = function() {
 		updateHash();
 		const savedLayout = sessionStorage.getItem('tempLayoutMode') || userDBRecord?.credits_json?._layout_mode;
 		currentLayoutMode = savedLayout ? savedLayout : "semester";
-
 		const btnSub = document.getElementById('btnLayoutSubject');
 		const btnSem = document.getElementById('btnLayoutSemester');
 		const activeClass = "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-slate-900 shadow-md";
 		const inactiveClass = "flex-1 md:flex-none px-6 py-2 text-xs font-extrabold rounded-lg transition-all text-slate-700 hover:text-slate-900";
-
 		if (btnSub) btnSub.className = (currentLayoutMode === 'subject') ? activeClass : inactiveClass;
 		if (btnSem) btnSem.className = (currentLayoutMode === 'semester') ? activeClass : inactiveClass;
-
 		if (adminEditBanner) adminEditBanner.style.display = editingStudentId ? 'block' : 'none';
 		document.getElementById('statusHeader').style.display = 'block';
 		const m = currentUser.user_metadata;
@@ -4837,7 +5056,6 @@ window.updateUI = function() {
 		}
 	}
 };
-
 window.updateHelpModalDetails = function() {
 	const curRec = editingStudentId ? activeStudentDBRecord : (userDBRecord || currentUser?.user_metadata);
 	let dept = curRec?.entry_dept;
@@ -4852,7 +5070,6 @@ window.updateHelpModalDetails = function() {
 	if (voc) voc.open = (track === 'vocational');
 	if (sports) sports.open = (track === 'sports');
 };
-
 window.findTutorByYearDept = async function(yr, dept) {
 	const client = ensureDbClient();
 	if (!client || yr === '未設定' || dept === '未設定') return '未設定';
@@ -4861,30 +5078,25 @@ window.findTutorByYearDept = async function(yr, dept) {
 		return data?.full_name || '未設定';
 	} catch (e) { return '未設定'; }
 };
-
 window.isUserAuthorizedForStudent = function(studentRec) {
 	if (!studentRec) return false;
 	const role = userDBRecord?.role || currentUser?.user_metadata?.role || 'student';
 	if (role === 'admin') return true;
 	const myYear = userDBRecord?.entry_year || currentUser?.user_metadata?.entry_year || '未設定';
 	const myDept = userDBRecord?.entry_dept || currentUser?.user_metadata?.entry_dept || '未設定';
-
 	if (role === 'teacher') {
 		if (myYear === '未設定' || myDept === '未設定') return false;
-		return String(studentRec.entry_year).trim() === String(myYear).trim() && 
+		return String(studentRec.entry_year).trim() === String(myYear).trim() &&
 		       String(studentRec.entry_dept).trim() === String(myDept).trim();
 	}
-
 	if (role === 'counselor') {
 		const allowedClasses = getUserCounselorClasses(userDBRecord);
 		if (allowedClasses.length === 0) return false;
 		const studentClassKey = `${studentRec.entry_year}_${studentRec.entry_dept}`;
 		return allowedClasses.includes(studentClassKey);
 	}
-
 	return false;
 };
-
 window.initDropdowns = function(isAdmin = false) {
 	const yearSelects = ['authEntryYear', 'dashSelectYear', 'profEntryYear', 'editUserEntryYear'];
 	const deptSelects = ['authEntryDept', 'dashSelectDept', 'profEntryDept', 'editUserEntryDept'];
@@ -4959,18 +5171,15 @@ window.initDropdowns = function(isAdmin = false) {
 				</label>`);
 		fDept.innerHTML = h;
 	}
-
 	const newCatSelect = document.getElementById('newAnnounceCategory');
 	if (newCatSelect) {
 		newCatSelect.innerHTML = ANNOUNCE_CATEGORIES.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
 	}
-
 	const filterStatusSelect = document.getElementById('announceStatusFilter');
 	if (filterStatusSelect) {
 		filterStatusSelect.innerHTML = ANNOUNCE_STATUS_FILTERS.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
 	}
 };
-
 window.updateHash = function() {
 	if (!currentUser) return;
 	if (currentIndependentPage) window.location.hash = `#page-${currentIndependentPage}`;
@@ -4978,7 +5187,6 @@ window.updateHash = function() {
 	else if (isViewingClassList) window.location.hash = '#class-data';
 	else window.location.hash = '#dashboard';
 };
-
 window.handleHashRouting = function() {
 	if (!currentUser) return;
 	const hash = window.location.hash;
@@ -5007,12 +5215,10 @@ window.handleHashRouting = function() {
 		}
 	}
 };
-
 window.initBackToTop = function() {
 	const sc = document.getElementById('scrollContainer');
 	const btn = document.getElementById('backToTopBtn');
 	if (!btn) return;
-
 	const handleScroll = (top) => {
 		if (top > 250) {
 			btn.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
@@ -5022,13 +5228,11 @@ window.initBackToTop = function() {
 			btn.classList.remove('opacity-100', 'translate-y-0');
 		}
 	};
-
 	if (sc) {
 		sc.addEventListener('scroll', () => handleScroll(sc.scrollTop));
 	}
 	window.addEventListener('scroll', () => handleScroll(window.scrollY));
 };
-
 window.initHelpModalScrollGuard = function() {
 	const container = document.getElementById('helpScrollContainer');
 	if (!container) return;
@@ -5036,7 +5240,6 @@ window.initHelpModalScrollGuard = function() {
 		if (container.scrollHeight - container.scrollTop <= container.clientHeight + 12) unlockConfirmButton();
 	});
 };
-
 window.unlockConfirmButton = function() {
 	const btn = document.getElementById('btnConfirmHelp');
 	if (!btn) return;
@@ -5044,19 +5247,16 @@ window.unlockConfirmButton = function() {
 	btn.className = "action-btn btn-pass-all w-full py-3.5 text-base font-extrabold rounded-xl shadow-md transition duration-150 cursor-pointer opacity-100";
 	btn.style.pointerEvents = "auto";
 };
-
 window.confirmReadHelp = function() {
 	sessionStorage.setItem('helpModalShown', 'true');
 	toggleUIModal(false, 'helpModal');
 };
-
 window.initCopyrightYear = function() {
 	const currentYear = new Date().getFullYear();
 	document.querySelectorAll('.copyright-year').forEach(el => {
 		el.textContent = currentYear;
 	});
 };
-
 window.addEventListener('keydown', function(e) {
 	const authWorkspace = document.getElementById('authWorkspace');
 	if (authWorkspace && authWorkspace.style.display !== 'none') {
@@ -5082,19 +5282,24 @@ window.addEventListener('keydown', function(e) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
 			triggerConfirmAction();
-		} else if (e.key === 'Escape') {
+		} else if (e.key === 'Escape' || e.code === 'Escape') {
 			e.preventDefault();
 			toggleUIModal(false, 'confirmModal');
 		}
-	} else if (e.key === 'Escape') {
-		document.querySelectorAll('.modal-overlay').forEach(modal => {
-			if (modal.id !== 'forceChangePasswordModal' && modal.style.display === 'flex') {
-				modal.style.display = 'none';
+	} else if (e.key === 'Escape' || e.code === 'Escape') {
+		const openModals = Array.from(document.querySelectorAll('.modal-overlay')).filter(m => m.id !== 'forceChangePasswordModal' && window.getComputedStyle(m).display !== 'none');
+		if (openModals.length > 0) {
+			e.preventDefault();
+			const confirmM = openModals.find(m => m.id === 'confirmModal');
+			if (confirmM) {
+				toggleUIModal(false, 'confirmModal');
+			} else {
+				const lastModal = openModals[openModals.length - 1];
+				toggleUIModal(false, lastModal.id);
 			}
-		});
+		}
 	}
 });
-
 function startApplication() {
 	const client = ensureDbClient();
 	if (client) {
@@ -5114,13 +5319,12 @@ function startApplication() {
 				if (authWorkspace) authWorkspace.style.display = 'none';
 				if (appWorkspace) appWorkspace.style.display = 'flex';
 				if (lastUserId === currentUser.id && hasLoadedInitialData) {
-					
 					return;
 				}
-				if (lastUserId !== currentUser.id) { 
-					hasLoadedInitialData = false; 
-					userDBRecord = null; 
-					lastUserId = currentUser.id; 
+				if (lastUserId !== currentUser.id) {
+					hasLoadedInitialData = false;
+					userDBRecord = null;
+					lastUserId = currentUser.id;
 				}
 				await loadFromCloud();
 				handleHashRouting();
@@ -5137,14 +5341,12 @@ function startApplication() {
 			if (appWorkspace) appWorkspace.style.display = 'none';
 		}, 100);
 	}
-
 	window.addEventListener('hashchange', () => {
 		if (currentUser) {
 			handleHashRouting();
 			updateUI();
 		}
 	});
-
 	initDropdowns(false);
 	fetchCloudCurriculums().then(() => {
 		selectCurriculum(currentYear, currentDept);
@@ -5157,24 +5359,23 @@ function startApplication() {
 	initBackToTop();
 	initCopyrightYear();
 }
-
 if (document.readyState === 'loading') {
 	document.addEventListener('DOMContentLoaded', startApplication);
 } else {
 	startApplication();
 }
-
 let pendingPdfParsedData = null;
-
 window.openPdfImportModal = function() {
 	resetPdfModalView();
+	initPdfDropZone();
 	toggleUIModal(true, 'pdfImportModal');
 };
-
 window.resetPdfModalView = function() {
 	pendingPdfParsedData = null;
 	const fileInput = document.getElementById('pdfFileInput');
 	if (fileInput) fileInput.value = '';
+	const nameDisp = document.getElementById('pdfFileNameDisplay');
+	if (nameDisp) { nameDisp.textContent = ''; nameDisp.classList.add('hidden'); }
 	const initView = document.getElementById('pdfModalInitialView');
 	const prevView = document.getElementById('pdfModalPreviewView');
 	if (initView) initView.classList.remove('hidden');
@@ -5185,15 +5386,46 @@ window.resetPdfModalView = function() {
 		parseBtn.innerHTML = '⚡ 開始解析 PDF 成績單';
 	}
 };
-
 window.handlePdfFileSelected = function() {
 	const fileInput = document.getElementById('pdfFileInput');
 	const parseBtn = document.getElementById('parsePdfBtn');
-	if (fileInput && fileInput.files && fileInput.files.length > 0 && parseBtn) {
-		parseBtn.disabled = false;
+	const nameDisp = document.getElementById('pdfFileNameDisplay');
+	if (fileInput && fileInput.files && fileInput.files.length > 0) {
+		const f = fileInput.files[0];
+		if (parseBtn) parseBtn.disabled = false;
+		if (nameDisp) {
+			nameDisp.textContent = '📄 ' + f.name + ' (' + Math.round(f.size / 1024) + ' KB)';
+			nameDisp.classList.remove('hidden');
+		}
 	}
 };
-
+function initPdfDropZone() {
+	const dropZone = document.getElementById('pdfDropZone');
+	if (!dropZone || dropZone._dropInit) return;
+	dropZone._dropInit = true;
+	['dragenter', 'dragover'].forEach(evt => {
+		dropZone.addEventListener(evt, e => {
+			e.preventDefault(); e.stopPropagation();
+			dropZone.classList.add('border-sky-500', 'bg-sky-50/60');
+		}, false);
+	});
+	['dragleave', 'drop'].forEach(evt => {
+		dropZone.addEventListener(evt, e => {
+			e.preventDefault(); e.stopPropagation();
+			dropZone.classList.remove('border-sky-500', 'bg-sky-50/60');
+		}, false);
+	});
+	dropZone.addEventListener('drop', e => {
+		const dt = e.dataTransfer;
+		if (dt && dt.files && dt.files.length > 0) {
+			const fileInput = document.getElementById('pdfFileInput');
+			if (fileInput) {
+				fileInput.files = dt.files;
+				handlePdfFileSelected();
+			}
+		}
+	}, false);
+}
 function parseScoreSshs(s) {
 	if (!s) return { str: '', passed: false };
 	s = String(s).trim();
@@ -5203,7 +5435,6 @@ function parseScoreSshs(s) {
 	const num = parseFloat(s.replace(/[^\d.]/g, ''));
 	return { str: s, passed: !isNaN(num) && num >= 60 };
 }
-
 function parseCreditsFromFraction(cStr) {
 	if (!cStr) return [0, 0];
 	const parts = cStr.split('/');
@@ -5211,7 +5442,6 @@ function parseCreditsFromFraction(cStr) {
 	const c2 = parseInt(parts[1], 10) || 0;
 	return [c1, c2];
 }
-
 window.handlePdfImport = async function() {
 	const fileInput = document.getElementById('pdfFileInput');
 	if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
@@ -5224,7 +5454,6 @@ window.handlePdfImport = async function() {
 		parseBtn.disabled = true;
 		parseBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> 正在解析官方成績單...';
 	}
-
 	try {
 		if (typeof pdfjsLib === 'undefined') {
 			throw new Error("PDF 解析模組未就緒，請重新整理頁面再試！");
@@ -5235,7 +5464,6 @@ window.handlePdfImport = async function() {
 		const viewport = page1.getViewport({ scale: 1.0 });
 		const pageHeight = viewport.height;
 		const textContent = await page1.getTextContent();
-
 		const items = [];
 		textContent.items.forEach(it => {
 			const str = (it.str || '').trim();
@@ -5244,32 +5472,26 @@ window.handlePdfImport = async function() {
 			const y = pageHeight - it.transform[5];
 			items.push({ str, x, y });
 		});
-
 		const fullText = items.map(i => i.str).join(' ');
-
 		let studentId = '', studentName = '', className = '', seatNo = '';
 		const mSid = fullText.match(/學號[：:\s]*(\w+)/) || fullText.match(/(\d{6})/);
 		const mName = fullText.match(/姓名[：:\s]*([\u4e00-\u9fa5]{2,4})/);
 		const mClass = fullText.match(/班級[：:\s]*([\u4e00-\u9fa50-9]+)/);
 		const mSeat = fullText.match(/座號[：:\s]*(\d+)/);
-
 		if (mSid) studentId = mSid[1];
 		if (mName) studentName = mName[1];
 		if (mClass) className = mClass[1];
 		if (mSeat) seatNo = mSeat[1];
-
 		let entryYear = '113';
 		if (fullText.includes('114 學年度') && !fullText.includes('113 學年度')) entryYear = '114';
 		else if (fullText.includes('113 學年度')) entryYear = '113';
 		else if (studentId.startsWith('4')) entryYear = '114';
 		else if (studentId.startsWith('3')) entryYear = '113';
-
 		const deptMap = { '商': '商經科-9', '資': '資處科-10', '農': '農經科-7', '園': '園藝科-8', '體': '體育班-5', '普': '普通科(理工生醫群)-1' };
 		let detectedDept = '商經科-9';
 		for (const [k, v] of Object.entries(deptMap)) {
 			if (className.includes(k)) { detectedDept = v; break; }
 		}
-
 		const rowsByY = {};
 		items.forEach(it => {
 			if (it.y < 120 || it.y > 720) return;
@@ -5285,20 +5507,16 @@ window.handlePdfImport = async function() {
 			}
 			rowsByY[matchedY].push(it);
 		});
-
 		const semCourses = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [] };
-
 		Object.keys(rowsByY).map(Number).sort((a, b) => a - b).forEach(ry => {
 			const rWords = rowsByY[String(ry)].sort((a, b) => a.x - b.x);
 			const courseName = rWords.filter(w => w.x < 95).map(w => w.str).join('').trim();
 			if (!courseName || ['加權', '學業成績', '班級', '年級', '名次', '此為電子'].some(k => courseName.includes(k))) return;
-
 			// 113 block (sem 0 & sem 1)
 			const c113Str = rWords.filter(w => w.x >= 95 && w.x < 125).map(w => w.str).join('');
 			const s0Score = rWords.filter(w => w.x >= 125 && w.x < 155).map(w => w.str).join('');
 			const s1Score = rWords.filter(w => w.x >= 175 && w.x < 205).map(w => w.str).join('');
 			const [c113Up, c113Down] = parseCreditsFromFraction(c113Str);
-
 			if (c113Up > 0) {
 				const sc = parseScoreSshs(s0Score);
 				semCourses[0].push({ name: courseName, credits: c113Up, score: sc.str, passed: sc.passed });
@@ -5307,13 +5525,11 @@ window.handlePdfImport = async function() {
 				const sc = parseScoreSshs(s1Score);
 				semCourses[1].push({ name: courseName, credits: c113Down, score: sc.str, passed: sc.passed });
 			}
-
 			// 114 block (sem 2 & sem 3)
 			const c114Str = rWords.filter(w => w.x >= 255 && w.x < 285).map(w => w.str).join('');
 			const s2Score = rWords.filter(w => w.x >= 285 && w.x < 315).map(w => w.str).join('');
 			const s3Score = rWords.filter(w => w.x >= 335 && w.x < 365).map(w => w.str).join('');
 			const [c114Up, c114Down] = parseCreditsFromFraction(c114Str);
-
 			if (c114Up > 0) {
 				const sc = parseScoreSshs(s2Score);
 				semCourses[2].push({ name: courseName, credits: c114Up, score: sc.str, passed: sc.passed });
@@ -5322,13 +5538,11 @@ window.handlePdfImport = async function() {
 				const sc = parseScoreSshs(s3Score);
 				semCourses[3].push({ name: courseName, credits: c114Down, score: sc.str, passed: sc.passed });
 			}
-
 			// 115 block (sem 4 & sem 5)
 			const c115Str = rWords.filter(w => w.x >= 415 && w.x < 445).map(w => w.str).join('');
 			const s4Score = rWords.filter(w => w.x >= 445 && w.x < 475).map(w => w.str).join('');
 			const s5Score = rWords.filter(w => w.x >= 495 && w.x < 525).map(w => w.str).join('');
 			const [c115Up, c115Down] = parseCreditsFromFraction(c115Str);
-
 			if (c115Up > 0) {
 				const sc = parseScoreSshs(s4Score);
 				semCourses[4].push({ name: courseName, credits: c115Up, score: sc.str, passed: sc.passed });
@@ -5338,7 +5552,6 @@ window.handlePdfImport = async function() {
 				semCourses[5].push({ name: courseName, credits: c115Down, score: sc.str, passed: sc.passed });
 			}
 		});
-
 		let totalTaken = 0, totalEarned = 0;
 		for (let i = 0; i < 6; i++) {
 			semCourses[i].forEach(c => {
@@ -5346,16 +5559,13 @@ window.handlePdfImport = async function() {
 				if (c.passed) totalEarned += c.credits;
 			});
 		}
-
 		if (totalTaken === 0) {
 			throw new Error("未能自 PDF 中辨識出有效成績項目，請確認上傳之 PDF 是否為標準成績表！");
 		}
-
 		pendingPdfParsedData = {
 			studentId, studentName, className, seatNo, entryYear, detectedDept,
 			semCourses, totalTaken, totalEarned
 		};
-
 		renderPdfPreview(pendingPdfParsedData);
 	} catch (e) {
 		showMsg("解析 PDF 失敗：" + e.message, "error");
@@ -5365,26 +5575,21 @@ window.handlePdfImport = async function() {
 		}
 	}
 };
-
 function renderPdfPreview(data) {
 	const initView = document.getElementById('pdfModalInitialView');
 	const prevView = document.getElementById('pdfModalPreviewView');
 	const container = document.getElementById('pdfParsedPreviewContainer');
 	if (!container || !initView || !prevView) return;
-
 	initView.classList.add('hidden');
 	prevView.classList.remove('hidden');
-
 	const semNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
 	let semCardsHtml = '';
-
 	for (let i = 0; i < 6; i++) {
 		const list = data.semCourses[i] || [];
 		if (list.length === 0) continue;
 		const sTaken = list.reduce((a, b) => a + b.credits, 0);
 		const sEarned = list.filter(c => c.passed).reduce((a, b) => a + b.credits, 0);
 		const failedList = list.filter(c => !c.passed);
-
 		let failedHtml = '';
 		if (failedList.length > 0) {
 			failedHtml = `<div class="mt-1.5 pt-1.5 border-t border-slate-200 text-[11px] text-red-600 font-bold">
@@ -5393,7 +5598,6 @@ function renderPdfPreview(data) {
 		} else {
 			failedHtml = `<div class="mt-1 text-[11px] text-emerald-600 font-black">🎉 本學期全數及格取得學分！</div>`;
 		}
-
 		semCardsHtml += `
 			<div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
 				<div class="flex items-center justify-between text-xs font-black text-slate-700">
@@ -5404,7 +5608,6 @@ function renderPdfPreview(data) {
 			</div>
 		`;
 	}
-
 	container.innerHTML = `
 		<div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
 			<div>
@@ -5441,7 +5644,6 @@ function renderPdfPreview(data) {
 		</div>
 	`;
 }
-
 function matchCourseCheckbox(pdfCourseName, semIdx, domCheckboxes) {
 	const cleanPdfName = pdfCourseName.replace(/\(彈性\)|\(校定\)|\(必修\)|\(選修\)|\s+/g, '');
 	for (const chk of domCheckboxes) {
@@ -5455,11 +5657,23 @@ function matchCourseCheckbox(pdfCourseName, semIdx, domCheckboxes) {
 	}
 	return null;
 }
-
-window.applyPdfParsedCredits = async function() {
+window.applyPdfParsedCredits = function() {
+	if (!pendingPdfParsedData) return;
+	const { totalEarned, totalTaken, studentName } = pendingPdfParsedData;
+	showConfirmModal(
+		`即將套用「${studentName || '學生'}」成績單資料（共修習 ${totalTaken} 學分，實得 ${totalEarned} 學分），此操作將依成績單更新檢核表勾選狀態。是否確認套用？`,
+		"確認套用成績單",
+		async () => {
+			toggleUIModal(false, 'confirmModal');
+			await executeApplyPdfCredits();
+		},
+		"確認套用",
+		"linear-gradient(135deg, #059669 0%, #047857 100%)"
+	);
+};
+window.executeApplyPdfCredits = async function() {
 	if (!pendingPdfParsedData) return;
 	const { entryYear, detectedDept, semCourses, totalEarned, studentName, studentId } = pendingPdfParsedData;
-
 	// Check if current curriculum matches; if not, select the parsed version
 	if (currentYear !== entryYear || currentDept !== detectedDept) {
 		selectCurriculum(entryYear, detectedDept);
@@ -5469,11 +5683,9 @@ window.applyPdfParsedCredits = async function() {
 		if (dpSel) dpSel.value = detectedDept;
 		renderTable();
 	}
-
 	const domCheckboxes = Array.from(document.querySelectorAll('.toggle-checkbox'));
 	domCheckboxes.forEach(chk => { chk.checked = false; });
 	let appliedCount = 0;
-
 	for (let sIdx = 0; sIdx < 6; sIdx++) {
 		const list = semCourses[sIdx] || [];
 		list.forEach(c => {
@@ -5484,7 +5696,6 @@ window.applyPdfParsedCredits = async function() {
 			}
 		});
 	}
-
 	calculate();
 	if (typeof updateAllSemesterCardsProgress === 'function') {
 		updateAllSemesterCardsProgress();
@@ -5500,7 +5711,6 @@ window.applyPdfParsedCredits = async function() {
 			matched_courses: appliedCount
 		}
 	});
-
 	toggleUIModal(false, 'pdfImportModal');
 	showMsg(`🎉 成功匯入 ${escapeHtml(studentName || '學生')} 的成績單！共取得 ${totalEarned} 學分！`);
 };
