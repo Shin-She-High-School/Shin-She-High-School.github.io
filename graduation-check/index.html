@@ -4030,8 +4030,11 @@ window.openAuditLogDetailModal = function(indexInFiltered) {
 		bannerEl.className = 'hidden';
 		bannerEl.innerHTML = '';
 		let bannerItems = [];
-		if (d.old_total !== undefined && d.new_total !== undefined) {
-			const diff = d.new_total - d.old_total;
+		const hasOldTotal = d.old_total !== undefined;
+		const hasNewTotal = d.new_total !== undefined || d.total_earned !== undefined;
+		if (hasOldTotal && hasNewTotal) {
+			const nTot = d.new_total !== undefined ? d.new_total : d.total_earned;
+			const diff = nTot - d.old_total;
 			const isUp = diff > 0;
 			const isDown = diff < 0;
 			const diffBadge = isUp ? `<span class="text-xs px-2 py-0.5 rounded-full font-black bg-emerald-100 text-emerald-800 border border-emerald-300">+ ${diff} 學分</span>`
@@ -4044,7 +4047,7 @@ window.openAuditLogDetailModal = function(indexInFiltered) {
 						<div class="flex items-center gap-2">
 							<span class="text-sm font-black text-slate-600">${d.old_total} 學分</span>
 							<i class="fa-solid fa-arrow-right text-xs text-indigo-500"></i>
-							<span class="text-base font-black text-indigo-700">${d.new_total} 學分</span>
+							<span class="text-base font-black text-indigo-700">${nTot} 學分</span>
 						</div>
 					</div>
 					<div>${diffBadge}</div>
@@ -4097,6 +4100,14 @@ window.openAuditLogDetailModal = function(indexInFiltered) {
 	const structCont = document.getElementById('auditDetailStructuredContainer');
 	if (structCont) {
 		structCont.innerHTML = '';
+		const detailKeyLabels = {
+			role: '身分權限', year: '入學學年度', dept: '科別班級', status: '帳號狀態',
+			category: '回饋類別', method: '重設方式', passwordChanged: '密碼變更紀錄',
+			fromOrder: '原始排序權重', toOrder: '新排序權重', isMarquee: '跑馬燈顯示',
+			isActive: '公開狀態', counselorClassesCount: '授權班級數', layout_mode: '版面檢視模式',
+			student_name: '學生姓名', student_id: '學生學號', total_earned: '實得學分', matched_courses: '配對科目數'
+		};
+		const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode', 'layout_mode'].includes(k));
 		if (d.changed_fields && Array.isArray(d.changed_fields) && d.changed_fields.length > 0) {
 			const gains = d.changed_fields.filter(f => f.newVal && f.newVal.includes('及格') && !f.newVal.includes('未及格'));
 			const losses = d.changed_fields.filter(f => !gains.includes(f));
@@ -4125,7 +4136,7 @@ window.openAuditLogDetailModal = function(indexInFiltered) {
 			}
 			if (losses.length > 0) {
 				changeSections += `
-					<div class="border border-rose-200 bg-rose-50/40 rounded-xl p-3">
+					<div class="border border-rose-200 bg-rose-50/40 rounded-xl p-3 mt-3">
 						<div class="text-xs font-black text-rose-900 flex items-center justify-between pb-2 mb-2 border-b border-rose-100">
 							<span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark text-rose-600"></i> 未及格 / 取消學分科目</span>
 							<span class="bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">${losses.length} 門</span>
@@ -4145,16 +4156,30 @@ window.openAuditLogDetailModal = function(indexInFiltered) {
 					</div>
 				`;
 			}
+			if (metaKeys.length > 0) {
+				changeSections += `
+					<div class="mt-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+						<div class="text-xs font-black text-slate-700 mb-2.5 flex items-center gap-1.5">
+							<i class="fa-solid fa-list-check text-indigo-600"></i> 詳細參數設定明細
+						</div>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+							${metaKeys.map(k => {
+								const label = detailKeyLabels[k] || k;
+								let rawVal = d[k];
+								let valStr = typeof rawVal === 'boolean' ? (rawVal ? '是' : '否') : String(rawVal ?? '未設定');
+								return `
+									<div class="p-2.5 bg-white border border-slate-200 rounded-lg flex items-center justify-between text-xs">
+										<span class="text-slate-500 font-bold">${escapeHtml(label)}</span>
+										<span class="font-black text-slate-800 font-mono">${escapeHtml(valStr)}</span>
+									</div>
+								`;
+							}).join('')}
+						</div>
+					</div>
+				`;
+			}
 			structCont.innerHTML = changeSections;
 		} else {
-			const detailKeyLabels = {
-				role: '身分權限', year: '入學學年度', dept: '科別班級', status: '帳號狀態',
-				category: '回饋類別', method: '重設方式', passwordChanged: '密碼變更紀錄',
-				fromOrder: '原始排序權重', toOrder: '新排序權重', isMarquee: '跑馬燈顯示',
-				isActive: '公開狀態', counselorClassesCount: '授權班級數', layout_mode: '版面檢視模式',
-				student_name: '學生姓名', student_id: '學生學號', total_earned: '實得學分', matched_courses: '配對科目數'
-			};
-			const metaKeys = Object.keys(d).filter(k => !['old_total', 'new_total', 'changed_fields', 'old_version', 'new_version', 'semester', 'mode', 'layout_mode'].includes(k));
 			if (metaKeys.length > 0) {
 				structCont.innerHTML = `
 					<div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
@@ -4274,8 +4299,19 @@ window.renderAuditLogList = function() {
 			`;
 		} else if (log.action_type === 'PDF成績單自動匯入') {
 			const matched = d.matched_courses || (d.changed_fields ? d.changed_fields.length : 0);
+			let totalBadge = '';
+			if (d.old_total !== undefined && (d.new_total !== undefined || d.total_earned !== undefined)) {
+				const nTot = d.new_total !== undefined ? d.new_total : d.total_earned;
+				const diff = nTot - d.old_total;
+				const isUp = diff > 0;
+				const isDown = diff < 0;
+				const totalBadgeColor = isUp ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (isDown ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-700');
+				const diffTxt = isUp ? ` (+ ${diff})` : (isDown ? ` (- ${Math.abs(diff)})` : '');
+				totalBadge = `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold shadow-2xs ${totalBadgeColor}"><span>舊: ${escapeHtml(d.old_total)}</span><span class="opacity-60 font-black">➔</span><span>新: <b>${escapeHtml(nTot)}</b>${diffTxt}</span></div>`;
+			}
 			diffHtml = `
 				<div class="flex items-center gap-2 flex-wrap">
+					${totalBadge}
 					<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 text-sky-900 text-xs font-bold shadow-2xs">
 						<i class="fa-solid fa-file-pdf text-sky-600"></i>
 						<span>匯入學生: ${escapeHtml(d.student_name || log.target_student_name || '學生')}</span>
@@ -4472,6 +4508,12 @@ window.flushPendingSave = async function() {
 	}
 };
 window.setAllStatus = function(p) {
+	const curRecord = editingStudentId ? activeStudentDBRecord : userDBRecord;
+	if (!saveBaselineChecks) {
+		const stat = calculateStats();
+		saveBaselineTotal = curRecord?.total_credits !== undefined ? curRecord.total_credits : (stat.total || 0);
+		saveBaselineChecks = JSON.parse(JSON.stringify(curRecord?.credits_json || {}));
+	}
 	document.querySelectorAll(".toggle-checkbox").forEach(chk => { chk.checked = p; });
 	syncDomChecksToRecord();
 	calculate();
@@ -4488,6 +4530,12 @@ window.setSemesterStatus = function(sIdx, p) {
 			showMsg("超出管理權限：您未被授權管理該學生學分！", "error");
 			return;
 		}
+	}
+	const curRecord = editingStudentId ? activeStudentDBRecord : userDBRecord;
+	if (!saveBaselineChecks) {
+		const stat = calculateStats();
+		saveBaselineTotal = curRecord?.total_credits !== undefined ? curRecord.total_credits : (stat.total || 0);
+		saveBaselineChecks = JSON.parse(JSON.stringify(curRecord?.credits_json || {}));
 	}
 	const semNames = ["第一學期 (一上)", "第二學期 (一下)", "第三學期 (二上)", "第四學期 (二下)", "第五學期 (三上)", "第六學期 (三下)"];
 	document.querySelectorAll(`.toggle-checkbox[data-sem="${sIdx}"]`).forEach(chk => { chk.checked = p; });
@@ -4509,12 +4557,12 @@ window.debouncedSaveToCloud = function(bulkActionInfo = null) {
 	}
 	isDirty = true;
 	updateSyncStatusIndicator('dirty');
-	syncDomChecksToRecord();
 	if (!saveBaselineChecks) {
 		const curRecord = editingStudentId ? activeStudentDBRecord : userDBRecord;
 		saveBaselineChecks = JSON.parse(JSON.stringify(curRecord?.credits_json || {}));
 		saveBaselineTotal = curRecord?.total_credits !== undefined ? curRecord.total_credits : 0;
 	}
+	syncDomChecksToRecord();
 	if (bulkActionInfo) pendingBulkActionInfo = bulkActionInfo;
 	clearTimeout(autoSaveDebounceTimer);
 	autoSaveDebounceTimer = setTimeout(() => {
@@ -4596,7 +4644,8 @@ async function executeDeferredSave(bulkActionInfo = null) {
 		activeRec.credits_json = checks;
 		activeRec.total_credits = res.total || 0;
 		if (bulkActionInfo || changedFields.length > 0) {
-			await logAuditRecord(bulkActionInfo ? bulkActionInfo.actionType : "變更學分紀錄", targetSid, targetName, { old_total: oldTotal, new_total: res.total || 0, ...(bulkActionInfo ? bulkActionInfo.details : {}), changed_fields: changedFields });
+			const finalFields = (bulkActionInfo && bulkActionInfo.details && Array.isArray(bulkActionInfo.details.changed_fields) && bulkActionInfo.details.changed_fields.length > 0) ? bulkActionInfo.details.changed_fields : changedFields;
+			await logAuditRecord(bulkActionInfo ? bulkActionInfo.actionType : "變更學分紀錄", targetSid, targetName, { old_total: oldTotal, new_total: res.total || 0, ...(bulkActionInfo ? bulkActionInfo.details : {}), changed_fields: finalFields });
 		}
 	} catch (err) {
 		isDirty = false;
@@ -5674,6 +5723,9 @@ window.applyPdfParsedCredits = function() {
 window.executeApplyPdfCredits = async function() {
 	if (!pendingPdfParsedData) return;
 	const { entryYear, detectedDept, semCourses, totalEarned, studentName, studentId } = pendingPdfParsedData;
+	const curRecord = editingStudentId ? activeStudentDBRecord : userDBRecord;
+	const priorTotal = curRecord?.total_credits !== undefined ? curRecord.total_credits : (calculateStats().total || 0);
+	const priorChecks = JSON.parse(JSON.stringify(curRecord?.credits_json || {}));
 	// Check if current curriculum matches; if not, select the parsed version
 	if (currentYear !== entryYear || currentDept !== detectedDept) {
 		selectCurriculum(entryYear, detectedDept);
@@ -5684,15 +5736,27 @@ window.executeApplyPdfCredits = async function() {
 		renderTable();
 	}
 	const domCheckboxes = Array.from(document.querySelectorAll('.toggle-checkbox'));
-	domCheckboxes.forEach(chk => { chk.checked = false; });
 	let appliedCount = 0;
+	const semNames = ["一上", "一下", "二上", "二下", "三上", "三下"];
+	const pdfChangedFields = [];
 	for (let sIdx = 0; sIdx < 6; sIdx++) {
 		const list = semCourses[sIdx] || [];
+		if (list.length === 0) continue;
 		list.forEach(c => {
 			const chk = matchCourseCheckbox(c.name, sIdx, domCheckboxes);
 			if (chk) {
+				const semStr = semNames[sIdx] || `第${sIdx + 1}學期`;
+				const credVal = chk.dataset.val || "0";
+				const wasChecked = chk.checked;
 				chk.checked = c.passed;
 				appliedCount++;
+				if (wasChecked !== c.passed) {
+					pdfChangedFields.push({
+						field: `📘 ${c.name} 【${semStr}】 (${credVal}學分)`,
+						oldVal: wasChecked ? '及格' : '未及格',
+						newVal: c.passed ? '✔及格' : '✕未及格'
+					});
+				}
 			}
 		});
 	}
@@ -5700,17 +5764,24 @@ window.executeApplyPdfCredits = async function() {
 	if (typeof updateAllSemesterCardsProgress === 'function') {
 		updateAllSemesterCardsProgress();
 	}
+	const newTotalStats = calculateStats();
+	const newTotal = newTotalStats.total || 0;
 	syncDomChecksToRecord();
-	await flushPendingSave();
-	await debouncedSaveToCloud({
+	saveBaselineTotal = priorTotal;
+	saveBaselineChecks = priorChecks;
+	debouncedSaveToCloud({
 		actionType: "PDF成績單自動匯入",
 		details: {
+			old_total: priorTotal,
+			new_total: newTotal,
 			student_name: studentName,
 			student_id: studentId,
 			total_earned: totalEarned,
-			matched_courses: appliedCount
+			matched_courses: appliedCount,
+			changed_fields: pdfChangedFields
 		}
 	});
+	await flushPendingSave();
 	toggleUIModal(false, 'pdfImportModal');
 	showMsg(`🎉 成功匯入 ${escapeHtml(studentName || '學生')} 的成績單！共取得 ${totalEarned} 學分！`);
 };
