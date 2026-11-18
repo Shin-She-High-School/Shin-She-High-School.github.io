@@ -1181,6 +1181,11 @@
         const SUPABASE_ANON_KEY = "sb_publishable_HUfSJgvMX0iYCoZ6AUlF1Q_VewS2O2p";
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
         const SESSION_STORAGE_KEY = 'sshs_mall_auth_session';
 
         let currentAuth = null;
@@ -3101,7 +3106,7 @@
                 if (origDesc !== newDesc) {
                     const bStr = origDesc || '(未填寫)';
                     const aStr = newDesc || '(未填寫)';
-                    changeList.push(`詳細介紹「${bStr}」➔「${aStr}」`);
+                    changeList.push(origDesc ? `詳細介紹已更新` : `新增詳細介紹`);
                     diffRecords.push({ field: '詳細介紹', before: bStr, after: aStr });
                     beforeData['詳細介紹'] = bStr;
                     afterData['詳細介紹'] = aStr;
@@ -3111,8 +3116,14 @@
                 if (origImg !== newImg) {
                     const bImg = origImg ? '原照片' : '(無照片)';
                     const aImg = newImg ? '新上傳照片' : '(已移除照片)';
-                    changeList.push(`展示照片「${bImg}」➔「${aImg}」`);
-                    diffRecords.push({ field: '展示照片', before: bImg, after: aImg });
+                    changeList.push(origImg ? `展示照片已變更` : `新增展示照片`);
+                    diffRecords.push({
+                        field: '展示照片',
+                        before: bImg,
+                        after: aImg,
+                        before_images: parseImages(origImg),
+                        after_images: parseImages(newImg)
+                    });
                     beforeData['展示照片'] = bImg;
                     afterData['展示照片'] = aImg;
                 }
@@ -4346,7 +4357,7 @@
                     if (uData) allUsersList = uData;
                 } catch(e) {}
             }
-            const { data } = await client.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(100);
+            const { data } = await client.from('audit_logs').select('*').order('created_at', { ascending: false });
             allAuditLogs = data || [];
             renderAuditLogs(allAuditLogs);
         }
@@ -4531,18 +4542,149 @@
 
                 if (key === '修改差異' || key === '修改項目' || key === '變更內容') {
                     const diffBtn = (logItem && logItem.id) ? `
-                        <button type="button" onclick="openDiffModalByLogId('${logItem.id}')" class="px-2.5 py-1 bg-amber-200/90 hover:bg-amber-300 text-amber-950 rounded-lg text-[10px] font-black transition inline-flex items-center gap-1 shadow-2xs whitespace-nowrap shrink-0">
+                        <button type="button" onclick="openDiffModalByLogId('${logItem.id}')" class="px-2.5 py-1 bg-amber-200/90 hover:bg-amber-300 text-amber-950 rounded-lg text-[10px] font-black transition inline-flex items-center gap-1 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer">
                             <i class="fa-solid fa-code-compare text-[10px] shrink-0"></i>
                             <span>前後對照</span>
                         </button>
                     ` : '';
-                    const parts = strVal.split(/[、；]/).map(s => s.trim()).filter(Boolean);
-                    if (parts.length > 1) {
-                        return `<div class="flex flex-wrap items-center gap-1.5 py-0.5 max-w-full">` +
-                            parts.map(p => `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs bg-amber-50 text-amber-950 border-amber-300 font-bold shadow-2xs max-w-full break-words"><i class="fa-solid fa-pen-to-square text-amber-600 text-[10px] shrink-0"></i><span class="break-words">${p}</span></span>`).join('') +
-                            diffBtn + `</div>`;
+
+                    let chips = [];
+                    if (Array.isArray(obj['異動項目']) && obj['異動項目'].length > 0) {
+                        chips = obj['異動項目'].map(item => {
+                            const field = item.field || item['欄位'] || '';
+                            if (field.includes('詳細介紹')) {
+                                return {
+                                    text: '📝 詳細介紹已更新',
+                                    cls: 'bg-emerald-50 text-emerald-950 border-emerald-300',
+                                    icon: 'fa-solid fa-file-lines text-emerald-600'
+                                };
+                            }
+                            if (field.includes('照片') || field.includes('圖片')) {
+                                return {
+                                    text: '🖼️ 展示照片已變更',
+                                    cls: 'bg-sky-50 text-sky-950 border-sky-300',
+                                    icon: 'fa-solid fa-image text-sky-600'
+                                };
+                            }
+                            if (field.includes('名稱') || field.includes('品名')) {
+                                const b = String(item.before || '');
+                                const a = String(item.after || '');
+                                return {
+                                    text: `名稱「${b}」➔「${a}」`,
+                                    cls: 'bg-orange-50 text-orange-950 border-orange-300',
+                                    icon: 'fa-solid fa-tag text-orange-600'
+                                };
+                            }
+                            if (field.includes('單價') || field.includes('金額') || field.includes('價格')) {
+                                const b = String(item.before || '');
+                                const a = String(item.after || '');
+                                const bStr = b.includes('幣') ? b : `${b} 幣`;
+                                const aStr = a.includes('幣') ? a : `${a} 幣`;
+                                return {
+                                    text: `單價 ${bStr} ➔ ${aStr}`,
+                                    cls: 'bg-amber-50 text-amber-950 border-amber-400',
+                                    icon: 'fa-solid fa-coins text-amber-600'
+                                };
+                            }
+                            if (field.includes('庫存')) {
+                                const b = String(item.before || '');
+                                const a = String(item.after || '');
+                                const bStr = (b.includes('件') || b === '無限制') ? b : `${b} 件`;
+                                const aStr = (a.includes('件') || a === '無限制') ? a : `${a} 件`;
+                                return {
+                                    text: `庫存 ${bStr} ➔ ${aStr}`,
+                                    cls: 'bg-indigo-50 text-indigo-950 border-indigo-300',
+                                    icon: 'fa-solid fa-boxes-stacked text-indigo-600'
+                                };
+                            }
+                            if (field.includes('組別')) {
+                                const b = String(item.before || '');
+                                const a = String(item.after || '');
+                                const bStr = b.includes('組') ? b : `第 ${b} 組`;
+                                const aStr = a.includes('組') ? a : `第 ${a} 組`;
+                                return {
+                                    text: `組別 ${bStr} ➔ ${aStr}`,
+                                    cls: 'bg-teal-50 text-teal-950 border-teal-300',
+                                    icon: 'fa-solid fa-users text-teal-600'
+                                };
+                            }
+                            const b = String(item.before || '');
+                            const a = String(item.after || '');
+                            const txt = (b.length > 20 || a.length > 20) ? `${field}已更新` : `${field} ${b} ➔ ${a}`;
+                            return {
+                                text: txt,
+                                cls: 'bg-slate-100 text-slate-800 border-slate-300',
+                                icon: 'fa-solid fa-pen-to-square text-slate-500'
+                            };
+                        });
+                    } else {
+                        if (strVal.includes('詳細介紹')) {
+                            chips.push({
+                                text: '📝 詳細介紹已更新',
+                                cls: 'bg-emerald-50 text-emerald-950 border-emerald-300',
+                                icon: 'fa-solid fa-file-lines text-emerald-600'
+                            });
+                        }
+                        if (strVal.includes('展示照片') || strVal.includes('照片')) {
+                            chips.push({
+                                text: '🖼️ 展示照片已變更',
+                                cls: 'bg-sky-50 text-sky-950 border-sky-300',
+                                icon: 'fa-solid fa-image text-sky-600'
+                            });
+                        }
+                        const nameMatch = strVal.match(/名稱「([^」]+)」➔「([^」]+)」/);
+                        if (nameMatch) {
+                            chips.push({
+                                text: `名稱「${nameMatch[1]}」➔「${nameMatch[2]}」`,
+                                cls: 'bg-orange-50 text-orange-950 border-orange-300',
+                                icon: 'fa-solid fa-tag text-orange-600'
+                            });
+                        }
+                        const priceMatch = strVal.match(/單價\s*([0-9,]+(?:\s*幣)?)\s*➔\s*([0-9,]+(?:\s*幣)?)/);
+                        if (priceMatch) {
+                            chips.push({
+                                text: `單價 ${priceMatch[1]} ➔ ${priceMatch[2]}`,
+                                cls: 'bg-amber-50 text-amber-950 border-amber-400',
+                                icon: 'fa-solid fa-coins text-amber-600'
+                            });
+                        }
+                        const stockMatch = strVal.match(/庫存\s*([^\s、➔]+(?:\s*件)?)\s*➔\s*([^\s、]+(?:\s*件)?)/);
+                        if (stockMatch) {
+                            chips.push({
+                                text: `庫存 ${stockMatch[1]} ➔ ${stockMatch[2]}`,
+                                cls: 'bg-indigo-50 text-indigo-950 border-indigo-300',
+                                icon: 'fa-solid fa-boxes-stacked text-indigo-600'
+                            });
+                        }
+                        const grpMatch = strVal.match(/組別\s*第?\s*([0-9]+)\s*組?\s*➔\s*第?\s*([0-9]+)\s*組?/);
+                        if (grpMatch) {
+                            chips.push({
+                                text: `組別 第 ${grpMatch[1]} 組 ➔ 第 ${grpMatch[2]} 組`,
+                                cls: 'bg-teal-50 text-teal-950 border-teal-300',
+                                icon: 'fa-solid fa-users text-teal-600'
+                            });
+                        }
+                        if (chips.length === 0) {
+                            chips.push({
+                                text: '資料內容已更新',
+                                cls: 'bg-slate-100 text-slate-800 border-slate-300',
+                                icon: 'fa-solid fa-pen-to-square text-slate-500'
+                            });
+                        }
                     }
-                    return `<span class="inline-flex flex-wrap items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs bg-amber-50 text-amber-950 border-amber-300 font-bold shadow-2xs max-w-full break-words"><i class="fa-solid fa-pen-to-square text-amber-600 text-xs shrink-0"></i><span class="text-amber-800 font-medium shrink-0">修改內容：</span><span class="font-black text-amber-950 break-words">${strVal}</span>${diffBtn}</span>`;
+
+                    const chipHtmls = chips.map(c => {
+                        const isLong = c.text && c.text.length > 30;
+                        const wrapCls = isLong ? 'break-words max-w-md' : 'whitespace-nowrap shrink-0';
+                        return `
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs ${c.cls} font-bold shadow-2xs ${wrapCls}">
+                                <i class="${c.icon} text-[10px] shrink-0"></i>
+                                <span>${escapeHtml(c.text)}</span>
+                            </span>
+                        `;
+                    }).join('');
+
+                    return `<div class="flex flex-wrap items-center gap-1.5 py-0.5 max-w-full">${chipHtmls}${diffBtn}</div>`;
                 }
 
                 if (key === '品項' || key === '退款品項' || key === '商品清單') {
@@ -4550,9 +4692,10 @@
                 }
 
                 if (key === '組別') {
+                    const groupStr = String(val).includes('組') ? String(val) : `第 ${val} 組`;
                     return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs bg-teal-50 text-teal-900 border-teal-200 font-black shadow-2xs whitespace-nowrap shrink-0">
                         <i class="fa-solid fa-users text-teal-600 text-xs shrink-0"></i>
-                        <span>第 ${val} 組</span>
+                        <span>${escapeHtml(groupStr)}</span>
                     </span>`;
                 }
 
@@ -4753,7 +4896,9 @@
                                     diffs.push(`庫存 ${pStr} ➔ ${nStr}`);
                                 }
                                 if (obj['組別'] !== undefined && prev['組別'] !== undefined && obj['組別'] !== prev['組別']) {
-                                    diffs.push(`組別 第 ${prev['組別']} 組 ➔ 第 ${obj['組別']} 組`);
+                                    const pGroup = String(prev['組別']).includes('組') ? prev['組別'] : `第 ${prev['組別']} 組`;
+                                    const nGroup = String(obj['組別']).includes('組') ? obj['組別'] : `第 ${obj['組別']} 組`;
+                                    diffs.push(`組別 ${pGroup} ➔ ${nGroup}`);
                                 }
                             }
                             prodState[pKey] = { ...obj };
@@ -4762,6 +4907,69 @@
                         }
                     }
                 }
+            }
+
+            function getAuditActionSubBadges(l) {
+                if (!l || l.action_type !== '修改商品') return '';
+                let obj = l.details;
+                if (typeof obj === 'string') {
+                    try { obj = JSON.parse(obj); } catch(e) {}
+                }
+                if (!obj || typeof obj !== 'object') {
+                    const diffStr = window.auditLogDiffMap ? window.auditLogDiffMap.get(l.id) : '';
+                    if (diffStr) {
+                        obj = { '修改差異': diffStr };
+                    } else {
+                        return '';
+                    }
+                }
+
+                const tags = [];
+                const checkTypes = (f) => {
+                    if (!f) return;
+                    const str = String(f);
+                    if (str.includes('單價') || str.includes('金額') || str.includes('價格')) {
+                        if (!tags.some(t => t.id === 'price')) tags.push({ id: 'price', label: '單價', icon: 'fa-coins', color: 'bg-amber-100 text-amber-900 border-amber-300' });
+                    }
+                    if (str.includes('庫存')) {
+                        if (!tags.some(t => t.id === 'stock')) tags.push({ id: 'stock', label: '庫存', icon: 'fa-boxes-stacked', color: 'bg-indigo-100 text-indigo-900 border-indigo-300' });
+                    }
+                    if (str.includes('照片') || str.includes('圖片')) {
+                        if (!tags.some(t => t.id === 'image')) tags.push({ id: 'image', label: '照片', icon: 'fa-image', color: 'bg-sky-100 text-sky-900 border-sky-300' });
+                    }
+                    if (str.includes('詳細介紹') || str.includes('介紹') || str.includes('描述')) {
+                        if (!tags.some(t => t.id === 'desc')) tags.push({ id: 'desc', label: '介紹', icon: 'fa-file-lines', color: 'bg-emerald-100 text-emerald-900 border-emerald-300' });
+                    }
+                    if (str.includes('名稱') || str.includes('品名')) {
+                        if (!tags.some(t => t.id === 'name')) tags.push({ id: 'name', label: '品名', icon: 'fa-tag', color: 'bg-orange-100 text-orange-900 border-orange-300' });
+                    }
+                    if (str.includes('組別')) {
+                        if (!tags.some(t => t.id === 'group')) tags.push({ id: 'group', label: '組別', icon: 'fa-users', color: 'bg-teal-100 text-teal-900 border-teal-300' });
+                    }
+                };
+
+                if (Array.isArray(obj['異動項目']) && obj['異動項目'].length > 0) {
+                    obj['異動項目'].forEach(item => {
+                        checkTypes(item.field || item['欄位'] || '');
+                    });
+                } else {
+                    const diffStr = obj['修改差異'] || obj['修改項目'] || (window.auditLogDiffMap ? window.auditLogDiffMap.get(l.id) : '') || '';
+                    checkTypes(diffStr);
+                    if (obj['修改前'] && typeof obj['修改前'] === 'object') {
+                        Object.keys(obj['修改前']).forEach(k => checkTypes(k));
+                    }
+                    if (obj['修改後'] && typeof obj['修改後'] === 'object') {
+                        Object.keys(obj['修改後']).forEach(k => checkTypes(k));
+                    }
+                }
+
+                if (tags.length === 0) return '';
+                return `<div class="flex flex-wrap gap-1 mt-1">` + tags.map(t => `
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black border ${t.color} shadow-2xs whitespace-nowrap">
+                        <i class="fa-solid ${t.icon} text-[8px]"></i>
+                        <span>${t.label}</span>
+                    </span>
+                `).join('') + `</div>`;
             }
 
             const auditCardsView = document.getElementById('auditLogCardsView');
@@ -4784,6 +4992,7 @@
                                 <i class="${actCfg.icon} text-[10px]"></i>
                                 <span>${actCfg.label}</span>
                             </span>
+                            ${getAuditActionSubBadges(l)}
                         </td>
                         <td class="p-3 border-b border-slate-100 font-mono text-brand-600 font-black text-xs whitespace-nowrap align-top">${l.ip_address || '127.0.0.1'}</td>
                         <td class="p-3 border-b border-slate-100 text-xs align-top">${formatAuditDetails(l.details, l)}</td>
@@ -4802,10 +5011,13 @@
                     return `
                         <div class="p-3.5 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-2 shadow-xs text-xs">
                             <div class="flex items-center justify-between gap-1.5 border-b border-slate-200/60 pb-2">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg font-black text-[10px] border shadow-xs ${actCfg.color}">
-                                    <i class="${actCfg.icon} text-[10px]"></i>
-                                    <span>${actCfg.label}</span>
-                                </span>
+                                <div class="flex flex-col items-start gap-1">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg font-black text-[10px] border shadow-xs ${actCfg.color}">
+                                        <i class="${actCfg.icon} text-[10px]"></i>
+                                        <span>${actCfg.label}</span>
+                                    </span>
+                                    ${getAuditActionSubBadges(l)}
+                                </div>
                                 <span class="font-mono text-[10px] text-slate-400">${formatDateTime(l.created_at)}</span>
                             </div>
                             <div class="flex flex-wrap items-center justify-between gap-1 text-slate-600 text-[11px]">
@@ -4851,7 +5063,9 @@
                 return obj['異動項目'].map(item => ({
                     field: item.field || item['欄位'] || '欄位',
                     before: item.before || item['修改前'] || item['原值'] || '-',
-                    after: item.after || item['修改後'] || item['新值'] || '-'
+                    after: item.after || item['修改後'] || item['新值'] || '-',
+                    before_images: item.before_images || null,
+                    after_images: item.after_images || null
                 }));
             }
 
@@ -4970,6 +5184,121 @@
             filterAuditLogs();
         }
 
+        window.renderDiffItemHtml = function(item, l, prod = null) {
+            const isStatus = item.field && item.field.includes('狀態');
+            const isPhoto = item.field && (item.field.includes('照片') || item.field.includes('圖片'));
+
+            if (isStatus) {
+                return `
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                        <span class="inline-flex items-center gap-1.5 font-black text-slate-800 shrink-0">
+                            <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+                            <span>${escapeHtml(item.field)}</span>
+                        </span>
+                        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                            ${window.renderStatusPill(item.before)}
+                            <i class="fa-solid fa-arrow-right text-slate-400 text-xs shrink-0"></i>
+                            ${window.renderStatusPill(item.after)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            let beforeDisplay, afterDisplay;
+
+            if (isPhoto) {
+                let bImgs = null;
+                if (Array.isArray(item.before_images) && item.before_images.length > 0) {
+                    bImgs = item.before_images;
+                } else if (typeof item.before === 'string' && (item.before.includes('data:image') || item.before.includes('http'))) {
+                    bImgs = parseImages(item.before);
+                } else if (item.before === '(無照片)' || item.before === '(未填寫)' || item.before === '-' || !item.before) {
+                    bImgs = [];
+                }
+
+                let aImgs = null;
+                if (Array.isArray(item.after_images) && item.after_images.length > 0) {
+                    aImgs = item.after_images;
+                } else if (typeof item.after === 'string' && (item.after.includes('data:image') || item.after.includes('http'))) {
+                    aImgs = parseImages(item.after);
+                } else if (item.after === '(已移除照片)' || item.after === '(無照片)' || item.after === '-' || !item.after) {
+                    aImgs = [];
+                } else {
+                    const pId = l?.details?.['商品ID'] || l?.details?.['productId'] || prod?.id;
+                    const matchedProd = (currentProductsList || []).find(p => String(p.id) === String(pId)) || prod;
+                    if (matchedProd && matchedProd.image_url) {
+                        aImgs = parseImages(matchedProd.image_url);
+                    }
+                }
+
+                const renderPhotoBox = (imgs, fallbackText, isHistoricalBefore = false) => {
+                    if (imgs && imgs.length > 0) {
+                        return `
+                            <div class="space-y-1.5">
+                                <div class="text-[10px] font-bold text-slate-500 flex items-center justify-between">
+                                    <span>共 ${imgs.length} 張照片：</span>
+                                    <span class="text-slate-400 font-normal">點擊放大檢視</span>
+                                </div>
+                                <div class="flex flex-wrap gap-2 pt-0.5">
+                                    ${imgs.map(u => `
+                                        <div class="relative group/thumb rounded-xl overflow-hidden border border-slate-200 shadow-2xs w-20 h-20 sm:w-24 sm:h-24 bg-white flex items-center justify-center shrink-0 cursor-zoom-in" onclick="openLightbox('${escapeHtml(u)}')">
+                                            <img src="${escapeHtml(u)}" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" alt="相片">
+                                            <div class="absolute inset-0 bg-black/35 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center text-white text-xs transition">
+                                                <i class="fa-solid fa-magnifying-glass"></i>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    if (imgs && imgs.length === 0) {
+                        return `<div class="p-3 bg-white/70 rounded-xl border border-slate-200 text-center text-slate-400 text-xs font-bold">${escapeHtml(fallbackText || '無照片')}</div>`;
+                    }
+                    return `
+                        <div class="p-3 bg-white/70 rounded-xl border border-rose-200 flex items-center gap-2.5 text-rose-800 text-xs font-bold">
+                            <i class="fa-solid fa-image text-rose-400 text-xl shrink-0"></i>
+                            <div>
+                                <div>${escapeHtml(fallbackText || '原照片')}</div>
+                                ${isHistoricalBefore ? '<div class="text-[10px] text-slate-400 font-normal mt-0.5">此為早前歷史紀錄，未留存更換前舊相片檔</div>' : ''}
+                            </div>
+                        </div>
+                    `;
+                };
+
+                beforeDisplay = renderPhotoBox(bImgs, item.before, bImgs === null && item.before === '原照片');
+                afterDisplay = renderPhotoBox(aImgs, item.after, false);
+            } else {
+                beforeDisplay = `<div class="font-medium text-rose-900 whitespace-pre-line break-words leading-relaxed ${item.before === '(未填寫)' ? 'italic text-rose-400' : ''}">${escapeHtml(item.before)}</div>`;
+                afterDisplay = `<div class="font-black text-emerald-950 whitespace-pre-line break-words leading-relaxed">${escapeHtml(item.after)}</div>`;
+            }
+
+            return `
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-xs">
+                    <div class="font-black text-slate-800 text-xs flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+                        <span>${escapeHtml(item.field)}</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div class="p-2.5 bg-rose-50/80 border border-rose-200 rounded-xl space-y-1">
+                            <div class="text-[10px] font-black text-rose-500 uppercase flex items-center gap-1">
+                                <i class="fa-solid fa-clock-rotate-left text-[9px]"></i>
+                                <span>修改前 (舊資料)</span>
+                            </div>
+                            ${beforeDisplay}
+                        </div>
+                        <div class="p-2.5 bg-emerald-50/80 border border-emerald-300 rounded-xl space-y-1">
+                            <div class="text-[10px] font-black text-emerald-600 uppercase flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                                <span>修改後 (新資料)</span>
+                            </div>
+                            ${afterDisplay}
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
         window.openDiffModalByLogId = function(logId) {
             const l = (allAuditLogs || []).find(item => String(item.id) === String(logId));
             if (!l) return;
@@ -5001,34 +5330,7 @@
                         <span>變更欄位清單 (${diffItems.length} 個欄位異動)</span>
                         <span class="text-[11px] text-slate-400 font-normal">Before ➔ After</span>
                     </div>
-                    ${diffItems.map(item => {
-                        const isStatus = item.field.includes('狀態');
-                        const beforeDisplay = isStatus ? window.renderStatusPill(item.before) : `<div class="font-medium text-rose-900 whitespace-pre-line break-words leading-relaxed ${item.before === '(未填寫)' ? 'italic text-rose-400' : ''}">${item.before}</div>`;
-                        const afterDisplay = isStatus ? window.renderStatusPill(item.after) : `<div class="font-black text-emerald-950 whitespace-pre-line break-words leading-relaxed">${item.after}</div>`;
-                        return `
-                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                            <div class="font-black text-slate-800 text-xs flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-brand-500"></span>
-                                <span>${item.field}</span>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                                <div class="p-2.5 bg-rose-50/80 border border-rose-200 rounded-xl space-y-1">
-                                    <div class="text-[10px] font-black text-rose-500 uppercase flex items-center gap-1">
-                                        <i class="fa-solid fa-clock-rotate-left text-[9px]"></i>
-                                        <span>修改前 (舊資料)</span>
-                                    </div>
-                                    ${beforeDisplay}
-                                </div>
-                                <div class="p-2.5 bg-emerald-50/80 border border-emerald-300 rounded-xl space-y-1">
-                                    <div class="text-[10px] font-black text-emerald-600 uppercase flex items-center gap-1">
-                                        <i class="fa-solid fa-arrow-right text-[9px]"></i>
-                                        <span>修改後 (新資料)</span>
-                                    </div>
-                                    ${afterDisplay}
-                                </div>
-                            </div>
-                        </div>
-                    `; }).join('')}
+                    ${diffItems.map(item => window.renderDiffItemHtml(item, l)).join('')}
                 </div>
             `;
         };
@@ -5124,71 +5426,7 @@
                                     <span>修改前後欄位差異對照 (Before ➔ After)</span>
                                 </div>
                                 <div class="grid grid-cols-1 gap-2.5">
-                                    ${diffItems.map(item => {
-                                        const isDetailed = item.field === '詳細介紹' || (item.before && item.before.length > 20) || (item.after && item.after.length > 20);
-                                        if (isDetailed) {
-                                            return `
-                                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-xs">
-                                                    <div class="font-black text-slate-700 flex items-center gap-1.5">
-                                                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                                                        <span>${item.field}</span>
-                                                    </div>
-                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                                                        <div class="p-2.5 bg-rose-50/80 border border-rose-200 rounded-xl space-y-1">
-                                                            <div class="text-[10px] font-black text-rose-500 uppercase flex items-center gap-1">
-                                                                <i class="fa-solid fa-clock-rotate-left text-[9px]"></i>
-                                                                <span>修改前 (舊資料)</span>
-                                                            </div>
-                                                            <div class="font-medium text-rose-900 whitespace-pre-line break-words leading-relaxed ${item.before === '(未填寫)' ? 'italic text-rose-400' : ''}">${item.before}</div>
-                                                        </div>
-                                                        <div class="p-2.5 bg-emerald-50/80 border border-emerald-300 rounded-xl space-y-1">
-                                                            <div class="text-[10px] font-black text-emerald-600 uppercase flex items-center gap-1">
-                                                                <i class="fa-solid fa-arrow-right text-[9px]"></i>
-                                                                <span>修改後 (新資料)</span>
-                                                            </div>
-                                                            <div class="font-black text-emerald-950 whitespace-pre-line break-words leading-relaxed">${item.after}</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            `;
-                                        }
-
-                                        if (item.field.includes('狀態')) {
-                                            return `
-                                                <div class="p-2.5 bg-slate-50/80 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                                                    <span class="inline-flex items-center gap-1 font-black text-slate-700 shrink-0">
-                                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                                        ${item.field}
-                                                    </span>
-                                                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                                                        ${window.renderStatusPill(item.before)}
-                                                        <i class="fa-solid fa-arrow-right text-slate-400 text-xs"></i>
-                                                        ${window.renderStatusPill(item.after)}
-                                                    </div>
-                                                </div>
-                                            `;
-                                        }
-
-                                        return `
-                                            <div class="p-2.5 bg-slate-50/80 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                                                <span class="inline-flex items-center gap-1 font-black text-slate-700 shrink-0">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                                    ${item.field}
-                                                </span>
-                                                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                                                    <div class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 font-bold text-xs line-through flex items-center gap-1" title="修改前 (舊資料)">
-                                                        <span class="text-[10px] text-rose-400 no-underline font-medium">前:</span>
-                                                        <span>${item.before}</span>
-                                                    </div>
-                                                    <i class="fa-solid fa-arrow-right text-slate-400 text-xs"></i>
-                                                    <div class="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 font-black text-xs flex items-center gap-1" title="修改後 (新資料)">
-                                                        <span class="text-[10px] text-emerald-600 font-medium">後:</span>
-                                                        <span>${item.after}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        `;
-                                    }).join('')}
+                                    ${diffItems.map(item => window.renderDiffItemHtml(item, l, p)).join('')}
                                 </div>
                             </div>
                         `;
