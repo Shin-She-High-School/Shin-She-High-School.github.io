@@ -2302,13 +2302,20 @@
                                           idx === 1 ? 'bg-slate-100 text-slate-800 border-slate-300' :
                                           idx === 2 ? 'bg-amber-50 text-amber-800 border-amber-200' :
                                           'bg-white text-slate-700 border-slate-200';
+                        const customStoreName = (gr.storeName || '').replace(/^第\s*[0-9一二三四五六1-6]\s*組(\s*-\s*|\s*)?/, '').trim();
+                        const displayStoreName = customStoreName || gr.storeName || `第 ${gr.groupNo} 組`;
+
                         return `
-                            <div class="p-2.5 rounded-xl border ${rankColor} flex flex-col justify-between shadow-2xs">
-                                <div class="flex items-center justify-between text-xs font-black">
-                                    <span>${medals[idx]} 第 ${gr.groupNo} 組</span>
-                                    <span class="text-[10px] text-slate-500 max-w-[65px] truncate" title="${gr.storeName}">${gr.storeName}</span>
+                            <div class="p-2.5 rounded-xl border ${rankColor} flex flex-col justify-between shadow-2xs min-w-0">
+                                <div>
+                                    <div class="flex items-center justify-between text-xs font-black">
+                                        <span>${medals[idx]} 第 ${gr.groupNo} 組</span>
+                                    </div>
+                                    <div class="text-[11px] font-bold text-slate-600 truncate mt-0.5" title="${escapeHtml(gr.storeName)}">
+                                        ${escapeHtml(displayStoreName)}
+                                    </div>
                                 </div>
-                                <div class="mt-1 text-sm font-black text-slate-900">${formatCurrency(gr.revenue)} <span class="text-[10px] font-bold text-slate-400">幣</span></div>
+                                <div class="mt-1.5 text-sm font-black text-slate-900">${formatCurrency(gr.revenue)} <span class="text-[10px] font-bold text-slate-400">幣</span></div>
                             </div>
                         `;
                     }).join('');
@@ -3793,7 +3800,7 @@
                         <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                             <div class="cursor-pointer" onclick="openProductDetailPage('${p.id}')">
                                 <div class="flex items-center justify-between mb-2 gap-1 flex-wrap">
-                                    <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200 max-w-[120px] truncate" title="${groupLabel}">${groupLabel}</span>
+                                    <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200 max-w-[170px] truncate" title="${groupLabel}">${groupLabel}</span>
                                     <div class="flex items-center gap-1.5 text-[11px] font-bold">
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/70 font-black shadow-2xs" title="累積已售出 ${soldCount} 件"><i class="fa-solid fa-fire text-amber-500 text-[10px]"></i>已售 ${soldCount}</span>
                                         <span class="${isOutOfStock ? 'text-rose-600' : 'text-slate-400'}">庫存: ${displayStock}</span>
