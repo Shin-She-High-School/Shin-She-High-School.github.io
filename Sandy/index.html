@@ -875,103 +875,163 @@
                     <div id="myOrdersListArea" class="space-y-3"></div>
                 </section>
 
-                <section id="page-student-publish" class="page-pane hidden space-y-6">
+                <section id="page-student-publish" class="page-pane hidden space-y-4">
                     
-                    <div class="bg-gradient-to-r from-brand-50 to-slate-50 border border-brand-200/80 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-11 h-11 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-lg shadow-sm shrink-0">
-                                <i class="fa-solid fa-store"></i>
-                            </div>
-                            <div>
-                                <div class="text-[11px] font-bold text-slate-500">實習商店品牌名稱</div>
-                                <div class="text-sm sm:text-base font-black text-slate-800 flex items-center gap-2">
-                                    <span id="currentGroupStoreNameDisplay">實習商店品牌</span>
-                                    <span id="currentGroupNoBadge" class="text-[10px] font-black px-2 py-0.5 rounded-md bg-brand-100 text-brand-800 border border-brand-200">組別資訊</span>
-                                </div>
-                            </div>
+                    <!-- Sub-tabs Navigation Bar -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200/90 rounded-2xl p-2.5 shadow-2xs">
+                        <div class="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/60 overflow-x-auto custom-scrollbar">
+                            <button type="button" id="tabBtnProdList" onclick="switchProductMgmtTab('list')" class="px-3.5 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-white text-slate-800 shadow-2xs border border-slate-200/80 whitespace-nowrap">
+                                <i class="fa-solid fa-boxes-stacked text-brand-600 text-xs"></i>
+                                <span>商品清單</span>
+                                <span id="prodMgmtCountBadge" class="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-brand-50 text-brand-700 font-black">0</span>
+                            </button>
+                            <button type="button" id="tabBtnProdCreate" onclick="switchProductMgmtTab('create')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+                                <i class="fa-solid fa-plus-circle text-xs text-brand-500"></i>
+                                <span>新增商品</span>
+                            </button>
+                            <button type="button" id="tabBtnProdStore" onclick="switchProductMgmtTab('store')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+                                <i class="fa-solid fa-store text-xs text-amber-500"></i>
+                                <span>商店品牌設定</span>
+                            </button>
                         </div>
-                        <button type="button" onclick="openEditStoreNameModal()" class="px-3.5 py-2 bg-white hover:bg-slate-100 text-brand-700 border border-brand-200 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-2xs shrink-0">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                            <span>自訂商店名稱</span>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="switchProductMgmtTab('create')" class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black transition shadow-xs flex items-center gap-1.5 whitespace-nowrap">
+                                <i class="fa-solid fa-plus text-[11px]"></i>
+                                <span>上架新商品</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
-                        <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
-                            <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
-                            <h3 class="text-sm font-black text-slate-800">新增商品</h3>
-                        </div>
-                        <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-start">
-                            <div id="newProdGroupField">
-                                <label class="block text-xs font-black text-slate-600 mb-1">組別</label>
-                                <select id="newProdGroup" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
-                                    <option value="1">第一組</option>
-                                    <option value="2">第二組</option>
-                                    <option value="3">第三組</option>
-                                    <option value="4">第四組</option>
-                                    <option value="5">第五組</option>
-                                    <option value="6">第六組</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-black text-slate-600 mb-1">商品名稱</label>
-                                <input type="text" id="newProdName" required placeholder="請輸入商品名稱" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-black text-slate-600 mb-1">定價</label>
-                                <input type="number" id="newProdPrice" min="0" required placeholder="請輸入金額" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-black text-slate-600 mb-1">庫存量 (-1表示無上限)</label>
-                                <input type="number" id="newProdStock" min="-1" value="-1" required placeholder="庫存量" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
-                            </div>
-                            <div class="sm:col-span-4">
-                                <label class="block text-xs font-black text-slate-600 mb-1">商品詳細介紹（選填）</label>
-                                <textarea id="newProdDesc" rows="3" placeholder="請輸入商品特色、規格、包裝、注意事項等詳細介紹..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition custom-scrollbar"></textarea>
-                            </div>
-                            <div class="sm:col-span-4">
-                                <label class="block text-xs font-black text-slate-600 mb-1">上傳照片</label>
-                                <input type="file" id="newProdFiles" accept="image/*" multiple onchange="handleImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
-                            </div>
-                            <div class="sm:col-span-4">
-                                <div id="selectedImagePreviews" class="flex flex-wrap gap-2.5 min-h-[56px] p-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl items-center">
-                                    <span class="text-xs text-slate-400 font-bold px-2">尚未選取任何相片檔案。</span>
+                    <!-- 1. 商品清單子頁面 (預設顯示) -->
+                    <div id="subViewProdList" class="space-y-4">
+                        <div class="bg-gradient-to-r from-brand-50/70 via-slate-50 to-white border border-brand-200/70 rounded-2xl p-3 sm:px-4 shadow-2xs flex items-center justify-between gap-3 flex-wrap">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs shadow-2xs shrink-0">
+                                    <i class="fa-solid fa-store"></i>
+                                </div>
+                                <div class="truncate text-xs">
+                                    <span class="text-slate-400 font-bold mr-1">當前實習商店：</span>
+                                    <b id="currentGroupStoreNameMiniDisplay" class="text-slate-800 font-black">實習商店</b>
+                                    <span id="currentGroupNoMiniBadge" class="ml-1 text-[10px] font-black px-1.5 py-0.2 rounded bg-brand-100 text-brand-800 border border-brand-200">組別</span>
                                 </div>
                             </div>
-                            <div class="sm:col-span-4 text-right pt-2 border-t border-slate-100">
-                                <button type="submit" id="submitProductBtn" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/20">
-                                    確認上架商品
+                            <button type="button" onclick="handleStoreBrandActionClick()" id="btnStoreBrandAction" class="px-3.5 py-1.5 bg-white hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 hover:border-brand-200 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-2xs shrink-0">
+                                <i class="fa-solid fa-pen-to-square text-brand-600 text-xs"></i>
+                                <span id="btnStoreBrandActionLabel">自訂品牌名稱</span>
+                            </button>
+                        </div>
+
+                        <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                                    <h3 class="text-sm font-black text-slate-800">目前已上架商品清單</h3>
+                                </div>
+                                <span class="text-xs text-slate-400 font-bold">點擊商品名稱或照片可即時預覽</span>
+                            </div>
+                            
+                            <div class="hidden md:block overflow-hidden border border-slate-200 rounded-2xl">
+                                <table class="w-full text-xs text-left border-collapse table-auto">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-600 font-black border-b border-slate-200">
+                                            <th class="p-3 w-16 text-center whitespace-nowrap">預覽</th>
+                                            <th class="p-3">商品名稱</th>
+                                            <th class="p-3 w-20 text-center whitespace-nowrap">組別</th>
+                                            <th class="p-3 w-24 whitespace-nowrap">單價</th>
+                                            <th class="p-3 w-24 text-center whitespace-nowrap">庫存</th>
+                                            <th class="p-3 w-20 text-center whitespace-nowrap">狀態</th>
+                                            <th class="p-3 w-36 whitespace-nowrap">上架時間</th>
+                                            <th class="p-3 w-48 text-center whitespace-nowrap">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="studentProductTableBody" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                                </table>
+                            </div>
+                            
+                            <div id="studentProductCardsView" class="md:hidden space-y-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 新增商品子頁面 -->
+                    <div id="subViewProdCreate" class="hidden space-y-4">
+                        <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
+                            <div class="flex items-center justify-between gap-2 mb-4 pb-2 border-b border-slate-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
+                                    <h3 class="text-sm font-black text-slate-800">新增商品</h3>
+                                </div>
+                                <button type="button" onclick="switchProductMgmtTab('list')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-arrow-left text-[11px]"></i>
+                                    <span>返回商品清單</span>
                                 </button>
                             </div>
-                        </form>
+                            <form onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-start">
+                                <div id="newProdGroupField">
+                                    <label class="block text-xs font-black text-slate-600 mb-1">組別</label>
+                                    <select id="newProdGroup" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                                        <option value="1">第一組</option>
+                                        <option value="2">第二組</option>
+                                        <option value="3">第三組</option>
+                                        <option value="4">第四組</option>
+                                        <option value="5">第五組</option>
+                                        <option value="6">第六組</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-black text-slate-600 mb-1">商品名稱</label>
+                                    <input type="text" id="newProdName" required placeholder="請輸入商品名稱" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-black text-slate-600 mb-1">定價</label>
+                                    <input type="number" id="newProdPrice" min="0" required placeholder="請輸入金額" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-black text-slate-600 mb-1">庫存量 (-1表示無上限)</label>
+                                    <input type="number" id="newProdStock" min="-1" value="-1" required placeholder="庫存量" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                                </div>
+                                <div class="sm:col-span-4">
+                                    <label class="block text-xs font-black text-slate-600 mb-1">商品詳細介紹（選填）</label>
+                                    <textarea id="newProdDesc" rows="3" placeholder="請輸入商品特色、規格、包裝、注意事項等詳細介紹..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition custom-scrollbar"></textarea>
+                                </div>
+                                <div class="sm:col-span-4">
+                                    <label class="block text-xs font-black text-slate-600 mb-1">上傳照片</label>
+                                    <input type="file" id="newProdFiles" accept="image/*" multiple onchange="handleImageFilesSelected(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                                </div>
+                                <div class="sm:col-span-4">
+                                    <div id="selectedImagePreviews" class="flex flex-wrap gap-2.5 min-h-[56px] p-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl items-center">
+                                        <span class="text-xs text-slate-400 font-bold px-2">尚未選取任何相片檔案。</span>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-4 text-right pt-2 border-t border-slate-100">
+                                    <button type="submit" id="submitProductBtn" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs transition shadow-md shadow-brand-600/20">
+                                        確認上架商品
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
-                    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="w-2.5 h-5 rounded-full bg-brand-600"></span>
-                            <h3 class="text-sm font-black text-slate-800">目前已上架商品清單</h3>
+                    <!-- 3. 商店品牌設定子頁面 -->
+                    <div id="subViewProdStore" class="hidden space-y-4">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-base shadow-2xs shrink-0">
+                                    <i class="fa-solid fa-store"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-black text-slate-800" id="storeBrandViewTitle">實習商店品牌設定</h3>
+                                    <p class="text-xs text-slate-400 font-medium" id="storeBrandViewSubtitle">此店名將顯示於校內商城商品卡片與商品詳情中，加深買家對您實習品牌的印象。</p>
+                                </div>
+                            </div>
+                            <!-- 隱藏保留 span 以維持向下相容 -->
+                            <span id="currentGroupStoreNameDisplay" class="hidden">實習商店品牌</span>
+                            <span id="currentGroupNoBadge" class="hidden">組別資訊</span>
                         </div>
-                        
-                        <div class="hidden md:block overflow-hidden border border-slate-200 rounded-2xl">
-                            <table class="w-full text-xs text-left border-collapse table-auto">
-                                <thead>
-                                    <tr class="bg-slate-50 text-slate-600 font-black border-b border-slate-200">
-                                        <th class="p-3 w-16 text-center whitespace-nowrap">預覽</th>
-                                        <th class="p-3">商品名稱</th>
-                                        <th class="p-3 w-20 text-center whitespace-nowrap">組別</th>
-                                        <th class="p-3 w-24 whitespace-nowrap">單價</th>
-                                        <th class="p-3 w-20 text-center whitespace-nowrap">庫存</th>
-                                        <th class="p-3 w-20 text-center whitespace-nowrap">狀態</th>
-                                        <th class="p-3 w-36 whitespace-nowrap">上架時間</th>
-                                        <th class="p-3 w-48 text-center whitespace-nowrap">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="studentProductTableBody" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
-                            </table>
-                        </div>
-                        
-                        <div id="studentProductCardsView" class="md:hidden space-y-3"></div>
+
+                        <!-- 獨立展開的組別品牌卡片容器 (教師展開 1~6 組，學生僅顯示所屬組別) -->
+                        <div id="storeBrandCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                     </div>
+
                 </section>
 
                 <section id="page-teacher-monitor" class="page-pane hidden space-y-6">
@@ -1367,6 +1427,48 @@
             }
         }
 
+        let currentProductMgmtTab = 'list';
+        window.switchProductMgmtTab = function(tabKey) {
+            if (!isPrivileged() && tabKey === 'store') {
+                tabKey = 'list';
+            }
+            currentProductMgmtTab = tabKey || 'list';
+            const subViewList = document.getElementById('subViewProdList');
+            const subViewCreate = document.getElementById('subViewProdCreate');
+            const subViewStore = document.getElementById('subViewProdStore');
+
+            const tabBtnList = document.getElementById('tabBtnProdList');
+            const tabBtnCreate = document.getElementById('tabBtnProdCreate');
+            const tabBtnStore = document.getElementById('tabBtnProdStore');
+
+            const activeBtnClass = "px-3.5 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-white text-slate-800 shadow-2xs border border-slate-200/80 whitespace-nowrap";
+            const inactiveBtnClass = "px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition flex items-center gap-1.5 whitespace-nowrap";
+
+            if (tabBtnStore) {
+                tabBtnStore.classList.toggle('hidden', !isPrivileged());
+            }
+
+            if (subViewList) subViewList.classList.toggle('hidden', currentProductMgmtTab !== 'list');
+            if (subViewCreate) subViewCreate.classList.toggle('hidden', currentProductMgmtTab !== 'create');
+            if (subViewStore) subViewStore.classList.toggle('hidden', currentProductMgmtTab !== 'store');
+
+            if (tabBtnList) tabBtnList.className = (currentProductMgmtTab === 'list' ? activeBtnClass : inactiveBtnClass);
+            if (tabBtnCreate) tabBtnCreate.className = (currentProductMgmtTab === 'create' ? activeBtnClass : inactiveBtnClass);
+            if (tabBtnStore && isPrivileged()) tabBtnStore.className = (currentProductMgmtTab === 'store' ? activeBtnClass : inactiveBtnClass);
+
+            if (currentProductMgmtTab === 'store' && typeof renderStoreBrandCards === 'function') {
+                renderStoreBrandCards();
+            }
+        };
+
+        window.handleStoreBrandActionClick = function() {
+            if (isPrivileged()) {
+                switchProductMgmtTab('store');
+            } else {
+                openEditStoreNameModal();
+            }
+        };
+
         function switchPage(pageKey, pushHash = true) {
             if (!currentAuth) return;
             currentPage = pageKey;
@@ -1391,7 +1493,12 @@
                 safeUpdateHash(pageKey);
             }
 
-            if (pageKey === 'mall' || pageKey === 'student-publish') loadProductsData();
+            if (pageKey === 'mall' || pageKey === 'student-publish') {
+                if (pageKey === 'student-publish' && typeof switchProductMgmtTab === 'function') {
+                    switchProductMgmtTab(currentProductMgmtTab || 'list');
+                }
+                loadProductsData();
+            }
             else if (pageKey === 'my-orders') {
                 loadMyOrdersData();
             } else if (pageKey === 'teacher-monitor') {
@@ -3242,6 +3349,7 @@
                 selectedBase64Images = [];
                 renderSelectedImagePreviews();
                 loadProductsData();
+                if (typeof switchProductMgmtTab === 'function') switchProductMgmtTab('list');
 
             } catch (err) {
                 showMsg("上架失敗：" + err.message, true);
@@ -3378,17 +3486,26 @@
 
             const displayElem = document.getElementById('currentGroupStoreNameDisplay');
             const badgeElem = document.getElementById('currentGroupNoBadge');
+            const displayMiniElem = document.getElementById('currentGroupStoreNameMiniDisplay');
+            const badgeMiniElem = document.getElementById('currentGroupNoMiniBadge');
             if (displayElem && badgeElem) {
                 if (currentAuth && currentAuth.role === 'student') {
                     const grp = String(currentAuth.account).trim();
-                    displayElem.innerText = groupStoreNameMap[grp] || currentAuth.name || `第 ${grp} 組`;
+                    const sName = groupStoreNameMap[grp] || currentAuth.name || `第 ${grp} 組`;
+                    displayElem.innerText = sName;
                     badgeElem.innerText = `第 ${grp} 組`;
+                    if (displayMiniElem) displayMiniElem.innerText = sName;
+                    if (badgeMiniElem) badgeMiniElem.innerText = `第 ${grp} 組`;
                 } else if (isPrivileged()) {
                     displayElem.innerText = "全校實習商店總覽 (1~6組)";
                     badgeElem.innerText = "教師/管理員模式";
+                    if (displayMiniElem) displayMiniElem.innerText = "全校實習商店總覽 (1~6組)";
+                    if (badgeMiniElem) badgeMiniElem.innerText = "教師/管理員模式";
                 } else {
                     displayElem.innerText = "新社高中實習商城";
                     badgeElem.innerText = "商經科";
+                    if (displayMiniElem) displayMiniElem.innerText = "新社高中實習商城";
+                    if (badgeMiniElem) badgeMiniElem.innerText = "商經科";
                 }
             }
         }
@@ -3440,7 +3557,7 @@
             loadStaffMall();
         };
 
-        window.openEditStoreNameModal = function() {
+        window.openEditStoreNameModal = function(specificGroup) {
             const modal = document.getElementById('editStoreNameModal');
             if (!modal) return;
 
@@ -3453,7 +3570,12 @@
             let targetGroup = '1';
             if (isPrivileged()) {
                 if (privWrapper) privWrapper.classList.remove('hidden');
-                targetGroup = groupSelect ? groupSelect.value : '1';
+                if (specificGroup) {
+                    targetGroup = String(specificGroup);
+                    if (groupSelect) groupSelect.value = targetGroup;
+                } else {
+                    targetGroup = groupSelect ? groupSelect.value : '1';
+                }
                 if (hint) hint.innerText = "身為教師/管理員，您可以設定各組別對外顯示之實習商店名稱";
             } else {
                 if (privWrapper) privWrapper.classList.add('hidden');
@@ -3695,6 +3817,93 @@
             }).join('');
         }
 
+        function renderStoreBrandCards() {
+            const container = document.getElementById('storeBrandCardsContainer');
+            const titleElem = document.getElementById('storeBrandViewTitle');
+            const subtitleElem = document.getElementById('storeBrandViewSubtitle');
+            if (!container || !currentAuth) return;
+
+            const isPriv = isPrivileged();
+
+            if (isPriv) {
+                if (titleElem) titleElem.innerText = "實習商店品牌管理 (第 1 組 ～ 第 6 組)";
+                if (subtitleElem) subtitleElem.innerText = "身為教師／管理員，您可直接檢視並個別自訂 1 ~ 6 組的實習商店品牌名稱。";
+
+                let html = '';
+                for (let i = 1; i <= 6; i++) {
+                    const grpStr = String(i);
+                    const storeName = groupStoreNameMap[grpStr] || `第 ${grpStr} 組`;
+                    const grpProducts = (currentProductsList || []).filter(p => parseInt(p.group_no, 10) === i);
+                    const prodCount = grpProducts.length;
+
+                    html += `
+                        <div class="bg-white border border-slate-200/90 hover:border-brand-300 rounded-2xl p-4 sm:p-5 shadow-2xs hover:shadow-xs transition flex flex-col justify-between gap-3">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-2.5">
+                                    <span class="text-xs font-black px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 border border-brand-200/80">第 ${i} 組</span>
+                                    <span class="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                                        <i class="fa-solid fa-box text-slate-400 text-[10px]"></i>
+                                        <span>${prodCount} 件商品</span>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-3 mt-1">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-200/60 flex items-center justify-center text-base shrink-0">
+                                        <i class="fa-solid fa-store"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-[10px] font-bold text-slate-400">商店品牌名稱</div>
+                                        <div class="text-sm font-black text-slate-800 truncate" title="${escapeHtml(storeName)}">${escapeHtml(storeName)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pt-2 border-t border-slate-100 flex items-center justify-end">
+                                <button type="button" onclick="openEditStoreNameModal(${i})" class="w-full py-2 px-3 bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 hover:border-brand-200 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 shadow-2xs">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    <span>自訂商店名稱</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                container.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4";
+                container.innerHTML = html;
+            } else {
+                // Student mode: only show their own group!
+                const myGrp = String(currentAuth.account).trim();
+                const myGrpNo = parseInt(myGrp, 10) || 1;
+                const storeName = groupStoreNameMap[myGrp] || currentAuth.name || `第 ${myGrp} 組`;
+                const myProducts = (currentProductsList || []).filter(p => parseInt(p.group_no, 10) === myGrpNo);
+                const prodCount = myProducts.length;
+
+                if (titleElem) titleElem.innerText = `實習商店品牌設定 (第 ${myGrp} 組)`;
+                if (subtitleElem) subtitleElem.innerText = "此店名將顯示於校內商城商品卡片與商品詳情中，加深買家對您實習品牌的印象。";
+
+                container.className = "max-w-2xl";
+                container.innerHTML = `
+                    <div class="bg-gradient-to-r from-brand-50 to-slate-50 border border-brand-200/80 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-xl shadow-sm shrink-0">
+                                <i class="fa-solid fa-store"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-500">實習商店品牌名稱</div>
+                                <div class="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2 mt-0.5">
+                                    <span>${escapeHtml(storeName)}</span>
+                                    <span class="text-xs font-black px-2 py-0.5 rounded-md bg-brand-100 text-brand-800 border border-brand-200">第 ${myGrp} 組</span>
+                                    <span class="text-xs font-bold text-slate-400 ml-1">(${prodCount} 件商品)</span>
+                                </div>
+                                <p class="text-xs text-slate-400 font-medium mt-1">此店名將顯示於校內商城商品卡片與商品詳情中，加深買家對您實習品牌的印象。</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="openEditStoreNameModal(${myGrpNo})" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-xs shrink-0 whitespace-nowrap">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>自訂商店名稱</span>
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
         function loadStudentProducts() {
             const tbody = document.getElementById('studentProductTableBody');
             const groupSelectWrapper = document.getElementById('newProdGroupField');
@@ -3702,14 +3911,21 @@
 
             const displayElem = document.getElementById('currentGroupStoreNameDisplay');
             const badgeElem = document.getElementById('currentGroupNoBadge');
+            const displayMiniElem = document.getElementById('currentGroupStoreNameMiniDisplay');
+            const badgeMiniElem = document.getElementById('currentGroupNoMiniBadge');
             if (displayElem && badgeElem) {
                 if (currentAuth && currentAuth.role === 'student') {
                     const grp = String(currentAuth.account).trim();
-                    displayElem.innerText = groupStoreNameMap[grp] || currentAuth.name || `第 ${grp} 組`;
+                    const sName = groupStoreNameMap[grp] || currentAuth.name || `第 ${grp} 組`;
+                    displayElem.innerText = sName;
                     badgeElem.innerText = `第 ${grp} 組`;
+                    if (displayMiniElem) displayMiniElem.innerText = sName;
+                    if (badgeMiniElem) badgeMiniElem.innerText = `第 ${grp} 組`;
                 } else if (isPrivileged()) {
                     displayElem.innerText = "全校實習商店總覽 (1~6組)";
                     badgeElem.innerText = "教師/管理員模式";
+                    if (displayMiniElem) displayMiniElem.innerText = "全校實習商店總覽 (1~6組)";
+                    if (badgeMiniElem) badgeMiniElem.innerText = "教師/管理員模式";
                 }
             }
 
@@ -3720,6 +3936,23 @@
             if (!isPrivileged()) {
                 const myGroupNo = parseInt(currentAuth.account, 10);
                 displayProds = currentProductsList.filter(p => parseInt(p.group_no, 10) === myGroupNo);
+            }
+
+            const countBadge = document.getElementById('prodMgmtCountBadge');
+            if (countBadge) countBadge.innerText = displayProds.length;
+
+            const tabBtnStore = document.getElementById('tabBtnProdStore');
+            if (tabBtnStore) {
+                tabBtnStore.classList.toggle('hidden', !isPrivileged());
+            }
+
+            const btnActionLabel = document.getElementById('btnStoreBrandActionLabel');
+            if (btnActionLabel) {
+                btnActionLabel.innerText = isPrivileged() ? "管理各組品牌" : "自訂品牌名稱";
+            }
+
+            if (typeof renderStoreBrandCards === 'function') {
+                renderStoreBrandCards();
             }
 
             const cardsView = document.getElementById('studentProductCardsView');
