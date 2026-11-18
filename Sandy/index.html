@@ -182,7 +182,7 @@
                     <label class="block text-xs font-black text-slate-600 mb-1">商品名稱</label>
                     <input type="text" id="editProdName" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-3" id="editProdSinglePriceStockWrapper">
                     <div>
                         <label class="block text-xs font-black text-slate-600 mb-1">商品價格</label>
                         <input type="number" id="editProdPrice" min="0" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
@@ -190,6 +190,25 @@
                     <div>
                         <label class="block text-xs font-black text-slate-600 mb-1">庫存 (-1表示無上限)</label>
                         <input type="number" id="editProdStock" min="-1" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none transition">
+                    </div>
+                </div>
+                <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" id="editProdEnableSpecs" onchange="toggleEditProdSpecs()" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                            <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                                <i class="fa-solid fa-layer-group text-brand-600"></i>
+                                開啟多種規格／選項（如尺寸、口味、容量等）
+                            </span>
+                        </label>
+                        <button type="button" id="btnEditProdSpecAdd" onclick="addEditProdSpecRow()" class="hidden px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/80 rounded-lg text-xs font-black transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>新增規格</span>
+                        </button>
+                    </div>
+                    <div id="editProdSpecsContainer" class="hidden space-y-2">
+                        <p class="text-[11px] text-slate-400 font-medium">請為各規格設定獨立名稱、單價與庫存（庫存填 -1 表示無限制）：</p>
+                        <div id="editProdSpecsList" class="space-y-2"></div>
                     </div>
                 </div>
                 <div>
@@ -808,6 +827,14 @@
                                         <span class="text-sm font-bold text-slate-500">幣</span>
                                     </div>
 
+                                    <div id="detailSpecsSection" class="hidden pt-3 border-t border-slate-100 space-y-2">
+                                        <div class="text-xs font-black text-slate-700 flex items-center justify-between">
+                                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-layer-group text-brand-600"></i>規格選項</span>
+                                            <span id="detailSelectedSpecLabel" class="text-xs text-brand-600 font-black"></span>
+                                        </div>
+                                        <div id="detailSpecsList" class="flex flex-wrap gap-2"></div>
+                                    </div>
+
                                     <div id="detailDescriptionSection" class="hidden pt-3 border-t border-slate-100 space-y-1.5">
                                         <div class="text-xs font-black text-slate-700 flex items-center gap-1.5">
                                             <i class="fa-solid fa-align-left text-brand-600"></i>
@@ -981,13 +1008,32 @@
                                     <label class="block text-xs font-black text-slate-600 mb-1">商品名稱</label>
                                     <input type="text" id="newProdName" required placeholder="請輸入商品名稱" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
                                 </div>
-                                <div>
+                                <div id="newProdPriceField">
                                     <label class="block text-xs font-black text-slate-600 mb-1">定價</label>
                                     <input type="number" id="newProdPrice" min="0" required placeholder="請輸入金額" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
                                 </div>
-                                <div>
+                                <div id="newProdStockField">
                                     <label class="block text-xs font-black text-slate-600 mb-1">庫存量 (-1表示無上限)</label>
                                     <input type="number" id="newProdStock" min="-1" value="-1" required placeholder="庫存量" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-brand-500 transition">
+                                </div>
+                                <div class="sm:col-span-4 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                                            <input type="checkbox" id="newProdEnableSpecs" onchange="toggleNewProdSpecs()" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                                            <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                                                <i class="fa-solid fa-layer-group text-brand-600"></i>
+                                                開啟多種規格／選項（如尺寸、口味、容量等）
+                                            </span>
+                                        </label>
+                                        <button type="button" id="btnAddNewProdSpec" onclick="addNewProdSpecRow()" class="hidden px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/80 rounded-lg text-xs font-black transition flex items-center gap-1 shadow-2xs">
+                                            <i class="fa-solid fa-plus text-[10px]"></i>
+                                            <span>新增規格</span>
+                                        </button>
+                                    </div>
+                                    <div id="newProdSpecsContainer" class="hidden space-y-2">
+                                        <p class="text-[11px] text-slate-400 font-medium">請為各規格設定獨立名稱、單價與庫存（庫存填 -1 表示無限制）：</p>
+                                        <div id="newProdSpecsList" class="space-y-2"></div>
+                                    </div>
                                 </div>
                                 <div class="sm:col-span-4">
                                     <label class="block text-xs font-black text-slate-600 mb-1">商品詳細介紹（選填）</label>
@@ -1642,6 +1688,40 @@
             }
             titleEl.innerText = p.name;
             priceEl.innerText = formatCurrency(p.price);
+
+            const meta = (typeof getProductSpecMeta === 'function') ? getProductSpecMeta(p) : null;
+            const specsSection = document.getElementById('detailSpecsSection');
+            const specsList = document.getElementById('detailSpecsList');
+            const specLabel = document.getElementById('detailSelectedSpecLabel');
+
+            if (meta) {
+                const parentId = meta.parentId;
+                const variants = (currentProductsList || []).filter(item => {
+                    const m = getProductSpecMeta(item);
+                    return m && m.parentId === parentId && !isProductOffShelf(item);
+                });
+                if (specsSection && specsList) {
+                    specsSection.classList.remove('hidden');
+                    titleEl.innerText = getBaseProductName(p.name);
+                    specsList.innerHTML = variants.map(v => {
+                        const vMeta = getProductSpecMeta(v);
+                        const sName = vMeta ? vMeta.specName : v.name;
+                        const isSelected = String(v.id) === String(p.id);
+                        const vStock = v.stock !== undefined ? v.stock : -1;
+                        const vOut = (vStock >= 0 && vStock <= 0);
+                        return `
+                            <button type="button" id="detail-spec-${v.id}" onclick="selectDetailProductSpec('${v.id}')" class="detail-spec-pill px-3 py-1.5 rounded-xl text-xs font-black transition border ${isSelected ? 'bg-brand-600 text-white border-brand-600 shadow-xs' : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'} ${vOut ? 'opacity-40 cursor-not-allowed line-through' : ''}">
+                                <span>${escapeHtml(sName)}</span>
+                                <span class="ml-1 text-[11px] opacity-80">(${formatCurrency(v.price)}幣)</span>
+                            </button>
+                        `;
+                    }).join('');
+                    if (specLabel) specLabel.innerText = `已選：${meta.specName} (${formatCurrency(p.price)} 幣)`;
+                }
+            } else {
+                if (specsSection) specsSection.classList.add('hidden');
+                titleEl.innerText = p.name;
+            }
             const descSection = document.getElementById('detailDescriptionSection');
             const descEl = document.getElementById('detailDescription');
             if (descSection && descEl) {
@@ -1688,6 +1768,63 @@
 
             if (updateHash) {
                 safeUpdateHash('product-detail', { id: p.id });
+            }
+        };
+
+        window.selectDetailProductSpec = function(variantId) {
+            const v = (currentProductsList || []).find(p => String(p.id) === String(variantId));
+            if (!v) return;
+            currentDetailProduct = v;
+
+            document.querySelectorAll('.detail-spec-pill').forEach(btn => {
+                const isMatch = btn.id === `detail-spec-${variantId}`;
+                btn.className = `detail-spec-pill px-3 py-1.5 rounded-xl text-xs font-black transition border ` +
+                    (isMatch ? 'bg-brand-600 text-white border-brand-600 shadow-xs' : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200');
+            });
+
+            const vMeta = (typeof getProductSpecMeta === 'function') ? getProductSpecMeta(v) : null;
+            const specLabel = document.getElementById('detailSelectedSpecLabel');
+            if (specLabel) specLabel.innerText = vMeta ? `已選：${vMeta.specName} (${formatCurrency(v.price)} 幣)` : '';
+
+            const priceEl = document.getElementById('detailPrice');
+            if (priceEl) priceEl.innerText = formatCurrency(v.price);
+
+            const stock = v.stock !== undefined ? v.stock : -1;
+            const isUnlimited = (stock < 0);
+            const isOutOfStock = (!isUnlimited && stock <= 0);
+
+            const outOfStockBadge = document.getElementById('detailOutOfStockBadge');
+            const stockTag = document.getElementById('detailStockTag');
+            const btnAdd = document.getElementById('btnDetailAddToCart');
+            const btnBuyNow = document.getElementById('btnDetailBuyNow');
+
+            if (isOutOfStock) {
+                if (outOfStockBadge) outOfStockBadge.classList.remove('hidden');
+                if (stockTag) {
+                    stockTag.className = "px-3 py-1 rounded-lg bg-rose-50 text-rose-700 text-xs font-black border border-rose-200";
+                    stockTag.innerText = "庫存: 已售完";
+                }
+                if (btnAdd) btnAdd.disabled = true;
+                if (btnBuyNow) {
+                    btnBuyNow.disabled = true;
+                    btnBuyNow.className = "w-full py-3 bg-slate-200 text-slate-400 font-black rounded-xl text-xs sm:text-sm cursor-not-allowed";
+                }
+            } else {
+                if (outOfStockBadge) outOfStockBadge.classList.add('hidden');
+                if (stockTag) {
+                    stockTag.className = "px-3 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200";
+                    stockTag.innerText = isUnlimited ? "庫存: 無限制" : `庫存: ${stock} 件`;
+                }
+                if (btnAdd) btnAdd.disabled = false;
+                if (btnBuyNow) {
+                    btnBuyNow.disabled = false;
+                    btnBuyNow.className = "w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-xl text-xs sm:text-sm transition shadow-md shadow-brand-600/30 flex items-center justify-center gap-1.5";
+                }
+            }
+
+            const qtyInput = document.getElementById('detailQtyInput');
+            if (qtyInput) {
+                qtyInput.max = isUnlimited ? "" : String(stock);
             }
         };
 
@@ -3141,17 +3278,185 @@
             `).join('');
         }
 
+        function getProductSpecMeta(p) {
+            if (!p || !p.description || typeof p.description !== 'string') return null;
+            const m = p.description.match(/\[SPEC_PARENT:([a-zA-Z0-9_\-]+)\]\[SPEC_NAME:([^\]]+)\]/);
+            if (!m) return null;
+            return {
+                parentId: m[1],
+                specName: m[2].trim()
+            };
+        }
+
+        function cleanProductDescription(desc) {
+            if (!desc || typeof desc !== 'string') return '';
+            return desc.replace(/\[OFF_SHELF\]\s*/g, '').replace(/\[SPEC_PARENT:[a-zA-Z0-9_\-]+\]\[SPEC_NAME:[^\]]+\]\s*/g, '').trim();
+        }
+
+        function getBaseProductName(name) {
+            if (!name || typeof name !== 'string') return '';
+            return name.replace(/\s*\([^)]*\)\s*$/, '').trim();
+        }
+
+        function getGroupedProducts(productsList) {
+            const parentMap = new Map();
+            const singles = [];
+
+            (productsList || []).forEach(p => {
+                const meta = getProductSpecMeta(p);
+                if (meta) {
+                    if (!parentMap.has(meta.parentId)) {
+                        parentMap.set(meta.parentId, []);
+                    }
+                    parentMap.get(meta.parentId).push({ ...p, _specName: meta.specName });
+                } else {
+                    singles.push(p);
+                }
+            });
+
+            const grouped = [];
+            parentMap.forEach((variants, parentId) => {
+                const primary = variants.find(v => String(v.id) === String(parentId)) || variants[0];
+                const prices = variants.map(v => Number(v.price) || 0);
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                const hasUnlimited = variants.some(v => v.stock < 0);
+                const totalStock = hasUnlimited ? -1 : variants.reduce((sum, v) => sum + (Math.max(0, Number(v.stock) || 0)), 0);
+
+                grouped.push({
+                    ...primary,
+                    _isMultiSpec: true,
+                    _specParentId: parentId,
+                    _variants: variants,
+                    _minPrice: minPrice,
+                    _maxPrice: maxPrice,
+                    _displayPrice: minPrice === maxPrice ? `${formatCurrency(minPrice)}` : `${formatCurrency(minPrice)} ~ ${formatCurrency(maxPrice)}`,
+                    _totalStock: totalStock,
+                    _baseName: getBaseProductName(primary.name) || primary.name
+                });
+            });
+
+            return [...singles, ...grouped];
+        }
+
+        window.toggleNewProdSpecs = function() {
+            const chk = document.getElementById('newProdEnableSpecs');
+            const container = document.getElementById('newProdSpecsContainer');
+            const btnAdd = document.getElementById('btnAddNewProdSpec');
+            const priceField = document.getElementById('newProdPriceField');
+            const stockField = document.getElementById('newProdStockField');
+            const priceInput = document.getElementById('newProdPrice');
+            const stockInput = document.getElementById('newProdStock');
+
+            const isEnabled = chk && chk.checked;
+            if (container) container.classList.toggle('hidden', !isEnabled);
+            if (btnAdd) btnAdd.classList.toggle('hidden', !isEnabled);
+
+            if (priceField) priceField.classList.toggle('hidden', isEnabled);
+            if (stockField) stockField.classList.toggle('hidden', isEnabled);
+            if (priceInput) priceInput.required = !isEnabled;
+            if (stockInput) stockInput.required = !isEnabled;
+
+            if (isEnabled) {
+                const list = document.getElementById('newProdSpecsList');
+                if (list && list.children.length === 0) {
+                    addNewProdSpecRow('規格一', '', -1);
+                    addNewProdSpecRow('規格二', '', -1);
+                }
+            }
+        };
+
+        window.addNewProdSpecRow = function(defaultName = '', defaultPrice = '', defaultStock = -1) {
+            const list = document.getElementById('newProdSpecsList');
+            if (!list) return;
+            const row = document.createElement('div');
+            row.className = "flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs spec-row";
+            row.innerHTML = `
+                <div class="flex-1 min-w-[120px]">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-0.5">規格名稱</label>
+                    <input type="text" class="spec-name w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white outline-none focus:ring-1 focus:ring-brand-500" placeholder="例如：S 號、大杯、原味" value="${escapeHtml(defaultName)}">
+                </div>
+                <div class="w-24">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-0.5">單價 (幣)</label>
+                    <input type="number" min="0" class="spec-price w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white outline-none focus:ring-1 focus:ring-brand-500" placeholder="金額" value="${defaultPrice}">
+                </div>
+                <div class="w-28">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-0.5">庫存 (-1無上限)</label>
+                    <input type="number" min="-1" class="spec-stock w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white outline-none focus:ring-1 focus:ring-brand-500" placeholder="庫存" value="${defaultStock}">
+                </div>
+                <div class="pt-3.5">
+                    <button type="button" onclick="removeSpecRow(this)" class="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition" title="刪除此規格"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>
+            `;
+            list.appendChild(row);
+        };
+
+        window.toggleEditProdSpecs = function() {
+            const chk = document.getElementById('editProdEnableSpecs');
+            const container = document.getElementById('editProdSpecsContainer');
+            const btnAdd = document.getElementById('btnEditProdSpecAdd');
+            const priceStockWrapper = document.getElementById('editProdSinglePriceStockWrapper');
+            const priceInput = document.getElementById('editProdPrice');
+            const stockInput = document.getElementById('editProdStock');
+
+            const isEnabled = chk && chk.checked;
+            if (container) container.classList.toggle('hidden', !isEnabled);
+            if (btnAdd) btnAdd.classList.toggle('hidden', !isEnabled);
+
+            if (priceStockWrapper) priceStockWrapper.classList.toggle('hidden', isEnabled);
+            if (priceInput) priceInput.required = !isEnabled;
+            if (stockInput) stockInput.required = !isEnabled;
+
+            if (isEnabled) {
+                const list = document.getElementById('editProdSpecsList');
+                if (list && list.children.length === 0) {
+                    addEditProdSpecRow('規格一', priceInput ? priceInput.value : '', stockInput ? stockInput.value : -1);
+                    addEditProdSpecRow('規格二', priceInput ? priceInput.value : '', stockInput ? stockInput.value : -1);
+                }
+            }
+        };
+
+        window.addEditProdSpecRow = function(defaultName = '', defaultPrice = '', defaultStock = -1, variantId = '') {
+            const list = document.getElementById('editProdSpecsList');
+            if (!list) return;
+            const row = document.createElement('div');
+            row.className = "flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs spec-row";
+            if (variantId) row.setAttribute('data-variant-id', variantId);
+            row.innerHTML = `
+                <div class="flex-1 min-w-[120px]">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-0.5">規格名稱</label>
+                    <input type="text" class="spec-name w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white outline-none focus:ring-1 focus:ring-brand-500" placeholder="例如：S 號、大杯、原味" value="${escapeHtml(defaultName)}">
+                </div>
+                <div class="w-24">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-0.5">單價 (幣)</label>
+                    <input type="number" min="0" class="spec-price w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white outline-none focus:ring-1 focus:ring-brand-500" placeholder="金額" value="${defaultPrice}">
+                </div>
+                <div class="w-28">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-0.5">庫存 (-1無上限)</label>
+                    <input type="number" min="-1" class="spec-stock w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white outline-none focus:ring-1 focus:ring-brand-500" placeholder="庫存" value="${defaultStock}">
+                </div>
+                <div class="pt-3.5">
+                    <button type="button" onclick="removeSpecRow(this)" class="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition" title="刪除此規格"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>
+            `;
+            list.appendChild(row);
+        };
+
+        window.removeSpecRow = function(btn) {
+            const row = btn.closest('.spec-row');
+            if (row) row.remove();
+        };
+
         window.openEditProductModal = function(productId) {
             const p = currentProductsList.find(item => String(item.id) === String(productId));
             if (!p) return;
 
             document.getElementById('editProdId').value = p.id;
             document.getElementById('editProdGroup').value = String(p.group_no);
-            document.getElementById('editProdName').value = p.name;
             document.getElementById('editProdPrice').value = p.price;
             document.getElementById('editProdStock').value = p.stock !== undefined ? p.stock : -1;
             const editDescEl = document.getElementById('editProdDesc');
-            if (editDescEl) editDescEl.value = p.description || '';
+            if (editDescEl) editDescEl.value = cleanProductDescription(p.description);
             document.getElementById('editProdFiles').value = '';
             editBase64Images = parseImages(p.image_url);
             renderEditImagePreviews();
@@ -3161,6 +3466,31 @@
                 if (groupField) groupField.classList.remove('hidden');
             } else {
                 if (groupField) groupField.classList.add('hidden');
+            }
+
+            const meta = getProductSpecMeta(p);
+            const chk = document.getElementById('editProdEnableSpecs');
+            const list = document.getElementById('editProdSpecsList');
+            if (list) list.innerHTML = '';
+
+            if (meta) {
+                const parentId = meta.parentId;
+                const variants = currentProductsList.filter(item => {
+                    const m = getProductSpecMeta(item);
+                    return m && m.parentId === parentId;
+                });
+                if (chk) chk.checked = true;
+                toggleEditProdSpecs();
+                document.getElementById('editProdName').value = getBaseProductName(p.name);
+                variants.forEach(v => {
+                    const vMeta = getProductSpecMeta(v);
+                    const sName = vMeta ? vMeta.specName : (v.name || '規格');
+                    addEditProdSpecRow(sName, v.price, v.stock !== undefined ? v.stock : -1, v.id);
+                });
+            } else {
+                if (chk) chk.checked = false;
+                toggleEditProdSpecs();
+                document.getElementById('editProdName').value = p.name;
             }
 
             document.getElementById('editProductModal').classList.remove('hidden');
@@ -3185,105 +3515,220 @@
             const price = parseInt(document.getElementById('editProdPrice').value, 10);
             const rawStock = parseInt(document.getElementById('editProdStock').value, 10);
             const stock = isNaN(rawStock) ? -1 : rawStock;
-            const desc = document.getElementById('editProdDesc')?.value.trim() || null;
+            const desc = document.getElementById('editProdDesc')?.value.trim() || '';
             const joinedImages = editBase64Images.join('|||');
 
             const orig = (currentProductsList || []).find(p => String(p.id) === String(id));
-            const changeList = [];
-            const diffRecords = [];
-            const beforeData = {};
-            const afterData = {};
+            if (!orig) return;
 
-            if (orig) {
-                if (orig.name !== name) {
-                    changeList.push(`名稱「${orig.name}」➔「${name}」`);
-                    diffRecords.push({ field: '商品名稱', before: orig.name, after: name });
-                    beforeData['商品名稱'] = orig.name;
-                    afterData['商品名稱'] = name;
-                }
-                if (orig.price !== price) {
-                    changeList.push(`單價 ${formatCurrency(orig.price)} ➔ ${formatCurrency(price)} 幣`);
-                    diffRecords.push({ field: '商品單價', before: `${formatCurrency(orig.price)} 幣`, after: `${formatCurrency(price)} 幣` });
-                    beforeData['單價'] = `${formatCurrency(orig.price)} 幣`;
-                    afterData['單價'] = `${formatCurrency(price)} 幣`;
-                }
-                const origStock = orig.stock !== undefined ? orig.stock : -1;
-                if (origStock !== stock) {
-                    const oStr = origStock === -1 ? '無限制' : `${origStock} 件`;
-                    const nStr = stock === -1 ? '無限制' : `${stock} 件`;
-                    changeList.push(`庫存 ${oStr} ➔ ${nStr}`);
-                    diffRecords.push({ field: '庫存數量', before: oStr, after: nStr });
-                    beforeData['庫存'] = oStr;
-                    afterData['庫存'] = nStr;
-                }
-                if (orig.group_no !== group_no) {
-                    changeList.push(`組別 第 ${orig.group_no} 組 ➔ 第 ${group_no} 組`);
-                    diffRecords.push({ field: '組別', before: `第 ${orig.group_no} 組`, after: `第 ${group_no} 組` });
-                    beforeData['組別'] = `第 ${orig.group_no} 組`;
-                    afterData['組別'] = `第 ${group_no} 組`;
-                }
-                const origDesc = (orig.description || '').trim();
-                const newDesc = (desc || '').trim();
-                if (origDesc !== newDesc) {
-                    const bStr = origDesc || '(未填寫)';
-                    const aStr = newDesc || '(未填寫)';
-                    changeList.push(origDesc ? `詳細介紹已更新` : `新增詳細介紹`);
-                    diffRecords.push({ field: '詳細介紹', before: bStr, after: aStr });
-                    beforeData['詳細介紹'] = bStr;
-                    afterData['詳細介紹'] = aStr;
-                }
-                const origImg = (orig.image_url || '').trim();
-                const newImg = (joinedImages || '').trim();
-                if (origImg !== newImg) {
-                    const bImg = origImg ? '原照片' : '(無照片)';
-                    const aImg = newImg ? '新上傳照片' : '(已移除照片)';
-                    changeList.push(origImg ? `展示照片已變更` : `新增展示照片`);
-                    diffRecords.push({
-                        field: '展示照片',
-                        before: bImg,
-                        after: aImg,
-                        before_images: parseImages(origImg),
-                        after_images: parseImages(newImg)
-                    });
-                    beforeData['展示照片'] = bImg;
-                    afterData['展示照片'] = aImg;
+            const enableSpecs = document.getElementById('editProdEnableSpecs')?.checked;
+            let specs = [];
+            if (enableSpecs) {
+                const specRows = document.querySelectorAll('#editProdSpecsList .spec-row');
+                specRows.forEach(row => {
+                    const sName = row.querySelector('.spec-name')?.value.trim();
+                    const sPrice = parseInt(row.querySelector('.spec-price')?.value, 10);
+                    const sStockRaw = parseInt(row.querySelector('.spec-stock')?.value, 10);
+                    const sStock = isNaN(sStockRaw) ? -1 : sStockRaw;
+                    const vId = row.getAttribute('data-variant-id') || null;
+                    if (sName && !isNaN(sPrice) && sPrice >= 0) {
+                        specs.push({ id: vId, name: sName, price: sPrice, stock: sStock });
+                    }
+                });
+                if (specs.length === 0) {
+                    showMsg("請至少填寫一組完整的規格項目（包含規格名稱與正確價格）！", true);
+                    return;
                 }
             }
-            const changeSummary = changeList.length > 0 ? changeList.join('、') : '無資料異動';
 
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>儲存中...`;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>儲存變更中...`;
             }
 
             try {
-                let updatePayload = {
-                    group_no,
-                    name,
-                    price,
-                    stock,
-                    image_url: joinedImages || null,
-                    description: desc
-                };
+                const origMeta = getProductSpecMeta(orig);
+                const parentId = origMeta ? origMeta.parentId : id;
+                const isOff = isProductOffShelf(orig);
+                const offPrefix = isOff ? '[OFF_SHELF] ' : '';
 
-                let { error } = await client.from('products').update(updatePayload).eq('id', id);
-                if (error && error.code === '42703') {
-                    delete updatePayload.description;
-                    const retry = await client.from('products').update(updatePayload).eq('id', id);
-                    error = retry.error;
+                const existingVariants = origMeta
+                    ? currentProductsList.filter(p => {
+                        const m = getProductSpecMeta(p);
+                        return m && m.parentId === parentId;
+                    })
+                    : [orig];
+
+                // Compute before & after details for auditing
+                const origBaseName = origMeta ? getBaseProductName(orig.name) : orig.name;
+                const origGroupNo = orig.group_no;
+                const origDesc = cleanProductDescription(orig.description);
+                const origImages = orig.image_url || '';
+
+                let origSpecSummary = '';
+                let origPriceDisplay = '';
+                let origStockDisplay = '';
+                if (origMeta && existingVariants.length > 0) {
+                    const vPrices = existingVariants.map(v => Number(v.price) || 0);
+                    const minP = Math.min(...vPrices);
+                    const maxP = Math.max(...vPrices);
+                    origPriceDisplay = minP === maxP ? `${formatCurrency(minP)} 幣` : `${formatCurrency(minP)} ~ ${formatCurrency(maxP)} 幣`;
+                    const hasUnlim = existingVariants.some(v => v.stock < 0);
+                    const totStock = hasUnlim ? -1 : existingVariants.reduce((sum, v) => sum + Math.max(0, Number(v.stock) || 0), 0);
+                    origStockDisplay = totStock < 0 ? '無限制' : `${totStock} 件`;
+                    origSpecSummary = `多種規格 (共 ${existingVariants.length} 種: ${existingVariants.map(v => `${getProductSpecMeta(v)?.specName || v.name} $${v.price}/${v.stock < 0 ? '無限制' : v.stock + '件'}`).join('、')})`;
+                } else {
+                    origPriceDisplay = `${formatCurrency(orig.price)} 幣`;
+                    origStockDisplay = orig.stock < 0 ? '無限制' : `${orig.stock} 件`;
+                    origSpecSummary = `單一規格 (${origPriceDisplay} / ${origStockDisplay})`;
                 }
-                if (error) throw error;
+
+                let newSpecSummary = '';
+                let newPriceDisplay = '';
+                let newStockDisplay = '';
+                if (enableSpecs && specs.length > 0) {
+                    const sPrices = specs.map(s => Number(s.price) || 0);
+                    const minP = Math.min(...sPrices);
+                    const maxP = Math.max(...sPrices);
+                    newPriceDisplay = minP === maxP ? `${formatCurrency(minP)} 幣` : `${formatCurrency(minP)} ~ ${formatCurrency(maxP)} 幣`;
+                    const hasUnlim = specs.some(s => s.stock < 0);
+                    const totStock = hasUnlim ? -1 : specs.reduce((sum, s) => sum + Math.max(0, Number(s.stock) || 0), 0);
+                    newStockDisplay = totStock < 0 ? '無限制' : `${totStock} 件`;
+                    newSpecSummary = `多種規格 (共 ${specs.length} 種: ${specs.map(s => `${s.name} $${s.price}/${s.stock < 0 ? '無限制' : s.stock + '件'}`).join('、')})`;
+                } else {
+                    newPriceDisplay = `${formatCurrency(price)} 幣`;
+                    newStockDisplay = stock < 0 ? '無限制' : `${stock} 件`;
+                    newSpecSummary = `單一規格 (${newPriceDisplay} / ${newStockDisplay})`;
+                }
+
+                const diffItems = [];
+                const userChanges = [];
+
+                if (origBaseName !== name) {
+                    diffItems.push({ field: '商品名稱', before: origBaseName, after: name });
+                    userChanges.push(`名稱「${origBaseName}」➔「${name}」`);
+                }
+                if (Number(origGroupNo) !== Number(group_no)) {
+                    diffItems.push({ field: '組別', before: `第 ${origGroupNo} 組`, after: `第 ${group_no} 組` });
+                    userChanges.push(`組別「第 ${origGroupNo} 組」➔「第 ${group_no} 組」`);
+                }
+                if (origSpecSummary !== newSpecSummary) {
+                    diffItems.push({ field: '規格設定', before: origSpecSummary, after: newSpecSummary });
+                    userChanges.push(`規格「${origSpecSummary}」➔「${newSpecSummary}」`);
+                }
+                if (origPriceDisplay !== newPriceDisplay) {
+                    diffItems.push({ field: '商品價格', before: origPriceDisplay, after: newPriceDisplay });
+                    userChanges.push(`價格「${origPriceDisplay}」➔「${newPriceDisplay}」`);
+                }
+                if (origStockDisplay !== newStockDisplay) {
+                    diffItems.push({ field: '庫存數量', before: origStockDisplay, after: newStockDisplay });
+                    userChanges.push(`庫存「${origStockDisplay}」➔「${newStockDisplay}」`);
+                }
+                if ((origDesc || '') !== (desc || '')) {
+                    diffItems.push({ field: '詳細介紹', before: origDesc || '(未填寫)', after: desc || '(未填寫)' });
+                    userChanges.push('詳細介紹已更新');
+                }
+                if ((origImages || '') !== (joinedImages || '')) {
+                    diffItems.push({
+                        field: '展示照片',
+                        before: origImages ? '原照片' : '(無照片)',
+                        after: joinedImages ? '已更新照片' : '(已移除照片)',
+                        before_images: parseImages(origImages),
+                        after_images: parseImages(joinedImages)
+                    });
+                    userChanges.push('展示照片已更新');
+                }
+
+                if (diffItems.length === 0) {
+                    diffItems.push({ field: '商品資料', before: '未更動', after: '資料確認儲存（數值未異動）' });
+                }
+
+                const beforeObj = {};
+                const afterObj = {};
+                diffItems.forEach(d => {
+                    beforeObj[d.field] = d.before;
+                    afterObj[d.field] = d.after;
+                });
+                const diffSummary = userChanges.length > 0 ? userChanges.join('、') : '資料確認（無欄位數值異動）';
+
+                if (enableSpecs) {
+                    const existingIdMap = new Map(existingVariants.map(v => [String(v.id), v]));
+                    const keptIds = new Set();
+
+                    for (let idx = 0; idx < specs.length; idx++) {
+                        const sp = specs[idx];
+                        const specFullName = `${name} (${sp.name})`;
+                        const specDesc = (offPrefix + `[SPEC_PARENT:${parentId}][SPEC_NAME:${sp.name}] ${desc}`).trim();
+
+                        if (sp.id && existingIdMap.has(String(sp.id))) {
+                            keptIds.add(String(sp.id));
+                            await client.from('products').update({
+                                group_no: group_no,
+                                name: specFullName,
+                                price: sp.price,
+                                stock: sp.stock,
+                                image_url: joinedImages || null,
+                                description: specDesc
+                            }).eq('id', sp.id);
+                        } else if (idx === 0 && !origMeta) {
+                            keptIds.add(String(id));
+                            await client.from('products').update({
+                                group_no: group_no,
+                                name: specFullName,
+                                price: sp.price,
+                                stock: sp.stock,
+                                image_url: joinedImages || null,
+                                description: specDesc
+                            }).eq('id', id);
+                        } else {
+                            const newId = crypto.randomUUID();
+                            keptIds.add(newId);
+                            await client.from('products').insert([{
+                                id: newId,
+                                group_no: group_no,
+                                name: specFullName,
+                                price: sp.price,
+                                stock: sp.stock,
+                                image_url: joinedImages || null,
+                                description: specDesc
+                            }]);
+                        }
+                    }
+
+                    const toDelete = existingVariants.filter(v => !keptIds.has(String(v.id))).map(v => v.id);
+                    if (toDelete.length > 0) {
+                        await client.from('products').delete().in('id', toDelete);
+                    }
+                } else {
+                    if (origMeta) {
+                        const siblingsToDelete = existingVariants.filter(v => String(v.id) !== String(id)).map(v => v.id);
+                        if (siblingsToDelete.length > 0) {
+                            await client.from('products').delete().in('id', siblingsToDelete);
+                        }
+                    }
+                    const cleanDesc = (offPrefix + desc).trim() || null;
+                    await client.from('products').update({
+                        group_no: group_no,
+                        name: name,
+                        price: price,
+                        stock: stock,
+                        image_url: joinedImages || null,
+                        description: cleanDesc
+                    }).eq('id', id);
+                }
 
                 await logAuditRecord("修改商品", {
                     商品ID: id,
-                    商品名稱: orig ? orig.name : name,
-                    原商品名稱: orig ? orig.name : name,
-                    修改差異: changeSummary,
-                    修改前: beforeData,
-                    修改後: afterData,
-                    異動項目: diffRecords
+                    商品名稱: name,
+                    原商品名稱: origBaseName || orig.name,
+                    組別: `第 ${group_no} 組`,
+                    操作人: currentAuth.name,
+                    修改差異: diffSummary,
+                    修改前: beforeObj,
+                    修改後: afterObj,
+                    異動項目: diffItems
                 });
-                showMsg("儲存變更成功！");
+                showMsg("商品修改成功！");
                 closeEditProductModal();
                 loadProductsData();
             } catch (err) {
@@ -3320,6 +3765,25 @@
             const stock = isNaN(rawStock) ? -1 : rawStock;
             const desc = descInput ? descInput.value.trim() : null;
 
+            const enableSpecs = document.getElementById('newProdEnableSpecs')?.checked;
+            let specs = [];
+            if (enableSpecs) {
+                const specRows = document.querySelectorAll('#newProdSpecsList .spec-row');
+                specRows.forEach(row => {
+                    const sName = row.querySelector('.spec-name')?.value.trim();
+                    const sPrice = parseInt(row.querySelector('.spec-price')?.value, 10);
+                    const sStockRaw = parseInt(row.querySelector('.spec-stock')?.value, 10);
+                    const sStock = isNaN(sStockRaw) ? -1 : sStockRaw;
+                    if (sName && !isNaN(sPrice) && sPrice >= 0) {
+                        specs.push({ name: sName, price: sPrice, stock: sStock });
+                    }
+                });
+                if (specs.length === 0) {
+                    showMsg("請至少填寫一組完整的規格項目（包含規格名稱與正確價格）！", true);
+                    return;
+                }
+            }
+
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>商品上架中...`;
@@ -3328,30 +3792,56 @@
             try {
                 const joinedImages = selectedBase64Images.join('|||');
 
-                let insertPayload = {
-                    group_no: targetGroup,
-                    name: name,
-                    price: price,
-                    stock: stock,
-                    image_url: joinedImages || null,
-                    description: desc || null
-                };
+                if (enableSpecs) {
+                    const parentId = crypto.randomUUID();
+                    const insertPayloads = specs.map((sp, idx) => ({
+                        id: idx === 0 ? parentId : crypto.randomUUID(),
+                        group_no: targetGroup,
+                        name: `${name} (${sp.name})`,
+                        price: sp.price,
+                        stock: sp.stock,
+                        image_url: joinedImages || null,
+                        description: `[SPEC_PARENT:${parentId}][SPEC_NAME:${sp.name}] ${desc || ''}`.trim()
+                    }));
 
-                let { error } = await client.from('products').insert([insertPayload]);
-                if (error && error.code === '42703') {
-                    delete insertPayload.description;
-                    const retry = await client.from('products').insert([insertPayload]);
-                    error = retry.error;
+                    let { error } = await client.from('products').insert(insertPayloads);
+                    if (error && error.code === '42703') {
+                        insertPayloads.forEach(p => delete p.description);
+                        const retry = await client.from('products').insert(insertPayloads);
+                        error = retry.error;
+                    }
+                    if (error) throw error;
+                    await logAuditRecord("新增商品(多規格)", { 商品名稱: name, 規格數: specs.length, 組別: targetGroup });
+                } else {
+                    let insertPayload = {
+                        group_no: targetGroup,
+                        name: name,
+                        price: price,
+                        stock: stock,
+                        image_url: joinedImages || null,
+                        description: desc || null
+                    };
+
+                    let { error } = await client.from('products').insert([insertPayload]);
+                    if (error && error.code === '42703') {
+                        delete insertPayload.description;
+                        const retry = await client.from('products').insert([insertPayload]);
+                        error = retry.error;
+                    }
+                    if (error) throw error;
+                    await logAuditRecord("新增商品", { 商品名稱: name, 定價: price, 庫存: stock, 組別: targetGroup });
                 }
-                if (error) throw error;
-
-                await logAuditRecord("新增商品", { 商品名稱: name, 定價: price, 庫存: stock, 組別: targetGroup });
 
                 showMsg("上架成功！");
                 nameInput.value = '';
                 priceInput.value = '';
                 stockInput.value = '-1';
                 if (descInput) descInput.value = '';
+                const chk = document.getElementById('newProdEnableSpecs');
+                if (chk) chk.checked = false;
+                toggleNewProdSpecs();
+                const list = document.getElementById('newProdSpecsList');
+                if (list) list.innerHTML = '';
                 document.getElementById('newProdFiles').value = '';
                 selectedBase64Images = [];
                 renderSelectedImagePreviews();
@@ -3377,48 +3867,44 @@
 
         function cleanProductDescription(desc) {
             if (!desc || typeof desc !== 'string') return '';
-            return desc.replace(/\[OFF_SHELF\]\s*/g, '').trim();
+            return desc.replace(/\[OFF_SHELF\]\s*/g, '').replace(/\[SPEC_PARENT:[a-zA-Z0-9_\-]+\]\[SPEC_NAME:[^\]]+\]\s*/g, '').trim();
         }
 
         window.toggleProductShelf = async function(productId, toPublish) {
             const p = (currentProductsList || []).find(item => String(item.id) === String(productId));
             if (!p) return;
 
+            const baseName = getBaseProductName(p.name);
             const actionText = toPublish ? "重新上架" : "下架";
             const confirmMsg = toPublish
-                ? `確定要將商品「${p.name}」【重新上架】嗎？\n\n上架後買家即可在商城即時選購此商品。`
-                : `確定要將商品「${p.name}」【下架】嗎？\n\n下架後商品資料仍會完整保留於後台，但買家將無法在商城看見或選購此商品。`;
+                ? `確定要將商品「${baseName}」【重新上架】嗎？\n\n上架後買家即可在商城即時選購此商品。`
+                : `確定要將商品「${baseName}」【下架】嗎？\n\n下架後商品資料仍會完整保留於後台，但買家將無法在商城看見或選購此商品。`;
 
             if (!confirm(confirmMsg)) return;
 
-            let desc = p.description || '';
-            if (toPublish) {
-                desc = desc.replace(/\[OFF_SHELF\]\s*/g, '').trim();
-            } else {
-                if (!desc.includes('[OFF_SHELF]')) {
-                    desc = ('[OFF_SHELF] ' + desc).trim();
-                }
+            const meta = getProductSpecMeta(p);
+            let targets = [p];
+            if (meta) {
+                targets = currentProductsList.filter(item => {
+                    const m = getProductSpecMeta(item);
+                    return m && m.parentId === meta.parentId;
+                });
             }
 
             try {
-                const updatePayload = { description: desc };
-                let { error } = await client.from('products').update(updatePayload).eq('id', productId);
-                if (error) throw error;
+                for (const item of targets) {
+                    let desc = item.description || '';
+                    if (toPublish) {
+                        desc = desc.replace(/\[OFF_SHELF\]\s*/g, '').trim();
+                    } else {
+                        if (!desc.includes('[OFF_SHELF]')) {
+                            desc = ('[OFF_SHELF] ' + desc).trim();
+                        }
+                    }
+                    await client.from('products').update({ description: desc }).eq('id', item.id);
+                }
 
-                const oldShelfStatus = toPublish ? "已下架" : "販售中";
-                const newShelfStatus = toPublish ? "販售中" : "已下架";
-                await logAuditRecord(toPublish ? "商品重新上架" : "商品下架", {
-                    商品名稱: p.name,
-                    組別: `第 ${p.group_no} 組`,
-                    原狀態: oldShelfStatus,
-                    新狀態: newShelfStatus,
-                    狀態變更: `${oldShelfStatus} ➔ ${newShelfStatus}`,
-                    狀態: newShelfStatus,
-                    商品ID: productId,
-                    說明: toPublish ? "已開放商城選購" : "保留於後台但對買家隱藏"
-                });
-
-                showMsg(`商品「${p.name}」已成功${actionText}！`);
+                showMsg(`商品「${baseName}」已成功${actionText}！`);
                 await loadProductsData();
             } catch (err) {
                 showMsg(`${actionText}失敗：` + err.message, true);
@@ -3427,13 +3913,23 @@
 
         window.deleteProductPermanently = async function(productId) {
             const targetProd = (currentProductsList || []).find(p => String(p.id) === String(productId));
-            const prodName = targetProd ? targetProd.name : '商品';
+            const prodName = targetProd ? getBaseProductName(targetProd.name) : '商品';
             const prodGroup = targetProd ? targetProd.group_no : '';
 
-            if (!confirm(`⚠️ 確定要徹底【永久刪除】商品「${prodName}」嗎？\n\n此動作將把該商品從資料庫完全刪除且無法復原！\n（若只是暫時不想讓買家選購，請使用【下架】功能）`)) return;
+            if (!confirm(`⚠️ 確定要徹底【永久刪除】商品「${prodName}」嗎？\n\n此動作將把該商品（含所有規格項目）從資料庫完全刪除且無法復原！\n（若只是暫時不想讓買家選購，請使用【下架】功能）`)) return;
+
+            const meta = getProductSpecMeta(targetProd);
+            let idsToDelete = [productId];
+            if (meta) {
+                const siblings = currentProductsList.filter(item => {
+                    const m = getProductSpecMeta(item);
+                    return m && m.parentId === meta.parentId;
+                });
+                idsToDelete = siblings.map(s => s.id);
+            }
 
             try {
-                const { error } = await client.from('products').delete().eq('id', productId);
+                const { error } = await client.from('products').delete().in('id', idsToDelete);
                 if (error) {
                     showMsg("永久刪除失敗（該商品可能已有歷史訂單紀錄關聯，為保護帳務資料請改用【下架】功能）：" + error.message, true);
                     return;
@@ -3443,6 +3939,7 @@
                     商品名稱: prodName,
                     ...(prodGroup ? { 組別: `第 ${prodGroup} 組` } : {}),
                     商品ID: productId,
+                    刪除品項數: idsToDelete.length,
                     操作備註: "完全自資料庫刪除"
                 });
 
@@ -3714,6 +4211,65 @@
             loadStudentProducts();
         }
 
+        window.cardSelectedSpecMap = window.cardSelectedSpecMap || new Map();
+        window.selectProductCardSpec = function(parentId, variantId, event) {
+            if (event) event.stopPropagation();
+            window.cardSelectedSpecMap.set(parentId, variantId);
+
+            document.querySelectorAll(`.card-spec-btn-${parentId}`).forEach(btn => {
+                const isMatch = btn.id === `card-spec-btn-${variantId}`;
+                btn.className = `card-spec-btn-${parentId} px-2 py-0.5 rounded-lg text-[10px] font-black transition border ` +
+                    (isMatch ? 'bg-brand-600 text-white border-brand-600 shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200');
+            });
+
+            const v = currentProductsList.find(p => String(p.id) === String(variantId));
+            if (!v) return;
+
+            const priceEl = document.getElementById(`main-price-${parentId}`);
+            if (priceEl) priceEl.innerText = formatCurrency(v.price);
+
+            const stockEl = document.getElementById(`main-stock-${parentId}`);
+            const vStock = v.stock !== undefined ? v.stock : -1;
+            const isOut = (vStock >= 0 && vStock <= 0);
+            if (stockEl) {
+                stockEl.innerText = vStock < 0 ? '庫存: 無限制' : `庫存: ${vStock}`;
+                stockEl.className = isOut ? 'text-rose-600' : 'text-slate-400';
+            }
+
+            const qtyInput = document.getElementById(`qty-${parentId}`);
+            if (qtyInput) {
+                qtyInput.disabled = isOut;
+                if (vStock >= 0) qtyInput.max = vStock;
+                else qtyInput.removeAttribute('max');
+            }
+
+            const addBtn = document.getElementById(`add-btn-${parentId}`);
+            if (addBtn) {
+                addBtn.disabled = isOut;
+                addBtn.className = `px-3 py-1.5 ${isOut ? 'bg-slate-300 cursor-not-allowed text-white' : 'bg-brand-600 hover:bg-brand-700 text-white'} rounded-xl text-xs font-black transition shadow-sm flex items-center gap-1`;
+                addBtn.innerHTML = `<i class="fa-solid fa-cart-plus text-[11px]"></i><span>${isOut ? '已售完' : '加入購物車'}</span>`;
+            }
+        };
+
+        window.handleCardAddToCart = function(parentId) {
+            const prod = currentProductsList.find(p => String(p.id) === String(parentId));
+            if (!prod) return;
+            const meta = getProductSpecMeta(prod);
+            if (meta) {
+                const selectedVariantId = window.cardSelectedSpecMap.get(parentId) || parentId;
+                const v = currentProductsList.find(p => String(p.id) === String(selectedVariantId)) || prod;
+                const vStock = v.stock !== undefined ? v.stock : -1;
+                const qtyInput = document.getElementById(`qty-${parentId}`);
+                const customQty = qtyInput ? parseInt(qtyInput.value, 10) : 1;
+                addToCart(v.id, v.name, v.group_no, v.price, vStock, customQty);
+            } else {
+                const stock = prod.stock !== undefined ? prod.stock : -1;
+                const qtyInput = document.getElementById(`qty-${parentId}`);
+                const customQty = qtyInput ? parseInt(qtyInput.value, 10) : 1;
+                addToCart(prod.id, prod.name, prod.group_no, prod.price, stock, customQty);
+            }
+        };
+
         function loadStaffMall() {
             const listArea = document.getElementById('productListArea');
             const countBadge = document.getElementById('productCountBadge');
@@ -3748,14 +4304,15 @@
                 displayedProds.sort((a, b) => (Number(b.stock) || 0) - (Number(a.stock) || 0));
             }
 
-            if (countBadge) countBadge.innerText = `共 ${displayedProds.length} 項商品`;
+            const mallProds = getGroupedProducts(displayedProds);
+            if (countBadge) countBadge.innerText = `共 ${mallProds.length} 項商品`;
 
             if (currentProductsList.length === 0) {
                 listArea.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200"><i class="fa-solid fa-store-slash text-3xl mb-2 block text-slate-300"></i>目前尚無商品</div>`;
                 return;
             }
 
-            if (displayedProds.length === 0) {
+            if (mallProds.length === 0) {
                 listArea.innerHTML = `
                     <div class="col-span-full py-16 text-center text-slate-400 font-bold bg-white rounded-3xl border border-slate-200 space-y-3">
                         <i class="fa-solid fa-magnifying-glass text-3xl mb-1 block text-slate-300"></i>
@@ -3769,10 +4326,12 @@
                 return;
             }
 
-            listArea.innerHTML = displayedProds.map(p => {
+            listArea.innerHTML = mallProds.map(p => {
                 const images = parseImages(p.image_url);
                 const firstImg = images.length > 0 ? images[0] : '';
-                const stock = p.stock !== undefined ? p.stock : -1;
+                const isMulti = p._isMultiSpec;
+                const initialVariant = isMulti ? p._variants[0] : p;
+                const stock = isMulti ? p._totalStock : (p.stock !== undefined ? p.stock : -1);
                 const isUnlimited = (stock < 0);
                 const isOutOfStock = (!isUnlimited && stock <= 0);
 
@@ -3790,9 +4349,26 @@
                 }
 
                 const displayStock = isUnlimited ? '無限制' : stock;
-                const maxAttr = isUnlimited ? '' : `max="${stock}"`;
+                const maxAttr = (initialVariant.stock >= 0) ? `max="${initialVariant.stock}"` : '';
                 const groupLabel = groupStoreNameMap[String(p.group_no)] || `第 ${p.group_no} 組`;
                 const soldCount = (window.productSoldCountMap && (window.productSoldCountMap.get(String(p.id)) || window.productSoldCountMap.get(p.name))) || 0;
+
+                const displayName = isMulti ? p._baseName : p.name;
+                const displayPriceHtml = isMulti ? `${p._displayPrice}` : `${formatCurrency(p.price)}`;
+
+                const specPillsHtml = isMulti ? `
+                    <div class="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-slate-100">
+                        ${p._variants.map((v, vIdx) => {
+                            const vStock = v.stock !== undefined ? v.stock : -1;
+                            const vOut = (vStock >= 0 && vStock <= 0);
+                            return `
+                                <button type="button" onclick="selectProductCardSpec('${p.id}', '${v.id}', event)" id="card-spec-btn-${v.id}" class="card-spec-btn-${p.id} px-2 py-0.5 rounded-lg text-[10px] font-black transition border ${vIdx === 0 ? 'bg-brand-600 text-white border-brand-600 shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'} ${vOut ? 'opacity-40 cursor-not-allowed line-through' : ''}">
+                                    ${escapeHtml(v._specName)}
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                ` : '';
 
                 return `
                     <div class="product-card bg-white border border-slate-200/80 rounded-3xl shadow-xs flex flex-col justify-between overflow-hidden">
@@ -3803,19 +4379,28 @@
                                     <span class="inline-block px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700 text-[10px] font-black border border-brand-200 max-w-[170px] truncate" title="${groupLabel}">${groupLabel}</span>
                                     <div class="flex items-center gap-1.5 text-[11px] font-bold">
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/70 font-black shadow-2xs" title="累積已售出 ${soldCount} 件"><i class="fa-solid fa-fire text-amber-500 text-[10px]"></i>已售 ${soldCount}</span>
-                                        <span class="${isOutOfStock ? 'text-rose-600' : 'text-slate-400'}">庫存: ${displayStock}</span>
+                                        <span id="main-stock-${p.id}" class="${isOutOfStock ? 'text-rose-600' : 'text-slate-400'}">庫存: ${displayStock}</span>
                                     </div>
                                 </div>
-                                <h4 class="font-black text-sm text-slate-800 leading-snug hover:text-brand-600 transition">${p.name}</h4>
+                                <h4 class="font-black text-sm text-slate-800 leading-snug hover:text-brand-600 transition flex items-center gap-1.5">
+                                    <span>${escapeHtml(displayName)}</span>
+                                    ${isMulti ? `<span class="text-[10px] font-black px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 border border-purple-200">${p._variants.length}種規格</span>` : ''}
+                                </h4>
                             </div>
-                            <div class="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
-                                <span class="text-base font-black text-rose-600">${formatCurrency(p.price)} <span class="text-xs font-bold text-slate-400">幣</span></span>
-                                <div class="flex items-center gap-1.5">
-                                    <input type="number" id="qty-${p.id}" min="1" value="1" ${maxAttr} ${isOutOfStock ? 'disabled' : ''} class="w-12 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-black text-center focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-40">
-                                    <button type="button" onclick="addToCart('${p.id}', '${p.name}', ${p.group_no}, ${p.price}, ${stock})" ${isOutOfStock ? 'disabled' : ''} class="px-3 py-1.5 ${isOutOfStock ? 'bg-slate-300 cursor-not-allowed text-white' : 'bg-brand-600 hover:bg-brand-700 text-white'} rounded-xl text-xs font-black transition shadow-sm flex items-center gap-1">
-                                        <i class="fa-solid fa-cart-plus text-[11px]"></i>
-                                        <span>${isOutOfStock ? '已售完' : '加入購物車'}</span>
-                                    </button>
+                            <div>
+                                ${specPillsHtml}
+                                <div class="mt-3 flex items-center justify-between pt-2.5 border-t border-slate-100">
+                                    <div class="flex items-baseline gap-1">
+                                        <span id="main-price-${p.id}" class="text-base font-black text-rose-600">${displayPriceHtml}</span>
+                                        <span class="text-xs font-bold text-slate-400">幣</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <input type="number" id="qty-${p.id}" min="1" value="1" ${maxAttr} ${isOutOfStock ? 'disabled' : ''} class="w-12 px-2 py-1 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-black text-center focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-40">
+                                        <button type="button" id="add-btn-${p.id}" onclick="handleCardAddToCart('${p.id}')" ${isOutOfStock ? 'disabled' : ''} class="px-3 py-1.5 ${isOutOfStock ? 'bg-slate-300 cursor-not-allowed text-white' : 'bg-brand-600 hover:bg-brand-700 text-white'} rounded-xl text-xs font-black transition shadow-sm flex items-center gap-1">
+                                            <i class="fa-solid fa-cart-plus text-[11px]"></i>
+                                            <span>${isOutOfStock ? '已售完' : '加入購物車'}</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3939,11 +4524,12 @@
             if (isPrivileged()) groupSelectWrapper.classList.remove('hidden');
             else groupSelectWrapper.classList.add('hidden');
 
-            let displayProds = currentProductsList;
+            let rawProds = currentProductsList;
             if (!isPrivileged()) {
                 const myGroupNo = parseInt(currentAuth.account, 10);
-                displayProds = currentProductsList.filter(p => parseInt(p.group_no, 10) === myGroupNo);
+                rawProds = currentProductsList.filter(p => parseInt(p.group_no, 10) === myGroupNo);
             }
+            const displayProds = (typeof getGroupedProducts === 'function') ? getGroupedProducts(rawProds) : rawProds;
 
             const countBadge = document.getElementById('prodMgmtCountBadge');
             if (countBadge) countBadge.innerText = displayProds.length;
@@ -3965,7 +4551,7 @@
             const cardsView = document.getElementById('studentProductCardsView');
             if (displayProds.length === 0) {
                 const emptyHtml = `<div class="p-8 text-center text-slate-400 font-bold bg-slate-50 border border-slate-200 rounded-2xl"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>目前尚未上架任何實習商品</div>`;
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>目前尚未上架任何實習商品</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold"><i class="fa-solid fa-box-open text-2xl mb-2 block"></i>目前尚未上架任何實習商品</td></tr>`;
                 if (cardsView) cardsView.innerHTML = emptyHtml;
                 return;
             }
@@ -3973,11 +4559,32 @@
             tbody.innerHTML = displayProds.map(p => {
                 const images = parseImages(p.image_url);
                 const firstImg = images.length > 0 ? images[0] : '';
-                const stockVal = p.stock !== undefined ? p.stock : -1;
-                const stockDisplay = stockVal < 0 ? '無限制' : stockVal;
-                const stockClass = (stockVal >= 0 && stockVal <= 0) ? 'text-rose-600 font-black' : 'text-slate-700 font-black';
+                const isMulti = !!p._isMultiSpec;
+                const displayName = isMulti ? p._baseName : p.name;
+                const specBadge = isMulti ? `<span class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 text-[10px] font-black border border-purple-200 ml-1 inline-flex items-center gap-0.5"><i class="fa-solid fa-layer-group text-[9px]"></i>${p._variants.length}種規格</span>` : '';
+                const priceDisplay = isMulti ? `${p._displayPrice} 幣` : `${formatCurrency(p.price)} 幣`;
+
+                let stockDisplay;
+                let stockClass = 'text-slate-700 font-black';
+                if (isMulti) {
+                    stockDisplay = p._totalStock < 0 ? '無限制' : `${p._totalStock}`;
+                    if (p._totalStock === 0) stockClass = 'text-rose-600 font-black';
+                } else {
+                    const stockVal = p.stock !== undefined ? p.stock : -1;
+                    stockDisplay = stockVal < 0 ? '無限制' : stockVal;
+                    stockClass = (stockVal >= 0 && stockVal <= 0) ? 'text-rose-600 font-black' : 'text-slate-700 font-black';
+                }
+
+                let soldCount = 0;
+                if (isMulti && p._variants) {
+                    p._variants.forEach(v => {
+                        soldCount += (window.productSoldCountMap && (window.productSoldCountMap.get(String(v.id)) || window.productSoldCountMap.get(v.name))) || 0;
+                    });
+                } else {
+                    soldCount = (window.productSoldCountMap && (window.productSoldCountMap.get(String(p.id)) || window.productSoldCountMap.get(p.name))) || 0;
+                }
+
                 const offShelf = isProductOffShelf(p);
-                const soldCount = (window.productSoldCountMap && (window.productSoldCountMap.get(String(p.id)) || window.productSoldCountMap.get(p.name))) || 0;
 
                 return `
                     <tr class="hover:bg-slate-50 transition ${offShelf ? 'bg-slate-50/50 opacity-80' : ''}">
@@ -3985,10 +4592,10 @@
                             ${firstImg ? `<div class="relative inline-block cursor-pointer" onclick="openProductDetailPage('${p.id}')"><img src="${firstImg}" class="w-12 h-12 object-cover rounded-xl ${offShelf ? 'grayscale' : ''}">${images.length > 1 ? `<span class="absolute -top-1 -right-1 bg-slate-800 text-white text-[9px] px-1 rounded-full font-bold">${images.length}</span>` : ''}</div>` : `<span class="text-slate-300 font-normal">暫無照片</span>`}
                         </td>
                         <td class="p-3 border-b border-slate-100">
-                            <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailPage('${p.id}')">${p.name}</span>
+                            <span class="font-black text-slate-800 text-xs hover:text-brand-600 cursor-pointer block" onclick="openProductDetailPage('${p.id}')">${displayName}${specBadge}</span>
                         </td>
                         <td class="p-3 border-b border-slate-100 text-center font-black text-brand-600 whitespace-nowrap">第 ${p.group_no} 組</td>
-                        <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs whitespace-nowrap">${formatCurrency(p.price)} 幣</td>
+                        <td class="p-3 border-b border-slate-100 text-rose-600 font-black text-xs whitespace-nowrap">${priceDisplay}</td>
                         <td class="p-3 border-b border-slate-100 text-center whitespace-nowrap">
                             <span class="${stockClass}">${stockDisplay}</span>
                             <span class="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded text-[10px] font-black border border-amber-200/70 ml-1 inline-flex items-center gap-0.5" title="已售出 ${soldCount} 件"><i class="fa-solid fa-fire text-amber-500 text-[9px]"></i>售 ${soldCount}</span>
@@ -4015,10 +4622,30 @@
                 cardsView.innerHTML = displayProds.map(p => {
                     const images = parseImages(p.image_url);
                     const firstImg = images.length > 0 ? images[0] : '';
-                    const stockVal = p.stock !== undefined ? p.stock : -1;
-                    const stockDisplay = stockVal < 0 ? '無限制' : `${stockVal} 件`;
-                    const stockClass = (stockVal >= 0 && stockVal <= 0) ? 'text-rose-600 font-black' : 'text-slate-700 font-bold';
-                    const soldCount = (window.productSoldCountMap && (window.productSoldCountMap.get(String(p.id)) || window.productSoldCountMap.get(p.name))) || 0;
+                    const isMulti = !!p._isMultiSpec;
+                    const displayName = isMulti ? p._baseName : p.name;
+                    const specBadge = isMulti ? `<span class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 text-[10px] font-black border border-purple-200 ml-1 inline-flex items-center gap-0.5"><i class="fa-solid fa-layer-group text-[9px]"></i>${p._variants.length}種規格</span>` : '';
+                    const priceDisplay = isMulti ? `${p._displayPrice} 幣` : `${formatCurrency(p.price)} 幣`;
+
+                    let stockDisplay;
+                    let stockClass = 'text-slate-700 font-bold';
+                    if (isMulti) {
+                        stockDisplay = p._totalStock < 0 ? '無限制' : `${p._totalStock} 件`;
+                        if (p._totalStock === 0) stockClass = 'text-rose-600 font-black';
+                    } else {
+                        const stockVal = p.stock !== undefined ? p.stock : -1;
+                        stockDisplay = stockVal < 0 ? '無限制' : `${stockVal} 件`;
+                        stockClass = (stockVal >= 0 && stockVal <= 0) ? 'text-rose-600 font-black' : 'text-slate-700 font-bold';
+                    }
+
+                    let soldCount = 0;
+                    if (isMulti && p._variants) {
+                        p._variants.forEach(v => {
+                            soldCount += (window.productSoldCountMap && (window.productSoldCountMap.get(String(v.id)) || window.productSoldCountMap.get(v.name))) || 0;
+                        });
+                    } else {
+                        soldCount = (window.productSoldCountMap && (window.productSoldCountMap.get(String(p.id)) || window.productSoldCountMap.get(p.name))) || 0;
+                    }
 
                     return `
                         <div class="p-3.5 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-2.5 shadow-xs">
@@ -4029,9 +4656,9 @@
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center justify-between gap-1">
                                         <span class="px-2 py-0.5 rounded-md bg-teal-50 border border-teal-200 text-teal-800 text-[10px] font-black shrink-0">第 ${p.group_no} 組</span>
-                                        <span class="text-rose-600 font-black text-xs font-mono">${formatCurrency(p.price)} 幣</span>
+                                        <span class="text-rose-600 font-black text-xs font-mono">${priceDisplay}</span>
                                     </div>
-                                    <h4 class="font-black text-slate-800 text-sm truncate mt-0.5 hover:text-brand-600 cursor-pointer" onclick="openProductDetailPage('${p.id}')">${p.name}</h4>
+                                    <h4 class="font-black text-slate-800 text-sm truncate mt-0.5 hover:text-brand-600 cursor-pointer" onclick="openProductDetailPage('${p.id}')">${displayName}${specBadge}</h4>
                                     <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
                                         <div class="flex items-center gap-1.5">
                                             <span>庫存: <b class="${stockClass}">${stockDisplay}</b></span>
@@ -4625,7 +5252,7 @@
             try {
                 const ip = await getClientIP();
                 const user = currentAuth || {};
-                await client.from('audit_logs').insert([{
+                const newRecord = {
                     account: user.account || '訪客',
                     operator_name: user.name || '未知使用者',
                     operator_role: user.role || 'guest',
@@ -4633,7 +5260,11 @@
                     details: details,
                     ip_address: ip,
                     user_agent: navigator.userAgent
-                }]);
+                };
+                const { data } = await client.from('audit_logs').insert([newRecord]).select();
+                if (data && data[0] && Array.isArray(allAuditLogs)) {
+                    allAuditLogs.unshift(data[0]);
+                }
             } catch (err) {}
         }
 
@@ -5650,12 +6281,9 @@
             `;
 
             try {
-                let logs = allAuditLogs || [];
-                if (logs.length === 0) {
-                    const { data } = await client.from('audit_logs').select('*').order('created_at', { ascending: true });
-                    logs = data || [];
-                    allAuditLogs = [...logs].reverse();
-                }
+                const { data } = await client.from('audit_logs').select('*').order('created_at', { ascending: true });
+                const logs = data || [];
+                allAuditLogs = [...logs].reverse();
 
                 const prodLogs = logs.filter(l => {
                     if (!l.details) return false;
@@ -5663,9 +6291,11 @@
                     if (typeof obj === 'string') {
                         try { obj = JSON.parse(obj); } catch(e) { return false; }
                     }
-                    if (obj['商品ID'] && String(obj['商品ID']) === String(productId)) return true;
-                    if (obj['productId'] && String(obj['productId']) === String(productId)) return true;
-                    if (obj['商品名稱'] && p && obj['商品名稱'] === p.name) return true;
+                    const logProdId = String(obj['商品ID'] || obj['productId'] || '');
+                    if (logProdId && (logProdId === String(productId) || (p && p._specParentId && logProdId === String(p._specParentId)))) return true;
+                    if (p && p._variants && p._variants.some(v => String(v.id) === logProdId)) return true;
+                    const logProdName = String(obj['商品名稱'] || obj['原商品名稱'] || '');
+                    if (logProdName && p && (logProdName === p.name || (p._baseName && logProdName === p._baseName) || (p._baseName && logProdName.startsWith(p._baseName)))) return true;
                     return false;
                 });
 
