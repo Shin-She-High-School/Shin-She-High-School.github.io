@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadDisplayName</key>
+    <string>Teacher-Test Wi-Fi 設定 (EAP-TTLS/PAP)</string>
+    <key>PayloadIdentifier</key>
+    <string>sshs.tc.edu.tw.wifi</string>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>F8B4C9E2-5D1A-4E38-B79C-8A1D3E5F70B1</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>PayloadDisplayName</key>
+            <string>Wi-Fi</string>
+            <key>PayloadIdentifier</key>
+            <string>sshs.tc.edu.tw.wifi.teachertest</string>
+            <key>PayloadType</key>
+            <string>com.apple.wifi.managed</string>
+            <key>PayloadUUID</key>
+            <string>C3A7E91D-4B82-4E2F-A610-9D72C4B5E890</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDescription</key>
+            <string>設定 Teacher-Test 企業級 EAP-TTLS 與 PAP 驗證</string>
+            <key>SSID_STR</key>
+            <string>Teacher-Test</string>
+            <key>HIDDEN_NETWORK</key>
+            <false/>
+            <key>AutoJoin</key>
+            <true/>
+            <key>EncryptionType</key>
+            <string>WPA2</string>
+            <key>EAPClientConfiguration</key>
+            <dict>
+                <key>AcceptEAPTypes</key>
+                <array>
+                    <!-- 21 = EAP-TTLS -->
+                    <integer>21</integer>
+                </array>
+                <!-- 指定內部通道驗證協定為 PAP -->
+                <key>TTLSInnerAuthentication</key>
+                <string>PAP</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>
