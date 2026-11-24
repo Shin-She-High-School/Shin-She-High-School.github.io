@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Teacher-Test_教師WiFi連線教學 ｜ 臺中市立新社高中</title>
+    <link rel="icon" type="image/png" href="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '"Noto Sans TC"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+
+    <header class="bg-slate-900 text-white shrink-0 py-3 px-4 sm:px-8 shadow-md sticky top-0 z-40 border-b border-slate-800">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <img src="https://sshs.tc.edu.tw/var/file/69/1069/msys_1069_413586_22128.png" alt="新社高中校徽" class="w-7 h-7 sm:w-8 sm:h-8 object-contain drop-shadow shrink-0">
+                <div class="min-w-0">
+                    <span class="font-black text-sm sm:text-base text-white tracking-wide truncate block">Teacher-Test_教師WiFi連線教學</span>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-medium block sm:inline">台中市立新社高中 校園網路</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-xl text-xs font-black inline-flex items-center gap-1">
+                    <i class="fa-solid fa-shield-halved text-[11px]"></i> 教職員專用
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-950 via-brand-900 to-slate-900 text-white p-6 sm:p-8 shadow-xl border border-brand-800/40">
+            <div class="absolute -right-16 -top-16 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-teal-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 space-y-4">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-black border border-emerald-400/30 inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-wifi text-[11px]"></i> 企業級 WPA2-Enterprise
+                    </span>
+                    <span class="px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-black border border-amber-400/30 inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-key text-[11px]"></i> EAP-TTLS (PAP)
+                    </span>
+                    <span class="px-3 py-1 rounded-full bg-slate-400/20 text-slate-300 text-xs font-black border border-slate-400/30 hidden sm:inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-building-columns text-[11px]"></i> 校園無線網路
+                    </span>
+                </div>
+
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">Teacher-Test_教師WiFi連線教學</h1>
+                    <p class="text-sm sm:text-base text-emerald-100/80 font-medium mt-1">全校教職員無線網路認證指南 ｜ 支援 Apple (iOS/Mac)、Android 手機與 Windows 筆記型電腦</p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+                    <div class="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 space-y-0.5">
+                        <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">Wi-Fi 名稱 (SSID)</div>
+                        <div class="text-sm sm:text-base font-black text-white font-mono">Teacher-Test</div>
+                    </div>
+                    <div class="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 space-y-0.5">
+                        <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">認證協定</div>
+                        <div class="text-sm sm:text-base font-black text-white font-mono">TTLS / PAP</div>
+                    </div>
+                    <div class="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 space-y-0.5">
+                        <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">使用者名稱</div>
+                        <div class="text-sm sm:text-base font-black text-white">信箱前段 <span class="text-xs font-mono text-emerald-300">(t999)</span></div>
+                    </div>
+                    <div class="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 space-y-0.5">
+                        <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">連線密碼</div>
+                        <div class="text-sm sm:text-base font-black text-white">你的信箱密碼</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-1.5 sm:p-2 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-1 sm:gap-2">
+            <button type="button" id="tab-ios" onclick="switchPlatform('ios')" class="flex-1 py-3 px-3 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 bg-brand-600 text-white shadow-xs">
+                <i class="fa-brands fa-apple text-base sm:text-lg"></i>
+                <span>Apple (iOS / Mac)</span>
+            </button>
+            <button type="button" id="tab-android" onclick="switchPlatform('android')" class="flex-1 py-3 px-3 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                <i class="fa-brands fa-android text-base sm:text-lg"></i>
+                <span>Android 手機</span>
+            </button>
+            <button type="button" id="tab-windows" onclick="switchPlatform('windows')" class="flex-1 py-3 px-3 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                <i class="fa-brands fa-windows text-base sm:text-lg"></i>
+                <span>Windows 筆電</span>
+            </button>
+        </div>
+
+        <div id="panel-ios" class="space-y-6">
+
+            <div class="p-5 sm:p-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border-2 border-emerald-300/80 rounded-3xl shadow-xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="inline-flex items-center gap-1.5 text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                            <i class="fa-solid fa-bolt text-amber-500"></i> Apple 設備專用一鍵安裝
+                        </div>
+                        <h3 class="text-lg sm:text-xl font-black text-slate-900">下載 Teacher-Test 快速連線描述檔</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                            iPhone / iPad / Mac 使用 Safari 下載此描述檔後，即可於系統設定直接安裝，免手動輸入複雜的通訊協定！
+                        </p>
+                    </div>
+                    <a href="./Teacher-Test-TTLS.mobileconfig" download="Teacher-Test-TTLS.mobileconfig" class="px-6 py-3.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-black rounded-2xl text-sm sm:text-base transition shadow-md hover:shadow-lg inline-flex items-center justify-center gap-2.5 shrink-0">
+                        <i class="fa-solid fa-file-arrow-down text-lg"></i>
+                        <span>下載 / 安裝 Wi-Fi 描述檔</span>
+                    </a>
+                </div>
+                <div class="p-3 bg-white/80 rounded-xl border border-emerald-200/80 text-xs font-bold text-emerald-900 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-emerald-600 shrink-0"></i>
+                    <span>請使用 <b>Safari 瀏覽器</b> 開啟點擊下載；若跳出「此網站正在嘗試下載設定描述檔」請點選「<b>允許</b>」。</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                <div class="p-5 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3 flex flex-col justify-between hover:shadow-md transition">
+                    <div class="space-y-2">
+                        <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black whitespace-nowrap shrink-0">步驟 1</span>
+                            <span>前往系統「設定」檢視描述檔</span>
+                        </h4>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                            下載完成後，打開 iPhone / iPad 的「<b>設定</b>」，點選最上方的「<b>已下載描述檔</b>」（或進入「<b>一般</b>」➔「<b>VPN 與裝置管理</b>」）。
+                        </p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 cursor-zoom-in relative group" onclick="openLightbox('images/ios_step1.jpg')">
+                        <img src="images/ios_step1.jpg" alt="iOS 步驟 1 設定畫面" class="w-full h-auto object-contain group-hover:scale-101 transition duration-200" loading="lazy">
+                        <div class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[11px] font-bold backdrop-blur-xs flex items-center gap-1">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i> 放大檢視
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3 flex flex-col justify-between hover:shadow-md transition">
+                    <div class="space-y-2">
+                        <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black whitespace-nowrap shrink-0">步驟 2</span>
+                            <span>選取 Teacher-Test 描述檔</span>
+                        </h4>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                            在「已下載的描述檔」清單中，點選「<b>Teacher-Test Wi-Fi 設定 (EAP-TTLS/PAP)</b>」進行安裝確認。
+                        </p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 cursor-zoom-in relative group" onclick="openLightbox('images/ios_step2.jpg')">
+                        <img src="images/ios_step2.jpg" alt="iOS 步驟 2 描述檔清單" class="w-full h-auto object-contain group-hover:scale-101 transition duration-200" loading="lazy">
+                        <div class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[11px] font-bold backdrop-blur-xs flex items-center gap-1">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i> 放大檢視
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3 flex flex-col justify-between hover:shadow-md transition">
+                    <div class="space-y-2">
+                        <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-black whitespace-nowrap shrink-0">步驟 3</span>
+                            <span>確認警告提示並點選「安裝」</span>
+                        </h4>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                            若畫面出現「警告：尚未簽署描述檔」系統安全性提示，此為校內自建描述檔正常現象，請直接點選右上角「<b>安裝</b>」。
+                        </p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 cursor-zoom-in relative group" onclick="openLightbox('images/ios_step3.jpg')">
+                        <img src="images/ios_step3.jpg" alt="iOS 步驟 3 點選安裝" class="w-full h-auto object-contain group-hover:scale-101 transition duration-200" loading="lazy">
+                        <div class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[11px] font-bold backdrop-blur-xs flex items-center gap-1">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i> 放大檢視
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3 flex flex-col justify-between hover:shadow-md transition">
+                    <div class="space-y-2">
+                        <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black whitespace-nowrap shrink-0">步驟 4</span>
+                            <span>輸入學校信箱帳號前段與密碼</span>
+                        </h4>
+                        <div class="text-xs text-slate-600 leading-relaxed font-medium space-y-1.5">
+                            <p>依系統導引輸入教職員身分憑證：</p>
+                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                                <div>• <b>使用者名稱</b>：學校信箱帳號前段（例如：<code class="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono font-black text-emerald-700">t999</code>，不含 @ 後網域）</div>
+                                <div>• <b>密碼</b>：你的學校信箱登入密碼</div>
+                            </div>
+                            <p class="text-[11px] text-slate-500">輸入完成後點選「下一步」，設備將立即自動連線至 Teacher-Test 高速網路！</p>
+                        </div>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 cursor-zoom-in relative group" onclick="openLightbox('images/ios_step4.jpg')">
+                        <img src="images/ios_step4.jpg" alt="iOS 步驟 4 輸入帳號" class="w-full h-auto object-contain group-hover:scale-101 transition duration-200" loading="lazy">
+                        <div class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[11px] font-bold backdrop-blur-xs flex items-center gap-1">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i> 放大檢視
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="panel-android" class="hidden space-y-6">
+            <div class="p-5 sm:p-6 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-5">
+                <div class="space-y-1">
+                    <div class="inline-flex items-center gap-1.5 text-xs font-black text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> 特別注意手動設定項目
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900">Android 系統 Wi-Fi 連線設定參數表</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 font-medium">
+                        在 Android 手機 Wi-Fi 清單中點選「<b>Teacher-Test</b>」，並務必將預設的 EAP 與階段 2 驗證手動修改為下方設定：
+                    </p>
+                </div>
+
+                <div class="overflow-hidden border border-slate-200 rounded-2xl shadow-2xs">
+                    <table class="w-full text-xs sm:text-sm text-left border-collapse">
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50 transition">
+                                <th class="p-3.5 bg-slate-50/80 font-bold text-slate-600 w-1/3">Wi-Fi 名稱 (SSID)</th>
+                                <td class="p-3.5 font-mono font-black text-slate-800">Teacher-Test</td>
+                            </tr>
+                            <tr class="bg-amber-50/40 hover:bg-amber-50/60 transition">
+                                <th class="p-3.5 bg-amber-100/40 font-black text-amber-900 flex items-center gap-1.5">
+                                    <span>EAP 方法</span>
+                                    <span class="px-1.5 py-0.2 rounded bg-rose-500 text-white text-[10px] font-black">重要需修改</span>
+                                </th>
+                                <td class="p-3.5">
+                                    <code class="px-2 py-1 bg-white border border-amber-300 rounded-lg font-mono font-black text-amber-800 text-sm">TTLS</code>
+                                    <span class="text-xs text-slate-500 ml-2">(預設通常為 PEAP，請點選下拉切換為 TTLS)</span>
+                                </td>
+                            </tr>
+                            <tr class="bg-amber-50/40 hover:bg-amber-50/60 transition">
+                                <th class="p-3.5 bg-amber-100/40 font-black text-amber-900 flex items-center gap-1.5">
+                                    <span>階段 2 驗證</span>
+                                    <span class="px-1.5 py-0.2 rounded bg-rose-500 text-white text-[10px] font-black">重要需修改</span>
+                                </th>
+                                <td class="p-3.5">
+                                    <code class="px-2 py-1 bg-white border border-amber-300 rounded-lg font-mono font-black text-amber-800 text-sm">PAP</code>
+                                    <span class="text-xs text-slate-500 ml-2">(預設為 MSCHAPV2，請切換為 PAP)</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <th class="p-3.5 bg-slate-50/80 font-bold text-slate-600">CA 憑證</th>
+                                <td class="p-3.5 font-bold text-slate-800">首次使用時信任 <span class="text-slate-400 font-normal">（或「不進行驗證」）</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <th class="p-3.5 bg-slate-50/80 font-bold text-slate-600">身分 (使用者帳號)</th>
+                                <td class="p-3.5 font-medium text-slate-800">
+                                    輸入<b>學校信箱帳號前段</b>（例如：<code class="px-1.5 py-0.5 bg-slate-100 rounded font-mono font-black text-emerald-700">t999</code>）
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <th class="p-3.5 bg-slate-50/80 font-bold text-slate-600">匿名身分</th>
+                                <td class="p-3.5 text-slate-400 italic">保持空白，不需填寫</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <th class="p-3.5 bg-slate-50/80 font-bold text-slate-600">密碼</th>
+                                <td class="p-3.5 font-medium text-slate-800">輸入你的<b>學校信箱登入密碼</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="text-xs font-black text-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-image text-slate-400"></i> Android 實機設定截圖對照 (點擊可放大)：
+                    </div>
+                    <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 cursor-zoom-in relative group max-w-sm mx-auto shadow-xs" onclick="openLightbox('images/android.jpg')">
+                        <img src="images/android.jpg" alt="Android Wi-Fi 連線設定截圖" class="w-full h-auto object-contain group-hover:scale-101 transition duration-200" loading="lazy">
+                        <div class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[11px] font-bold backdrop-blur-xs flex items-center gap-1">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i> 放大檢視
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-windows" class="hidden space-y-6">
+            <div class="p-5 sm:p-6 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-5">
+                <div class="space-y-1">
+                    <div class="inline-flex items-center gap-1.5 text-xs font-black text-sky-800 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
+                        <i class="fa-brands fa-windows text-sky-600"></i> 筆記型電腦與桌機連線指引
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900">Windows 連線設定三步驟</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 font-medium">
+                        Windows 系統連線方式非常直覺，系統會自動處理 EAP-TTLS 協定，依照下方步驟即可快速完成連線：
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="p-5 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3 flex flex-col justify-between hover:shadow-md transition">
+                        <div class="space-y-2">
+                            <h5 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-xs font-black font-mono whitespace-nowrap shrink-0">STEP 1</span>
+                                <span>選取 Teacher-Test</span>
+                            </h5>
+                            <p class="text-xs text-slate-600 leading-relaxed font-medium">點擊右下角工具列 Wi-Fi 圖示，在清單中找到並點選「<b>Teacher-Test</b>」。</p>
+                        </div>
+                        <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 cursor-zoom-in relative group" onclick="openLightbox('images/windows_step1.jpg')">
+                            <img src="images/windows_step1.jpg" alt="Windows STEP 1 選取 Wi-Fi" class="w-full h-auto object-contain group-hover:scale-101 transition duration-200" loading="lazy">
+                            <div class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[11px] font-bold backdrop-blur-xs flex items-center gap-1">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i> 放大檢視
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3 flex flex-col justify-between hover:shadow-md transition">
+                        <div class="space-y-2">
+                            <h5 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-xs font-black font-mono whitespace-nowrap shrink-0">STEP 2</span>
+                                <span>輸入使用者名稱與密碼</span>
+                            </h5>
+                            <div class="text-xs text-slate-600 leading-relaxed font-medium space-y-1">
+                                <p>帳號輸入學校信箱前段（例如：<code class="px-1.5 py-0.5 bg-slate-100 rounded font-mono font-bold text-emerald-700">t999</code>），密碼輸入信箱密碼，點選「<b>確定</b>」。</p>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 cursor-zoom-in relative group" onclick="openLightbox('images/windows_step2.jpg')">
+                            <img src="images/windows_step2.jpg" alt="Windows STEP 2 輸入帳密" class="w-full h-auto object-contain group-hover:scale-101 transition duration-200" loading="lazy">
+                            <div class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[11px] font-bold backdrop-blur-xs flex items-center gap-1">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i> 放大檢視
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5 bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3 flex flex-col justify-between hover:shadow-md transition">
+                        <div class="space-y-2">
+                            <h5 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-xs font-black font-mono whitespace-nowrap shrink-0">STEP 3</span>
+                                <span>信任憑證完成連線</span>
+                            </h5>
+                            <p class="text-xs text-slate-600 leading-relaxed font-medium">若跳出「繼續連線？若您認為應該可在此位置找到...」，請直接點選「<b>連線</b>」即可順利上網。</p>
+                        </div>
+                        <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 cursor-zoom-in relative group" onclick="openLightbox('images/windows_step3.jpg')">
+                            <img src="images/windows_step3.jpg" alt="Windows STEP 3 信任憑證" class="w-full h-auto object-contain group-hover:scale-101 transition duration-200" loading="lazy">
+                            <div class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/60 text-white text-[11px] font-bold backdrop-blur-xs flex items-center gap-1">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i> 放大檢視
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-5 bg-white border border-slate-200 rounded-3xl shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-lg shrink-0">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div>
+                    <h5 class="text-sm font-black text-slate-900">離線教學資源下載</h5>
+                    <p class="text-xs text-slate-500 font-medium">可下載完整圖文連線教學 PDF 手冊離線查閱留存</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <a href="./Teacher-Test-WiFi教學手冊.pdf" download="新社高中_Teacher-Test_WiFi連線教學手冊.pdf" class="flex-1 sm:flex-none px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-black transition inline-flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-pdf text-rose-500 text-sm"></i>
+                    <span>下載完整 PDF 教學手冊</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-6 text-xs text-slate-400 font-medium shrink-0">
+        © 臺中市立新社高級中學 資媒組 ＆ 開發團隊 版權所有
+    </footer>
+
+    <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md p-4 sm:p-8 flex items-center justify-center cursor-zoom-out" onclick="closeLightbox()">
+        <button type="button" class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center text-lg transition" onclick="closeLightbox()">&times;</button>
+        <img id="lightboxImg" src="" alt="放大檢視" class="max-w-[95vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl">
+    </div>
+
+    <script>
+        function switchPlatform(platform, updateHash) {
+            const tabs = ['ios', 'android', 'windows'];
+            if (!tabs.includes(platform)) platform = 'ios';
+            tabs.forEach(p => {
+                const btn = document.getElementById(`tab-${p}`);
+                const panel = document.getElementById(`panel-${p}`);
+                if (p === platform) {
+                    btn.className = "flex-1 py-3 px-3 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 bg-brand-600 text-white shadow-xs";
+                    panel.classList.remove('hidden');
+                } else {
+                    btn.className = "flex-1 py-3 px-3 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+                    panel.classList.add('hidden');
+                }
+            });
+            if (updateHash !== false) {
+                if (window.location.hash !== '#' + platform) {
+                    history.replaceState(null, '', '#' + platform);
+                }
+            }
+        }
+
+        function resolveHash() {
+            const raw = window.location.hash.toLowerCase().replace(/^#\/?/, '');
+            if (raw === 'ios' || raw === 'apple' || raw === 'mac' || raw === 'iphone' || raw === 'ipad') {
+                return 'ios';
+            } else if (raw === 'android') {
+                return 'android';
+            } else if (raw === 'windows' || raw === 'win' || raw === 'pc') {
+                return 'windows';
+            }
+            return null;
+        }
+
+        function initRoute() {
+            const routed = resolveHash();
+            if (routed) {
+                switchPlatform(routed, false);
+                return;
+            }
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            if (/iPad|iPhone|iPod|Macintosh/.test(ua) && !window.MSStream) {
+                switchPlatform('ios', true);
+            } else if (/android/i.test(ua)) {
+                switchPlatform('android', true);
+            } else if (/windows/i.test(ua)) {
+                switchPlatform('windows', true);
+            } else {
+                switchPlatform('ios', true);
+            }
+        }
+
+        window.addEventListener('hashchange', function() {
+            const routed = resolveHash();
+            if (routed) switchPlatform(routed, false);
+        });
+
+        initRoute();
+
+        function openLightbox(src) {
+            const modal = document.getElementById('lightboxModal');
+            const img = document.getElementById('lightboxImg');
+            if (modal && img) {
+                img.src = src;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightboxModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+</body>
+</html>
