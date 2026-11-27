@@ -951,7 +951,6 @@
     let currentAdminDataTab = 'students';
     let currentEditingItem = null;
     let mode2StudentMap = {};
-    let dynamicAdminStaffNos = [];
     let adminStaffRoleFilter = 'all';
     let isForcePasswordSetup = false;
     function openUserPasswordModal(force = false) {
@@ -1049,30 +1048,8 @@
       const code = String(staffNo || '').trim().toLowerCase();
       if (!code) return false;
       if (code === 'admin') return true;
-      return dynamicAdminStaffNos.some(no => String(no).trim().toLowerCase() === code);
-    }
-    async function loadAdminWhitelist() {
-      try {
-        const { data, error } = await sb
-          .from('approval_logs')
-          .select('comment, created_at')
-          .eq('application_no', 'SYSTEM_CONFIG')
-          .eq('action', 'ADMIN_WHITELIST')
-          .order('created_at', { ascending: false })
-          .limit(1);
-        if (!error && data && data.length > 0) {
-          const parsed = JSON.parse(data[0].comment || '{}');
-          if (Array.isArray(parsed.admins)) {
-            dynamicAdminStaffNos = parsed.admins
-              .map(x => String(x || '').trim().toLowerCase())
-              .filter(x => x && x !== 'admin');
-          }
-        }
-      } catch (e) {
-        console.warn('loadAdminWhitelist fallback:', e);
-      }
-      renderAdminWhitelist();
-      renderAdminStaffControlTable();
+      const st = (allStaffs || []).find(s => String(s.staff_no || '').trim().toLowerCase() === code);
+      return String(st?.role || '').trim().toUpperCase() === 'ADMIN';
     }
     function setAdminStaffRoleFilter(mode) {
       adminStaffRoleFilter = mode;
@@ -1144,7 +1121,8 @@
     function renderAdminWhitelist() {
       const container = document.getElementById('adminWhitelistContainer');
       const countBadge = document.getElementById('adminWhitelistCountBadge');
-      if (countBadge) countBadge.textContent = `${dynamicAdminStaffNos.length} 位授權`;
+      const adminStaffs = (allStaffs || []).filter(st => isStaffAdmin(st.staff_no));
+      if (countBadge) countBadge.textContent = `${adminStaffs.length} 位授權`;
       if (!container) return;
       const adminCard = `
         <div class="inline-flex items-center gap-2 bg-slate-900 text-white px-3 py-2 rounded-xl text-xs shadow-sm border border-slate-700">
@@ -1153,9 +1131,9 @@
           <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-400/30 px-1.5 py-0.5 rounded font-bold">系統保護</span>
         </div>
       `;
-      const staffCards = dynamicAdminStaffNos.map(code => {
-        const st = (allStaffs || []).find(s => String(s.staff_no || '').toLowerCase() === code);
-        const name = st ? st.name : '教職員名單載入中';
+      const staffCards = adminStaffs.map(st => {
+        const code = String(st.staff_no || '').trim().toLowerCase();
+        const name = st.name || code;
         return `
           <div class="inline-flex items-center gap-2 bg-purple-50 text-purple-900 px-3 py-2 rounded-xl text-xs border border-purple-200 shadow-2xs">
             <span class="font-mono font-bold text-purple-700">${code}</span>
@@ -1167,19 +1145,18 @@
       }).join('');
       container.innerHTML = adminCard + staffCards;
     }
-    async function saveAdminWhitelist(nextAdmins) {
-      const cleaned = Array.from(new Set(
-        (nextAdmins || []).map(x => String(x || '').trim().toLowerCase()).filter(x => x && x !== 'admin')
-      ));
-      const { error } = await sb.from('approval_logs').insert([{
-        application_no: 'SYSTEM_CONFIG',
-        actor_name: currentStaff?.name || '系統管理員',
-        actor_role: currentStaff?.role || 'ADMIN',
-        action: 'ADMIN_WHITELIST',
-        comment: JSON.stringify({ admins: cleaned, updated_by: currentStaff?.staff_no || 'admin' })
-      }]);
-      if (error) throw error;
-      dynamicAdminStaffNos = cleaned;
+    async function updateStaffRoleToDb(staffNo, nextRole) {
+      const code = String(staffNo || '').trim().toLowerCase();
+      const normalizedRole = String(nextRole || 'TEACHER').trim().toUpperCase() === 'ADMIN' ? 'ADMIN' : 'TEACHER';
+      const { error } = await sb.from('staffs').update({ role: normalizedRole }).eq('staff_no', code);
+      if (error) {
+        if ((error.message || '').includes('role') || error.code === '42703' || error.code === 'PGRST204') {
+          throw new Error('Supabase 的 staffs 資料表尚未新增 role 欄位！請至 Supabase SQL Editor 執行：ALTER TABLE public.staffs ADD COLUMN IF NOT EXISTS role text DEFAULT \'TEACHER\';');
+        }
+        throw error;
+      }
+      const target = (allStaffs || []).find(s => String(s.staff_no || '').trim().toLowerCase() === code);
+      if (target) target.role = normalizedRole;
       renderAdminWhitelist();
       renderAdminStaffControlTable();
       if (currentActiveTab === 'admin' && currentAdminDataTab === 'staffs') {
@@ -1193,7 +1170,7 @@
       if (!st) return;
       if (!confirm(`確定要授予「${code} ${st.name}」系統管理員權限嗎？`)) return;
       try {
-        await saveAdminWhitelist([...dynamicAdminStaffNos, code]);
+        await updateStaffRoleToDb(code, 'ADMIN');
         await logAdminAction('ADMIN_CONFIG', `新增管理人員授權：「${code} ${st.name}」`);
       } catch (err) {
         alert(`授權失敗：${err.message}`);
@@ -1209,7 +1186,7 @@
       const label = st ? `${code} ${st.name}` : code;
       if (!confirm(`確定要撤銷「${label}」的系統管理員權限嗎？`)) return;
       try {
-        await saveAdminWhitelist(dynamicAdminStaffNos.filter(x => x !== code));
+        await updateStaffRoleToDb(code, 'TEACHER');
         await logAdminAction('ADMIN_CONFIG', `撤銷管理人員授權：「${label}」`);
       } catch (err) {
         alert(`撤銷失敗：${err.message}`);
@@ -1290,7 +1267,6 @@
     }
     async function init() {
       checkSystemConnection();
-      loadAdminWhitelist();
       const dateEl = document.getElementById('eventDate');
       if (dateEl) dateEl.value = getLocalDateString();
       const acad = getAcademicInfo();
@@ -1365,8 +1341,7 @@
           loadStaffs(),
           loadClasses(),
           loadCadreRoles(),
-          loadCourseAssignments(),
-          loadAdminWhitelist()
+          loadCourseAssignments()
         ]).then(() => {
           if (currentActiveTab === 'admin') {
             renderAdminTable();
@@ -1578,8 +1553,7 @@
         }
         return;
       }
-      await loadAdminWhitelist();
-      const isAuthorizedAdmin = isStaffAdmin(data.staff_no);
+      const isAuthorizedAdmin = String(data.role || '').trim().toUpperCase() === 'ADMIN';
       const staffPwd = (data.password || '').trim();
       if (staffPwd) {
         const isStaffPwdMatch = (password === staffPwd) || (/^[0-9a-f]{64}$/i.test(staffPwd) && inputHash === staffPwd.toLowerCase());
@@ -2557,6 +2531,7 @@
           </div>
         `;
       } else if (currentAdminDataTab === 'staffs') {
+        const currentRole = String(data.role || 'TEACHER').trim().toUpperCase() === 'ADMIN' ? 'ADMIN' : 'TEACHER';
         container.innerHTML = `
           <div>
             <label class="block font-bold text-slate-700 mb-1">教師編號 (帳號代碼)</label>
@@ -2569,6 +2544,13 @@
           <div>
             <label class="block font-bold text-slate-700 mb-1">電子郵件</label>
             <input type="email" id="field_email" value="${data.email || ''}" class="w-full border border-slate-300 rounded-lg p-2 font-mono outline-none bg-white" required>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">系統身份</label>
+            <select id="field_role" class="w-full border border-slate-300 rounded-lg p-2 outline-none bg-white">
+              <option value="TEACHER" ${currentRole === 'TEACHER' ? 'selected' : ''}>教師 (TEACHER)</option>
+              <option value="ADMIN" ${currentRole === 'ADMIN' ? 'selected' : ''}>系統管理員 (ADMIN)</option>
+            </select>
           </div>
         `;
       } else if (currentAdminDataTab === 'classes') {
@@ -2730,7 +2712,7 @@
             staff_no: document.getElementById('field_staff_no')?.value.trim(),
             name: document.getElementById('field_name')?.value.trim(),
             email: document.getElementById('field_email')?.value.trim(),
-            job_title: '教師'
+            role: document.getElementById('field_role')?.value || oldItem?.role || 'TEACHER'
           };
           const { error } = await sb.from('staffs').upsert(savedPayload, { onConflict: 'staff_no' });
           if (error) throw error;
