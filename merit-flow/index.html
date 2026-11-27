@@ -317,15 +317,37 @@
             </button>
           </div>
         </div>
+        <div class="flex flex-wrap items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+          <select id="recordsStatusFilter" onchange="renderRecordsTable()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+            <option value="all">全部審核進度</option>
+            <option value="PENDING_CLERK">待幹事審核</option>
+            <option value="PENDING_CHIEF">待組長審核</option>
+            <option value="APPROVED">已核准</option>
+            <option value="REJECTED">已退回</option>
+          </select>
+          <select id="recordsCategoryFilter" onchange="renderRecordsTable()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+            <option value="all">全部模式/類別</option>
+            <option value="GENERAL">一般獎懲</option>
+            <option value="INDIVIDUAL">模式2 個別設定</option>
+            <option value="CADRE">班級幹部</option>
+            <option value="ASSISTANT">小老師</option>
+          </select>
+          <div class="relative flex-1 min-w-[180px]">
+            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="recordsSearchInput" oninput="renderRecordsTable()" placeholder="搜尋單號、條款、提報人、事由..." class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <button type="button" onclick="resetRecordsFilters()" class="text-xs bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 font-bold px-2.5 py-1.5 rounded-lg transition cursor-pointer">清除篩選</button>
+          <span id="recordsFilteredCountBadge" class="text-[11px] bg-white text-slate-600 border border-slate-200 font-bold px-2.5 py-1 rounded-full">共 0 件</span>
+        </div>
         <div class="overflow-x-auto rounded-xl border border-slate-100">
-          <table class="w-full text-left text-sm min-w-[850px]">
-            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs">
+          <table class="w-full text-left text-sm min-w-[920px]">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs whitespace-nowrap">
               <tr>
                 <th class="p-3.5">申請單號 (MMDDhhmmss)</th>
                 <th class="p-3.5">人數</th>
                 <th class="p-3.5">法規條款 / 模式</th>
                 <th class="p-3.5">提報人員</th>
-                <th class="p-3.5">事由說明摘要</th>
+                <th class="p-3.5 min-w-[220px]">事由說明摘要</th>
                 <th class="p-3.5">審核進度</th>
                 <th class="p-3.5 text-right">操作</th>
               </tr>
@@ -424,6 +446,7 @@
             </div>
           </div>
           <div id="adminStandardToolbar" class="flex items-center gap-2 flex-wrap">
+            <select id="adminTabFilter" onchange="renderAdminTable()" class="hidden border border-slate-300 bg-white text-xs px-2.5 py-1.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-700 cursor-pointer"></select>
             <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="即時搜尋資料..." class="border border-slate-300 text-xs px-3 py-1.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-40 sm:w-48">
             <input type="file" id="adminTabImportInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleAdminTabImport(event)">
             <button onclick="document.getElementById('adminTabImportInput').click()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-sm" title="匯入 Excel/CSV 至目前分頁">📥 匯入本表</button>
@@ -437,8 +460,8 @@
           <span id="adminTabCountBadge" class="font-bold text-slate-800">共 0 筆</span>
         </div>
         <div id="adminStandardTableWrap" class="overflow-x-auto rounded-xl border border-slate-100 min-h-[300px]">
-          <table class="w-full text-left text-xs sm:text-sm">
-            <thead id="adminTableHeader" class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs"></thead>
+          <table class="w-full text-left text-xs sm:text-sm min-w-[680px]">
+            <thead id="adminTableHeader" class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs whitespace-nowrap"></thead>
             <tbody id="adminTableBody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
@@ -455,22 +478,27 @@
                 <button type="button" id="adminRoleFilterAdmin" onclick="setAdminStaffRoleFilter('admin')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition cursor-pointer">僅管理員</button>
                 <button type="button" id="adminRoleFilterTeacher" onclick="setAdminStaffRoleFilter('teacher')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition cursor-pointer">教師</button>
               </div>
-              <div class="relative">
+              <select id="adminStaffPwdFilter" onchange="renderAdminStaffControlTable()" class="text-xs bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer">
+                <option value="all">全部密碼狀態</option>
+                <option value="set">🔑 已設密碼</option>
+                <option value="unset">尚未設密碼</option>
+              </select>
+              <div class="relative w-full sm:w-auto">
                 <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
                 <input id="adminStaffSearchInput" type="text" oninput="renderAdminStaffControlTable()" placeholder="搜尋教師姓名、編號或 Email..."
-                  class="text-xs bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 w-64 outline-none focus:ring-2 focus:ring-purple-400">
+                  class="text-xs bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 w-full sm:w-64 outline-none focus:ring-2 focus:ring-purple-400">
               </div>
             </div>
           </div>
           <div class="overflow-x-auto border border-slate-200 rounded-xl max-h-[580px] overflow-y-auto">
-            <table class="w-full text-left border-collapse text-xs">
-              <thead class="bg-slate-50 text-slate-600 font-bold sticky top-0 z-10 border-b border-slate-200">
+            <table class="w-full text-left border-collapse text-xs min-w-[720px]">
+              <thead class="bg-slate-50 text-slate-600 font-bold sticky top-0 z-10 border-b border-slate-200 whitespace-nowrap">
                 <tr>
-                  <th class="p-3">教職員編號</th>
-                  <th class="p-3">姓名</th>
-                  <th class="p-3 hidden sm:table-cell">Email</th>
-                  <th class="p-3">目前權限</th>
-                  <th class="p-3 text-right">一鍵操作</th>
+                  <th class="p-3 w-28">教職員編號</th>
+                  <th class="p-3 min-w-[160px]">姓名</th>
+                  <th class="p-3 hidden sm:table-cell min-w-[200px]">Email</th>
+                  <th class="p-3 w-32">目前權限</th>
+                  <th class="p-3 text-right w-52">一鍵操作</th>
                 </tr>
               </thead>
               <tbody id="adminStaffControlBody" class="divide-y divide-slate-100"></tbody>
@@ -953,6 +981,13 @@
     let mode2StudentMap = {};
     let adminStaffRoleFilter = 'all';
     let isForcePasswordSetup = false;
+    function getSessionToken() {
+      return localStorage.getItem('meritflow_session_token') || '';
+    }
+    function setSessionToken(token) {
+      if (token) localStorage.setItem('meritflow_session_token', token);
+      else localStorage.removeItem('meritflow_session_token');
+    }
     function openUserPasswordModal(force = false) {
       if (!currentStaff) return;
       isForcePasswordSetup = !!force;
@@ -981,23 +1016,29 @@
     async function enforceAdminPasswordIfUnset() {
       if (!currentStaff || currentStaff.role !== 'ADMIN') return;
       try {
-        const { data } = await sb.from('staffs').select('password').eq('staff_no', currentStaff.staff_no).maybeSingle();
-        if (data && !(data.password || '').trim()) {
+        const token = getSessionToken();
+        if (!token) return;
+        const { data } = await sb.rpc('meritflow_get_session', { p_token: token });
+        if (data?.ok && data.staff && !data.staff.has_password) {
           openUserPasswordModal(true);
         }
       } catch (e) {}
     }
     async function saveStaffPasswordToDb(staffNo, newPwd) {
-      const { error } = await sb.from('staffs').update({ password: newPwd }).eq('staff_no', staffNo);
-      if (error) {
-        if ((error.message || '').includes('password') || error.code === '42703' || error.code === 'PGRST204') {
-          throw new Error('Supabase 的 staffs 資料表尚未新增 password 欄位！請至 Supabase SQL Editor 執行：ALTER TABLE public.staffs ADD COLUMN IF NOT EXISTS password text;');
-        }
-        throw error;
-      }
+      const token = getSessionToken();
+      if (!token) throw new Error('登入憑證已失效，請重新登入！');
+      const pwdHash = await hashAdminPassword(newPwd);
+      const isSelf = String(staffNo || '').trim().toLowerCase() === String(currentStaff?.staff_no || '').trim().toLowerCase();
+      const { error } = isSelf
+        ? await sb.rpc('meritflow_change_my_password', { p_token: token, p_new_password_hash: pwdHash })
+        : await sb.rpc('meritflow_admin_set_staff_password', { p_token: token, p_target_staff_no: staffNo, p_new_password_hash: pwdHash });
+      if (error) throw error;
       const target = (allStaffs || []).find(s => String(s.staff_no || '').toLowerCase() === String(staffNo).toLowerCase());
-      if (target) target.password = newPwd;
+      if (target) target.has_password = true;
       renderAdminStaffControlTable();
+      if (currentActiveTab === 'admin' && currentAdminDataTab === 'staffs') {
+        renderAdminTable();
+      }
     }
     async function saveUserPassword(e) {
       e.preventDefault();
@@ -1071,6 +1112,7 @@
       const countEl = document.getElementById('adminStaffControlCount');
       if (!tbody) return;
       const kw = (document.getElementById('adminStaffSearchInput')?.value || '').trim().toLowerCase();
+      const pwdFilter = document.getElementById('adminStaffPwdFilter')?.value || 'all';
       let list = (allStaffs || []).slice().sort((a, b) => {
         const aAdm = isStaffAdmin(a.staff_no) ? 0 : 1;
         const bAdm = isStaffAdmin(b.staff_no) ? 0 : 1;
@@ -1081,6 +1123,11 @@
         list = list.filter(st => isStaffAdmin(st.staff_no));
       } else if (adminStaffRoleFilter === 'teacher') {
         list = list.filter(st => !isStaffAdmin(st.staff_no));
+      }
+      if (pwdFilter === 'set') {
+        list = list.filter(st => Boolean(st.has_password || (st.password && String(st.password).trim())));
+      } else if (pwdFilter === 'unset') {
+        list = list.filter(st => !(st.has_password || (st.password && String(st.password).trim())));
       }
       if (kw) {
         list = list.filter(st =>
@@ -1098,22 +1145,22 @@
         const code = String(st.staff_no || '').trim();
         const isAdm = isStaffAdmin(code);
         const roleBadge = isAdm
-          ? '<span class="inline-flex items-center gap-1 text-[11px] bg-purple-100 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full font-bold">👑 系統管理員</span>'
-          : '<span class="inline-flex items-center gap-1 text-[11px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full font-semibold">教師</span>';
-        const pwdBadge = (st.password && String(st.password).trim())
-          ? '<span class="ml-1.5 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-semibold">🔑 已設密碼</span>'
+          ? '<span class="inline-flex items-center gap-1 text-[11px] bg-purple-100 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full font-bold whitespace-nowrap">👑 系統管理員</span>'
+          : '<span class="inline-flex items-center gap-1 text-[11px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full font-semibold whitespace-nowrap">教師</span>';
+        const pwdBadge = (st.has_password || (st.password && String(st.password).trim()))
+          ? '<span class="ml-1.5 inline-block text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">🔑 已設密碼</span>'
           : '';
-        const pwdBtn = `<button type="button" onclick="adminSetStaffPassword('${code}', '${String(st.name || '').replace(/'/g, "\\'")}')" class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 font-bold px-2.5 py-1.5 rounded-xl transition cursor-pointer mr-1.5">🔑 設密碼</button>`;
+        const pwdBtn = `<button type="button" onclick="adminSetStaffPassword('${code}', '${String(st.name || '').replace(/'/g, "\\'")}')" class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 font-bold px-2.5 py-1.5 rounded-xl transition cursor-pointer mr-1.5 whitespace-nowrap">🔑 設密碼</button>`;
         const actionBtn = isAdm
-          ? `${pwdBtn}<button type="button" onclick="revokeAdminPermission('${code}')" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-1.5 rounded-xl transition cursor-pointer">✕ 撤銷權限</button>`
-          : `${pwdBtn}<button type="button" onclick="grantAdminPermissionByCode('${code}')" class="text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs transition cursor-pointer">➕ 設為管理員</button>`;
+          ? `${pwdBtn}<button type="button" onclick="revokeAdminPermission('${code}')" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-1.5 rounded-xl transition cursor-pointer whitespace-nowrap">✕ 撤銷權限</button>`
+          : `${pwdBtn}<button type="button" onclick="grantAdminPermissionByCode('${code}')" class="text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs transition cursor-pointer whitespace-nowrap">➕ 設為管理員</button>`;
         return `
           <tr class="hover:bg-slate-50/80 transition">
-            <td class="p-3 font-mono font-bold text-slate-800">${code}</td>
-            <td class="p-3 font-bold text-slate-900">${st.name || '-'}${pwdBadge}</td>
-            <td class="p-3 text-slate-500 hidden sm:table-cell">${st.email || '-'}</td>
-            <td class="p-3">${roleBadge}</td>
-            <td class="p-3 text-right">${actionBtn}</td>
+            <td class="p-3 font-mono font-bold text-slate-800 whitespace-nowrap">${code}</td>
+            <td class="p-3 font-bold text-slate-900 whitespace-nowrap">${st.name || '-'}${pwdBadge}</td>
+            <td class="p-3 text-slate-500 hidden sm:table-cell whitespace-nowrap">${st.email || '-'}</td>
+            <td class="p-3 whitespace-nowrap">${roleBadge}</td>
+            <td class="p-3 text-right whitespace-nowrap">${actionBtn}</td>
           </tr>
         `;
       }).join('');
@@ -1148,13 +1195,14 @@
     async function updateStaffRoleToDb(staffNo, nextRole) {
       const code = String(staffNo || '').trim().toLowerCase();
       const normalizedRole = String(nextRole || 'TEACHER').trim().toUpperCase() === 'ADMIN' ? 'ADMIN' : 'TEACHER';
-      const { error } = await sb.from('staffs').update({ role: normalizedRole }).eq('staff_no', code);
-      if (error) {
-        if ((error.message || '').includes('role') || error.code === '42703' || error.code === 'PGRST204') {
-          throw new Error('Supabase 的 staffs 資料表尚未新增 role 欄位！請至 Supabase SQL Editor 執行：ALTER TABLE public.staffs ADD COLUMN IF NOT EXISTS role text DEFAULT \'TEACHER\';');
-        }
-        throw error;
-      }
+      const token = getSessionToken();
+      if (!token) throw new Error('登入憑證已失效，請重新登入！');
+      const { error } = await sb.rpc('meritflow_admin_set_staff_role', {
+        p_token: token,
+        p_target_staff_no: code,
+        p_role: normalizedRole
+      });
+      if (error) throw error;
       const target = (allStaffs || []).find(s => String(s.staff_no || '').trim().toLowerCase() === code);
       if (target) target.role = normalizedRole;
       renderAdminWhitelist();
@@ -1275,12 +1323,41 @@
       if (yrEl) yrEl.value = acad.schoolYear;
       if (semEl) semEl.value = String(acad.semester);
       const savedUser = localStorage.getItem('meritflow_staff');
-      if (savedUser) {
+      const sessionToken = getSessionToken();
+      if (savedUser && sessionToken) {
         currentStaff = JSON.parse(savedUser);
+        let needsForcePwd = false;
+        let sessionValid = false;
+        try {
+          const { data: sessRes, error: sessErr } = await sb.rpc('meritflow_get_session', { p_token: sessionToken });
+          if (!sessErr && sessRes?.ok && sessRes.staff) {
+            sessionValid = true;
+            currentStaff = {
+              staff_no: sessRes.staff.staff_no,
+              name: sessRes.staff.name,
+              email: sessRes.staff.email,
+              role: sessRes.staff.role
+            };
+            localStorage.setItem('meritflow_staff', JSON.stringify(currentStaff));
+            needsForcePwd = sessRes.staff.role === 'ADMIN' && !sessRes.staff.has_password;
+          }
+        } catch (e) {}
+        if (!sessionValid) {
+          localStorage.removeItem('meritflow_staff');
+          setSessionToken('');
+          currentStaff = null;
+          showAuth();
+          return;
+        }
         renderDashboard();
         await resolveAndApplyRoute();
-        await enforceAdminPasswordIfUnset();
+        if (needsForcePwd) {
+          openUserPasswordModal(true);
+        }
       } else {
+        localStorage.removeItem('meritflow_staff');
+        setSessionToken('');
+        currentStaff = null;
         showAuth();
       }
     }
@@ -1499,89 +1576,51 @@
         return;
       }
       const inputHash = await hashAdminPassword(password);
-      if (cleanAccount === 'admin') {
-        const { data: adminRow } = await sb.from('staffs').select('*').eq('staff_no', 'admin').maybeSingle();
-        const adminDbPwd = (adminRow?.password || '').trim();
-        const isAdminMatched = adminDbPwd
-          ? ((password === adminDbPwd) || (/^[0-9a-f]{64}$/i.test(adminDbPwd) && inputHash === adminDbPwd.toLowerCase()))
-          : !password;
-        if (!isAdminMatched) {
-          await logSystemEvent('LOGIN_FAILED', '登入失敗：帳號「admin」（密碼錯誤）', {
-            actorName: 'admin',
+      const { data: loginRes, error: loginErr } = await sb.rpc('meritflow_login', {
+        p_staff_no: cleanAccount,
+        p_password: password,
+        p_password_hash: inputHash
+      });
+      if (loginErr || !loginRes) {
+        alert(`登入連線失敗：${loginErr?.message || '請確認是否已在 Supabase 執行 security_rpc_setup.sql'}`);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>登入系統</span> <i class="fa-solid fa-arrow-right text-xs"></i>';
+        }
+        return;
+      }
+      if (!loginRes.ok) {
+        if (loginRes.reason === 'NOT_FOUND') {
+          await logSystemEvent('LOGIN_FAILED', `登入失敗：查無教職員帳號「${cleanAccount}」`, {
+            actorName: cleanAccount,
             actorRole: 'GUEST'
           });
-          alert('帳號或密碼錯誤！請確認密碼是否正確。');
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<span>登入系統</span> <i class="fa-solid fa-arrow-right text-xs"></i>';
-          }
-          return;
-        }
-        currentStaff = {
-          staff_no: 'admin',
-          name: '系統管理員',
-          role: 'ADMIN',
-          email: 'admin@sshs.tc.edu.tw'
-        };
-        localStorage.setItem('meritflow_staff', JSON.stringify(currentStaff));
-        await logAdminAction('LOGIN', '登入系統');
-        renderDashboard();
-        await resolveAndApplyRoute();
-        if (!adminDbPwd) {
-          openUserPasswordModal(true);
-        }
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<span>登入系統</span> <i class="fa-solid fa-arrow-right text-xs"></i>';
-        }
-        return;
-      }
-      const { data, error } = await sb
-        .from('staffs')
-        .select('*')
-        .eq('staff_no', cleanAccount)
-        .maybeSingle();
-      if (error || !data) {
-        await logSystemEvent('LOGIN_FAILED', `登入失敗：查無教職員帳號「${cleanAccount}」`, {
-          actorName: cleanAccount,
-          actorRole: 'GUEST'
-        });
-        alert(`找不到編號為「${cleanAccount}」的教職員！請確認帳號是否正確。`);
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<span>登入系統</span> <i class="fa-solid fa-arrow-right text-xs"></i>';
-        }
-        return;
-      }
-      const isAuthorizedAdmin = String(data.role || '').trim().toUpperCase() === 'ADMIN';
-      const staffPwd = (data.password || '').trim();
-      if (staffPwd) {
-        const isStaffPwdMatch = (password === staffPwd) || (/^[0-9a-f]{64}$/i.test(staffPwd) && inputHash === staffPwd.toLowerCase());
-        if (!isStaffPwdMatch) {
-          await logSystemEvent('LOGIN_FAILED', `登入失敗：帳號「${data.staff_no} ${data.name}」（密碼錯誤）`, {
-            actorName: data.name || data.staff_no,
-            actorRole: isAuthorizedAdmin ? 'ADMIN' : 'TEACHER'
+          alert(`找不到編號為「${cleanAccount}」的教職員！請確認帳號是否正確。`);
+        } else {
+          await logSystemEvent('LOGIN_FAILED', `登入失敗：帳號「${loginRes.staff?.staff_no || cleanAccount} ${loginRes.staff?.name || ''}」（密碼錯誤）`, {
+            actorName: loginRes.staff?.name || cleanAccount,
+            actorRole: loginRes.staff?.role || 'GUEST'
           });
           alert('帳號或密碼錯誤！請確認密碼是否正確。');
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<span>登入系統</span> <i class="fa-solid fa-arrow-right text-xs"></i>';
-          }
-          return;
         }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>登入系統</span> <i class="fa-solid fa-arrow-right text-xs"></i>';
+        }
+        return;
       }
-      const userRole = isAuthorizedAdmin ? 'ADMIN' : 'TEACHER';
+      setSessionToken(loginRes.token);
       currentStaff = {
-        staff_no: data.staff_no,
-        name: data.name,
-        role: userRole,
-        email: data.email
+        staff_no: loginRes.staff.staff_no,
+        name: loginRes.staff.name,
+        role: loginRes.staff.role,
+        email: loginRes.staff.email
       };
       localStorage.setItem('meritflow_staff', JSON.stringify(currentStaff));
       await logAdminAction('LOGIN', '登入系統');
       renderDashboard();
       await resolveAndApplyRoute();
-      if (userRole === 'ADMIN' && !staffPwd) {
+      if (loginRes.staff.role === 'ADMIN' && !loginRes.staff.has_password) {
         openUserPasswordModal(true);
       }
       if (btn) {
@@ -1591,6 +1630,11 @@
     });
     async function handleLogout() {
       await logAdminAction('LOGOUT', '登出系統');
+      const token = getSessionToken();
+      if (token) {
+        try { await sb.rpc('meritflow_logout', { p_token: token }); } catch (e) {}
+      }
+      setSessionToken('');
       localStorage.removeItem('meritflow_staff');
       currentStaff = null;
       if (window.location.hash) {
@@ -1877,8 +1921,15 @@
       printPdfAdvice(newAppNo);
     }
     async function loadStaffs() {
-      const { data } = await sb.from('staffs').select('*').order('staff_no');
-      allStaffs = (data || []).filter(st => (st.staff_no || '').toLowerCase() !== 'admin');
+      const token = getSessionToken();
+      if (!token) {
+        allStaffs = [];
+        return;
+      }
+      const { data, error } = await sb.rpc('meritflow_list_staffs', { p_token: token });
+      if (!error && Array.isArray(data)) {
+        allStaffs = data.filter(st => (st.staff_no || '').toLowerCase() !== 'admin');
+      }
       updateAdminStats();
       renderAdminWhitelist();
       renderAdminStaffControlTable();
@@ -2178,11 +2229,53 @@
       });
       const searchInput = document.getElementById('adminSearchInput');
       if (searchInput) searchInput.value = '';
+      populateAdminTabFilter(tabName);
       renderAdminTable();
       if (updateHash && !isHandlingHashChange && currentActiveTab === 'admin') {
         const targetHash = '#admin/' + tabName;
         if (window.location.hash !== targetHash) window.location.hash = targetHash;
       }
+    }
+    function populateAdminTabFilter(tabName) {
+      const sel = document.getElementById('adminTabFilter');
+      if (!sel) return;
+      const prevVal = sel.dataset.tab === tabName ? sel.value : '';
+      sel.dataset.tab = tabName;
+      let options = [];
+      let defaultLabel = '全部';
+      if (tabName === 'students') {
+        defaultLabel = '全部班級';
+        options = [...new Set((allStudents || []).map(s => s.class_name).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+      } else if (tabName === 'course_assignments') {
+        defaultLabel = '全部班級';
+        options = [...new Set((allCourseAssignments || []).map(c => c.class_name).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+      } else if (tabName === 'staffs') {
+        defaultLabel = '全部身份';
+        options = [{ value: 'ADMIN', label: '👑 系統管理員' }, { value: 'TEACHER', label: '教師' }];
+      } else if (tabName === 'rules') {
+        defaultLabel = '全部獎懲種類';
+        options = [...new Set((allRules || []).map(r => r.level).filter(Boolean))];
+      } else if (tabName === 'cadre_roles') {
+        defaultLabel = '全部類別';
+        options = [...new Set((allCadreRoles || []).map(cr => cr.category).filter(Boolean))];
+      } else if (tabName === 'classes') {
+        defaultLabel = '全部學年度';
+        options = [...new Set((allClasses || []).map(c => String(c.school_year || '')).filter(Boolean))].sort();
+      }
+      if (!options.length) {
+        sel.innerHTML = '';
+        sel.value = '';
+        sel.classList.add('hidden');
+        return;
+      }
+      const optHtml = options.map(opt => {
+        const val = typeof opt === 'string' ? opt : opt.value;
+        const lbl = typeof opt === 'string' ? opt : opt.label;
+        return `<option value="${val}">${lbl}</option>`;
+      }).join('');
+      sel.innerHTML = `<option value="">${defaultLabel}</option>${optHtml}`;
+      sel.value = options.some(o => (typeof o === 'string' ? o : o.value) === prevVal) ? prevVal : '';
+      sel.classList.remove('hidden');
     }
     function renderAdminTable() {
       const isAdminsSubTab = currentAdminDataTab === 'admins';
@@ -2195,6 +2288,11 @@
         renderAdminStaffControlTable();
         return;
       }
+      const filterEl = document.getElementById('adminTabFilter');
+      if (filterEl && filterEl.dataset.tab !== currentAdminDataTab) {
+        populateAdminTabFilter(currentAdminDataTab);
+      }
+      const filterVal = filterEl?.value || '';
       const searchKey = document.getElementById('adminSearchInput')?.value.trim().toLowerCase() || '';
       const thead = document.getElementById('adminTableHeader');
       const tbody = document.getElementById('adminTableBody');
@@ -2210,8 +2308,12 @@
       const curGuide = guideMap[currentAdminDataTab];
       const guideEl = document.getElementById('adminTabGuideText');
       const countBadgeEl = document.getElementById('adminTabCountBadge');
+      const updateFilteredCount = (shownCount) => {
+        if (!countBadgeEl || !curGuide) return;
+        const total = curGuide.data.length;
+        countBadgeEl.innerText = shownCount === total ? `共 ${total} 筆` : `顯示 ${shownCount} / ${total} 筆`;
+      };
       if (guideEl && curGuide) guideEl.innerText = `目前檢視：${curGuide.label}`;
-      if (countBadgeEl && curGuide) countBadgeEl.innerText = `共 ${curGuide.data.length} 筆`;
       if (currentAdminDataTab === 'students') {
         thead.innerHTML = `
           <tr>
@@ -2223,6 +2325,7 @@
           </tr>
         `;
         let list = allStudents;
+        if (filterVal) list = list.filter(s => s.class_name === filterVal);
         if (searchKey) {
           list = list.filter(s =>
             (s.name && s.name.toLowerCase().includes(searchKey)) ||
@@ -2230,17 +2333,18 @@
             (s.class_name && s.class_name.toLowerCase().includes(searchKey))
           );
         }
+        updateFilteredCount(list.length);
         if (!list.length) {
           tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無學生資料</td></tr>';
           return;
         }
         tbody.innerHTML = list.map(s => `
           <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 font-medium text-slate-800">${s.class_name || '-'}</td>
-            <td class="p-3 font-mono text-slate-600">${s.seat_no ? `${s.seat_no}號` : '-'}</td>
-            <td class="p-3 font-bold text-slate-900">${s.name}</td>
-            <td class="p-3 font-mono text-blue-700 font-semibold">${s.student_no}</td>
-            <td class="p-3 text-right space-x-1">
+            <td class="p-3 font-medium text-slate-800 whitespace-nowrap">${s.class_name || '-'}</td>
+            <td class="p-3 font-mono text-slate-600 whitespace-nowrap">${s.seat_no ? `${s.seat_no}號` : '-'}</td>
+            <td class="p-3 font-bold text-slate-900 whitespace-nowrap">${s.name}</td>
+            <td class="p-3 font-mono text-blue-700 font-semibold whitespace-nowrap">${s.student_no}</td>
+            <td class="p-3 text-right space-x-1 whitespace-nowrap">
               <button onclick="openAdminEditModal('students', '${s.student_no}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
               <button onclick="deleteAdminItem('students', '${s.student_no}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
             </td>
@@ -2257,6 +2361,7 @@
           </tr>
         `;
         let list = allRules;
+        if (filterVal) list = list.filter(r => r.level === filterVal);
         if (searchKey) {
           list = list.filter(r =>
             (r.code && r.code.toLowerCase().includes(searchKey)) ||
@@ -2265,17 +2370,18 @@
             (r.legacy_code && r.legacy_code.toLowerCase().includes(searchKey))
           );
         }
+        updateFilteredCount(list.length);
         if (!list.length) {
           tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無法規條款</td></tr>';
           return;
         }
         tbody.innerHTML = list.map(r => `
           <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 font-mono font-bold text-blue-700">${r.code}</td>
-            <td class="p-3 font-mono text-slate-500">${r.legacy_code || '-'}</td>
-            <td class="p-3 font-medium">${r.level} (${r.points || 1}次)</td>
-            <td class="p-3 text-slate-700 max-w-lg whitespace-normal break-words leading-relaxed">${r.description}</td>
-            <td class="p-3 text-right space-x-1">
+            <td class="p-3 font-mono font-bold text-blue-700 whitespace-nowrap">${r.code}</td>
+            <td class="p-3 font-mono text-slate-500 whitespace-nowrap">${r.legacy_code || '-'}</td>
+            <td class="p-3 font-medium whitespace-nowrap">${r.level} (${r.points || 1}次)</td>
+            <td class="p-3 text-slate-700 min-w-[240px] max-w-lg whitespace-normal break-words leading-relaxed">${r.description}</td>
+            <td class="p-3 text-right space-x-1 whitespace-nowrap">
               <button onclick="openAdminEditModal('rules', '${r.code}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
               <button onclick="deleteAdminItem('rules', '${r.code}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
             </td>
@@ -2286,10 +2392,13 @@
           <tr>
             <th class="p-3">教職員編號</th>
             <th class="p-3">姓名</th>
+            <th class="p-3 hidden sm:table-cell">Email</th>
             <th class="p-3 text-right">操作</th>
           </tr>
         `;
         let list = allStaffs;
+        if (filterVal === 'ADMIN') list = list.filter(st => isStaffAdmin(st.staff_no));
+        else if (filterVal === 'TEACHER') list = list.filter(st => !isStaffAdmin(st.staff_no));
         if (searchKey) {
           list = list.filter(st =>
             (st.name && st.name.toLowerCase().includes(searchKey)) ||
@@ -2297,8 +2406,9 @@
             (st.email && st.email.toLowerCase().includes(searchKey))
           );
         }
+        updateFilteredCount(list.length);
         if (!list.length) {
-          tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-xs text-slate-400">查無教師資料</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-400">查無教師資料</td></tr>';
           return;
         }
         tbody.innerHTML = list.map(st => {
@@ -2306,11 +2416,15 @@
           const adminBadge = isStaffAdmin(st.staff_no)
             ? '<span class="ml-1.5 text-[10px] bg-purple-100 text-purple-700 border border-purple-200 px-1.5 py-0.5 rounded font-bold">👑 管理員</span>'
             : '';
+          const pwdBadge = (st.has_password || (st.password && String(st.password).trim()))
+            ? '<span class="ml-1.5 inline-block text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">🔑 已設密碼</span>'
+            : '';
           return `
           <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 font-mono font-bold text-slate-800">${staffCode}</td>
-            <td class="p-3 font-bold text-slate-900">${st.name}${adminBadge}</td>
-            <td class="p-3 text-right space-x-1">
+            <td class="p-3 font-mono font-bold text-slate-800 whitespace-nowrap">${staffCode}</td>
+            <td class="p-3 font-bold text-slate-900 whitespace-nowrap">${st.name}${adminBadge}${pwdBadge}</td>
+            <td class="p-3 text-slate-500 text-xs hidden sm:table-cell whitespace-nowrap">${st.email || '-'}</td>
+            <td class="p-3 text-right space-x-1 whitespace-nowrap">
               <button onclick="openAdminEditModal('staffs', '${st.staff_no}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
               <button onclick="deleteAdminItem('staffs', '${st.staff_no}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
             </td>
@@ -2328,23 +2442,25 @@
           </tr>
         `;
         let list = allClasses;
+        if (filterVal) list = list.filter(c => String(c.school_year || '') === filterVal);
         if (searchKey) {
           list = list.filter(c =>
             (c.class_name && c.class_name.toLowerCase().includes(searchKey)) ||
             (c.juyao_code && c.juyao_code.toLowerCase().includes(searchKey))
           );
         }
+        updateFilteredCount(list.length);
         if (!list.length) {
           tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無班級資料</td></tr>';
           return;
         }
         tbody.innerHTML = list.map(c => `
           <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 font-bold text-slate-900">${c.class_name} 班</td>
-            <td class="p-3 font-mono font-bold text-blue-700">${c.juyao_code}</td>
-            <td class="p-3 font-medium">${c.school_year || '115'}</td>
-            <td class="p-3 font-medium">第 ${c.semester || 1} 學期</td>
-            <td class="p-3 text-right space-x-1">
+            <td class="p-3 font-bold text-slate-900 whitespace-nowrap">${c.class_name} 班</td>
+            <td class="p-3 font-mono font-bold text-blue-700 whitespace-nowrap">${c.juyao_code}</td>
+            <td class="p-3 font-medium whitespace-nowrap">${c.school_year || '115'}</td>
+            <td class="p-3 font-medium whitespace-nowrap">第 ${c.semester || 1} 學期</td>
+            <td class="p-3 text-right space-x-1 whitespace-nowrap">
               <button onclick="openAdminEditModal('classes', '${c.juyao_code}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
               <button onclick="deleteAdminItem('classes', '${c.juyao_code}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
             </td>
@@ -2361,6 +2477,7 @@
           </tr>
         `;
         let list = allCadreRoles;
+        if (filterVal) list = list.filter(cr => cr.category === filterVal);
         if (searchKey) {
           list = list.filter(cr =>
             (cr.role_code && cr.role_code.toLowerCase().includes(searchKey)) ||
@@ -2368,17 +2485,18 @@
             (cr.category && cr.category.toLowerCase().includes(searchKey))
           );
         }
+        updateFilteredCount(list.length);
         if (!list.length) {
           tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無幹部角色資料</td></tr>';
           return;
         }
         tbody.innerHTML = list.map(cr => `
           <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 font-mono font-bold text-slate-700">${cr.role_code}</td>
-            <td class="p-3 font-bold text-amber-900">${cr.role_name}</td>
-            <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-bold ${cr.category.includes('小老師') ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-800'}">${cr.category}</span></td>
-            <td class="p-3 font-mono text-slate-500">${cr.semester_code}</td>
-            <td class="p-3 text-right space-x-1">
+            <td class="p-3 font-mono font-bold text-slate-700 whitespace-nowrap">${cr.role_code}</td>
+            <td class="p-3 font-bold text-amber-900 whitespace-nowrap">${cr.role_name}</td>
+            <td class="p-3 whitespace-nowrap"><span class="px-2 py-0.5 rounded text-[11px] font-bold ${cr.category.includes('小老師') ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-800'}">${cr.category}</span></td>
+            <td class="p-3 font-mono text-slate-500 whitespace-nowrap">${cr.semester_code}</td>
+            <td class="p-3 text-right space-x-1 whitespace-nowrap">
               <button onclick="openAdminEditModal('cadre_roles', '${cr.id || cr.role_code}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
               <button onclick="deleteAdminItem('cadre_roles', '${cr.id || cr.role_code}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
             </td>
@@ -2395,6 +2513,7 @@
           </tr>
         `;
         let list = allCourseAssignments;
+        if (filterVal) list = list.filter(ca => ca.class_name === filterVal);
         if (searchKey) {
           list = list.filter(ca =>
             (ca.class_name && ca.class_name.toLowerCase().includes(searchKey)) ||
@@ -2402,6 +2521,7 @@
             (ca.teacher_name && ca.teacher_name.toLowerCase().includes(searchKey))
           );
         }
+        updateFilteredCount(list.length);
         if (!list.length) {
           tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">查無配課名冊資料</td></tr>';
           return;
@@ -2413,11 +2533,11 @@
             : (matchedStaff?.staff_no || (matchedStaff?.email ? matchedStaff.email.split('@')[0] : '-'));
           return `
           <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 font-bold text-slate-800">${ca.class_name} 班</td>
-            <td class="p-3 font-bold text-emerald-800">${ca.subject_name}</td>
-            <td class="p-3 font-medium text-slate-900">${ca.teacher_name}</td>
-            <td class="p-3 font-mono text-slate-500 text-xs">${rawCode}</td>
-            <td class="p-3 text-right space-x-1">
+            <td class="p-3 font-bold text-slate-800 whitespace-nowrap">${ca.class_name} 班</td>
+            <td class="p-3 font-bold text-emerald-800 whitespace-nowrap">${ca.subject_name}</td>
+            <td class="p-3 font-medium text-slate-900 whitespace-nowrap">${ca.teacher_name}</td>
+            <td class="p-3 font-mono text-slate-500 text-xs whitespace-nowrap">${rawCode}</td>
+            <td class="p-3 text-right space-x-1 whitespace-nowrap">
               <button onclick="openAdminEditModal('course_assignments', '${ca.id}')" class="text-xs bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2.5 py-1 rounded font-medium transition">✏️ 編輯</button>
               <button onclick="deleteAdminItem('course_assignments', '${ca.id}')" class="text-xs bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-2.5 py-1 rounded font-medium transition">🗑️ 刪除</button>
             </td>
@@ -2642,7 +2762,7 @@
       const fieldLabels = {
         student_no: '學號', name: '姓名', class_name: '班級', seat_no: '座號',
         code: '代碼', legacy_code: '巨耀代碼', level: '類別', points: '額度', description: '事由',
-        staff_no: '教職員編號', email: 'Email',
+        staff_no: '教職員編號', email: 'Email', role: '系統身份',
         juyao_code: '巨耀代碼', school_year: '學年度', semester: '學期',
         role_code: '角色代碼', role_name: '幹部職稱', category: '類別', semester_code: '適用學期',
         subject_name: '學科名稱', teacher_name: '任課教師', teacher_email: '教師Email'
@@ -2666,7 +2786,7 @@
       }
       const diffs = [];
       for (const k of Object.keys(newObj)) {
-        if (k === 'id' || k === 'job_title' || k === 'type' || k === 'article' || k === 'clause') continue;
+        if (k === 'id' || k === 'type' || k === 'article' || k === 'clause') continue;
         const beforeVal = oldObj[k] ?? '';
         const afterVal = newObj[k] ?? '';
         if (String(beforeVal) !== String(afterVal)) {
@@ -2714,7 +2834,13 @@
             email: document.getElementById('field_email')?.value.trim(),
             role: document.getElementById('field_role')?.value || oldItem?.role || 'TEACHER'
           };
-          const { error } = await sb.from('staffs').upsert(savedPayload, { onConflict: 'staff_no' });
+          const { error } = await sb.rpc('meritflow_admin_upsert_staff', {
+            p_token: getSessionToken(),
+            p_staff_no: savedPayload.staff_no,
+            p_name: savedPayload.name,
+            p_email: savedPayload.email,
+            p_role: savedPayload.role
+          });
           if (error) throw error;
           await loadStaffs();
         } else if (currentAdminDataTab === 'classes') {
@@ -3076,11 +3202,17 @@
       URL.revokeObjectURL(url);
     }
     async function overwriteTableData(tableName, rows, keyCol, onConflictKey) {
-      const protectedVal = tableName === 'staffs' ? 'admin' : '___none___';
-      const filteredRows = tableName === 'staffs'
-        ? (rows || []).filter(r => String(r[keyCol] || '').toLowerCase() !== 'admin')
-        : (rows || []);
-      const { error: delErr } = await sb.from(tableName).delete().neq(keyCol, protectedVal);
+      if (tableName === 'staffs') {
+        const filteredStaffRows = (rows || []).filter(r => String(r[keyCol] || '').toLowerCase() !== 'admin');
+        const { data: count, error } = await sb.rpc('meritflow_admin_overwrite_staffs', {
+          p_token: getSessionToken(),
+          p_rows: filteredStaffRows
+        });
+        if (error) throw error;
+        return { count: count ?? filteredStaffRows.length, mode: 'overwrite' };
+      }
+      const { error: delErr } = await sb.from(tableName).delete().neq(keyCol, '___none___');
+      const filteredRows = rows || [];
       if (!delErr) {
         if (filteredRows.length > 0) {
           for (let i = 0; i < filteredRows.length; i += 300) {
@@ -3122,7 +3254,10 @@
           if (error) throw error;
           await loadRules();
         } else if (type === 'staffs') {
-          const { error } = await sb.from('staffs').delete().eq('staff_no', keyId);
+          const { error } = await sb.rpc('meritflow_admin_delete_staff', {
+            p_token: getSessionToken(),
+            p_target_staff_no: keyId
+          });
           if (error) throw error;
           await loadStaffs();
         } else if (type === 'classes') {
@@ -3205,7 +3340,7 @@
           if (error) throw error;
           await loadRules();
         } else if (currentAdminDataTab === 'staffs') {
-          const { error } = await sb.from('staffs').delete().neq('staff_no', 'admin');
+          const { error } = await sb.rpc('meritflow_admin_clear_staffs', { p_token: getSessionToken() });
           if (error) throw error;
           await loadStaffs();
         } else if (currentAdminDataTab === 'classes') {
@@ -3378,6 +3513,7 @@
           groupedApplications[appNo] = {
             appNo: r.application_no || '無單號',
             proposer_name: mainApp.proposer_name || r.proposer_name,
+            category: mainApp.category || r.category || 'GENERAL',
             rule_code: mainApp.rule_code || r.rule_code,
             level: r.merit_rules?.level || '',
             points: r.merit_rules?.points || 1,
@@ -3393,11 +3529,55 @@
         }
         groupedApplications[appNo].records.push(r);
       });
+      renderRecordsTable();
+      updateAdminStats();
+    }
+    function resetRecordsFilters() {
+      const s = document.getElementById('recordsStatusFilter');
+      const c = document.getElementById('recordsCategoryFilter');
+      const q = document.getElementById('recordsSearchInput');
+      if (s) s.value = 'all';
+      if (c) c.value = 'all';
+      if (q) q.value = '';
+      renderRecordsTable();
+    }
+    function renderRecordsTable() {
       const tbody = document.getElementById('applicationGroupsTableBody');
       if (!tbody) return;
-      const groupList = Object.values(groupedApplications);
+      const allGroups = Object.values(groupedApplications || {});
+      const statusFilter = document.getElementById('recordsStatusFilter')?.value || 'all';
+      const categoryFilter = document.getElementById('recordsCategoryFilter')?.value || 'all';
+      const kw = (document.getElementById('recordsSearchInput')?.value || '').trim().toLowerCase();
+      let groupList = allGroups;
+      if (statusFilter !== 'all') {
+        groupList = groupList.filter(g => g.status === statusFilter);
+      }
+      if (categoryFilter !== 'all') {
+        groupList = groupList.filter(g => {
+          const isMultiRules = new Set(g.records.map(r => r.rule_code)).size > 1;
+          const effectiveCat = isMultiRules ? 'INDIVIDUAL' : (g.category || 'GENERAL');
+          return effectiveCat === categoryFilter;
+        });
+      }
+      if (kw) {
+        groupList = groupList.filter(g =>
+          (g.appNo && g.appNo.toLowerCase().includes(kw)) ||
+          (g.rule_code && g.rule_code.toLowerCase().includes(kw)) ||
+          (g.level && g.level.toLowerCase().includes(kw)) ||
+          (g.proposer_name && g.proposer_name.toLowerCase().includes(kw)) ||
+          (g.custom_reason && g.custom_reason.toLowerCase().includes(kw))
+        );
+      }
+      const badge = document.getElementById('recordsFilteredCountBadge');
+      if (badge) {
+        badge.textContent = groupList.length === allGroups.length
+          ? `共 ${allGroups.length} 件`
+          : `顯示 ${groupList.length} / ${allGroups.length} 件`;
+      }
       if (!groupList.length) {
-        const emptyMsg = currentStaff.role === 'ADMIN' ? '目前全校尚無獎懲申請案件' : '您目前尚無送出的獎懲申請案件';
+        const emptyMsg = allGroups.length
+          ? '查無符合篩選條件的獎懲申請案件'
+          : (currentStaff?.role === 'ADMIN' ? '目前全校尚無獎懲申請案件' : '您目前尚無送出的獎懲申請案件');
         tbody.innerHTML = `<tr><td colspan="7" class="p-5 text-center text-xs text-slate-400 font-medium">${emptyMsg}</td></tr>`;
         return;
       }
@@ -3406,30 +3586,29 @@
         const ruleDisplay = isMultiRules ? '【模式2 個別設定】' : `[${g.rule_code}] ${g.level} (${g.points}次)`;
         return `
           <tr class="hover:bg-slate-50 transition">
-            <td class="p-3.5">
-              <button onclick="openAppDetailModal('${g.appNo}')" class="text-xs font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
+            <td class="p-3.5 whitespace-nowrap">
+              <button onclick="openAppDetailModal('${g.appNo}')" class="text-xs font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 whitespace-nowrap">
                 📄 ${g.appNo}
               </button>
             </td>
-            <td class="p-3.5">
-              <span class="text-xs font-bold bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full border border-blue-200">${g.records.length} 人</span>
+            <td class="p-3.5 whitespace-nowrap">
+              <span class="text-xs font-bold bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full border border-blue-200 whitespace-nowrap">${g.records.length} 人</span>
             </td>
-            <td class="p-3.5 font-medium text-xs">${ruleDisplay}</td>
-            <td class="p-3.5 text-xs">${g.proposer_name}</td>
-            <td class="p-3.5 text-xs text-slate-500 max-w-sm whitespace-normal break-words leading-relaxed">${g.custom_reason || '-'}</td>
-            <td class="p-3.5">${renderStatusBadge(g.status)}</td>
-            <td class="p-3.5 text-right space-x-1">
-              <button onclick="printPdfAdvice('${g.appNo}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-1 rounded font-medium transition">
+            <td class="p-3.5 font-medium text-xs whitespace-nowrap">${ruleDisplay}</td>
+            <td class="p-3.5 text-xs whitespace-nowrap">${g.proposer_name}</td>
+            <td class="p-3.5 text-xs text-slate-500 min-w-[220px] max-w-sm whitespace-normal break-words leading-relaxed">${g.custom_reason || '-'}</td>
+            <td class="p-3.5 whitespace-nowrap">${renderStatusBadge(g.status)}</td>
+            <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
+              <button onclick="printPdfAdvice('${g.appNo}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-1 rounded font-medium transition whitespace-nowrap">
                 🖨️ 列印
               </button>
-              <button onclick="openAppDetailModal('${g.appNo}')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded font-medium transition">
+              <button onclick="openAppDetailModal('${g.appNo}')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded font-medium transition whitespace-nowrap">
                 🔍 明細
               </button>
             </td>
           </tr>
         `;
       }).join('');
-      updateAdminStats();
     }
     function openAppDetailModal(appNo, updateHash = true) {
       const group = groupedApplications[appNo];
