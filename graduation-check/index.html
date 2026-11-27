@@ -2589,11 +2589,7 @@ window.checkIsTeacherAccount = async function(cleanSid) {
 	const client = ensureDbClient();
 	if (!client) return false;
 	try {
-		const { data, error } = await client
-			.from('teacher_whitelist')
-			.select('teacher_id')
-			.ilike('teacher_id', lowerSid)
-			.maybeSingle();
+		const { data, error } = await client.rpc('grad_is_teacher_whitelisted', { p_teacher_id: lowerSid });
 		const isTeacher = !!(!error && data);
 		teacherCache.set(lowerSid, { isTeacher, timestamp: Date.now() });
 		return isTeacher;
@@ -2782,7 +2778,7 @@ window.handleAuth = async function() {
 			if (!pwd) {
 				let accountExists = false;
 				try {
-					const { data } = await client.from('grad_checks').select('student_id').eq('student_id', cleanSid).maybeSingle();
+					const { data } = await client.rpc('grad_check_account_exists', { p_student_id: cleanSid });
 					if (data) accountExists = true;
 				} catch (e) {}
 				if (!accountExists) {
@@ -2796,7 +2792,7 @@ window.handleAuth = async function() {
 			if (error) {
 				let accountExists = false;
 				try {
-					const { data } = await client.from('grad_checks').select('student_id').eq('student_id', cleanSid).maybeSingle();
+					const { data } = await client.rpc('grad_check_account_exists', { p_student_id: cleanSid });
 					if (data) accountExists = true;
 				} catch (e) {}
 				if (!accountExists) {
@@ -5150,8 +5146,8 @@ window.findTutorByYearDept = async function(yr, dept) {
 	const client = ensureDbClient();
 	if (!client || yr === '未設定' || dept === '未設定') return '未設定';
 	try {
-		const { data } = await client.from('grad_checks').select('full_name').eq('role', 'teacher').eq('entry_year', yr).eq('entry_dept', dept).maybeSingle();
-		return data?.full_name || '未設定';
+		const { data } = await client.rpc('grad_find_tutor_name', { p_entry_year: yr, p_entry_dept: dept });
+		return data || '未設定';
 	} catch (e) { return '未設定'; }
 };
 window.isUserAuthorizedForStudent = function(studentRec) {
