@@ -1043,6 +1043,13 @@
       const modal = document.getElementById('loginModal');
       if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
     }
+    function getCampSessionToken() {
+      return localStorage.getItem('xshs_camp_session_token') || '';
+    }
+    function setCampSessionToken(token) {
+      if (token) localStorage.setItem('xshs_camp_session_token', token);
+      else localStorage.removeItem('xshs_camp_session_token');
+    }
     function toggleAuth() { currentUser ? handleLogout() : openLoginModal(); }
 
     async function handleLoginSubmit(event) {
@@ -1064,27 +1071,26 @@
       if (btn) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
       
       try {
-        const { data: accounts, error } = await supabaseClient
-          .from('accounts')
-          .select('*')
-          .eq('username', u)
-          .eq('password', p);
+        const { data: loginRes, error } = await supabaseClient.rpc('camp_login', {
+          p_username: u,
+          p_password: p
+        });
 
-        if (error) {
+        if (error || !loginRes) {
           console.error('Supabase 驗證發生錯誤:', error);
-          showToast('資料庫驗證失敗，請檢查網路連線：' + (error.message || '連線錯誤'), 'error');
+          showToast('資料庫驗證失敗，請檢查網路連線：' + (error?.message || '連線錯誤'), 'error');
           return;
         }
 
-        const matchedAccount = accounts ? accounts.find(a => a.username === u && a.password === p) : null;
-
-        if (!matchedAccount) {
+        if (!loginRes.ok || !loginRes.account) {
           showToast('帳號或密碼錯誤，請重新確認大小寫！', 'error');
           return;
         }
 
-        const role = getNormalizedRole(matchedAccount.role, matchedAccount.username);
-        currentUser = { id: matchedAccount.username, name: matchedAccount.display_name || matchedAccount.username, role: role };
+        setCampSessionToken(loginRes.token);
+        const acc = loginRes.account;
+        const role = getNormalizedRole(acc.role, acc.username);
+        currentUser = { id: acc.username, name: acc.display_name || acc.username, role: role };
 
         sessionStorage.setItem('xshs_user_session', JSON.stringify(currentUser));
 
@@ -1107,11 +1113,16 @@
       }
     }
 
-    function handleLogout() {
+    async function handleLogout() {
       if (gpsWatchId !== null && navigator.geolocation) {
         navigator.geolocation.clearWatch(gpsWatchId);
         gpsWatchId = null;
       }
+      const token = getCampSessionToken();
+      if (token && supabaseClient) {
+        try { await supabaseClient.rpc('camp_logout', { p_token: token }); } catch(e) {}
+      }
+      setCampSessionToken('');
       currentUser = null;
       sessionStorage.removeItem('xshs_user_session');
       sessionStorage.removeItem('xshs_admin_tab');
@@ -1129,7 +1140,7 @@
 
     function restoreSession() {
       const savedUserStr = sessionStorage.getItem('xshs_user_session');
-      if (savedUserStr) {
+      if (savedUserStr && getCampSessionToken()) {
         try {
           currentUser = JSON.parse(savedUserStr);
           document.getElementById('loginModal').classList.add('hidden');
@@ -1864,9 +1875,9 @@
       const tbody = document.getElementById('accountsTableBody');
       if (!tbody || !supabaseClient) return;
       try {
-        const { data, error } = await supabaseClient.from('accounts').select('*').order('id', { ascending: true });
+        const { data, error } = await supabaseClient.rpc('camp_admin_list_accounts', { p_token: getCampSessionToken() });
         if (!error && data && data.length > 0) {
-          tbody.innerHTML = data.map(acc => `<tr><td class="px-3 py-2.5 font-mono text-slate-400 font-bold">#${acc.id}</td><td class="px-3 py-2.5 font-mono font-bold text-slate-900">${acc.username}</td><td class="px-3 py-2.5 text-slate-800">${acc.display_name}</td><td class="px-3 py-2.5 text-xs"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold border border-slate-200">${acc.role}</span></td><td class="px-3 py-2.5"><input type="text" id="pass_${acc.id}" value="${acc.password}" class="px-2.5 py-1 border border-slate-300 rounded-lg text-xs font-mono w-24 bg-white text-slate-900 outline-none"></td><td class="px-3 py-2.5 text-center"><button onclick="updateAccountPass('${acc.id}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold border border-amber-400 rounded-lg text-xs shadow-sm transition cursor-pointer">儲存</button></td></tr>`).join('');
+          tbody.innerHTML = data.map(acc => `<tr><td class="px-3 py-2.5 font-mono text-slate-400 font-bold">#${acc.id}</td><td class="px-3 py-2.5 font-mono font-bold text-slate-900">${acc.username}</td><td class="px-3 py-2.5 text-slate-800">${acc.display_name}</td><td class="px-3 py-2.5 text-xs"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold border border-slate-200">${acc.role}</span></td><td class="px-3 py-2.5"><input type="password" id="pass_${acc.id}" placeholder="輸入新密碼" class="px-2.5 py-1 border border-slate-300 rounded-lg text-xs font-mono w-28 bg-white text-slate-900 outline-none"></td><td class="px-3 py-2.5 text-center"><button onclick="updateAccountPass('${acc.id}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold border border-amber-400 rounded-lg text-xs shadow-sm transition cursor-pointer">儲存</button></td></tr>`).join('');
         }
       } catch(e){}
     }
@@ -1880,10 +1891,15 @@
       if (!pass) { showToast('請填寫新密碼！', 'error'); return; }
       isActionPending = true;
       try {
-        const { error } = await supabaseClient.from('accounts').update({ password: pass }).eq('id', id);
+        const { error } = await supabaseClient.rpc('camp_admin_update_password', {
+          p_token: getCampSessionToken(),
+          p_account_id: parseInt(id, 10),
+          p_new_password: pass
+        });
         if (error) throw error;
+        passInput.value = '';
         showToast('密碼已成功儲存', 'success');
-      } catch(e) { showToast('密碼儲存失敗，請檢查網路連線！', 'error'); }
+      } catch(e) { showToast('密碼儲存失敗，請檢查網路連線或管理員權限！', 'error'); }
       finally { isActionPending = false; }
     }
 
