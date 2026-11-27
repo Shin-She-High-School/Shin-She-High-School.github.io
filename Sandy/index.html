@@ -1295,6 +1295,14 @@
         }
 
         const SESSION_STORAGE_KEY = 'sshs_mall_auth_session';
+        const SANDY_TOKEN_KEY = 'sshs_mall_session_token';
+        function getSandySessionToken() {
+            return localStorage.getItem(SANDY_TOKEN_KEY) || '';
+        }
+        function setSandySessionToken(token) {
+            if (token) localStorage.setItem(SANDY_TOKEN_KEY, token);
+            else localStorage.removeItem(SANDY_TOKEN_KEY);
+        }
 
         let currentAuth = null;
         let selectedBase64Images = [];
@@ -2052,8 +2060,11 @@
                 await client.from('carts').update({ account: currentAuth.account }).eq('account', 'hold_' + currentAuth.account);
             } catch (e) {}
 
-            const { data: latestUser } = await client.from('users').select('balance').ilike('account', currentAuth.account).maybeSingle();
-            if (latestUser) currentAuth.balance = latestUser.balance;
+            const token = getSandySessionToken();
+            if (token) {
+                const { data: balVal, error: balErr } = await client.rpc('sandy_get_my_balance', { p_token: token });
+                if (!balErr && balVal !== null && balVal !== undefined) currentAuth.balance = Number(balVal);
+            }
             if (userBalEl) userBalEl.innerText = `${formatCurrency(currentAuth.balance)} 幣`;
 
             const { data: userCarts, error } = await client
@@ -3961,7 +3972,7 @@
 
         async function fetchGroupStoreNames() {
             try {
-                const { data: students } = await client.from('users').select('account, name').eq('role', 'student');
+                const { data: students } = await client.rpc('sandy_get_group_names');
                 if (students && students.length > 0) {
                     students.forEach(s => {
                         const grpNo = String(s.account).trim();
@@ -4145,7 +4156,11 @@
             }
 
             try {
-                const { error } = await client.from('users').update({ name: newName }).eq('account', targetGroup);
+                const { error } = await client.rpc('sandy_update_store_name', {
+                    p_token: getSandySessionToken(),
+                    p_account: targetGroup,
+                    p_new_name: newName
+                });
                 if (error) throw error;
 
                 groupStoreNameMap[targetGroup] = newName;
@@ -4804,12 +4819,11 @@
             }
 
             try {
-                const batchSize = 50;
-                for (let i = 0; i < parsedImportUsers.length; i += batchSize) {
-                    const batch = parsedImportUsers.slice(i, i + batchSize);
-                    const { error } = await client.from('users').upsert(batch, { onConflict: 'account' });
-                    if (error) throw error;
-                }
+                const { error } = await client.rpc('sandy_admin_upsert_users_batch', {
+                    p_token: getSandySessionToken(),
+                    p_rows: parsedImportUsers
+                });
+                if (error) throw error;
 
                 await logAuditRecord("批次匯入名單", {
                     匯入筆數: parsedImportUsers.length,
@@ -4931,9 +4945,15 @@
                     }
                     const userChangeSummary = userChanges.length > 0 ? userChanges.join('、') : '無資料異動';
 
-                    const updatePayload = { name, role, balance };
-                    if (password) updatePayload.password = password;
-                    const { error } = await client.from('users').update(updatePayload).eq('id', id);
+                    const { error } = await client.rpc('sandy_admin_save_user', {
+                        p_token: getSandySessionToken(),
+                        p_id: id,
+                        p_account: account,
+                        p_name: name,
+                        p_role: role,
+                        p_password: password || '',
+                        p_balance: balance
+                    });
                     if (error) throw error;
                     await logAuditRecord("修改使用者資料", {
                         帳號: account,
@@ -4944,8 +4964,15 @@
                     });
                     showMsg("儲存使用者帳號成功！");
                 } else {
-                    const insertPayload = { account, name, role, password, balance };
-                    const { error } = await client.from('users').insert([insertPayload]);
+                    const { error } = await client.rpc('sandy_admin_save_user', {
+                        p_token: getSandySessionToken(),
+                        p_id: null,
+                        p_account: account,
+                        p_name: name,
+                        p_role: role,
+                        p_password: password || '',
+                        p_balance: balance
+                    });
                     if (error) throw error;
                     await logAuditRecord("新增使用者", { 帳號: account, 姓名: name, 角色: role, 起始商GO幣額度: balance });
                     showMsg("儲存使用者帳號成功！");
@@ -4974,7 +5001,10 @@
             }
             if (!confirm(`確定要刪除帳號「${account}」嗎？`)) return;
             try {
-                const { error } = await client.from('users').delete().eq('id', userId);
+                const { error } = await client.rpc('sandy_admin_delete_user', {
+                    p_token: getSandySessionToken(),
+                    p_user_id: userId
+                });
                 if (error) throw error;
                 await logAuditRecord("刪除使用者", { 帳號: account });
                 showMsg(`已刪除帳號！`);
@@ -4990,7 +5020,7 @@
             if (!tbody) return;
 
             try {
-                const { data, error } = await client.from('users').select('*').order('account', { ascending: true });
+                const { data, error } = await client.rpc('sandy_list_users', { p_token: getSandySessionToken() });
                 if (error) throw error;
 
                 const roleOrder = { admin: 1, teacher: 2, student: 3, staff: 4 };
@@ -5138,7 +5168,7 @@
 
         async function resetAllBalances() {
             if (!confirm("確定要將全體教職員的商GO幣餘額重置為 500 點嗎？")) return;
-            const { error } = await client.from('users').update({ balance: 500 }).eq('role', 'staff');
+            const { error } = await client.rpc('sandy_admin_reset_staff_balances', { p_token: getSandySessionToken() });
             if (error) {
                 showMsg("重置失敗：" + error.message, true);
                 return;
@@ -5212,9 +5242,9 @@
                 if (typeof loadTeacherMonitorOrders === 'function') loadTeacherMonitorOrders();
                 if (typeof loadMyOrders === 'function') loadMyOrders();
 
-                if (currentAuth) {
-                    const { data: latestUser } = await client.from('users').select('*').ilike('account', currentAuth.account).maybeSingle();
-                    if (latestUser) activateUserSession(latestUser);
+                if (currentAuth && getSandySessionToken()) {
+                    const { data: sessRes } = await client.rpc('sandy_get_session', { p_token: getSandySessionToken() });
+                    if (sessRes?.ok && sessRes.user) activateUserSession(sessRes.user);
                 }
             } catch (err) {
                 showMsg("重設失敗：" + err.message, true);
@@ -5276,11 +5306,11 @@
             }
             if (!allUsersList || allUsersList.length === 0) {
                 try {
-                    const { data: uData } = await client.from('users').select('*');
+                    const { data: uData } = await client.rpc('sandy_list_users', { p_token: getSandySessionToken() });
                     if (uData) allUsersList = uData;
                 } catch(e) {}
             }
-            const { data } = await client.from('audit_logs').select('*').order('created_at', { ascending: false });
+            const { data } = await client.rpc('sandy_list_audit_logs', { p_token: getSandySessionToken(), p_asc: false });
             allAuditLogs = data || [];
             renderAuditLogs(allAuditLogs);
         }
@@ -6281,7 +6311,7 @@
             `;
 
             try {
-                const { data } = await client.from('audit_logs').select('*').order('created_at', { ascending: true });
+                const { data } = await client.rpc('sandy_list_audit_logs', { p_token: getSandySessionToken(), p_asc: true });
                 const logs = data || [];
                 allAuditLogs = [...logs].reverse();
 
@@ -6466,14 +6496,13 @@
         window.refreshUserBalance = async function() {
             if (!currentAuth) return;
             try {
-                const { data: u } = await client
-                    .from('users')
-                    .select('balance')
-                    .eq('account', currentAuth.account)
-                    .maybeSingle();
-                if (u && u.balance !== undefined) {
-                    currentAuth.balance = u.balance;
-                    try { sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentAuth)); } catch(e) {}
+                const token = getSandySessionToken();
+                if (token) {
+                    const { data: balVal, error: balErr } = await client.rpc('sandy_get_my_balance', { p_token: token });
+                    if (!balErr && balVal !== null && balVal !== undefined) {
+                        currentAuth.balance = Number(balVal);
+                        try { sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentAuth)); } catch(e) {}
+                    }
                 }
             } catch(e) {}
             updateUserBalanceDisplays();
@@ -6816,19 +6845,23 @@
                 if (s) saved = JSON.parse(s);
             } catch(e) {}
 
-            if (!saved || !saved.account) {
+            const sessionToken = getSandySessionToken();
+            if (!saved || !saved.account || !sessionToken) {
                 currentAuth = null;
+                setSandySessionToken('');
+                try { sessionStorage.removeItem(SESSION_STORAGE_KEY); } catch(e) {}
                 renderAuthViews();
                 return;
             }
 
             try {
-                const { data: dbUser, error } = await client.from('users').select('*').ilike('account', saved.account).maybeSingle();
-                if (!error && dbUser) {
-                    activateUserSession(dbUser);
+                const { data: sessRes, error } = await client.rpc('sandy_get_session', { p_token: sessionToken });
+                if (!error && sessRes?.ok && sessRes.user) {
+                    activateUserSession(sessRes.user);
                     if (page) switchPage(page, false);
                 } else {
                     currentAuth = null;
+                    setSandySessionToken('');
                     sessionStorage.removeItem(SESSION_STORAGE_KEY);
                     renderAuthViews();
                 }
@@ -6859,23 +6892,25 @@
             }
 
             try {
-                const { data: usersList, error } = await client.from('users').select('*').ilike('account', rawAccount);
+                const { data: loginRes, error } = await client.rpc('sandy_login', {
+                    p_account: rawAccount,
+                    p_password: rawPassword
+                });
                 if (error) throw error;
 
-                if (!usersList || usersList.length === 0) {
-                    showLoginError("查無此帳號，請確認帳號或組別是否正確！");
-                    await logAuditRecord("登入失敗", { 嘗試帳號: rawAccount, 失敗原因: "查無此帳號" });
+                if (!loginRes || !loginRes.ok) {
+                    if (loginRes?.reason === 'NOT_FOUND') {
+                        showLoginError("查無此帳號，請確認帳號或組別是否正確！");
+                        await logAuditRecord("登入失敗", { 嘗試帳號: rawAccount, 失敗原因: "查無此帳號" });
+                    } else {
+                        showLoginError("密碼錯誤，請重新輸入！");
+                        await logAuditRecord("登入失敗", { 嘗試帳號: rawAccount, 失敗原因: "密碼錯誤" });
+                    }
                     return;
                 }
 
-                const user = usersList[0];
-                if (user.role !== 'staff' && (user.password || '').trim() !== rawPassword) {
-                    showLoginError("密碼錯誤，請重新輸入！");
-                    await logAuditRecord("登入失敗", { 嘗試帳號: rawAccount, 失敗原因: "密碼錯誤" });
-                    return;
-                }
-
-                activateUserSession(user);
+                setSandySessionToken(loginRes.token);
+                activateUserSession(loginRes.user);
                 await logAuditRecord("使用者登入", { 狀態: "登入成功" });
                 showMsg(`登入成功！`);
             } catch (err) {
@@ -6892,6 +6927,11 @@
             if (currentAuth) await logAuditRecord("使用者登出", { 狀態: "登出成功" });
             if (realtimeChannel) client.removeChannel(realtimeChannel);
 
+            const token = getSandySessionToken();
+            if (token) {
+                try { await client.rpc('sandy_logout', { p_token: token }); } catch(e) {}
+            }
+            setSandySessionToken('');
             currentAuth = null;
             try { sessionStorage.removeItem(SESSION_STORAGE_KEY); } catch(e) {}
             document.getElementById('loginAccount').value = '';
