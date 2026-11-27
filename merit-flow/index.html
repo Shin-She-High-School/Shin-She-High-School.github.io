@@ -740,7 +740,7 @@
     </div>
   </div>
   <div id="mode3WizardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 print:hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-300">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-300">
       <div class="p-4 border-b flex justify-between items-center bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
         <div>
           <div class="flex items-center gap-2">
@@ -769,38 +769,44 @@
         </div>
         <div class="flex items-center gap-1.5 flex-wrap">
           <span class="text-xs text-slate-400 font-medium">快速套用：</span>
-          <button type="button" onclick="setMode3AllRewards('嘉獎1次')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg font-bold transition shadow-sm">
+          <button type="button" onclick="setMode3AllRewards('1001')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg font-bold transition shadow-sm cursor-pointer">
             ⚡ 全設嘉獎 1 次
           </button>
-          <button type="button" onclick="setMode3AllRewards('嘉獎2次')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg font-bold transition shadow-sm">
+          <button type="button" onclick="setMode3AllRewards('1002')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg font-bold transition shadow-sm cursor-pointer">
             ⚡ 全設嘉獎 2 次
           </button>
-          <button type="button" onclick="setMode3AllRewards('NONE')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-lg font-bold transition">
+          <button type="button" onclick="setMode3AllRewards('NONE')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-lg font-bold transition cursor-pointer">
             🧹 全部清除
           </button>
         </div>
       </div>
       <div class="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/50">
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="p-3.5 bg-slate-100/70 border-b border-slate-200 flex justify-between items-center">
+          <div class="p-3.5 bg-slate-100/70 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2">
             <div class="flex items-center gap-2">
               <span class="text-sm font-bold text-slate-900">1. 班級常設幹部名冊</span>
-              <span class="text-[11px] text-slate-500">（班長、副班長、風紀、學藝、衛生、體育、總務、輔導、資訊等）</span>
+              <span class="text-[11px] text-slate-500">（先選學生再選幹部，無須保留空行；選「其他幹部」可填名稱）</span>
             </div>
-            <span id="mode3CadreCountBadge" class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold">0 個幹部職位</span>
+            <div class="flex items-center gap-2">
+              <span id="mode3CadreCountBadge" class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold">0 筆</span>
+              <button type="button" onclick="addMode3CadreRow()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded-lg font-bold transition shadow-sm cursor-pointer">
+                ➕ 新增學生幹部
+              </button>
+            </div>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs min-w-[700px]">
-              <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-semibold">
+            <table class="w-full text-left text-xs min-w-[960px]">
+              <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-semibold whitespace-nowrap">
                 <tr>
-                  <th class="p-2.5 w-32">幹部職稱</th>
-                  <th class="p-2.5 w-44">擔任學生</th>
-                  <th class="p-2.5 w-36">敘獎項目</th>
-                  <th class="p-2.5">獎勵具體事由</th>
+                  <th class="p-2.5 min-w-[195px]">1. 擔任學生</th>
+                  <th class="p-2.5 min-w-[245px]">2. 幹部職稱</th>
+                  <th class="p-2.5 min-w-[165px]">3. 敘獎項目</th>
+                  <th class="p-2.5 min-w-[260px]">4. 獎勵具體事由</th>
+                  <th class="p-2.5 w-14 text-center">移除</th>
                 </tr>
               </thead>
               <tbody id="mode3CadreTableBody" class="divide-y divide-slate-100">
-                <tr><td colspan="4" class="text-center py-6 text-slate-400">請先在上方選擇執導班級</td></tr>
+                <tr><td colspan="5" class="text-center py-6 text-slate-400">請先在上方選擇執導班級</td></tr>
               </tbody>
             </table>
           </div>
@@ -814,13 +820,13 @@
             <span id="mode3AssistantCountBadge" class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold">0 門學科</span>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs min-w-[700px]">
-              <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-semibold">
+            <table class="w-full text-left text-xs min-w-[860px]">
+              <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-semibold whitespace-nowrap">
                 <tr>
-                  <th class="p-2.5 w-48">科目名稱 / 任課教師</th>
-                  <th class="p-2.5 w-44">擔任學生</th>
-                  <th class="p-2.5 w-36">敘獎項目</th>
-                  <th class="p-2.5">獎勵具體事由</th>
+                  <th class="p-2.5 min-w-[195px]">科目名稱 / 任課教師</th>
+                  <th class="p-2.5 min-w-[195px]">擔任學生</th>
+                  <th class="p-2.5 min-w-[165px]">敘獎項目</th>
+                  <th class="p-2.5 min-w-[260px]">獎勵具體事由</th>
                 </tr>
               </thead>
               <tbody id="mode3AssistantTableBody" class="divide-y divide-slate-100">
@@ -1630,8 +1636,6 @@
         if (lvl) lvl.value = rule.level;
         const pts = document.getElementById('formPoints');
         if (pts) pts.value = rule.points || 1;
-        const rsn = document.getElementById('formReason');
-        if (rsn) rsn.value = rule.description;
       }
     }
     function onFormLevelChanged() {
@@ -1640,8 +1644,6 @@
       if (filtered.length > 0) {
         const ruleSel = document.getElementById('formRuleSelect');
         if (ruleSel) ruleSel.value = filtered[0].code;
-        const rsn = document.getElementById('formReason');
-        if (rsn) rsn.value = filtered[0].description;
       }
     }
     document.getElementById('vbaRewardForm')?.addEventListener('submit', async (e) => {
@@ -3829,26 +3831,27 @@
         default: return status;
       }
     }
-    function openMode3WizardModal(updateHash = true) {
+    async function openMode3WizardModal(updateHash = true) {
       const modal = document.getElementById('mode3WizardModal');
       if (modal) modal.classList.remove('hidden');
+      if (!allStudents.length || !allCourseAssignments.length || !allCadreRoles.length || !allClasses.length) {
+        await Promise.all([
+          allClasses.length ? Promise.resolve() : loadClasses(),
+          allCadreRoles.length ? Promise.resolve() : loadCadreRoles(),
+          allCourseAssignments.length ? Promise.resolve() : loadCourseAssignments(),
+          allStudents.length ? Promise.resolve() : loadStudents()
+        ]);
+      }
       const select = document.getElementById('mode3ClassSelect');
       const classCodesSet = new Set([
         ...allStudents.map(s => s.class_name).filter(Boolean),
-        ...allCourseAssignments.map(ca => ca.class_name).filter(Boolean)
+        ...allCourseAssignments.map(ca => ca.class_name).filter(Boolean),
+        ...allClasses.map(c => c.class_name).filter(Boolean)
       ]);
       const sortedClassCodes = [...classCodesSet].sort((a, b) => a.localeCompare(b, 'zh-Hant', { numeric: true }));
       if (select) {
         select.innerHTML = '<option value="">請選擇執導班級...</option>' +
-          sortedClassCodes.map(code => {
-            const matchedCls = allClasses.find(c =>
-              c.class_name === code || (c.juyao_code && c.juyao_code.endsWith(code))
-            );
-            const label = matchedCls
-              ? `${code} 班 (${matchedCls.class_name} · 代碼:${matchedCls.juyao_code})`
-              : `${code} 班`;
-            return `<option value="${code}">${label}</option>`;
-          }).join('');
+          sortedClassCodes.map(code => `<option value="${code}">${code}</option>`).join('');
       }
       let autoSelected = false;
       if (currentStaff) {
@@ -3892,51 +3895,130 @@
       renderMode3Assistants(className, classStudents);
       updateMode3SubmitCount();
     }
-    function renderMode3Cadres(className, classStudents) {
-      const tbody = document.getElementById('mode3CadreTableBody');
-      const badge = document.getElementById('mode3CadreCountBadge');
-      if (!tbody) return;
+    let mode3CurrentClassStudents = [];
+    function getMode3UniqueCadreRoles() {
       const roles = allCadreRoles.filter(cr => cr.category === '幹部' || cr.category.includes('幹部'));
-      if (!roles.length) {
-        if (badge) badge.innerText = '0 個幹部職位';
-        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-400">雲端資料庫尚未建置幹部職稱資料，請至系統資料管理匯入</td></tr>';
-        return;
-      }
       const uniqueRoles = [];
       const seen = new Set();
       roles.forEach(r => {
-        if (!seen.has(r.role_name)) {
-          seen.add(r.role_name);
-          uniqueRoles.push(r);
+        const displayName = r.role_name && r.role_name.includes('其他幹部')
+          ? '其他幹部：請填入幹部名稱'
+          : r.role_name;
+        if (displayName && !seen.has(displayName)) {
+          seen.add(displayName);
+          uniqueRoles.push(displayName);
         }
       });
-      if (badge) badge.innerText = `${uniqueRoles.length} 個幹部職位`;
-      const studentOptions = '<option value="">(尚未指派學生)</option>' +
-        classStudents.map(s => `<option value="${s.student_no}">${s.seat_no ? `${s.seat_no}號 ` : ''}${s.name} (${s.student_no})</option>`).join('');
-      tbody.innerHTML = uniqueRoles.map(r => `
-        <tr data-role="${r.role_name}" class="hover:bg-amber-50/40 transition">
-          <td class="p-2.5 font-bold text-amber-950 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
-            ${r.role_name}
-          </td>
-          <td class="p-2.5">
-            <select class="mode3-student-select w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-white outline-none focus:ring-1 focus:ring-amber-500 font-medium" onchange="updateMode3SubmitCount()">
-              ${studentOptions}
-            </select>
-          </td>
-          <td class="p-2.5">
-            <select class="mode3-reward-select w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-white outline-none font-bold text-slate-800" onchange="updateMode3SubmitCount()">
-              <option value="1001" selected>嘉獎 1 次</option>
-              <option value="1002">嘉獎 2 次</option>
-              <option value="2001">小功 1 次</option>
-              <option value="NONE">不獎懲 / 未達標準</option>
-            </select>
-          </td>
-          <td class="p-2.5">
-            <input type="text" class="mode3-reason-input w-full border border-slate-200 rounded-lg p-1.5 text-xs bg-white outline-none focus:ring-1 focus:ring-amber-500 text-slate-700" value="擔任 115-1 ${r.role_name} 盡心負責，表現優良">
-          </td>
-        </tr>
-      `).join('');
+      if (!uniqueRoles.some(name => name.includes('其他'))) {
+        uniqueRoles.push('其他幹部：請填入幹部名稱');
+      }
+      return uniqueRoles;
+    }
+    function renderMode3Cadres(className, classStudents) {
+      mode3CurrentClassStudents = classStudents || [];
+      const tbody = document.getElementById('mode3CadreTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (!mode3CurrentClassStudents.length) {
+        const badge = document.getElementById('mode3CadreCountBadge');
+        if (badge) badge.innerText = '0 筆';
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">此班級尚無學生資料</td></tr>';
+        return;
+      }
+      addMode3CadreRow();
+    }
+    function addMode3CadreRow() {
+      const tbody = document.getElementById('mode3CadreTableBody');
+      if (!tbody) return;
+      const className = document.getElementById('mode3ClassSelect')?.value;
+      if (!className) return alert('請先在上方選擇執導班級！');
+      if (!mode3CurrentClassStudents.length) return alert('此班級尚無學生資料！');
+      if (tbody.querySelector('tr:not(.mode3-cadre-row)')) {
+        tbody.innerHTML = '';
+      }
+      const uniqueRoles = getMode3UniqueCadreRoles();
+      const studentOptions = '<option value="">(請選擇學生)</option>' +
+        mode3CurrentClassStudents.map(s => `<option value="${s.student_no}">${s.seat_no ? `${s.seat_no}號 ` : ''}${s.name} (${s.student_no})</option>`).join('');
+      const roleOptions = '<option value="">(請選擇幹部)</option>' +
+        uniqueRoles.map(name => `<option value="${name}">${name}</option>`).join('');
+      const tr = document.createElement('tr');
+      tr.className = 'mode3-cadre-row hover:bg-amber-50/40 transition';
+      tr.innerHTML = `
+        <td class="p-2.5 align-top">
+          <select class="mode3-student-select w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-white outline-none focus:ring-1 focus:ring-amber-500 font-medium" onchange="updateMode3SubmitCount()">
+            ${studentOptions}
+          </select>
+        </td>
+        <td class="p-2.5 align-top space-y-1.5">
+          <select class="mode3-role-select w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-white outline-none focus:ring-1 focus:ring-amber-500 font-bold text-amber-950" onchange="onMode3CadreRoleChange(this)">
+            ${roleOptions}
+          </select>
+          <input type="text" class="mode3-custom-role-input hidden w-full border border-amber-300 rounded-lg p-1.5 text-xs bg-amber-50/60 outline-none focus:ring-1 focus:ring-amber-500 text-slate-800 font-medium" placeholder="請填入幹部名稱" oninput="onMode3CustomRoleInput(this)">
+        </td>
+        <td class="p-2.5 align-top">
+          <select class="mode3-reward-select w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-white outline-none font-bold text-slate-800" onchange="updateMode3SubmitCount()">
+            <option value="1001" selected>嘉獎 1 次</option>
+            <option value="1002">嘉獎 2 次</option>
+            <option value="2001">小功 1 次</option>
+            <option value="NONE">不獎懲 / 未達標準</option>
+          </select>
+        </td>
+        <td class="p-2.5 align-top">
+          <input type="text" class="mode3-reason-input w-full border border-slate-200 rounded-lg p-1.5 text-xs bg-white outline-none focus:ring-1 focus:ring-amber-500 text-slate-700" placeholder="選取幹部後自動產生或自行填寫">
+        </td>
+        <td class="p-2.5 text-center align-top">
+          <button type="button" onclick="removeMode3CadreRow(this)" class="text-xs text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded-lg transition cursor-pointer" title="移除此列">✕</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+      updateMode3CadreCountBadge();
+      updateMode3SubmitCount();
+    }
+    function removeMode3CadreRow(btn) {
+      const tr = btn?.closest('tr');
+      if (tr) tr.remove();
+      const tbody = document.getElementById('mode3CadreTableBody');
+      if (tbody && !tbody.querySelector('tr.mode3-cadre-row')) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-xs text-slate-400">目前無班級幹部項目，可點擊右上方「➕ 新增學生幹部」加入（若僅需提報小老師可保持為空）</td></tr>';
+      }
+      updateMode3CadreCountBadge();
+      updateMode3SubmitCount();
+    }
+    function updateMode3CadreCountBadge() {
+      const badge = document.getElementById('mode3CadreCountBadge');
+      if (!badge) return;
+      const rows = document.querySelectorAll('#mode3CadreTableBody tr.mode3-cadre-row').length;
+      badge.innerText = `${rows} 筆`;
+    }
+    function onMode3CadreRoleChange(sel) {
+      const tr = sel?.closest('tr');
+      if (!tr) return;
+      const customInp = tr.querySelector('.mode3-custom-role-input');
+      const reasonInp = tr.querySelector('.mode3-reason-input');
+      const roleName = sel.value;
+      const isOther = roleName.includes('其他');
+      if (customInp) {
+        customInp.classList.toggle('hidden', !isOther);
+        if (isOther) customInp.focus();
+        else customInp.value = '';
+      }
+      if (reasonInp) {
+        const acad = getAcademicInfo(document.getElementById('eventDate')?.value || new Date());
+        const term = `${acad.schoolYear}-${acad.semester}`;
+        const displayRole = isOther ? (customInp?.value.trim() || '幹部') : roleName;
+        reasonInp.value = roleName ? `擔任 ${term} ${displayRole} 盡心負責，表現優良` : '';
+      }
+      updateMode3SubmitCount();
+    }
+    function onMode3CustomRoleInput(inp) {
+      const tr = inp?.closest('tr');
+      if (!tr) return;
+      const reasonInp = tr.querySelector('.mode3-reason-input');
+      const customName = inp.value.trim();
+      if (reasonInp && customName) {
+        const acad = getAcademicInfo(document.getElementById('eventDate')?.value || new Date());
+        reasonInp.value = `擔任 ${acad.schoolYear}-${acad.semester} ${customName} 盡心負責，表現優良`;
+      }
     }
     function renderMode3Assistants(className, classStudents) {
       const tbody = document.getElementById('mode3AssistantTableBody');
@@ -3984,14 +4066,24 @@
       `).join('');
     }
     function setMode3AllRewards(rewardType) {
+      const codeMap = { '嘉獎1次': '1001', '嘉獎2次': '1002' };
+      const targetVal = codeMap[rewardType] || rewardType;
       document.querySelectorAll('.mode3-reward-select').forEach(sel => {
-        sel.value = rewardType;
+        sel.value = targetVal;
       });
       updateMode3SubmitCount();
     }
     function updateMode3SubmitCount() {
       let count = 0;
-      document.querySelectorAll('#mode3CadreTableBody tr, #mode3AssistantTableBody tr').forEach(tr => {
+      document.querySelectorAll('#mode3CadreTableBody tr.mode3-cadre-row').forEach(tr => {
+        const studentSelect = tr.querySelector('.mode3-student-select');
+        const roleSelect = tr.querySelector('.mode3-role-select');
+        const rewardSelect = tr.querySelector('.mode3-reward-select');
+        if (studentSelect?.value && roleSelect?.value && rewardSelect?.value && rewardSelect.value !== 'NONE') {
+          count++;
+        }
+      });
+      document.querySelectorAll('#mode3AssistantTableBody tr').forEach(tr => {
         const studentSelect = tr.querySelector('.mode3-student-select');
         const rewardSelect = tr.querySelector('.mode3-reward-select');
         if (studentSelect?.value && rewardSelect?.value && rewardSelect.value !== 'NONE') {
@@ -4004,26 +4096,44 @@
     async function submitMode3Application() {
       const className = document.getElementById('mode3ClassSelect')?.value;
       if (!className) return alert('請先選取執導班級！');
-      const cadreRows = document.querySelectorAll('#mode3CadreTableBody tr[data-role]');
+      const cadreRows = document.querySelectorAll('#mode3CadreTableBody tr.mode3-cadre-row');
       const assistantRows = document.querySelectorAll('#mode3AssistantTableBody tr[data-subject]');
       const items = [];
+      let missingRoleMsg = '';
       cadreRows.forEach(tr => {
+        if (missingRoleMsg) return;
         const studentSelect = tr.querySelector('.mode3-student-select');
+        const roleSelect = tr.querySelector('.mode3-role-select');
+        const customRoleInput = tr.querySelector('.mode3-custom-role-input');
         const rewardSelect = tr.querySelector('.mode3-reward-select');
         const reasonInput = tr.querySelector('.mode3-reason-input');
         const studentNo = studentSelect?.value;
+        const rawRole = roleSelect?.value || '';
         const reward = rewardSelect?.value;
         const reason = reasonInput?.value.trim() || '';
-        const roleName = tr.getAttribute('data-role');
         if (studentNo && reward && reward !== 'NONE') {
+          if (!rawRole) {
+            missingRoleMsg = '已選擇擔任學生，請同時選擇該生的幹部職稱！';
+            roleSelect?.focus();
+            return;
+          }
+          const isOther = rawRole.includes('其他');
+          const customRole = customRoleInput?.value.trim() || '';
+          if (isOther && !customRole) {
+            missingRoleMsg = '選擇「其他幹部」時，請務必填寫幹部名稱！';
+            customRoleInput?.focus();
+            return;
+          }
+          const roleName = isOther ? customRole : rawRole;
           items.push({
             student_no: studentNo,
             rule_code: reward,
             category: 'CADRE',
-            custom_reason: reason || `擔任 115-1 ${roleName} 盡心負責，表現優良`
+            custom_reason: reason || `擔任 ${roleName} 盡心負責，表現優良`
           });
         }
       });
+      if (missingRoleMsg) return alert(missingRoleMsg);
       assistantRows.forEach(tr => {
         const studentSelect = tr.querySelector('.mode3-student-select');
         const rewardSelect = tr.querySelector('.mode3-reward-select');
