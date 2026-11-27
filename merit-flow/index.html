@@ -769,10 +769,10 @@
         </div>
         <div class="flex items-center gap-1.5 flex-wrap">
           <span class="text-xs text-slate-400 font-medium">快速套用：</span>
-          <button type="button" onclick="setMode3AllRewards('1001')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg font-bold transition shadow-sm cursor-pointer">
+          <button type="button" onclick="setMode3AllRewards('6-17|1')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg font-bold transition shadow-sm cursor-pointer">
             ⚡ 全設嘉獎 1 次
           </button>
-          <button type="button" onclick="setMode3AllRewards('1002')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg font-bold transition shadow-sm cursor-pointer">
+          <button type="button" onclick="setMode3AllRewards('6-17|2')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg font-bold transition shadow-sm cursor-pointer">
             ⚡ 全設嘉獎 2 次
           </button>
           <button type="button" onclick="setMode3AllRewards('NONE')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-lg font-bold transition cursor-pointer">
@@ -1658,12 +1658,14 @@
       const acad = getAcademicInfo(eventDateInput);
       const rule = allRules.find(r => r.code === ruleCode);
       const articleNum = parseInt((ruleCode || '6').split('-')[0]) || 6;
+      const pointsVal = Math.max(1, parseInt(document.getElementById('formPoints')?.value) || 1);
       const customReasonText = location ? `[地點:${location}] ${reason}` : reason;
       const payload = studentList.map(no => ({
         application_no: newAppNo,
         student_no: no,
         rule_code: ruleCode,
         article_num: articleNum,
+        points: pointsVal,
         category: 'GENERAL',
         custom_reason: customReasonText,
         proposer_name: currentStaff.name,
@@ -1694,8 +1696,11 @@
       } catch (err) {
         console.warn('merit_applications insert skipped:', err);
       }
-      const studentPreview = studentList.slice(0, 3).map(s => `${s.class_name || ''}${s.name || s.student_no}`).join('、') + (studentList.length > 3 ? ` 等共 ${studentList.length} 位` : `（共 ${studentList.length} 位）`);
-      await logSystemEvent('SUBMIT', `提報獎懲申請（${rule ? `[${rule.code}] ${rule.level}${rule.points}次` : ruleCode}｜學生：${studentPreview}）`, {
+      const studentPreview = studentList.slice(0, 3).map(no => {
+        const st = allStudents.find(x => x.student_no === no);
+        return st ? `${st.class_name || ''}${st.name}` : no;
+      }).join('、') + (studentList.length > 3 ? ` 等共 ${studentList.length} 位` : `（共 ${studentList.length} 位）`);
+      await logSystemEvent('SUBMIT', `提報獎懲申請（${rule ? `[${rule.code}] ${rule.level}${pointsVal}次` : ruleCode}｜學生：${studentPreview}）`, {
         applicationNo: newAppNo
       });
       closeRewardFormModal();
@@ -1721,14 +1726,18 @@
               <span class="text-slate-500 ml-1 font-mono">(${s.class_name} ${s.seat_no ? `${s.seat_no}號` : ''})</span>
               <div class="text-slate-400 font-mono text-[11px]">${s.student_no}</div>
             </div>
-            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
-              <div>
+            <div class="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-2 w-full">
+              <div class="sm:col-span-6">
                 <label class="block text-[11px] font-bold text-slate-600 mb-0.5">獎懲條款代碼</label>
                 <select id="mode2_rule_${s.student_no}" class="w-full border border-slate-300 rounded p-1.5 bg-white outline-none">
                   ${allRules.map(r => `<option value="${r.code}" ${r.code === defRule ? 'selected' : ''}>[${r.code}] ${r.level} (${r.points}次) - ${r.description}</option>`).join('')}
                 </select>
               </div>
-              <div>
+              <div class="sm:col-span-2">
+                <label class="block text-[11px] font-bold text-slate-600 mb-0.5">次數</label>
+                <input type="number" id="mode2_points_${s.student_no}" min="1" max="10" value="1" class="w-full border border-slate-300 rounded p-1.5 bg-white outline-none text-center font-bold">
+              </div>
+              <div class="sm:col-span-4">
                 <label class="block text-[11px] font-bold text-slate-600 mb-0.5">具體事由內容</label>
                 <input type="text" id="mode2_reason_${s.student_no}" value="${defReason}" placeholder="輸入事由內容" class="w-full border border-slate-300 rounded p-1.5 bg-white outline-none">
               </div>
@@ -1757,6 +1766,7 @@
       const acad = getAcademicInfo(eventDateInput);
       const payload = selectedList.map(s => {
         const ruleCode = document.getElementById(`mode2_rule_${s.student_no}`)?.value || '6-1';
+        const pointsVal = Math.max(1, parseInt(document.getElementById(`mode2_points_${s.student_no}`)?.value) || 1);
         const reason = document.getElementById(`mode2_reason_${s.student_no}`)?.value.trim() || '';
         const articleNum = parseInt(ruleCode.split('-')[0]) || 6;
         return {
@@ -1764,6 +1774,7 @@
           student_no: s.student_no,
           rule_code: ruleCode,
           article_num: articleNum,
+          points: pointsVal,
           category: 'INDIVIDUAL',
           custom_reason: reason,
           proposer_name: currentStaff.name,
@@ -3431,7 +3442,7 @@
             category: mainApp.category || r.category || 'GENERAL',
             rule_code: mainApp.rule_code || r.rule_code,
             level: r.merit_rules?.level || '',
-            points: r.merit_rules?.points || 1,
+            points: r.points || r.merit_rules?.points || 1,
             custom_reason: mainApp.custom_reason || r.custom_reason || r.merit_rules?.description || '',
             status: mainApp.status || r.status,
             event_date: mainApp.event_date || r.event_date || (r.created_at ? getLocalDateString(r.created_at) : ''),
@@ -3576,7 +3587,7 @@
               <td class="p-2.5 font-bold text-slate-900">${studentInfo.name || '-'}</td>
               <td class="p-2.5 font-mono text-slate-600">${r.student_no}</td>
               <td class="p-2.5 text-xs text-slate-700">
-                <span class="font-bold text-blue-700">[${r.rule_code}]</span> ${ruleInfo.level || ''} (${ruleInfo.points || 1}次) - ${r.custom_reason || ''}
+                <span class="font-bold text-blue-700">[${r.rule_code}]</span> ${ruleInfo.level || ''} (${r.points || ruleInfo.points || 1}次) - ${r.custom_reason || ''}
               </td>
             </tr>
           `;
@@ -3843,11 +3854,12 @@
         ]);
       }
       const select = document.getElementById('mode3ClassSelect');
-      const classCodesSet = new Set([
-        ...allStudents.map(s => s.class_name).filter(Boolean),
-        ...allCourseAssignments.map(ca => ca.class_name).filter(Boolean),
-        ...allClasses.map(c => c.class_name).filter(Boolean)
-      ]);
+      const classCodesSet = new Set(
+        [
+          ...allStudents.map(s => String(s.class_name || '').trim()),
+          ...allCourseAssignments.map(ca => String(ca.class_name || '').trim())
+        ].filter(code => /^\d+$/.test(code))
+      );
       const sortedClassCodes = [...classCodesSet].sort((a, b) => a.localeCompare(b, 'zh-Hant', { numeric: true }));
       if (select) {
         select.innerHTML = '<option value="">請選擇執導班級...</option>' +
@@ -3957,9 +3969,9 @@
         </td>
         <td class="p-2.5 align-top">
           <select class="mode3-reward-select w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-white outline-none font-bold text-slate-800" onchange="updateMode3SubmitCount()">
-            <option value="1001" selected>嘉獎 1 次</option>
-            <option value="1002">嘉獎 2 次</option>
-            <option value="2001">小功 1 次</option>
+            <option value="6-17|1" selected>嘉獎 1 次</option>
+            <option value="6-17|2">嘉獎 2 次</option>
+            <option value="7-9|1">小功 1 次</option>
             <option value="NONE">不獎懲 / 未達標準</option>
           </select>
         </td>
@@ -4054,8 +4066,8 @@
           </td>
           <td class="p-2.5">
             <select class="mode3-reward-select w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-white outline-none font-bold text-slate-800" onchange="updateMode3SubmitCount()">
-              <option value="1001" selected>嘉獎 1 次</option>
-              <option value="1002">嘉獎 2 次</option>
+              <option value="6-17|1" selected>嘉獎 1 次</option>
+              <option value="6-17|2">嘉獎 2 次</option>
               <option value="NONE">不獎懲 / 無小老師</option>
             </select>
           </td>
@@ -4066,7 +4078,7 @@
       `).join('');
     }
     function setMode3AllRewards(rewardType) {
-      const codeMap = { '嘉獎1次': '1001', '嘉獎2次': '1002' };
+      const codeMap = { '嘉獎1次': '6-17|1', '嘉獎2次': '6-17|2', '1001': '6-17|1', '1002': '6-17|2', '2001': '7-9|1' };
       const targetVal = codeMap[rewardType] || rewardType;
       document.querySelectorAll('.mode3-reward-select').forEach(sel => {
         sel.value = targetVal;
@@ -4125,9 +4137,11 @@
             return;
           }
           const roleName = isOther ? customRole : rawRole;
+          const [ruleCodePart, ptsPart] = reward.split('|');
           items.push({
             student_no: studentNo,
-            rule_code: reward,
+            rule_code: ruleCodePart || '6-17',
+            points: parseInt(ptsPart) || 1,
             category: 'CADRE',
             custom_reason: reason || `擔任 ${roleName} 盡心負責，表現優良`
           });
@@ -4143,9 +4157,11 @@
         const reason = reasonInput?.value.trim() || '';
         const subject = tr.getAttribute('data-subject');
         if (studentNo && reward && reward !== 'NONE') {
+          const [ruleCodePart, ptsPart] = reward.split('|');
           items.push({
             student_no: studentNo,
-            rule_code: reward,
+            rule_code: ruleCodePart || '6-17',
+            points: parseInt(ptsPart) || 1,
             category: 'ASSISTANT',
             custom_reason: reason || `擔任 ${subject} 任課小老師認真負責`
           });
@@ -4169,6 +4185,7 @@
           student_no: item.student_no,
           rule_code: ruleCode,
           article_num: artNum,
+          points: item.points || 1,
           category: item.category,
           custom_reason: item.custom_reason,
           proposer_name: currentStaff.name,
@@ -4189,7 +4206,7 @@
             semester_code: acad.semesterCode,
             event_date: todayIso,
             category: 'CADRE',
-            rule_code: items[0]?.rule_code || '1001',
+            rule_code: items[0]?.rule_code || '6-17',
             custom_reason: `${className} 幹部與小老師敘獎 (${items.length}人)`,
             proposer_name: currentStaff.name,
             proposer_staff_no: currentStaff.staff_no || '',
@@ -4684,7 +4701,7 @@
         const classObj = allClasses.find(c => c.class_name === studentInfo.class_name);
         const juyaoClassCode = classObj?.juyao_code || studentInfo.class_name || '';
         const level = ruleInfo.level || group.level || '嘉獎';
-        const points = ruleInfo.points || group.points || 1;
+        const points = group.records[0]?.points || ruleInfo.points || group.points || 1;
         return {
           'SSID': '',
           '班級代碼': juyaoClassCode,
@@ -4734,7 +4751,7 @@
           grade = '9';
           clsNo = className.replace(/^30|^90?/, '');
         }
-        const pointNum = ruleInfo.points || 1;
+        const pointNum = r.points || ruleInfo.points || 1;
         const pointChinese = ['零', '一', '二', '三', '四', '五'][pointNum] || '一';
         const [art, cls] = (r.rule_code || '6-1').split('-');
         if (!isMode2) {
@@ -4770,10 +4787,44 @@
       XLSX.utils.book_append_sheet(wb, ws, isMode2 ? "國中系統2" : "國中系統1");
       XLSX.writeFile(wb, `國中獎懲核對清冊_${isMode2 ? '模式2_' : '模式1_'}${appNo}.xlsx`);
     }
+    function toRocYmd7(dateInput) {
+      const d = dateInput ? new Date(dateInput) : new Date();
+      if (isNaN(d.getTime())) return '';
+      const y = String(d.getFullYear() - 1911).padStart(3, '0');
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}${m}${day}`;
+    }
     async function exportExcelForClerk() {
       const { data } = await sb.from('merit_records').select(`*, merit_rules(*)`).eq('status', 'APPROVED');
       if (!data || !data.length) return alert('尚無已核准之獎懲紀錄');
-      const exportRows = data.map(r => {
+      const todayRoc = toRocYmd7(new Date());
+      const juyaoRows = data.map(r => {
+        const studentInfo = allStudents.find(s => s.student_no === r.student_no) || {};
+        const clsInfo = allClasses.find(c => c.class_name === studentInfo.class_name || (c.juyao_code && c.juyao_code.endsWith(studentInfo.class_name || '___')));
+        const lvl = r.merit_rules?.level || '';
+        const pts = r.points || r.merit_rules?.points || 1;
+        const eventRoc = toRocYmd7(r.event_date || r.created_at);
+        const applyRoc = toRocYmd7(r.created_at);
+        return {
+          '獎懲單號': r.application_no || '',
+          '班級': clsInfo?.juyao_code || studentInfo.class_name || '',
+          '座號': studentInfo.seat_no ? String(studentInfo.seat_no).padStart(2, '0') : '',
+          '姓名': studentInfo.name || '',
+          '學號': r.student_no,
+          '申請日期': applyRoc,
+          '獎懲日期': todayRoc,
+          '發生日期': eventRoc,
+          '嘉獎': lvl === '嘉獎' ? pts : 0,
+          '小功': lvl === '小功' ? pts : 0,
+          '大功': lvl === '大功' ? pts : 0,
+          '警告': lvl === '警告' ? pts : 0,
+          '小過': lvl === '小過' ? pts : 0,
+          '大過': lvl === '大過' ? pts : 0,
+          '獎懲事項': r.merit_rules?.legacy_code || r.rule_code || ''
+        };
+      });
+      const detailRows = data.map(r => {
         const studentInfo = allStudents.find(s => s.student_no === r.student_no) || {};
         return {
           '申請單號': r.application_no || '',
@@ -4784,16 +4835,16 @@
           '條款代碼': r.rule_code,
           '巨耀代碼': r.merit_rules?.legacy_code || '',
           '獎懲類別': r.merit_rules?.level || '',
-          '次數': r.merit_rules?.points || 1,
+          '次數': r.points || r.merit_rules?.points || 1,
           '事由說明': r.custom_reason || r.merit_rules?.description || '',
           '提報人': r.proposer_name
         };
       });
-      const ws = XLSX.utils.json_to_sheet(exportRows);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "獎懲清冊");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(juyaoRows), "匯入巨耀");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detailRows), "獎懲清冊");
       XLSX.writeFile(wb, "學務處學生獎懲建議清冊.xlsx");
-      logAdminAction('EXPORT_EXCEL', `匯出學務處學生獎懲建議清冊（共 ${exportRows.length} 筆）`);
+      logAdminAction('EXPORT_EXCEL', `匯出學務處學生獎懲建議清冊（共 ${juyaoRows.length} 筆，含匯入巨耀格式）`);
     }
     async function exportPortfolioForChief() {
       const { data } = await sb.from('merit_records').select(`*, merit_rules(*)`).in('category', ['CADRE', 'ASSISTANT']).eq('status', 'APPROVED');
