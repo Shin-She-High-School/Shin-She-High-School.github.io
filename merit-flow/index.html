@@ -81,7 +81,6 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <span class="font-black text-sm sm:text-base text-white tracking-wide block">學生獎懲建議系統</span>
-            <span id="roleBadge" class="text-[10px] font-black px-2 py-0.5 rounded-full hidden"></span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-[10px] sm:text-xs text-slate-400 font-medium">臺中市立新社高中 學務處</span>
@@ -101,16 +100,14 @@
             <i class="fa-solid fa-clock-rotate-left text-xs"></i> <span>案件進度</span>
           </button>
           <button id="tabBtnAdmin" onclick="switchTab('admin')" class="hidden px-3.5 py-1.5 rounded-xl transition text-slate-300 hover:text-white flex items-center gap-1.5">
-            <i class="fa-solid fa-sliders text-xs"></i> <span>管理控制台</span>
-          </button>
-          <button id="tabBtnAdmins" onclick="switchTab('admins')" class="hidden px-3.5 py-1.5 rounded-xl transition text-slate-300 hover:text-white flex items-center gap-1.5">
-            <i class="fa-solid fa-user-shield text-xs"></i> <span>帳號控管</span>
+            <i class="fa-solid fa-sliders text-xs"></i> <span>系統資料管理</span>
           </button>
           <button id="tabBtnLogs" onclick="switchTab('logs')" class="hidden px-3.5 py-1.5 rounded-xl transition text-slate-300 hover:text-white flex items-center gap-1.5">
             <i class="fa-solid fa-scroll text-xs"></i> <span>操作紀錄</span>
           </button>
         </nav>
         <div id="userSection" class="hidden flex items-center gap-2">
+          <span id="roleBadge" class="text-[10px] font-black px-2 py-0.5 rounded-full hidden"></span>
           <span id="userName" class="text-xs font-bold text-slate-200 hidden md:inline px-2.5 py-1 bg-slate-800 rounded-xl border border-slate-700"></span>
           <button id="btnChangeMyPassword" onclick="openUserPasswordModal()" class="text-xs bg-slate-800 hover:bg-indigo-500/20 hover:text-indigo-200 hover:border-indigo-400/30 text-slate-300 border border-slate-700 px-2.5 py-1.5 rounded-xl transition font-bold flex items-center gap-1 cursor-pointer" title="修改登入密碼">
             <i class="fa-solid fa-key text-[11px]"></i> <span>修改密碼</span>
@@ -207,7 +204,7 @@
               全校教職員線上獎懲建議、導師期末幹部敘獎與學務處簽核管理平台
             </p>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
             <div class="p-3.5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 space-y-0.5">
               <div class="text-[10px] text-indigo-300 font-bold uppercase tracking-wider">當前學期</div>
               <div class="text-sm sm:text-base font-black text-white">115 學年度第 1 學期</div>
@@ -219,13 +216,6 @@
             <div class="p-3.5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 space-y-1">
               <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">案件發生日期（預設今日）</div>
               <input type="date" id="eventDate" onclick="this.showPicker?.()" class="w-full bg-slate-900/70 border border-white/20 text-white rounded-lg px-2.5 py-1 text-xs font-bold outline-none focus:border-indigo-400 cursor-pointer [color-scheme:dark]">
-            </div>
-            <div class="p-3.5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 space-y-0.5">
-              <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">系統狀態</div>
-              <div id="heroSystemStatus" class="text-sm sm:text-base font-black text-amber-300 flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse inline-block"></span>
-                <span>連線中...</span>
-              </div>
             </div>
           </div>
         </div>
@@ -430,9 +420,10 @@
               <button id="adminDataTabRules" onclick="switchAdminDataTab('rules')" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">📜 獎懲法規</button>
               <button id="adminDataTabClasses" onclick="switchAdminDataTab('classes')" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition text-opacity-75">🏫 班級清單</button>
               <button id="adminDataTabCadres" onclick="switchAdminDataTab('cadre_roles')" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition text-opacity-75">🎖️ 幹部職稱</button>
+              <button id="adminDataTabAdmins" onclick="switchAdminDataTab('admins')" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">🛡️ 管理員權限設定</button>
             </div>
           </div>
-          <div class="flex items-center gap-2 flex-wrap">
+          <div id="adminStandardToolbar" class="flex items-center gap-2 flex-wrap">
             <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="即時搜尋資料..." class="border border-slate-300 text-xs px-3 py-1.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-40 sm:w-48">
             <input type="file" id="adminTabImportInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleAdminTabImport(event)">
             <button onclick="document.getElementById('adminTabImportInput').click()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-sm" title="匯入 Excel/CSV 至目前分頁">📥 匯入本表</button>
@@ -445,50 +436,46 @@
           <span id="adminTabGuideText">目前檢視：學生名冊（支援匯入欄位：學號、姓名、班級、座號）</span>
           <span id="adminTabCountBadge" class="font-bold text-slate-800">共 0 筆</span>
         </div>
-        <div class="overflow-x-auto rounded-xl border border-slate-100 min-h-[300px]">
+        <div id="adminStandardTableWrap" class="overflow-x-auto rounded-xl border border-slate-100 min-h-[300px]">
           <table class="w-full text-left text-xs sm:text-sm">
             <thead id="adminTableHeader" class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs"></thead>
             <tbody id="adminTableBody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
-      </section>
-    </div>
-    <div id="tabContentAdmins" class="tab-pane hidden space-y-5">
-      <section class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2 flex-wrap">
-              <span>🛡️ 管理人員帳號控管</span>
+        <div id="adminStaffControlSection" class="hidden space-y-4">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-bold text-slate-700">🛡️ 管理員權限設定</span>
               <span id="adminWhitelistCountBadge" class="text-[11px] bg-purple-100 text-purple-700 font-bold px-2.5 py-0.5 rounded-full">0 位授權</span>
-              <span id="adminStaffControlCount" class="text-[11px] bg-slate-100 text-slate-600 font-bold px-2.5 py-0.5 rounded-full">共 0 位</span>
-            </h3>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-              <button type="button" id="adminRoleFilterAll" onclick="setAdminStaffRoleFilter('all')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition cursor-pointer">全部</button>
-              <button type="button" id="adminRoleFilterAdmin" onclick="setAdminStaffRoleFilter('admin')" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer">僅管理員</button>
-              <button type="button" id="adminRoleFilterTeacher" onclick="setAdminStaffRoleFilter('teacher')" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer">教師</button>
+              <span id="adminStaffControlCount" class="text-[11px] bg-white text-slate-600 border border-slate-200 font-bold px-2.5 py-0.5 rounded-full">共 0 位</span>
             </div>
-            <div class="relative">
-              <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
-              <input id="adminStaffSearchInput" type="text" oninput="renderAdminStaffControlTable()" placeholder="搜尋教師姓名、編號或 Email..."
-                class="text-xs bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2 w-64 outline-none focus:ring-2 focus:ring-purple-400">
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="inline-flex bg-slate-200/70 p-1 rounded-xl text-xs font-bold">
+                <button type="button" id="adminRoleFilterAll" onclick="setAdminStaffRoleFilter('all')" class="px-3 py-1 rounded-lg bg-white text-slate-900 shadow-xs transition cursor-pointer">全部</button>
+                <button type="button" id="adminRoleFilterAdmin" onclick="setAdminStaffRoleFilter('admin')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition cursor-pointer">僅管理員</button>
+                <button type="button" id="adminRoleFilterTeacher" onclick="setAdminStaffRoleFilter('teacher')" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition cursor-pointer">教師</button>
+              </div>
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input id="adminStaffSearchInput" type="text" oninput="renderAdminStaffControlTable()" placeholder="搜尋教師姓名、編號或 Email..."
+                  class="text-xs bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 w-64 outline-none focus:ring-2 focus:ring-purple-400">
+              </div>
             </div>
           </div>
-        </div>
-        <div class="overflow-x-auto border border-slate-200 rounded-2xl max-h-[580px] overflow-y-auto">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead class="bg-slate-50 text-slate-600 font-bold sticky top-0 z-10 border-b border-slate-200">
-              <tr>
-                <th class="p-3">教職員編號</th>
-                <th class="p-3">姓名</th>
-                <th class="p-3 hidden sm:table-cell">Email</th>
-                <th class="p-3">目前權限</th>
-                <th class="p-3 text-right">一鍵操作</th>
-              </tr>
-            </thead>
-            <tbody id="adminStaffControlBody" class="divide-y divide-slate-100"></tbody>
-          </table>
+          <div class="overflow-x-auto border border-slate-200 rounded-xl max-h-[580px] overflow-y-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold sticky top-0 z-10 border-b border-slate-200">
+                <tr>
+                  <th class="p-3">教職員編號</th>
+                  <th class="p-3">姓名</th>
+                  <th class="p-3 hidden sm:table-cell">Email</th>
+                  <th class="p-3">目前權限</th>
+                  <th class="p-3 text-right">一鍵操作</th>
+                </tr>
+              </thead>
+              <tbody id="adminStaffControlBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>
@@ -1322,9 +1309,18 @@
       }
     }
     function switchTab(tabKey, updateHash = true) {
-      if ((tabKey === 'admin' || tabKey === 'admins' || tabKey === 'logs') && currentStaff?.role !== 'ADMIN') {
+      const isSuperAdmin = String(currentStaff?.staff_no || '').toLowerCase() === 'admin';
+      if (tabKey === 'logs' && !isSuperAdmin) {
+        logSystemEvent('ACCESS_DENIED', '嘗試存取受限分頁「操作紀錄」遭阻擋');
+        alert('權限不足：操作紀錄僅限 admin 系統管理員存取！');
+        if (updateHash && !isHandlingHashChange) {
+          window.location.hash = '#menu';
+        }
+        return;
+      }
+      if (tabKey === 'admin' && currentStaff?.role !== 'ADMIN') {
         logSystemEvent('ACCESS_DENIED', `嘗試存取受限分頁「${tabKey}」遭阻擋`);
-        alert('權限不足：管理控制台、帳號控管與操作紀錄僅限系統管理員存取！');
+        alert('權限不足：系統資料管理僅限系統管理員存取！');
         if (updateHash && !isHandlingHashChange) {
           window.location.hash = '#menu';
         }
@@ -1335,13 +1331,12 @@
       const btnMenu = document.getElementById('tabBtnMenu');
       const btnRecords = document.getElementById('tabBtnRecords');
       const btnAdmin = document.getElementById('tabBtnAdmin');
-      const btnAdmins = document.getElementById('tabBtnAdmins');
       const btnLogs = document.getElementById('tabBtnLogs');
       const isAdmin = currentStaff?.role === 'ADMIN';
-      [btnMenu, btnRecords, btnAdmin, btnAdmins, btnLogs].forEach(b => {
+      [btnMenu, btnRecords, btnAdmin, btnLogs].forEach(b => {
         if (!b) return;
-        const isAdminOnly = (b === btnAdmin || b === btnAdmins || b === btnLogs);
-        b.className = `${(isAdminOnly && !isAdmin) ? 'hidden ' : ''}px-3.5 py-1.5 rounded-xl transition text-slate-300 hover:text-white flex items-center gap-1.5 font-bold`;
+        const hideForRole = (b === btnLogs && !isSuperAdmin) || (b === btnAdmin && !isAdmin);
+        b.className = `${hideForRole ? 'hidden ' : ''}px-3.5 py-1.5 rounded-xl transition text-slate-300 hover:text-white flex items-center gap-1.5 font-bold`;
       });
       if (tabKey === 'menu') {
         const pane = document.getElementById('tabContentMenu');
@@ -1382,16 +1377,6 @@
           const targetHash = '#admin/' + (currentAdminDataTab || 'students');
           if (window.location.hash !== targetHash) window.location.hash = targetHash;
         }
-      } else if (tabKey === 'admins') {
-        const pane = document.getElementById('tabContentAdmins');
-        if (pane) pane.classList.remove('hidden');
-        if (btnAdmins) btnAdmins.className = 'px-3.5 py-1.5 rounded-xl transition bg-purple-600 text-white shadow-sm flex items-center gap-1.5 font-bold';
-        renderAdminWhitelist();
-        renderAdminStaffControlTable();
-        Promise.all([loadStaffs(), loadAdminWhitelist()]);
-        if (updateHash && !isHandlingHashChange) {
-          if (window.location.hash !== '#admins') window.location.hash = '#admins';
-        }
       } else if (tabKey === 'logs') {
         const pane = document.getElementById('tabContentLogs');
         if (pane) pane.classList.remove('hidden');
@@ -1426,9 +1411,9 @@
         } else if (mainRoute === 'records') {
           switchTab('records', false);
         } else if (mainRoute === 'logs') {
-          if (currentStaff.role !== 'ADMIN') {
+          if (String(currentStaff.staff_no || '').toLowerCase() !== 'admin') {
             logSystemEvent('ACCESS_DENIED', '嘗試透過網址存取「操作紀錄 (#logs)」遭阻擋');
-            alert('權限不足：操作紀錄僅限系統管理員存取！');
+            alert('權限不足：操作紀錄僅限 admin 系統管理員存取！');
             window.location.hash = '#menu';
             switchTab('menu', false);
             return;
@@ -1436,23 +1421,24 @@
           switchTab('logs', false);
         } else if (mainRoute === 'admins') {
           if (currentStaff.role !== 'ADMIN') {
-            logSystemEvent('ACCESS_DENIED', '嘗試透過網址存取「帳號控管 (#admins)」遭阻擋');
-            alert('權限不足：帳號控管僅限系統管理員存取！');
-            window.location.hash = '#menu';
-            switchTab('menu', false);
-            return;
-          }
-          switchTab('admins', false);
-        } else if (mainRoute === 'admin') {
-          if (currentStaff.role !== 'ADMIN') {
-            logSystemEvent('ACCESS_DENIED', '嘗試透過網址存取「管理控制台 (#admin)」遭阻擋');
-            alert('權限不足：管理控制台僅限系統管理員存取！');
+            logSystemEvent('ACCESS_DENIED', '嘗試透過網址存取「管理員權限設定 (#admins)」遭阻擋');
+            alert('權限不足：管理員權限設定僅限系統管理員存取！');
             window.location.hash = '#menu';
             switchTab('menu', false);
             return;
           }
           switchTab('admin', false);
-          const validAdminTabs = ['students', 'rules', 'staffs', 'classes', 'cadre_roles', 'course_assignments'];
+          switchAdminDataTab('admins', false);
+        } else if (mainRoute === 'admin') {
+          if (currentStaff.role !== 'ADMIN') {
+            logSystemEvent('ACCESS_DENIED', '嘗試透過網址存取「系統資料管理 (#admin)」遭阻擋');
+            alert('權限不足：系統資料管理僅限系統管理員存取！');
+            window.location.hash = '#menu';
+            switchTab('menu', false);
+            return;
+          }
+          switchTab('admin', false);
+          const validAdminTabs = ['students', 'rules', 'staffs', 'classes', 'cadre_roles', 'course_assignments', 'admins'];
           const targetTab = validAdminTabs.includes(subRoute.toLowerCase()) ? subRoute.toLowerCase() : 'students';
           switchAdminDataTab(targetTab, false);
         } else if (mainRoute === 'mode1') {
@@ -1545,11 +1531,11 @@
           ? ((password === adminDbPwd) || (/^[0-9a-f]{64}$/i.test(adminDbPwd) && inputHash === adminDbPwd.toLowerCase()))
           : !password;
         if (!isAdminMatched) {
-          await logSystemEvent('LOGIN_FAILED', '登入失敗：帳號「admin」（管理員密碼錯誤）', {
+          await logSystemEvent('LOGIN_FAILED', '登入失敗：帳號「admin」（密碼錯誤）', {
             actorName: 'admin',
             actorRole: 'GUEST'
           });
-          alert('管理員帳號或密碼錯誤！');
+          alert('帳號或密碼錯誤！請確認密碼是否正確。');
           if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<span>登入系統</span> <i class="fa-solid fa-arrow-right text-xs"></i>';
@@ -1664,7 +1650,6 @@
       }
       const btnRecords = document.getElementById('tabBtnRecords');
       const btnAdmin = document.getElementById('tabBtnAdmin');
-      const btnAdmins = document.getElementById('tabBtnAdmins');
       const btnLogs = document.getElementById('tabBtnLogs');
       const recordsTitle = document.getElementById('recordsSectionTitle');
       const recordsSub = document.getElementById('recordsSectionSub');
@@ -1674,14 +1659,11 @@
           btnRecords.classList.remove('hidden');
         }
         if (btnAdmin) {
-          btnAdmin.innerHTML = '<i class="fa-solid fa-sliders text-xs"></i> <span>管理控制台</span>';
+          btnAdmin.innerHTML = '<i class="fa-solid fa-sliders text-xs"></i> <span>系統資料管理</span>';
           btnAdmin.classList.remove('hidden');
         }
-        if (btnAdmins) {
-          btnAdmins.classList.remove('hidden');
-        }
         if (btnLogs) {
-          btnLogs.classList.remove('hidden');
+          btnLogs.classList.toggle('hidden', String(currentStaff.staff_no || '').toLowerCase() !== 'admin');
         }
         if (recordsTitle) recordsTitle.innerHTML = '<i class="fa-solid fa-clipboard-check text-indigo-600"></i> 全校獎懲案件審核進度（依單號彙總）';
         if (recordsSub) recordsSub.innerText = '點擊「申請單號」即可檢視完整學生名單、整批審核、列印 PDF 簽核表或匯出 Excel';
@@ -1693,7 +1675,6 @@
           btnRecords.classList.remove('hidden');
         }
         if (btnAdmin) btnAdmin.classList.add('hidden');
-        if (btnAdmins) btnAdmins.classList.add('hidden');
         if (btnLogs) btnLogs.classList.add('hidden');
         if (recordsTitle) recordsTitle.innerHTML = `<i class="fa-solid fa-clipboard-list text-indigo-600"></i> 【${currentStaff.name}】的獎懲申請紀錄`;
         if (recordsSub) recordsSub.innerText = '點擊「申請單號」可查看您送出的學生名單與即時審核進度';
@@ -2208,7 +2189,8 @@
         staffs: 'Staffs',
         classes: 'Classes',
         cadre_roles: 'Cadres',
-        course_assignments: 'Courses'
+        course_assignments: 'Courses',
+        admins: 'Admins'
       };
       Object.keys(tabMap).forEach(t => {
         const btn = document.getElementById(`adminDataTab${tabMap[t]}`);
@@ -2229,6 +2211,16 @@
       }
     }
     function renderAdminTable() {
+      const isAdminsSubTab = currentAdminDataTab === 'admins';
+      document.getElementById('adminStandardToolbar')?.classList.toggle('hidden', isAdminsSubTab);
+      document.getElementById('adminTabGuideBar')?.classList.toggle('hidden', isAdminsSubTab);
+      document.getElementById('adminStandardTableWrap')?.classList.toggle('hidden', isAdminsSubTab);
+      document.getElementById('adminStaffControlSection')?.classList.toggle('hidden', !isAdminsSubTab);
+      if (isAdminsSubTab) {
+        renderAdminWhitelist();
+        renderAdminStaffControlTable();
+        return;
+      }
       const searchKey = document.getElementById('adminSearchInput')?.value.trim().toLowerCase() || '';
       const thead = document.getElementById('adminTableHeader');
       const tbody = document.getElementById('adminTableBody');
@@ -3824,7 +3816,7 @@
       const roles = allCadreRoles.filter(cr => cr.category === '幹部' || cr.category.includes('幹部'));
       if (!roles.length) {
         if (badge) badge.innerText = '0 個幹部職位';
-        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-400">雲端資料庫尚未建置幹部職稱資料，請至管理控制台匯入</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-400">雲端資料庫尚未建置幹部職稱資料，請至系統資料管理匯入</td></tr>';
         return;
       }
       const uniqueRoles = [];
