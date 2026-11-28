@@ -5291,9 +5291,9 @@
                     ip_address: ip,
                     user_agent: navigator.userAgent
                 };
-                const { data } = await client.from('audit_logs').insert([newRecord]).select();
-                if (data && data[0] && Array.isArray(allAuditLogs)) {
-                    allAuditLogs.unshift(data[0]);
+                const { error } = await client.from('audit_logs').insert([newRecord]);
+                if (!error && Array.isArray(allAuditLogs)) {
+                    allAuditLogs.unshift({ ...newRecord, created_at: new Date().toISOString() });
                 }
             } catch (err) {}
         }
